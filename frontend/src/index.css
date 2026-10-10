@@ -1,0 +1,120 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 215 28% 97%;
+    --foreground: 222 47% 11%;
+    --primary: 221 83% 53%; /* Azul Real */
+    --primary-foreground: 0 0% 100%;
+  }
+
+  body {
+    background-color: #F4F7FB;
+    color: #0F172A;
+    font-family: 'Plus Jakarta Sans', 'Nunito', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* =============================================================================
+   Design System Economia Real — Estética Azul Moderna, Confiável e Tátil
+   ============================================================================= */
+
+/* Botões 3D Táteis com Efeito Push-down */
+.btn-duo {
+  @apply relative inline-flex items-center justify-center font-extrabold uppercase tracking-wide select-none transition-all duration-75 active:translate-y-1;
+}
+
+/* Botão Primário da Marca (Azul Real Profundo & Vibrante) */
+.btn-duo-green,
+.btn-real-blue {
+  @apply bg-[#026CD6] hover:bg-[#0A7DEF] text-white border-b-4 border-[#0153AB] active:border-b-0 rounded-2xl px-4 py-2.5 shadow-sm;
+}
+
+/* Botão Azul Celeste / Ação Secundária */
+.btn-duo-blue,
+.btn-real-sky {
+  @apply bg-[#0284C7] hover:bg-[#039BE5] text-white border-b-4 border-[#0369A1] active:border-b-0 rounded-2xl px-4 py-2.5 shadow-sm;
+}
+
+/* Botão Azul Marinho / Ação Nobre */
+.btn-real-navy {
+  @apply bg-[#0F172A] hover:bg-[#1E293B] text-white border-b-4 border-[#020617] active:border-b-0 rounded-2xl px-4 py-2.5 shadow-sm;
+}
+
+/* Botão Destaque / Alerta Dourado */
+.btn-duo-yellow {
+  @apply bg-[#F59E0B] hover:bg-[#FBBF24] text-amber-950 border-b-4 border-[#D97706] active:border-b-0 rounded-2xl px-4 py-2.5 shadow-sm;
+}
+
+/* Botão Perigo / Exclusão */
+.btn-duo-red {
+  @apply bg-[#EF4444] hover:bg-[#F87171] text-white border-b-4 border-[#DC2626] active:border-b-0 rounded-2xl px-4 py-2.5 shadow-sm;
+}
+
+/* Botão IA / Inteligência Artificial (Índigo Tecnológico) */
+.btn-duo-purple,
+.btn-real-indigo {
+  @apply bg-[#4F46E5] hover:bg-[#6366F1] text-white border-b-4 border-[#3730A3] active:border-b-0 rounded-2xl px-4 py-2.5 shadow-sm;
+}
+
+/* Botão Branco com Contorno Tátil Azulado */
+.btn-duo-white {
+  @apply bg-white hover:bg-blue-50/50 text-slate-700 border-2 border-b-4 border-slate-200 active:border-b-2 active:translate-y-0.5 rounded-2xl px-4 py-2;
+}
+
+.btn-duo-ghost {
+  @apply bg-transparent hover:bg-blue-50 text-slate-600 font-bold rounded-2xl px-3 py-1.5 transition-colors;
+}
+
+/* Cards com Relevo Físico e Contornos Macios */
+.card-duo {
+  @apply bg-white rounded-3xl border-2 border-slate-200/80 shadow-[0_4px_0_0_#E2E8F0] transition-all;
+}
+
+.card-duo-interactive {
+  @apply bg-white rounded-3xl border-2 border-slate-200/80 shadow-[0_4px_0_0_#E2E8F0] hover:border-blue-300 hover:shadow-[0_6px_0_0_#DBEAFE] transition-all;
+}
+
+/* Card Destaque Economia Real (Degradê Azul Suave e Refinado) */
+.card-duo-green,
+.card-real-blue {
+  @apply bg-gradient-to-b from-[#F0F7FF] via-[#E8F3FF] to-[#E1EFFF] rounded-3xl border-2 border-blue-200/90 shadow-[0_4px_0_0_#BFDBFE];
+}
+
+/* Badges e Pílulas */
+.badge-duo {
+  @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider;
+}
+
+/* Barra de Progresso com Brilho Tátil em Azul */
+.progress-duo-track {
+  @apply h-4 rounded-full bg-slate-100 border-2 border-slate-200 overflow-hidden relative shadow-inner;
+}
+
+.progress-duo-fill {
+  @apply h-full rounded-full transition-all duration-500 relative overflow-hidden bg-gradient-to-r from-blue-600 to-sky-500;
+}
+
+.progress-duo-fill::after {
+  content: '';
+  @apply absolute inset-x-0 top-0 h-1/2 bg-white/35 rounded-t-full pointer-events-none;
+}
+
+/* Scrollbar Bonita e Discreta */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}

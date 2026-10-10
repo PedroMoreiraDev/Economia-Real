@@ -1,0 +1,40 @@
+# Ambiente e Segredos
+.env
+*.env
+!.env.example
+
+# Java / Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+*.class
+*.jar
+*.war
+.flattened-pom.xml
+
+# Node / Frontend
+node_modules/
+dist/
+dist-ssr/
+*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# IDEs e Ferramentas de Sistema
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
+*.log
+
+# Docker / Volumes locais
+postgres_data/
+
+# AG-Kit e IDE
+.ag-kit-backups/
+.gemini/
+scratch/
