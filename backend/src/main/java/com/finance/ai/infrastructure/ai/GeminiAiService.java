@@ -96,6 +96,94 @@ public class GeminiAiService implements AiExtractionPort, AudioTranscriptionPort
         }
     }
 
+    @Override
+    public String classifyMerchant(String rawDescription, List<String> availableCategories) {
+        if (rawDescription == null || rawDescription.isBlank() || availableCategories == null || availableCategories.isEmpty()) {
+            return null;
+        }
+
+        if (apiKey.isBlank()) {
+            log.debug("GEMINI_API_KEY não configurada. Classificação de estabelecimento via IA ignorada.");
+            return null;
+        }
+
+        try {
+            return callGeminiApiForMerchant(rawDescription, availableCategories);
+        } catch (Exception ex) {
+            log.warn("Falha ao consultar IA Gemini para classificar estabelecimento '{}': {}", rawDescription, ex.getMessage());
+            return null;
+        }
+    }
+
+    private String callGeminiApiForMerchant(String rawDescription, List<String> availableCategories) throws Exception {
+        String categoriesList = String.join(", ", availableCategories);
+
+        String prompt = """
+                Você é um classificador financeiro de estabelecimentos e faturas bancárias brasileiras.
+                Sua tarefa é analisar o nome do estabelecimento comercial ou lançamento e determinar a categoria mais apropriada dentre as categorias permitidas.
+
+                Descrição da transação: "%s"
+                Categorias permitidas: [%s]
+
+                Regras:
+                1. Analise o nome da empresa ou serviço (exemplo: "Amigao Umuarama" ou "Supermercados Amigão" é um supermercado -> Alimentação; "Droga Raia" é farmácia -> Saúde; "Posto Shell" -> Transporte; "Havan" -> Compras; "Steam" -> Lazer).
+                2. Se identificar o ramo de atividade e ele corresponder a uma das categorias permitidas, retorne EXATAMENTE o nome da categoria correspondente.
+                3. Se o estabelecimento for desconhecido, genérico (ex: códigos ilegíveis, nomes de pessoas sem contexto) ou você tiver dúvidas, retorne null no campo "category". NUNCA invente categorias e NUNCA retorne "Outros" se você não tiver certeza absoluta.
+                4. Responda EXCLUSIVAMENTE um objeto JSON válido (sem tags markdown ```json).
+
+                Estrutura exigida:
+                {
+                  "category": string ou null,
+                  "confidence": number,
+                  "reason": string
+                }
+                """.formatted(rawDescription, categoriesList);
+
+        Map<String, Object> requestBody = Map.of(
+                "contents", List.of(
+                        Map.of("role", "user", "parts", List.of(
+                                Map.of("text", prompt)
+                        ))
+                ),
+                "generationConfig", Map.of(
+                        "temperature", 0.1,
+                        "responseMimeType", "application/json"
+                )
+        );
+
+        String responseJson = restClient.post()
+                .uri(GEMINI_API_URL, modelName, apiKey)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(requestBody)
+                .retrieve()
+                .body(String.class);
+
+        JsonNode root = objectMapper.readTree(responseJson);
+        JsonNode candidates = root.path("candidates");
+        if (candidates.isArray() && !candidates.isEmpty()) {
+            JsonNode textNode = candidates.get(0).path("content").path("parts").get(0).path("text");
+            String rawText = textNode.asText("{}").trim();
+            if (rawText.startsWith("```json")) rawText = rawText.substring(7);
+            if (rawText.startsWith("```")) rawText = rawText.substring(3);
+            if (rawText.endsWith("```")) rawText = rawText.substring(0, rawText.length() - 3);
+            rawText = rawText.trim();
+
+            JsonNode parsed = objectMapper.readTree(rawText);
+            String category = parsed.hasNonNull("category") ? parsed.get("category").asText() : null;
+            double confidence = parsed.path("confidence").asDouble(0.0);
+
+            if (category != null && !category.isBlank() && confidence >= 0.6) {
+                for (String available : availableCategories) {
+                    if (available.equalsIgnoreCase(category.trim())) {
+                        return available;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
     private ExtractedTransaction callGeminiApiForText(String text, List<String> categories) throws Exception {
         String categoriesHint = (categories != null && !categories.isEmpty())
                 ? "Categorias existentes do usuário: " + String.join(", ", categories) + "."

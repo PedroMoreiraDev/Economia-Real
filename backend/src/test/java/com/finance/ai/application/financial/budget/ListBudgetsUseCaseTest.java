@@ -134,4 +134,41 @@ class ListBudgetsUseCaseTest {
         assertThat(dto.spentAmount()).isEqualByComparingTo(new BigDecimal("245.57"));
         assertThat(dto.remainingAmount()).isEqualByComparingTo(new BigDecimal("322.37"));
     }
+
+    @Test
+    @DisplayName("Deve manter meta de 4000 nos meses passados e reajustar para 8000 no mês atual e subsequentes")
+    void shouldMaintainPastBudgetsAndProjectNewBudgetToCurrentAndSubsequentMonths() {
+        UUID userId = UUID.randomUUID();
+        UUID catId = UUID.randomUUID();
+
+        // Usuário definiu 4000 em Outubro/2026 e reajustou para 8000 em Dezembro/2026
+        Budget budgetOutubro = Budget.create(userId, catId, LocalDate.of(2026, 10, 1), new BigDecimal("4000.00"), 80);
+        Budget budgetDezembro = Budget.create(userId, catId, LocalDate.of(2026, 12, 1), new BigDecimal("8000.00"), 80);
+
+        when(budgetRepository.findAllByUserId(userId)).thenReturn(List.of(budgetOutubro, budgetDezembro));
+
+        Category cat = new Category(catId, userId, null, "Alimentação", "utensils", "#FF5722", false, Instant.now(), null);
+        when(categoryRepository.findAllByUserIdOrSystemDefault(userId)).thenReturn(List.of(cat));
+        when(transactionRepository.findAllByUserIdAndPeriod(eq(userId), any(), any())).thenReturn(List.of());
+
+        // 1. Mês de Outubro/2026 (mês da criação inicial) -> deve ser 4000
+        List<BudgetProgressDto> resultOutubro = useCase.execute(userId, LocalDate.of(2026, 10, 1));
+        assertThat(resultOutubro.get(0).monthlyLimit()).isEqualByComparingTo(new BigDecimal("4000.00"));
+
+        // 2. Mês de Novembro/2026 (mês intermediário passado) -> deve manter 4000
+        List<BudgetProgressDto> resultNovembro = useCase.execute(userId, LocalDate.of(2026, 11, 1));
+        assertThat(resultNovembro.get(0).monthlyLimit()).isEqualByComparingTo(new BigDecimal("4000.00"));
+
+        // 3. Mês de Dezembro/2026 (mês do reajuste) -> deve ser 8000
+        List<BudgetProgressDto> resultDezembro = useCase.execute(userId, LocalDate.of(2026, 12, 1));
+        assertThat(resultDezembro.get(0).monthlyLimit()).isEqualByComparingTo(new BigDecimal("8000.00"));
+
+        // 4. Mês de Janeiro/2027 (mês subsequente) -> deve herdar 8000
+        List<BudgetProgressDto> resultJaneiro = useCase.execute(userId, LocalDate.of(2027, 1, 1));
+        assertThat(resultJaneiro.get(0).monthlyLimit()).isEqualByComparingTo(new BigDecimal("8000.00"));
+
+        // 5. Mês de Fevereiro/2027 (dois meses subsequentes) -> deve continuar herdando 8000
+        List<BudgetProgressDto> resultFevereiro = useCase.execute(userId, LocalDate.of(2027, 2, 1));
+        assertThat(resultFevereiro.get(0).monthlyLimit()).isEqualByComparingTo(new BigDecimal("8000.00"));
+    }
 }

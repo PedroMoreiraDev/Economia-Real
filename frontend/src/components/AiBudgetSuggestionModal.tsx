@@ -209,7 +209,7 @@ export const AiBudgetSuggestionModal: React.FC<AiBudgetSuggestionModalProps> = (
                   >
                     <div className="flex items-start gap-2.5 flex-1 min-w-0">
                       <span
-                        className="w-3.5 h-3.5 rounded-full mt-0.5 shrink-0 shadow-xs"
+                        className="w-3.5 h-3.5 rounded-full mt-0.5 shrink-0 shadow-sm"
                         style={{ backgroundColor: item.colorHex || '#3b82f6' }}
                       />
                       <div className="min-w-0">

@@ -15,4 +15,15 @@ public interface AiExtractionPort {
      * @return Transação extraída estruturada
      */
     ExtractedTransaction extractFromText(String naturalText, List<String> availableCategories);
+
+    /**
+     * Classifica o nome da categoria mais adequada para um estabelecimento ou lançamento de extrato via IA.
+     *
+     * @param rawDescription Descrição bruta da transação ou nome do estabelecimento
+     * @param availableCategories Categorias válidas disponíveis no perfil do usuário
+     * @return Nome da categoria selecionada ou null se desconhecido/duvidoso
+     */
+    default String classifyMerchant(String rawDescription, List<String> availableCategories) {
+        return null;
+    }
 }

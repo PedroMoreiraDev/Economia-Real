@@ -24,7 +24,7 @@ import java.util.UUID;
 public class JwtTokenProvider {
 
     private static final Logger log = LoggerFactory.getLogger(JwtTokenProvider.class);
-    private static final long ACCESS_TOKEN_MINUTES = 60;
+    private static final long ACCESS_TOKEN_MINUTES = 60 * 24; // 24 horas de sessão contínua
 
     private final SecretKey signingKey;
 

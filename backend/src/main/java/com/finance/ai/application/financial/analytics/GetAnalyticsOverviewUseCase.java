@@ -131,12 +131,39 @@ public class GetAnalyticsOverviewUseCase {
         BigDecimal dailyAverage = spentSoFar.divide(BigDecimal.valueOf(daysElapsed), 2, RoundingMode.HALF_EVEN);
         BigDecimal projectedMonthEnd = dailyAverage.multiply(BigDecimal.valueOf(totalDays)).setScale(2, RoundingMode.HALF_EVEN);
 
-        // Somatório dos limites orçados para o mês
-        List<Budget> userBudgets = budgetRepository.findAllByUserIdAndMonthReference(userId, currentMonth);
-        BigDecimal budgetTotal = userBudgets.stream()
-                .map(Budget::getMonthlyLimit)
-                .reduce(BigDecimal.ZERO, BigDecimal::add)
-                .setScale(2, RoundingMode.HALF_EVEN);
+        // Somatório dos limites orçados para o mês com resolução histórica temporal
+        List<Budget> allBudgets = budgetRepository.findAllByUserId(userId);
+        BigDecimal budgetTotal = BigDecimal.ZERO;
+        if (allBudgets != null && !allBudgets.isEmpty()) {
+            Map<UUID, List<Budget>> byCategory = allBudgets.stream()
+                    .collect(Collectors.groupingBy(Budget::getCategoryId));
+
+            for (List<Budget> catBudgets : byCategory.values()) {
+                Optional<Budget> exact = catBudgets.stream()
+                        .filter(b -> b.getMonthReference().withDayOfMonth(1).isEqual(currentMonth))
+                        .findFirst();
+
+                Budget effective = exact.orElseGet(() ->
+                        catBudgets.stream()
+                                .filter(b -> !b.getMonthReference().withDayOfMonth(1).isAfter(currentMonth))
+                                .max(Comparator.comparing(Budget::getMonthReference))
+                                .orElseGet(() -> catBudgets.stream().min(Comparator.comparing(Budget::getMonthReference)).orElse(null))
+                );
+
+                if (effective != null) {
+                    budgetTotal = budgetTotal.add(effective.getMonthlyLimit());
+                }
+            }
+        } else {
+            // Fallback para consultas diretas por mês
+            List<Budget> userBudgets = budgetRepository.findAllByUserIdAndMonthReference(userId, currentMonth);
+            if (userBudgets != null) {
+                budgetTotal = userBudgets.stream()
+                        .map(Budget::getMonthlyLimit)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+            }
+        }
+        budgetTotal = budgetTotal.setScale(2, RoundingMode.HALF_EVEN);
 
         String burnStatus = "SAFE";
         if (budgetTotal.compareTo(BigDecimal.ZERO) > 0) {

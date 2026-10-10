@@ -31,7 +31,12 @@ import {
   FileText,
   ChevronLeft,
   ChevronRight,
-  Calendar
+  Calendar,
+  Search,
+  X,
+  Eye,
+  EyeOff,
+  Wifi
 } from 'lucide-react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AuthModal } from './components/AuthModal';
@@ -45,6 +50,8 @@ import { AiTransactionModal } from './components/AiTransactionModal';
 import { AnalyticsSection } from './components/AnalyticsSection';
 import { BudgetModal } from './components/BudgetModal';
 import { AiBudgetSuggestionModal } from './components/AiBudgetSuggestionModal';
+import { InlineCategorySelect } from './components/InlineCategorySelect';
+import { InlineDatePicker } from './components/InlineDatePicker';
 import { RecurringBillsSection } from './components/RecurringBillsSection';
 import { SavingsGoalsSection } from './components/SavingsGoalsSection';
 import { exportTransactionsCsvApi } from './services/goalApi';
@@ -67,7 +74,9 @@ import {
   fetchTransactionsApi, 
   fetchSummaryApi,
   deleteTransactionApi,
-  deleteBatchTransactionsApi 
+  deleteBatchTransactionsApi,
+  updateTransactionApi,
+  createCategoryApi 
 } from './services/financialApi';
 import { 
   fetchCreditCardsApi, 
@@ -75,6 +84,13 @@ import {
 } from './services/cardApi';
 import { fetchBudgetsApi, deleteBudgetApi } from './services/budgetApi';
 import { fetchAnalyticsOverviewApi } from './services/analyticsApi';
+import { 
+  resolveTimelineLimit,
+  getSpendingLimitsTimeline,
+  saveSpendingLimitForMonth,
+  removeSpendingLimitForMonth,
+  SpendingLimitResolution,
+} from './utils/spendingLimitTimeline';
 
 function formatBRL(amount: number | undefined): string {
   if (amount === undefined || isNaN(amount)) return 'R$ 0,00';
@@ -108,6 +124,17 @@ function getCurrentMonthStr(): string {
   return `${y}-${m}`;
 }
 
+const CATEGORY_COLORS = [
+  '#026CD6', // Azul Principal
+  '#10B981', // Verde Esmeralda
+  '#8B5CF6', // Roxo Moderno
+  '#EC4899', // Rosa
+  '#F59E0B', // Âmbar / Dourado
+  '#EF4444', // Coral / Vermelho
+  '#06B6D4', // Ciano
+  '#64748B', // Ardósia Neutro
+];
+
 type TabType = 'overview' | 'analytics' | 'recurring' | 'goals' | 'cards';
 
 const MainDashboard: React.FC = () => {
@@ -120,6 +147,24 @@ const MainDashboard: React.FC = () => {
   // Navegação de Mês e Filtros Temporais Globais
   const [selectedMonth, setSelectedMonth] = useState<string>(() => getCurrentMonthStr());
   const [txFilterMode, setTxFilterMode] = useState<'month' | 'all'>('month');
+
+  // Modo Privacidade (ocultar valores na tela)
+  const [privacyMode, setPrivacyMode] = useState<boolean>(() => {
+    return localStorage.getItem('economia_real_privacy_mode') === 'true';
+  });
+
+  const togglePrivacyMode = () => {
+    setPrivacyMode((prev) => {
+      const next = !prev;
+      localStorage.setItem('economia_real_privacy_mode', String(next));
+      return next;
+    });
+  };
+
+  // Filtros Avançados de Busca e Tipo no Extrato
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [typeFilter, setTypeFilter] = useState<'ALL' | 'INCOME' | 'EXPENSE'>('ALL');
+  const [showOnlyUncategorized, setShowOnlyUncategorized] = useState<boolean>(false);
 
   // Modais
   const [authModalOpen, setAuthModalOpen] = useState<boolean>(false);
@@ -138,9 +183,13 @@ const MainDashboard: React.FC = () => {
   const [initialTransactionType, setInitialTransactionType] = useState<TransactionType>('EXPENSE');
   const [aiBudgetModalOpen, setAiBudgetModalOpen] = useState<boolean>(false);
 
-  // Meta global de gastos (Teto Mensal) - Isolado estritamente por ID de usuário (RULE[security_isolation])
-  const [globalSpendingLimit, setGlobalSpendingLimit] = useState<number>(0);
-  const [spendingLimitDisabled, setSpendingLimitDisabled] = useState<boolean>(false);
+  // Meta global de gastos (Teto Mensal) - Linha do tempo histórica contábil por usuário
+  const [, setSpendingTimeline] = useState<Record<string, number>>({});
+  const [spendingResolution, setSpendingResolution] = useState<SpendingLimitResolution>({
+    limit: 0,
+    isInherited: false,
+    isExplicitZero: false,
+  });
   const [isEditingLimit, setIsEditingLimit] = useState<boolean>(false);
   const [tempLimitInput, setTempLimitInput] = useState<string>('');
 
@@ -148,7 +197,7 @@ const MainDashboard: React.FC = () => {
   const [selectedTxIds, setSelectedTxIds] = useState<Set<string>>(new Set());
   const [deletingBatch, setDeletingBatch] = useState<boolean>(false);
 
-  // Sincroniza o teto de gastos exclusivo para o usuário autenticado ativo
+  // Sincroniza a linha do tempo histórica do teto de gastos para o usuário e mês ativo
   useEffect(() => {
     // Remove chave legada global se existir no navegador para evitar vazamento
     if (localStorage.getItem('economia_real_spending_limit')) {
@@ -156,17 +205,16 @@ const MainDashboard: React.FC = () => {
     }
 
     if (user?.id) {
-      const isDisabled = localStorage.getItem(`economia_real_spending_limit_disabled_${user.id}`) === 'true';
-      setSpendingLimitDisabled(isDisabled);
-
-      const saved = localStorage.getItem(`economia_real_spending_limit_${user.id}`);
-      setGlobalSpendingLimit(saved ? parseFloat(saved) : 0);
+      const timeline = getSpendingLimitsTimeline(user.id);
+      setSpendingTimeline(timeline);
+      const res = resolveTimelineLimit(timeline, selectedMonth);
+      setSpendingResolution(res);
     } else {
-      setGlobalSpendingLimit(0);
-      setSpendingLimitDisabled(false);
+      setSpendingTimeline({});
+      setSpendingResolution({ limit: 0, isInherited: false, isExplicitZero: false });
       setSelectedTxIds(new Set());
     }
-  }, [user?.id]);
+  }, [user?.id, selectedMonth]);
 
   // Dados financeiros
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -331,14 +379,42 @@ const MainDashboard: React.FC = () => {
     });
   };
 
-  // Transações exibidas de acordo com o filtro (mês selecionado ou todas)
-  const displayedTransactions = txFilterMode === 'month'
+  const formatValue = (amount: number | undefined) => {
+    if (privacyMode) return '••••••';
+    return formatBRL(amount);
+  };
+
+  // Base de transações de acordo com o filtro de período (mês selecionado ou todas)
+  const baseTransactions = txFilterMode === 'month'
     ? transactions.filter((t) => t.accrualDate && t.accrualDate.startsWith(selectedMonth))
     : transactions;
 
   const monthTransactionsCount = transactions.filter(
     (t) => t.accrualDate && t.accrualDate.startsWith(selectedMonth)
   ).length;
+
+  const uncategorizedCount = baseTransactions.filter(
+    (t) => !t.categoryId && t.type !== 'TRANSFER' && t.type !== 'INVOICE_PAYMENT'
+  ).length;
+
+  // Filtragem avançada com busca textual e tipo de movimentação
+  const displayedTransactions = baseTransactions.filter((t) => {
+    if (showOnlyUncategorized && (t.categoryId || t.type === 'TRANSFER' || t.type === 'INVOICE_PAYMENT')) {
+      return false;
+    }
+    if (typeFilter === 'INCOME' && t.type !== 'INCOME') return false;
+    if (typeFilter === 'EXPENSE' && t.type !== 'EXPENSE') return false;
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      const cat = categories.find((c) => c.id === t.categoryId);
+      const descMatch = t.description.toLowerCase().includes(q);
+      const catMatch = cat?.name.toLowerCase().includes(q);
+      const notesMatch = t.notes?.toLowerCase().includes(q);
+      return Boolean(descMatch || catMatch || notesMatch);
+    }
+    return true;
+  });
 
   const handleToggleSelectAll = () => {
     if (selectedTxIds.size === displayedTransactions.length && displayedTransactions.length > 0) {
@@ -374,20 +450,172 @@ const MainDashboard: React.FC = () => {
     }
   };
 
-  // Limite global efetivo (soma das metas ou teto manual)
+  // Estados para atualização inline e feedback na tabela
+  const [inlineUpdatingTxId, setInlineUpdatingTxId] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage((prev) => (prev === msg ? null : prev));
+    }, 2800);
+  };
+
+  const handleInlineUpdateCategory = async (tx: Transaction, newCategoryId: string) => {
+    if (!token || !newCategoryId || newCategoryId === tx.categoryId) return;
+    try {
+      setInlineUpdatingTxId(tx.id);
+      const catObj = categories.find((c) => c.id === newCategoryId);
+      const catName = catObj?.name || 'categoria';
+
+      // Atualização otimista imediata para resposta instantânea
+      setTransactions((prev) =>
+        prev.map((item) => (item.id === tx.id ? { ...item, categoryId: newCategoryId } : item))
+      );
+
+      const payload = {
+        type: tx.type,
+        amount: tx.amount,
+        accrualDate: tx.accrualDate,
+        settlementDate: tx.settlementDate,
+        description: tx.description,
+        accountId: tx.accountId,
+        destinationAccountId: tx.destinationAccountId,
+        categoryId: newCategoryId,
+        notes: tx.notes,
+      };
+
+      await updateTransactionApi(token, tx.id, payload);
+      showToast(`Categoria alterada para "${catName}"!`);
+      await loadFinancialData();
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Erro ao atualizar categoria da movimentação.');
+      await loadFinancialData();
+    } finally {
+      setInlineUpdatingTxId(null);
+    }
+  };
+
+  const handleInlineUpdateDate = async (tx: Transaction, newDate: string) => {
+    if (!token || !newDate || newDate === tx.accrualDate) return;
+    try {
+      setInlineUpdatingTxId(tx.id);
+
+      // Atualização otimista imediata
+      setTransactions((prev) =>
+        prev.map((item) => (item.id === tx.id ? { ...item, accrualDate: newDate } : item))
+      );
+
+      const payload = {
+        type: tx.type,
+        amount: tx.amount,
+        accrualDate: newDate,
+        settlementDate: tx.settlementDate,
+        description: tx.description,
+        accountId: tx.accountId,
+        destinationAccountId: tx.destinationAccountId,
+        categoryId: tx.categoryId,
+        notes: tx.notes,
+      };
+
+      await updateTransactionApi(token, tx.id, payload);
+      const formattedDate = newDate.split('-').reverse().join('/');
+      showToast(`Data alterada para ${formattedDate}!`);
+      await loadFinancialData();
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Erro ao atualizar data da movimentação.');
+      await loadFinancialData();
+    } finally {
+      setInlineUpdatingTxId(null);
+    }
+  };
+
+  const handleInlineUpdateAmount = async (tx: Transaction, newAmount: number) => {
+    if (!token || isNaN(newAmount) || newAmount <= 0 || Math.abs(newAmount - tx.amount) < 0.001) return;
+    try {
+      setInlineUpdatingTxId(tx.id);
+
+      // Atualização otimista imediata
+      setTransactions((prev) =>
+        prev.map((item) => (item.id === tx.id ? { ...item, amount: newAmount } : item))
+      );
+
+      const payload = {
+        type: tx.type,
+        amount: newAmount,
+        accrualDate: tx.accrualDate,
+        settlementDate: tx.settlementDate,
+        description: tx.description,
+        accountId: tx.accountId,
+        destinationAccountId: tx.destinationAccountId,
+        categoryId: tx.categoryId,
+        notes: tx.notes,
+      };
+
+      await updateTransactionApi(token, tx.id, payload);
+      showToast(`Valor atualizado para ${formatBRL(newAmount)}!`);
+      await loadFinancialData();
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Erro ao atualizar valor da movimentação.');
+      await loadFinancialData();
+    } finally {
+      setInlineUpdatingTxId(null);
+    }
+  };
+
+  // Modal para criação rápida de categoria inline
+  const [quickCategoryModal, setQuickCategoryModal] = useState<{ isOpen: boolean; targetTx?: Transaction } | null>(null);
+  const [newCatName, setNewCatName] = useState<string>('');
+  const [newCatColor, setNewCatColor] = useState<string>(CATEGORY_COLORS[0]);
+  const [creatingCat, setCreatingCat] = useState<boolean>(false);
+
+  const handleCreateQuickCategory = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!token || !newCatName.trim()) return;
+
+    try {
+      setCreatingCat(true);
+      const created = await createCategoryApi(token, {
+        name: newCatName.trim(),
+        icon: 'tag',
+        colorHex: newCatColor,
+      });
+
+      // Adiciona na lista de categorias do estado
+      setCategories((prev) => [...prev, created]);
+
+      // Se havia uma transação associada, atualiza imediatamente a categoria dela
+      if (quickCategoryModal?.targetTx) {
+        await handleInlineUpdateCategory(quickCategoryModal.targetTx, created.id);
+      } else {
+        showToast(`Categoria "${created.name}" criada com sucesso!`);
+      }
+
+      setQuickCategoryModal(null);
+      setNewCatName('');
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Erro ao cadastrar categoria.');
+    } finally {
+      setCreatingCat(false);
+    }
+  };
+
+  // Limite global efetivo (teto na linha do tempo ou soma das metas por categoria)
   const totalBudgetFromCategories = budgets.reduce((acc, b) => acc + (b.monthlyLimit || 0), 0);
-  const effectiveGlobalLimit = spendingLimitDisabled
+  const effectiveGlobalLimit = spendingResolution.isExplicitZero
     ? 0
-    : (globalSpendingLimit > 0 ? globalSpendingLimit : totalBudgetFromCategories);
+    : spendingResolution.limit > 0
+    ? spendingResolution.limit
+    : totalBudgetFromCategories;
 
   const handleSaveGlobalLimit = () => {
     const parsed = parseFloat(tempLimitInput);
     if (!isNaN(parsed) && parsed > 0) {
-      setGlobalSpendingLimit(parsed);
-      setSpendingLimitDisabled(false);
       if (user?.id) {
-        localStorage.setItem(`economia_real_spending_limit_${user.id}`, parsed.toString());
-        localStorage.removeItem(`economia_real_spending_limit_disabled_${user.id}`);
+        const updated = saveSpendingLimitForMonth(user.id, selectedMonth, parsed);
+        setSpendingTimeline(updated);
+        const res = resolveTimelineLimit(updated, selectedMonth);
+        setSpendingResolution(res);
       }
       setIsEditingLimit(false);
     } else {
@@ -396,17 +624,17 @@ const MainDashboard: React.FC = () => {
   };
 
   const handleRemoveGlobalLimit = async () => {
-    setGlobalSpendingLimit(0);
-    setSpendingLimitDisabled(true);
     if (user?.id) {
-      localStorage.removeItem(`economia_real_spending_limit_${user.id}`);
-      localStorage.setItem(`economia_real_spending_limit_disabled_${user.id}`, 'true');
+      const updated = removeSpendingLimitForMonth(user.id, selectedMonth);
+      setSpendingTimeline(updated);
+      const res = resolveTimelineLimit(updated, selectedMonth);
+      setSpendingResolution(res);
     }
 
-    // Remove também quaisquer metas/orçamentos cadastrados no backend para o mês atual
+    // Se houver metas cadastradas especificamente para o mês selecionado no backend, remove-as
     if (token && budgets.length > 0) {
       try {
-        const toDelete = budgets.filter((b) => !!b.id);
+        const toDelete = budgets.filter((b) => !!b.id && b.monthReference && b.monthReference.startsWith(selectedMonth));
         if (toDelete.length > 0) {
           await Promise.all(toDelete.map((b) => deleteBudgetApi(token, b.id!)));
           await loadFinancialData();
@@ -436,25 +664,29 @@ const MainDashboard: React.FC = () => {
     : `${selectedMonth}-01`;
 
   return (
-    <div className="min-h-screen bg-[#F4F7FB] text-slate-800 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 flex flex-col font-sans">
       
-      {/* Top Header Economia Real (Clean, Sofisticado com Borda Inferior e Acento Azul) */}
-      <header className="bg-white border-b-2 border-slate-200/90 sticky top-0 z-40 shadow-sm">
+      {/* Top Header Economia Real com Glassmorphism Refinado */}
+      <header className="glass-panel sticky top-0 z-40 border-b-2 border-slate-200/90 shadow-sm transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           
           {/* Logo e Nome da Plataforma */}
-          <div className="flex items-center gap-3">
-            <img
-              src="/logo-economia-real.png"
-              alt="Economia Real Logo"
-              className="h-12 w-12 rounded-2xl object-cover border-2 border-blue-200 shadow-md"
-            />
+          <div className="flex items-center gap-3.5">
+            <div className="relative group">
+              <img
+                src="/logo-economia-real.png"
+                alt="Economia Real Logo"
+                className="h-12 w-12 rounded-2xl object-cover border-2 border-blue-200 shadow-md group-hover:scale-105 transition-transform"
+              />
+              <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white animate-pulse" title="Sistema online e conectado" />
+            </div>
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-2xl font-black tracking-tight text-slate-900">
                   Economia<span className="text-[#026CD6]">Real</span>
                 </span>
-                <span className="hidden md:inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-black bg-blue-100 text-blue-800 border border-blue-200 uppercase">
+                <span className="hidden md:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-900 border border-blue-200 shadow-sm uppercase tracking-wider">
+                  <Sparkles className="w-3 h-3 text-[#026CD6]" />
                   Inteligência Artificial 🎩
                 </span>
               </div>
@@ -464,24 +696,50 @@ const MainDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Área Direita: Perfil e Autenticação */}
-          <div className="flex items-center gap-3">
+          {/* Área Direita: Controles, Perfil e Autenticação */}
+          <div className="flex items-center gap-2.5">
+            {/* Botão de Modo Privacidade (Ocultar/Mostrar Valores) */}
+            {isAuthenticated && (
+              <button
+                type="button"
+                onClick={togglePrivacyMode}
+                className={`btn-duo text-xs px-3 py-2 flex items-center gap-1.5 transition-all ${
+                  privacyMode 
+                    ? 'btn-duo-yellow font-black ring-2 ring-amber-300' 
+                    : 'btn-duo-white hover:text-[#026CD6]'
+                }`}
+                title={privacyMode ? "Valores monetários ocultos. Clique para exibir." : "Ocultar valores monetários na tela (Modo Privacidade)"}
+              >
+                {privacyMode ? (
+                  <>
+                    <EyeOff className="h-4 w-4 stroke-[2.5]" />
+                    <span className="hidden sm:inline">Oculto</span>
+                  </>
+                ) : (
+                  <>
+                    <Eye className="h-4 w-4 stroke-[2.5] text-slate-500" />
+                    <span className="hidden sm:inline">Privacidade</span>
+                  </>
+                )}
+              </button>
+            )}
+
             {/* Autenticação / Perfil do Usuário */}
             {isAuthenticated && user ? (
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-blue-50 border-2 border-blue-200 text-xs">
-                  <div className="h-7 w-7 rounded-xl bg-[#026CD6] border-b-2 border-[#0153AB] text-white font-black flex items-center justify-center text-xs shadow-sm">
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-blue-50/90 border-2 border-blue-200 text-xs shadow-sm">
+                  <div className="h-7 w-7 rounded-xl bg-gradient-to-br from-[#026CD6] to-[#0153AB] border-b-2 border-[#0153AB] text-white font-black flex items-center justify-center text-xs shadow-sm">
                     {user.fullName ? user.fullName.substring(0, 1).toUpperCase() : 'U'}
                   </div>
                   <div className="text-left hidden md:block">
                     <p className="font-extrabold text-slate-800 leading-tight">{user.fullName}</p>
-                    <p className="text-[10px] text-blue-700 font-bold leading-tight">{user.email}</p>
+                    <p className="text-[10px] text-blue-700 font-bold leading-tight truncate max-w-[140px]">{user.email}</p>
                   </div>
                 </div>
 
                 <button
                   onClick={logout}
-                  className="btn-duo btn-duo-white text-xs px-3 py-2 flex items-center gap-1.5 text-rose-600 hover:text-rose-700 border-rose-200"
+                  className="btn-duo btn-duo-white text-xs px-3 py-2 flex items-center gap-1.5 text-rose-600 hover:text-rose-700 border-rose-200 hover:bg-rose-50/50"
                   title="Encerrar sessão"
                 >
                   <LogOut className="h-4 w-4" />
@@ -691,53 +949,65 @@ const MainDashboard: React.FC = () => {
               </div>
             </div>
             
-            {/* 4 Cards de Métricas Principais (KPIs com Relevo 3D Estilo Duolingo) */}
+            {/* 4 Cards de Métricas Principais (KPIs com Relevo Tátil e Modo Privacidade) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               
               {/* Receitas Totais */}
-              <div className="card-duo p-5 space-y-2 hover:border-[#58CC02] transition-all">
+              <div className="card-duo card-duo-interactive p-5 space-y-2.5 hover:border-emerald-400 group">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-black uppercase text-slate-500 tracking-wider">
+                  <span className="text-[11px] font-black uppercase text-slate-500 tracking-wider">
                     Entradas
                   </span>
-                  <div className="h-10 w-10 rounded-2xl bg-[#E8F8E8] border-2 border-[#D7FFB8] text-[#58CC02] flex items-center justify-center shadow-sm">
+                  <div className="h-10 w-10 rounded-2xl bg-[#E8F8E8] border-2 border-[#D7FFB8] text-[#10B981] flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
                     <ArrowUpRight className="h-5 w-5 stroke-[3]" />
                   </div>
                 </div>
-                <p className="text-2xl sm:text-3xl font-black text-[#46A302] tracking-tight">
-                  {formatBRL(summary.totalIncome)}
+                <p className="text-2xl sm:text-3xl font-black text-[#059669] tracking-tight font-numeric">
+                  {formatValue(summary.totalIncome)}
                 </p>
-                <p className="text-xs font-bold text-slate-400">Total recebido no período</p>
+                <div className="flex items-center justify-between text-xs font-bold text-slate-400">
+                  <span>Recebido no período</span>
+                  <span className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    +{incomeTransactions.length} entrada(s)
+                  </span>
+                </div>
               </div>
 
               {/* Despesas de Consumo */}
-              <div className="card-duo p-5 space-y-2 hover:border-rose-400 transition-all">
+              <div className="card-duo card-duo-interactive p-5 space-y-2.5 hover:border-rose-400 group">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-black uppercase text-slate-500 tracking-wider">
+                  <span className="text-[11px] font-black uppercase text-slate-500 tracking-wider">
                     Despesas
                   </span>
-                  <div className="h-10 w-10 rounded-2xl bg-[#FFEAEA] border-2 border-[#FFDFDF] text-[#FF4B4B] flex items-center justify-center shadow-sm">
+                  <div className="h-10 w-10 rounded-2xl bg-[#FFEAEA] border-2 border-[#FFDFDF] text-[#EF4444] flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
                     <ArrowDownLeft className="h-5 w-5 stroke-[3]" />
                   </div>
                 </div>
-                <p className="text-2xl sm:text-3xl font-black text-[#FF4B4B] tracking-tight">
-                  {formatBRL(summary.totalExpense)}
+                <p className="text-2xl sm:text-3xl font-black text-[#DC2626] tracking-tight font-numeric">
+                  {formatValue(summary.totalExpense)}
                 </p>
-                <p className="text-xs font-bold text-slate-400">Consumo real sem duplicidade</p>
+                <div className="flex items-center justify-between text-xs font-bold text-slate-400">
+                  <span>Consumo no período</span>
+                  {summary.totalIncome > 0 && (
+                    <span className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-200">
+                      {Math.round((summary.totalExpense / summary.totalIncome) * 100)}% da receita
+                    </span>
+                  )}
+                </div>
               </div>
 
               {/* Disponível para Gastar / Meta de Gastos (substitui Economia conforme meta) */}
-              <div className="card-duo p-5 space-y-2 hover:border-[#1CB0F6] transition-all">
+              <div className="card-duo card-duo-interactive p-5 space-y-2.5 hover:border-[#026CD6] group">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-black uppercase text-slate-500 tracking-wider">
+                  <span className="text-[11px] font-black uppercase text-slate-500 tracking-wider">
                     {effectiveGlobalLimit > 0 ? 'Disponível no Mês' : 'Economia'}
                   </span>
-                  <div className={`h-10 w-10 rounded-2xl border-2 flex items-center justify-center shadow-sm ${
+                  <div className={`h-10 w-10 rounded-2xl border-2 flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform ${
                     effectiveGlobalLimit > 0
                       ? effectiveGlobalLimit - summary.totalExpense >= 0
-                        ? 'bg-[#DDF4FF] border-[#BAE6FD] text-[#1CB0F6]'
-                        : 'bg-[#FFEAEA] border-[#FFDFDF] text-[#FF4B4B]'
-                      : 'bg-[#DDF4FF] border-[#BAE6FD] text-[#1CB0F6]'
+                        ? 'bg-[#EBF5FF] border-[#BAE0FD] text-[#026CD6]'
+                        : 'bg-[#FFEAEA] border-[#FFDFDF] text-[#EF4444]'
+                      : 'bg-[#EBF5FF] border-[#BAE0FD] text-[#026CD6]'
                   }`}>
                     {effectiveGlobalLimit > 0 ? (
                       <Target className="h-5 w-5 stroke-[3]" />
@@ -748,23 +1018,37 @@ const MainDashboard: React.FC = () => {
                 </div>
                 {effectiveGlobalLimit > 0 ? (
                   <>
-                    <p className={`text-2xl sm:text-3xl font-black tracking-tight ${
-                      effectiveGlobalLimit - summary.totalExpense >= 0 ? 'text-[#1899D6]' : 'text-[#EA2B2B]'
+                    <p className={`text-2xl sm:text-3xl font-black tracking-tight font-numeric ${
+                      effectiveGlobalLimit - summary.totalExpense >= 0 ? 'text-[#026CD6]' : 'text-[#DC2626]'
                     }`}>
-                      {formatBRL(effectiveGlobalLimit - summary.totalExpense)}
+                      {formatValue(effectiveGlobalLimit - summary.totalExpense)}
                     </p>
-                    <p className="text-xs font-bold text-slate-400">
-                      {effectiveGlobalLimit - summary.totalExpense >= 0
-                        ? `Restam da meta de ${formatBRL(effectiveGlobalLimit)}`
-                        : `⚠️ Meta estourada em ${formatBRL(Math.abs(effectiveGlobalLimit - summary.totalExpense))}`}
-                    </p>
+                    <div className="space-y-1">
+                      <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+                        <div 
+                          className={`h-full rounded-full transition-all ${
+                            summary.totalExpense >= effectiveGlobalLimit 
+                              ? 'bg-rose-500' 
+                              : summary.totalExpense >= effectiveGlobalLimit * 0.85 
+                              ? 'bg-amber-500' 
+                              : 'bg-[#026CD6]'
+                          }`}
+                          style={{ width: `${Math.min(100, Math.round((summary.totalExpense / effectiveGlobalLimit) * 100))}%` }}
+                        />
+                      </div>
+                      <p className="text-[11px] font-bold text-slate-400">
+                        {effectiveGlobalLimit - summary.totalExpense >= 0
+                          ? `Restam de ${formatValue(effectiveGlobalLimit)}`
+                          : `⚠️ Meta estourada em ${formatValue(Math.abs(effectiveGlobalLimit - summary.totalExpense))}`}
+                      </p>
+                    </div>
                   </>
                 ) : (
                   <>
-                    <p className={`text-2xl sm:text-3xl font-black tracking-tight ${
-                      (summary.totalIncome - summary.totalExpense) >= 0 ? 'text-[#1899D6]' : 'text-amber-600'
+                    <p className={`text-2xl sm:text-3xl font-black tracking-tight font-numeric ${
+                      (summary.totalIncome - summary.totalExpense) >= 0 ? 'text-[#026CD6]' : 'text-amber-600'
                     }`}>
-                      {formatBRL(summary.totalIncome - summary.totalExpense)}
+                      {formatValue(summary.totalIncome - summary.totalExpense)}
                     </p>
                     <p className="text-xs font-bold text-slate-400">
                       Defina sua meta no painel ao lado
@@ -774,23 +1058,32 @@ const MainDashboard: React.FC = () => {
               </div>
 
               {/* Saldo Total: Entradas menos Despesas */}
-              <div className="card-duo p-5 space-y-2 hover:border-amber-400 transition-all">
+              <div className="card-duo card-duo-interactive p-5 space-y-2.5 hover:border-amber-400 group">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-black uppercase text-slate-500 tracking-wider">
+                  <span className="text-[11px] font-black uppercase text-slate-500 tracking-wider">
                     Saldo Total
                   </span>
-                  <div className="h-10 w-10 rounded-2xl bg-[#FFF5D1] border-2 border-[#FDE68A] text-[#FF9600] flex items-center justify-center shadow-sm">
+                  <div className="h-10 w-10 rounded-2xl bg-[#FFF8E6] border-2 border-[#FDE68A] text-[#D97706] flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
                     <Wallet className="h-5 w-5 stroke-[3]" />
                   </div>
                 </div>
-                <p className={`text-2xl sm:text-3xl font-black tracking-tight ${
-                  (summary.totalIncome - summary.totalExpense) >= 0 ? 'text-slate-900' : 'text-[#EA2B2B]'
+                <p className={`text-2xl sm:text-3xl font-black tracking-tight font-numeric ${
+                  (summary.totalIncome - summary.totalExpense) >= 0 ? 'text-slate-900' : 'text-[#DC2626]'
                 }`}>
-                  {formatBRL(summary.totalIncome - summary.totalExpense)}
+                  {formatValue(summary.totalIncome - summary.totalExpense)}
                 </p>
-                <p className="text-xs font-bold text-slate-400">
-                  Receitas menos despesas do período
-                </p>
+                <div className="flex items-center justify-between text-xs font-bold text-slate-400">
+                  <span>Resultado do período</span>
+                  {(summary.totalIncome - summary.totalExpense) >= 0 ? (
+                    <span className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      Superávit ✨
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-200">
+                      Déficit ⚠️
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -871,16 +1164,16 @@ const MainDashboard: React.FC = () => {
                     <div className="flex items-center justify-between border-b-2 border-slate-100 pb-3">
                       <div>
                         <h2 className="text-base font-black text-slate-800 flex items-center gap-2">
-                          <ArrowUpRight className="h-5 w-5 text-[#46A302] stroke-[3]" />
+                          <ArrowUpRight className="h-5 w-5 text-[#10B981] stroke-[3]" />
                           Minhas Entradas
                         </h2>
                         <span className="text-xs font-bold text-slate-400">
-                          {formatBRL(summary.totalIncome)} recebidos no mês
+                          <strong className="text-emerald-700 font-numeric">{formatValue(summary.totalIncome)}</strong> recebidos no mês
                         </span>
                       </div>
                       <button
                         onClick={handleOpenNewIncome}
-                        className="btn-duo btn-duo-green text-xs px-3 py-1.5 flex items-center gap-1 shadow-sm"
+                        className="btn-duo btn-emerald text-xs px-3 py-1.5 flex items-center gap-1 shadow-sm"
                         title="Registrar nova entrada ou salário"
                       >
                         <Plus className="h-3.5 w-3.5 stroke-[3]" />
@@ -894,7 +1187,7 @@ const MainDashboard: React.FC = () => {
                           <p className="text-xs font-bold text-slate-400">Nenhuma entrada registrada este mês.</p>
                           <button
                             onClick={handleOpenNewIncome}
-                            className="btn-duo btn-duo-green text-xs px-3 py-1.5"
+                            className="btn-duo btn-emerald text-xs px-3 py-1.5"
                           >
                             Registrar Primeiro Salário/Renda
                           </button>
@@ -905,7 +1198,7 @@ const MainDashboard: React.FC = () => {
                           return (
                             <div
                               key={tx.id}
-                              className="p-3 rounded-2xl bg-slate-50 border-2 border-slate-100 hover:border-emerald-200 transition-all flex items-center justify-between"
+                              className="p-3 rounded-2xl bg-slate-50 border-2 border-slate-100 hover:border-emerald-200 transition-all flex items-center justify-between group"
                             >
                               <div className="space-y-0.5 min-w-0 pr-2">
                                 <p className="font-black text-xs text-slate-800 truncate">{tx.description}</p>
@@ -921,14 +1214,14 @@ const MainDashboard: React.FC = () => {
                                 </div>
                               </div>
                               <div className="flex items-center gap-2 flex-shrink-0">
-                                <span className="text-xs font-black text-[#46A302]">
-                                  + {formatBRL(tx.amount)}
+                                <span className="text-xs font-black text-[#10B981] font-numeric">
+                                  + {formatValue(tx.amount)}
                                 </span>
-                                <div className="flex items-center">
+                                <div className="flex items-center opacity-80 group-hover:opacity-100 transition-opacity">
                                   <button
                                     type="button"
                                     onClick={() => handleEditTransaction(tx)}
-                                    className="p-1 text-slate-400 hover:text-[#1CB0F6] rounded-lg transition"
+                                    className="p-1 text-slate-400 hover:text-[#026CD6] rounded-lg transition"
                                     title="Editar entrada"
                                   >
                                     <Pencil className="w-3 h-3 stroke-[2.5]" />
@@ -936,7 +1229,7 @@ const MainDashboard: React.FC = () => {
                                   <button
                                     type="button"
                                     onClick={() => handleDeleteTransaction(tx.id)}
-                                    className="p-1 text-slate-400 hover:text-[#EA2B2B] rounded-lg transition"
+                                    className="p-1 text-slate-400 hover:text-rose-600 rounded-lg transition"
                                     title="Excluir entrada"
                                   >
                                     <Trash2 className="w-3 h-3 stroke-[2.5]" />
@@ -965,8 +1258,22 @@ const MainDashboard: React.FC = () => {
                           <h2 className="text-base font-black text-slate-800">
                             Teto Máximo de Gastos
                           </h2>
-                          <span className="text-xs font-bold text-slate-400">
-                            Meta global para este mês
+                          <span className="text-xs font-bold flex items-center gap-1.5">
+                            {spendingResolution.isInherited ? (
+                              <span className="text-[#026CD6] flex items-center gap-1">
+                                <span className="inline-block w-2 h-2 rounded-full bg-[#026CD6] animate-pulse" />
+                                Herdado de {spendingResolution.inheritedFromMonth?.split('-').reverse().join('/')}
+                              </span>
+                            ) : spendingResolution.limit > 0 ? (
+                              <span className="text-emerald-600 flex items-center gap-1">
+                                <CheckCircle2 className="w-3.5 h-3.5 stroke-[2.5]" />
+                                Definido neste mês
+                              </span>
+                            ) : (
+                              <span className="text-slate-400">
+                                Meta global para este mês
+                              </span>
+                            )}
                           </span>
                         </div>
                       </div>
@@ -1046,16 +1353,16 @@ const MainDashboard: React.FC = () => {
                         <div className="flex items-baseline justify-between">
                           <div>
                             <span className="text-[11px] font-bold text-slate-400 block uppercase">Limite Definido</span>
-                            <span className="text-2xl font-black text-slate-900">
-                              {formatBRL(effectiveGlobalLimit)}
+                            <span className="text-2xl font-black text-slate-900 font-numeric">
+                              {formatValue(effectiveGlobalLimit)}
                             </span>
                           </div>
                           <div className="text-right">
                             <span className="text-[11px] font-bold text-slate-400 block uppercase">Gasto Atual</span>
-                            <span className={`text-base font-black ${
+                            <span className={`text-base font-black font-numeric ${
                               summary.totalExpense > effectiveGlobalLimit ? 'text-[#EA2B2B]' : 'text-slate-800'
                             }`}>
-                              {formatBRL(summary.totalExpense)}
+                              {formatValue(summary.totalExpense)}
                             </span>
                           </div>
                         </div>
@@ -1075,7 +1382,7 @@ const MainDashboard: React.FC = () => {
                                   ? 'bg-[#FF4B4B]'
                                   : summary.totalExpense >= effectiveGlobalLimit * 0.85
                                   ? 'bg-[#FF9600]'
-                                  : 'bg-[#58CC02]'
+                                  : 'bg-[#10B981]'
                               }`}
                               style={{
                                 width: `${Math.min(100, (summary.totalExpense / effectiveGlobalLimit) * 100)}%`,
@@ -1084,14 +1391,14 @@ const MainDashboard: React.FC = () => {
                           </div>
                           <p className="text-[11px] font-black pt-1">
                             {effectiveGlobalLimit - summary.totalExpense >= 0 ? (
-                              <span className="text-[#388302] flex items-center gap-1">
-                                <CheckCircle2 className="w-3.5 h-3.5" />
-                                Restam {formatBRL(effectiveGlobalLimit - summary.totalExpense)} para gastar este mês
+                              <span className="text-[#059669] flex items-center gap-1 font-numeric">
+                                <CheckCircle2 className="w-3.5 h-3.5 text-[#10B981]" />
+                                Restam {formatValue(effectiveGlobalLimit - summary.totalExpense)} para gastar este mês
                               </span>
                             ) : (
-                              <span className="text-[#EA2B2B] flex items-center gap-1">
-                                <AlertCircle className="w-3.5 h-3.5" />
-                                Teto estourado em {formatBRL(Math.abs(effectiveGlobalLimit - summary.totalExpense))}
+                              <span className="text-[#EA2B2B] flex items-center gap-1 font-numeric">
+                                <AlertCircle className="w-3.5 h-3.5 text-rose-500" />
+                                Teto estourado em {formatValue(Math.abs(effectiveGlobalLimit - summary.totalExpense))}
                               </span>
                             )}
                           </p>
@@ -1116,7 +1423,7 @@ const MainDashboard: React.FC = () => {
                           <button
                             type="button"
                             onClick={handleStartEditLimit}
-                            className="btn-duo btn-duo-green text-xs px-3 py-1.5 w-full sm:w-auto"
+                            className="btn-duo btn-emerald text-xs px-3 py-1.5 w-full sm:w-auto"
                           >
                             Definir Teto
                           </button>
@@ -1135,18 +1442,18 @@ const MainDashboard: React.FC = () => {
                 </div>
 
                 {/* Coluna 2 e 3: Extrato de Transações */}
-                <div className="lg:col-span-2 card-duo p-6 space-y-5">
+                <div className="lg:col-span-2 card-duo p-4 sm:p-5 space-y-4">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-slate-100 pb-4">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <Receipt className="h-5 w-5 text-[#1CB0F6]" />
+                        <Receipt className="h-5 w-5 text-[#026CD6]" />
                         <h2 className="text-base font-black text-slate-800">
                           Extrato de Movimentações
                         </h2>
                       </div>
                       
                       {/* Pílulas de Alternância de Filtro: Mês Selecionado vs Todas */}
-                      <div className="flex items-center gap-2 pt-1">
+                      <div className="flex items-center gap-2 pt-1 flex-wrap">
                         <button
                           type="button"
                           onClick={() => setTxFilterMode('month')}
@@ -1181,7 +1488,7 @@ const MainDashboard: React.FC = () => {
                         className="btn-duo btn-duo-white text-xs px-2.5 py-1.5"
                         title="Atualizar lançamentos"
                       >
-                        <RefreshCw className={`h-3.5 w-3.5 ${loadingData ? 'animate-spin' : ''}`} />
+                        <RefreshCw className={`h-3.5 w-3.5 ${loadingData ? 'animate-spin text-[#026CD6]' : ''}`} />
                       </button>
 
                       <button
@@ -1189,7 +1496,7 @@ const MainDashboard: React.FC = () => {
                           setEditingTransaction(null);
                           setTransactionModalOpen(true);
                         }}
-                        className="btn-duo btn-duo-green text-xs px-3 py-1.5 flex items-center gap-1.5"
+                        className="btn-duo btn-emerald text-xs px-3.5 py-1.5 flex items-center gap-1.5"
                       >
                         <Plus className="h-3.5 w-3.5 stroke-[3]" />
                         Adicionar
@@ -1197,11 +1504,88 @@ const MainDashboard: React.FC = () => {
                     </div>
                   </div>
 
+                  {/* Barra de Pesquisa Rápida e Filtros de Tipo */}
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-slate-50/80 p-3 rounded-2xl border-2 border-slate-200/80">
+                    <div className="relative flex-1">
+                      <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Pesquisar por descrição, categoria, notas..."
+                        className="w-full pl-9 pr-8 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#026CD6] focus:ring-2 focus:ring-blue-100 transition-all"
+                      />
+                      {searchQuery && (
+                        <button
+                          type="button"
+                          onClick={() => setSearchQuery('')}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
+                          title="Limpar busca"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Filtros por Tipo: Todas, Entradas, Despesas */}
+                    <div className="flex items-center gap-1.5 self-center sm:self-auto">
+                      <button
+                        type="button"
+                        onClick={() => setTypeFilter('ALL')}
+                        className={`text-[11px] font-extrabold px-2.5 py-1 rounded-xl transition-all ${
+                          typeFilter === 'ALL'
+                            ? 'bg-[#026CD6] text-white shadow-sm'
+                            : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                        }`}
+                      >
+                        Todas
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setTypeFilter('INCOME')}
+                        className={`text-[11px] font-extrabold px-2.5 py-1 rounded-xl transition-all ${
+                          typeFilter === 'INCOME'
+                            ? 'bg-[#10B981] text-white shadow-sm'
+                            : 'bg-white text-emerald-700 hover:bg-emerald-50 border border-emerald-200'
+                        }`}
+                      >
+                        Receitas
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setTypeFilter('EXPENSE')}
+                        className={`text-[11px] font-extrabold px-2.5 py-1 rounded-xl transition-all ${
+                          typeFilter === 'EXPENSE'
+                            ? 'bg-rose-600 text-white shadow-sm'
+                            : 'bg-white text-rose-700 hover:bg-rose-50 border border-rose-200'
+                        }`}
+                      >
+                        Despesas
+                      </button>
+
+                      {uncategorizedCount > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setShowOnlyUncategorized(!showOnlyUncategorized)}
+                          className={`text-[11px] font-black px-2.5 py-1 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ml-1 ${
+                            showOnlyUncategorized
+                              ? 'bg-amber-500 text-white shadow-sm ring-2 ring-amber-300'
+                              : 'bg-amber-50 text-amber-900 hover:bg-amber-100 border-2 border-amber-300/80'
+                          }`}
+                          title={showOnlyUncategorized ? 'Mostrar todas as movimentações' : 'Filtrar apenas movimentações sem categoria'}
+                        >
+                          <span className="text-xs leading-none select-none">⚠️</span>
+                          <span>{uncategorizedCount} sem categoria</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
                   {/* Barra Contextual de Ações em Massa */}
                   {selectedTxIds.size > 0 && (
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-blue-50/90 border-2 border-blue-200 shadow-sm animate-fadeIn">
                       <div className="flex items-center gap-2">
-                        <span className="h-6 w-6 rounded-lg bg-[#026CD6] text-white text-xs font-black flex items-center justify-center shadow-xs">
+                        <span className="h-6 w-6 rounded-lg bg-[#026CD6] text-white text-xs font-black flex items-center justify-center shadow-sm">
                           {selectedTxIds.size}
                         </span>
                         <span className="text-xs font-extrabold text-blue-950">
@@ -1234,25 +1618,36 @@ const MainDashboard: React.FC = () => {
                     {displayedTransactions.length === 0 ? (
                       <div className="p-8 rounded-2xl border-2 border-dashed border-slate-200 text-center space-y-3">
                         <p className="text-xs font-bold text-slate-400">
-                          {txFilterMode === 'month'
+                          {searchQuery
+                            ? `Nenhum resultado encontrado para "${searchQuery}".`
+                            : txFilterMode === 'month'
                             ? `Nenhuma movimentação registrada em ${formatMonthLabel(selectedMonth)}.`
                             : 'Nenhuma movimentação registrada.'}
                         </p>
-                        <button
-                          onClick={() => {
-                            setEditingTransaction(null);
-                            setTransactionModalOpen(true);
-                          }}
-                          className="btn-duo btn-duo-green text-xs px-4 py-2"
-                        >
-                          Registrar Primeiro Lançamento
-                        </button>
+                        {searchQuery ? (
+                          <button
+                            onClick={() => setSearchQuery('')}
+                            className="btn-duo btn-duo-white text-xs px-3.5 py-1.5"
+                          >
+                            Limpar busca
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              setEditingTransaction(null);
+                              setTransactionModalOpen(true);
+                            }}
+                            className="btn-duo btn-emerald text-xs px-4 py-2"
+                          >
+                            Registrar Primeiro Lançamento
+                          </button>
+                        )}
                       </div>
                     ) : (
                       <table className="w-full text-left text-xs">
                         <thead>
                           <tr className="border-b-2 border-slate-100 text-slate-400 font-extrabold uppercase text-[10px] tracking-wider">
-                            <th className="py-3 px-3 w-10 text-center">
+                            <th className="py-2.5 px-1.5 w-8 text-center">
                               <input
                                 type="checkbox"
                                 checked={displayedTransactions.length > 0 && selectedTxIds.size === displayedTransactions.length}
@@ -1261,31 +1656,32 @@ const MainDashboard: React.FC = () => {
                                 title={selectedTxIds.size === displayedTransactions.length ? 'Desmarcar todos' : 'Selecionar todos'}
                               />
                             </th>
-                            <th className="py-3 px-3">Data</th>
-                            <th className="py-3 px-3">Descrição</th>
-                            <th className="py-3 px-3">Categoria</th>
-                            <th className="py-3 px-3">Origem</th>
-                            <th className="py-3 px-3">Tipo</th>
-                            <th className="py-3 px-3 text-right">Valor</th>
-                            <th className="py-3 px-3 text-center">Ações</th>
+                            <th className="py-2.5 px-1.5 w-[114px]">Data</th>
+                            <th className="py-2.5 px-2">Descrição</th>
+                            <th className="py-2.5 px-1.5">Categoria</th>
+                            <th className="py-2.5 px-1.5 text-center">Origem</th>
+                            <th className="py-2.5 px-1.5 text-center">Tipo</th>
+                            <th className="py-2.5 px-1.5 text-right">Valor</th>
+                            <th className="py-2.5 px-1 w-14 text-center">Ações</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 font-bold">
                           {displayedTransactions.map((tx) => {
-                            const cat = categories.find((c) => c.id === tx.categoryId);
-                            const isOtherOrUnassigned = !cat || cat.name.trim().toLowerCase() === 'outros';
                             const isSelected = selectedTxIds.has(tx.id);
+                            const isRowUncategorized = !tx.categoryId && tx.type !== 'TRANSFER' && tx.type !== 'INVOICE_PAYMENT';
 
                             return (
                               <tr 
                                 key={tx.id} 
-                                className={`transition-colors ${
+                                className={`transition-colors group ${
                                   isSelected 
                                     ? 'bg-blue-50/80 hover:bg-blue-100/70 border-l-4 border-l-[#026CD6]' 
-                                    : 'hover:bg-slate-50/80'
+                                    : isRowUncategorized
+                                      ? 'bg-amber-50/50 hover:bg-amber-100/60 border-l-4 border-l-amber-500'
+                                      : 'hover:bg-slate-50/90'
                                 }`}
                               >
-                                <td className="py-3.5 px-3 text-center">
+                                <td className="py-2 px-1.5 text-center">
                                   <input
                                     type="checkbox"
                                     checked={isSelected}
@@ -1293,58 +1689,47 @@ const MainDashboard: React.FC = () => {
                                     className="w-4 h-4 rounded border-2 border-slate-300 text-[#026CD6] focus:ring-[#026CD6] cursor-pointer accent-[#026CD6]"
                                   />
                                 </td>
-                                <td className="py-3.5 px-3 text-slate-500 font-semibold font-mono">
-                                  {tx.accrualDate}
+                                <td className="py-2 px-1.5 whitespace-nowrap">
+                                  <InlineDatePicker
+                                    value={tx.accrualDate}
+                                    onChange={(newDate) => handleInlineUpdateDate(tx, newDate)}
+                                    disabled={inlineUpdatingTxId === tx.id}
+                                  />
                                 </td>
-                                <td className="py-3.5 px-3 text-slate-800">
-                                  <div className="font-extrabold">{tx.description}</div>
+                                <td className="py-2 px-2 text-slate-800 min-w-0">
+                                  <div className="font-extrabold text-xs truncate max-w-[130px] sm:max-w-[160px] lg:max-w-[180px]" title={tx.description}>
+                                    {tx.description}
+                                  </div>
                                   {tx.notes && (
-                                    <span className="text-[10px] text-slate-400 font-normal">{tx.notes}</span>
-                                  )}
-                                </td>
-                                <td className="py-3.5 px-3">
-                                  {isOtherOrUnassigned ? (
-                                    <button
-                                      type="button"
-                                      onClick={() => handleEditTransaction(tx)}
-                                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 text-[11px] font-black shadow-xs transition-all cursor-pointer group"
-                                      title="Categoria pendente de conferência. Clique para alterar manualmente!"
-                                    >
-                                      <AlertCircle className="w-3.5 h-3.5 text-amber-500 animate-pulse stroke-[2.5]" />
-                                      <span>{cat ? cat.name : 'Outros'}</span>
-                                      <span className="text-[9px] px-1.5 py-0.2 bg-amber-200/90 text-amber-950 rounded-md font-black uppercase tracking-wider group-hover:bg-amber-300">
-                                        Editar
-                                      </span>
-                                    </button>
-                                  ) : (
-                                    <span
-                                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[11px] font-extrabold border"
-                                      style={{
-                                        backgroundColor: cat.colorHex ? `${cat.colorHex}15` : '#f1f5f9',
-                                        color: cat.colorHex || '#334155',
-                                        borderColor: cat.colorHex ? `${cat.colorHex}40` : '#cbd5e1',
-                                      }}
-                                    >
-                                      <Tag className="w-3 h-3 stroke-[2.5]" />
-                                      {cat.name}
+                                    <span className="text-[10px] text-slate-400 font-normal truncate block max-w-[130px] sm:max-w-[160px] lg:max-w-[180px]" title={tx.notes}>
+                                      {tx.notes}
                                     </span>
                                   )}
                                 </td>
-                                <td className="py-3.5 px-3">
+                                <td className="py-2 px-1.5 whitespace-nowrap">
+                                  <InlineCategorySelect
+                                    currentCategoryId={tx.categoryId}
+                                    categories={categories}
+                                    disabled={inlineUpdatingTxId === tx.id}
+                                    onSelectCategory={(newCatId) => handleInlineUpdateCategory(tx, newCatId)}
+                                    onOpenCreateCategory={() => setQuickCategoryModal({ isOpen: true, targetTx: tx })}
+                                  />
+                                </td>
+                                <td className="py-2 px-1.5 text-center whitespace-nowrap">
                                   {tx.origin === 'AI_TEXT' ? (
-                                    <span className="inline-flex items-center gap-1 text-[10px] font-black text-purple-700 bg-purple-100 border border-purple-200 px-2.5 py-0.5 rounded-full">
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-black text-purple-700 bg-purple-100 border border-purple-200 px-2 py-0.5 rounded-full">
                                       <Sparkles className="w-2.5 h-2.5" /> IA Texto
                                     </span>
                                   ) : tx.origin === 'AI_AUDIO' ? (
-                                    <span className="inline-flex items-center gap-1 text-[10px] font-black text-indigo-700 bg-indigo-100 border border-indigo-200 px-2.5 py-0.5 rounded-full">
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-black text-indigo-700 bg-indigo-100 border border-indigo-200 px-2 py-0.5 rounded-full">
                                       <Mic className="w-2.5 h-2.5" /> IA Voz
                                     </span>
                                   ) : tx.origin === 'CSV_IMPORT' ? (
-                                    <span className="inline-flex items-center gap-1 text-[10px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
                                       <FileSpreadsheet className="w-2.5 h-2.5 stroke-[2.5]" /> Fatura CSV
                                     </span>
                                   ) : tx.origin === 'OFX_IMPORT' ? (
-                                    <span className="inline-flex items-center gap-1 text-[10px] font-black text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full">
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-black text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">
                                       <FileText className="w-2.5 h-2.5 stroke-[2.5]" /> Extrato OFX
                                     </span>
                                   ) : (
@@ -1353,39 +1738,72 @@ const MainDashboard: React.FC = () => {
                                     </span>
                                   )}
                                 </td>
-                                <td className="py-3.5 px-3">
+                                <td className="py-2 px-1.5 text-center whitespace-nowrap">
                                   {tx.type === 'INCOME' && (
-                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#E8F8E8] text-[#388302] border border-[#D7FFB8] text-[10px] font-black">
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-black">
                                       <ArrowUpRight className="h-3 w-3 stroke-[3]" /> Receita
                                     </span>
                                   )}
                                   {tx.type === 'EXPENSE' && (
-                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#FFEAEA] text-[#EA2B2B] border border-[#FFDFDF] text-[10px] font-black">
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-200 text-[10px] font-black">
                                       <ArrowDownLeft className="h-3 w-3 stroke-[3]" /> Despesa
                                     </span>
                                   )}
                                   {tx.type === 'TRANSFER' && (
-                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#DDF4FF] text-[#1899D6] border border-[#BAE6FD] text-[10px] font-black">
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200 text-[10px] font-black">
                                       <ArrowLeftRight className="h-3 w-3 stroke-[3]" /> Transf.
                                     </span>
                                   )}
                                   {tx.type === 'INVOICE_PAYMENT' && (
-                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200 text-[10px] font-black">
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-black">
                                       <DollarSign className="h-3 w-3 stroke-[3]" /> Fatura
                                     </span>
                                   )}
                                 </td>
-                                <td className={`py-3.5 px-3 text-right font-black text-sm ${
-                                  tx.type === 'INCOME' ? 'text-[#46A302]' : 'text-slate-800'
-                                }`}>
-                                  {tx.type === 'EXPENSE' ? `- ${formatBRL(tx.amount)}` : formatBRL(tx.amount)}
+                                <td className="py-2 px-1.5 text-right whitespace-nowrap">
+                                  {privacyMode ? (
+                                    <span className="font-numeric font-black text-slate-400 text-xs">••••••</span>
+                                  ) : (
+                                    <div className="inline-flex items-center justify-end gap-1 group/amt">
+                                      <span className={`text-[11px] font-black select-none ${
+                                        tx.type === 'INCOME' ? 'text-[#10B981]' : 'text-rose-500'
+                                      }`}>
+                                        {tx.type === 'EXPENSE' ? '-' : (tx.type === 'INCOME' ? '+' : '')} R$
+                                      </span>
+                                      <input
+                                        type="number"
+                                        step="0.01"
+                                        min="0.01"
+                                        defaultValue={tx.amount}
+                                        key={`${tx.id}-${tx.amount}`}
+                                        disabled={inlineUpdatingTxId === tx.id}
+                                        onKeyDown={(e) => {
+                                          if (e.key === 'Enter') {
+                                            (e.target as HTMLInputElement).blur();
+                                          }
+                                        }}
+                                        onBlur={(e) => {
+                                          const val = parseFloat(e.target.value);
+                                          if (!isNaN(val) && val > 0 && Math.abs(val - tx.amount) > 0.001) {
+                                            handleInlineUpdateAmount(tx, val);
+                                          } else {
+                                            e.target.value = tx.amount.toString();
+                                          }
+                                        }}
+                                        className={`w-20 text-right font-black text-xs font-numeric bg-slate-50/80 hover:bg-blue-50/60 focus:bg-white px-1.5 py-0.5 rounded-lg border border-slate-200/90 hover:border-blue-300 focus:border-[#026CD6] focus:ring-1 focus:ring-blue-100 focus:outline-none transition-all cursor-pointer shadow-2xs disabled:opacity-50 ${
+                                          tx.type === 'INCOME' ? 'text-[#10B981]' : 'text-slate-900'
+                                        }`}
+                                        title="Clique para alterar o valor (Enter para salvar)"
+                                      />
+                                    </div>
+                                  )}
                                 </td>
-                                <td className="py-3.5 px-3 text-center">
-                                  <div className="flex items-center justify-center gap-1">
+                                <td className="py-2 px-1 text-center whitespace-nowrap">
+                                  <div className="flex items-center justify-center gap-0.5 opacity-80 group-hover:opacity-100 transition-opacity">
                                     <button
                                       type="button"
                                       onClick={() => handleEditTransaction(tx)}
-                                      className="p-1.5 rounded-xl text-slate-400 hover:text-[#1CB0F6] hover:bg-slate-100 transition-colors"
+                                      className="p-1 rounded-lg text-slate-400 hover:text-[#026CD6] hover:bg-blue-50 transition-colors"
                                       title="Editar movimentação"
                                     >
                                       <Pencil className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -1393,7 +1811,7 @@ const MainDashboard: React.FC = () => {
                                     <button
                                       type="button"
                                       onClick={() => handleDeleteTransaction(tx.id)}
-                                      className="p-1.5 rounded-xl text-slate-400 hover:text-[#EA2B2B] hover:bg-red-50 transition-colors"
+                                      className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
                                       title="Excluir movimentação"
                                     >
                                       <Trash2 className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -1447,7 +1865,7 @@ const MainDashboard: React.FC = () => {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b-2 border-slate-100 pb-5">
                   <div className="space-y-1">
                     <h2 className="text-xl font-black text-slate-800 flex items-center gap-2">
-                      <CardIcon className="h-6 w-6 text-[#1CB0F6]" />
+                      <CardIcon className="h-6 w-6 text-[#026CD6]" />
                       Cartões de Crédito & Faturas Mensais
                     </h2>
                     <p className="text-xs font-bold text-slate-400">
@@ -1475,11 +1893,14 @@ const MainDashboard: React.FC = () => {
                 </div>
 
                 {creditCards.length === 0 ? (
-                  <div className="p-8 rounded-2xl border-2 border-dashed border-slate-200 text-center space-y-3">
+                  <div className="p-12 rounded-3xl border-2 border-dashed border-slate-200 text-center space-y-3">
+                    <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto text-slate-400">
+                      <CardIcon className="w-6 h-6" />
+                    </div>
                     <p className="text-xs font-bold text-slate-400">Nenhum cartão de crédito cadastrado.</p>
                     <button
                       onClick={() => setCardModalOpen(true)}
-                      className="btn-duo btn-duo-green text-xs px-4 py-2"
+                      className="btn-duo btn-emerald text-xs px-4 py-2"
                     >
                       Cadastrar Primeiro Cartão
                     </button>
@@ -1491,52 +1912,107 @@ const MainDashboard: React.FC = () => {
                       return (
                         <div
                           key={card.id}
-                          className="rounded-3xl bg-white border-2 border-slate-200/90 shadow-[0_4px_0_0_#E2E8F0] p-6 space-y-4 hover:border-[#1CB0F6] transition-all"
+                          className="rounded-3xl bg-white border-2 border-slate-200/90 shadow-[0_4px_0_0_#E2E8F0] p-5 space-y-5 hover:border-blue-300 transition-all flex flex-col justify-between"
                         >
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h3 className="font-black text-slate-900 text-lg">{card.name}</h3>
-                              <p className="text-xs font-bold text-slate-400">
-                                Fecha dia {card.closingDay} • Vence dia {card.dueDay}
-                              </p>
+                          {/* Cartão de Crédito Físico Virtual de Luxo */}
+                          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white p-5 shadow-lg border border-slate-800 space-y-4">
+                            {/* Brilhos de Fundo */}
+                            <div className="absolute -right-8 -top-8 w-36 h-36 bg-blue-500/15 rounded-full blur-xl pointer-events-none" />
+                            <div className="absolute -left-8 -bottom-8 w-36 h-36 bg-indigo-500/15 rounded-full blur-xl pointer-events-none" />
+
+                            {/* Topo do Cartão: Logo & Contactless */}
+                            <div className="flex items-center justify-between relative z-10">
+                              <span className="text-[10px] font-black tracking-widest uppercase text-slate-300">
+                                Economia Real
+                              </span>
+                              <div className="flex items-center gap-1.5 text-slate-400">
+                                <Wifi className="w-4 h-4 rotate-90" />
+                              </div>
                             </div>
-                            <span className="text-[11px] font-black px-2.5 py-0.5 rounded-full bg-[#E8F8E8] text-[#388302] border border-[#D7FFB8]">
-                              Ativo
-                            </span>
+
+                            {/* Chip EMV & Número Mascarado */}
+                            <div className="flex items-center justify-between relative z-10 pt-1">
+                              {/* Chip Dourado */}
+                              <div className="w-10 h-7 rounded-md bg-gradient-to-tr from-amber-300 via-yellow-200 to-amber-500 border border-amber-300/80 shadow-sm relative overflow-hidden flex items-center justify-center">
+                                <div className="w-full h-[1px] bg-amber-700/30 absolute top-1.5" />
+                                <div className="w-full h-[1px] bg-amber-700/30 absolute bottom-1.5" />
+                                <div className="h-full w-[1px] bg-amber-700/30 absolute left-2.5" />
+                                <div className="h-full w-[1px] bg-amber-700/30 absolute right-2.5" />
+                              </div>
+
+                              <span className="text-[11px] font-mono tracking-widest text-slate-300 font-bold">
+                                •••• 8842
+                              </span>
+                            </div>
+
+                            {/* Rodapé do Cartão Virtual: Nome, Datas e Círculos */}
+                            <div className="flex items-end justify-between relative z-10 pt-2 border-t border-slate-800">
+                              <div>
+                                <p className="font-black text-sm text-white tracking-wide uppercase truncate max-w-[170px]">
+                                  {card.name}
+                                </p>
+                                <span className="text-[9px] font-bold text-slate-400 block tracking-wider uppercase">
+                                  Fecha {card.closingDay} • Vence {card.dueDay}
+                                </span>
+                              </div>
+
+                              {/* Esferas de Bandeira */}
+                              <div className="flex -space-x-2">
+                                <div className="w-5 h-5 rounded-full bg-rose-500 opacity-90 shadow-sm" />
+                                <div className="w-5 h-5 rounded-full bg-amber-400 opacity-90 shadow-sm" />
+                              </div>
+                            </div>
                           </div>
 
+                          {/* Painel Informativo de Limite */}
                           <div className="p-4 rounded-2xl bg-slate-50 border-2 border-slate-100 space-y-1">
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">
-                              Limite de Crédito
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">
+                              Limite de Crédito Disponível
                             </span>
-                            <p className="text-xl font-black text-slate-900">
-                              {formatBRL(card.creditLimit)}
+                            <p className="text-xl font-black text-slate-900 font-numeric">
+                              {formatValue(card.creditLimit)}
                             </p>
                           </div>
 
-                          {/* Faturas deste cartão */}
+                          {/* Faturas deste Cartão */}
                           <div className="space-y-2">
-                            <p className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Faturas</p>
+                            <div className="flex items-center justify-between">
+                              <p className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">
+                                Faturas ({cardInvoices.length})
+                              </p>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setPurchaseModalOpen(true);
+                                }}
+                                className="text-[11px] font-bold text-[#026CD6] hover:underline"
+                              >
+                                + Compra parcelada
+                              </button>
+                            </div>
+
                             {cardInvoices.length === 0 ? (
-                              <p className="text-xs text-slate-400 italic">Nenhuma fatura gerada para este cartão.</p>
+                              <p className="text-xs text-slate-400 italic py-2 text-center bg-slate-50 rounded-xl">
+                                Nenhuma fatura gerada para este cartão.
+                              </p>
                             ) : (
-                              <div className="space-y-2 max-h-40 overflow-y-auto">
+                              <div className="space-y-2 max-h-44 overflow-y-auto pr-0.5">
                                 {cardInvoices.map((inv) => (
                                   <div
                                     key={inv.id}
-                                    className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between text-xs"
+                                    className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between text-xs hover:border-slate-300 transition-colors"
                                   >
                                     <div>
                                       <p className="font-extrabold text-slate-800">Ref. {inv.referenceMonth}</p>
                                       <span className="text-[10px] font-bold text-slate-400">Vence em {inv.dueDate}</span>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                      <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${
+                                      <span className={`text-[10px] font-black px-2.5 py-0.5 rounded-full border ${
                                         inv.status === 'PAID'
-                                          ? 'bg-[#E8F8E8] text-[#388302] border-[#D7FFB8]'
+                                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                                           : 'bg-amber-100 text-amber-800 border-amber-200'
                                       }`}>
-                                        {inv.status === 'PAID' ? 'Paga 🎉' : inv.status}
+                                        {inv.status === 'PAID' ? 'Paga 🎉' : 'Aberta'}
                                       </span>
                                       {inv.status !== 'PAID' && (
                                         <button
@@ -1725,6 +2201,104 @@ const MainDashboard: React.FC = () => {
         onApplied={loadFinancialData}
         monthReference={`${selectedMonth}-01`}
       />
+
+      {/* Modal de Criação Rápida de Nova Categoria Inline */}
+      {quickCategoryModal?.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fadeIn">
+          <div className="w-full max-w-sm card-duo p-6 space-y-4 shadow-2xl border-2 border-slate-200 animate-scaleUp">
+            <div className="flex items-center justify-between border-b-2 border-slate-100 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2.5 rounded-2xl bg-blue-50 text-[#026CD6] border border-blue-200 shadow-xs">
+                  <Tag className="w-5 h-5 stroke-[2.5]" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-slate-800">Nova Categoria</h3>
+                  <p className="text-xs font-bold text-slate-400">
+                    {quickCategoryModal.targetTx 
+                      ? `Aplicar em "${quickCategoryModal.targetTx.description}"`
+                      : 'Cadastre e use em qualquer movimentação'}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setQuickCategoryModal(null);
+                  setNewCatName('');
+                }}
+                className="p-1 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                title="Fechar"
+              >
+                <X className="w-4 h-4 stroke-[2.5]" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateQuickCategory} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-black text-slate-500 uppercase tracking-wider block">
+                  Nome da Categoria
+                </label>
+                <input
+                  type="text"
+                  value={newCatName}
+                  onChange={(e) => setNewCatName(e.target.value)}
+                  placeholder="Ex: Pet Shop, Cinema, Farmácia..."
+                  autoFocus
+                  required
+                  className="w-full px-3 py-2 bg-white border-2 border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:border-[#026CD6] focus:ring-2 focus:ring-blue-100 transition-all"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-black text-slate-500 uppercase tracking-wider block">
+                  Cor da Categoria
+                </label>
+                <div className="flex items-center gap-2 flex-wrap pt-0.5">
+                  {CATEGORY_COLORS.map((color) => (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => setNewCatColor(color)}
+                      className={`w-7 h-7 rounded-xl transition-all cursor-pointer ${
+                        newCatColor === color ? 'scale-115 ring-2 ring-offset-2 ring-slate-800 shadow-sm' : 'hover:scale-105 opacity-85 hover:opacity-100'
+                      }`}
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t-2 border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setQuickCategoryModal(null);
+                    setNewCatName('');
+                  }}
+                  className="btn-duo btn-duo-white text-xs px-3.5 py-2"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={creatingCat || !newCatName.trim()}
+                  className="btn-duo btn-duo-blue text-xs px-4 py-2 flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5 stroke-[2.5]" />
+                  <span>{creatingCat ? 'Criando...' : 'Criar e Aplicar'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 bg-slate-900/95 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5 border border-slate-700/80 animate-fadeIn backdrop-blur-md">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400 stroke-[2.5]" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
     </div>
   );
 };

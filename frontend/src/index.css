@@ -4,37 +4,43 @@
 
 @layer base {
   :root {
-    --background: 215 28% 97%;
+    --background: 210 40% 98%;
     --foreground: 222 47% 11%;
     --primary: 221 83% 53%; /* Azul Real */
     --primary-foreground: 0 0% 100%;
   }
 
   body {
-    background-color: #F4F7FB;
+    background-color: #F8FAFC;
     color: #0F172A;
-    font-family: 'Plus Jakarta Sans', 'Nunito', system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
 /* =============================================================================
-   Design System Economia Real — Estética Azul Moderna, Confiável e Tátil
+   Design System Economia Real — Estética Premium, Tátil e Confiável
    ============================================================================= */
 
 /* Botões 3D Táteis com Efeito Push-down */
 .btn-duo {
-  @apply relative inline-flex items-center justify-center font-extrabold uppercase tracking-wide select-none transition-all duration-75 active:translate-y-1;
+  @apply relative inline-flex items-center justify-center font-extrabold tracking-wide select-none transition-all duration-100 active:translate-y-1 cursor-pointer;
 }
 
-/* Botão Primário da Marca (Azul Real Profundo & Vibrante) */
-.btn-duo-green,
+/* Botão Primário da Marca (Azul Real Institucional) */
+.btn-duo-blue,
 .btn-real-blue {
-  @apply bg-[#026CD6] hover:bg-[#0A7DEF] text-white border-b-4 border-[#0153AB] active:border-b-0 rounded-2xl px-4 py-2.5 shadow-sm;
+  @apply bg-[#026CD6] hover:bg-[#0A7DEF] text-white border-b-4 border-[#0153AB] active:border-b-0 rounded-2xl px-4 py-2.5 shadow-sm shadow-blue-500/10;
+}
+
+/* Botão Verde Esmeralda (Sucesso / Receitas / Economia / Confirmação) */
+.btn-duo-green,
+.btn-emerald {
+  @apply bg-[#10B981] hover:bg-[#059669] text-white border-b-4 border-[#047857] active:border-b-0 rounded-2xl px-4 py-2.5 shadow-sm shadow-emerald-500/10;
 }
 
 /* Botão Azul Celeste / Ação Secundária */
-.btn-duo-blue,
 .btn-real-sky {
   @apply bg-[#0284C7] hover:bg-[#039BE5] text-white border-b-4 border-[#0369A1] active:border-b-0 rounded-2xl px-4 py-2.5 shadow-sm;
 }
@@ -45,43 +51,54 @@
 }
 
 /* Botão Destaque / Alerta Dourado */
-.btn-duo-yellow {
+.btn-duo-yellow,
+.btn-amber {
   @apply bg-[#F59E0B] hover:bg-[#FBBF24] text-amber-950 border-b-4 border-[#D97706] active:border-b-0 rounded-2xl px-4 py-2.5 shadow-sm;
 }
 
 /* Botão Perigo / Exclusão */
-.btn-duo-red {
+.btn-duo-red,
+.btn-rose {
   @apply bg-[#EF4444] hover:bg-[#F87171] text-white border-b-4 border-[#DC2626] active:border-b-0 rounded-2xl px-4 py-2.5 shadow-sm;
 }
 
-/* Botão IA / Inteligência Artificial (Índigo Tecnológico) */
+/* Botão IA / Inteligência Artificial (Índigo Tecnológico & Gradiente) */
 .btn-duo-purple,
 .btn-real-indigo {
-  @apply bg-[#4F46E5] hover:bg-[#6366F1] text-white border-b-4 border-[#3730A3] active:border-b-0 rounded-2xl px-4 py-2.5 shadow-sm;
+  @apply bg-gradient-to-r from-[#4F46E5] to-[#6366F1] hover:from-[#4338CA] hover:to-[#4F46E5] text-white border-b-4 border-[#3730A3] active:border-b-0 rounded-2xl px-4 py-2.5 shadow-sm shadow-indigo-500/20;
 }
 
-/* Botão Branco com Contorno Tátil Azulado */
+/* Botão Branco Tátil com Contorno Macio */
 .btn-duo-white {
-  @apply bg-white hover:bg-blue-50/50 text-slate-700 border-2 border-b-4 border-slate-200 active:border-b-2 active:translate-y-0.5 rounded-2xl px-4 py-2;
+  @apply bg-white hover:bg-slate-50 text-slate-700 border-2 border-b-4 border-slate-200 active:border-b-2 active:translate-y-0.5 rounded-2xl px-4 py-2 shadow-sm transition-colors;
 }
 
 .btn-duo-ghost {
-  @apply bg-transparent hover:bg-blue-50 text-slate-600 font-bold rounded-2xl px-3 py-1.5 transition-colors;
+  @apply bg-transparent hover:bg-blue-50/70 text-slate-600 hover:text-[#026CD6] font-extrabold rounded-2xl px-3 py-1.5 transition-colors;
 }
 
 /* Cards com Relevo Físico e Contornos Macios */
 .card-duo {
-  @apply bg-white rounded-3xl border-2 border-slate-200/80 shadow-[0_4px_0_0_#E2E8F0] transition-all;
+  @apply bg-white rounded-3xl border-2 border-slate-200/90 shadow-[0_4px_0_0_#E2E8F0] transition-all duration-150;
 }
 
 .card-duo-interactive {
-  @apply bg-white rounded-3xl border-2 border-slate-200/80 shadow-[0_4px_0_0_#E2E8F0] hover:border-blue-300 hover:shadow-[0_6px_0_0_#DBEAFE] transition-all;
+  @apply bg-white rounded-3xl border-2 border-slate-200/90 shadow-[0_4px_0_0_#E2E8F0] hover:border-blue-300 hover:shadow-[0_6px_0_0_#DBEAFE] hover:-translate-y-0.5 transition-all duration-150;
 }
 
-/* Card Destaque Economia Real (Degradê Azul Suave e Refinado) */
+/* Card Destaque Hero (Degradê Azul Suave e Refinado) */
 .card-duo-green,
 .card-real-blue {
-  @apply bg-gradient-to-b from-[#F0F7FF] via-[#E8F3FF] to-[#E1EFFF] rounded-3xl border-2 border-blue-200/90 shadow-[0_4px_0_0_#BFDBFE];
+  @apply bg-gradient-to-br from-[#F0F7FF] via-[#E8F3FF] to-[#DBEAFE] rounded-3xl border-2 border-blue-200/90 shadow-[0_4px_0_0_#BFDBFE];
+}
+
+/* Painel com Efeito Vidro Fosco (Glassmorphism) */
+.glass-panel {
+  @apply bg-white/80 backdrop-blur-xl border border-white/60 shadow-lg shadow-slate-900/5;
+}
+
+.glass-pill {
+  @apply bg-white/85 backdrop-blur-md border border-white/80 shadow-sm;
 }
 
 /* Badges e Pílulas */
@@ -89,9 +106,9 @@
   @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider;
 }
 
-/* Barra de Progresso com Brilho Tátil em Azul */
+/* Barra de Progresso com Brilho Tátil */
 .progress-duo-track {
-  @apply h-4 rounded-full bg-slate-100 border-2 border-slate-200 overflow-hidden relative shadow-inner;
+  @apply h-4 rounded-full bg-slate-100 border-2 border-slate-200/80 overflow-hidden relative shadow-inner;
 }
 
 .progress-duo-fill {
@@ -103,10 +120,59 @@
   @apply absolute inset-x-0 top-0 h-1/2 bg-white/35 rounded-t-full pointer-events-none;
 }
 
+/* Tipografia de Números Tabulares para Finanças */
+.font-numeric {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Animações e Micro-transições */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(2, 108, 214, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(2, 108, 214, 0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.pulse-glow {
+  animation: pulseGlow 2.5s infinite;
+}
+
 /* Scrollbar Bonita e Discreta */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
 }
 ::-webkit-scrollbar-track {
   background: #F1F5F9;

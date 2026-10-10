@@ -86,7 +86,11 @@ Este documento registra o estado real, factual e auditável do desenvolvimento d
     - Card de *Burn Rate* com termômetro visual, dias transcorridos vs restantes, e barra de consumo do orçamento total.
     - Gráfico interativo SVG de barras duplas (Receitas x Despesas dos últimos 6 meses com tooltips em hover).
     - Gráfico de distribuição por categoria com barra segmentada colorida e tabela detalhada com percentuais.
-    - Painel de metas por categoria com badges de status (No Limite, Atenção 80%, Estourado).
+    - Painel de metas por categoria com badges de status (No Limite, Atenção 80%, Estourado) e cálculo em tempo real dos gastos acumulados na categoria.
+    - **Resolução Temporal Histórica Contábil:**
+      - Metas definidas em um mês propagam automaticamente para os meses subsequentes.
+      - Ao reajustar uma meta em um mês posterior (ex: de R$ 4.000 para R$ 8.000 após 2 meses), os meses anteriores preservam estritamente o valor histórico original (R$ 4.000), enquanto o mês do reajuste e todos os meses seguintes herdam o novo valor (R$ 8.000).
+      - Aplicado de ponta a ponta no backend (`ListBudgetsUseCase` e `GetAnalyticsOverviewUseCase`) e no frontend (`spendingLimitTimeline` no `App.tsx` com persistência isolada por usuário).
   - Modal `BudgetModal`: formulário intuitivo para definir limites mensais e percentual de aviso prévio.
 
 ### 2.9. Fase 8 — Despesas Fixas Recorrentes, Assinaturas & Robustez Operacional
@@ -228,10 +232,27 @@ dist/assets/index-CVcJJLIG.js   305.65 kB │ gzip: 75.31 kB
 
 ---
 
+## 4.7. Auto-Categorização Adaptativa com Aprendizado Contínuo, IA Gemini e Edição Ágil em Linha (Implementado)
+
+- **Classificação Adaptativa Baseada no Histórico do Usuário:**
+  - `MerchantCategoryClassifier.java` aprimorado com inteligência adaptativa de Passo 0: antes de regras estáticas ou IA, o sistema consulta as transações do próprio usuário.
+  - Ordenação temporal decrescente (`updatedAt DESC`): a alteração mais recente do usuário sempre tem precedência absoluta sobre transações antigas e regras do sistema.
+  - Higienização e correspondência: higienização automática de parcelas (`01/05`, `Parcela 1/10`) e adquirentes (`PAG*`, `CIELO*`, `REDE*`), com match exato prioritário e match parcial seguro.
+  - Validação estrita de categorias ativas do usuário para evitar identificadores órfãos.
+- **Classificação Bancária com Inteligência Artificial (Gemini):**
+  - Implementação de `classifyMerchant` em `AiExtractionPort` e `GeminiAiService`, consultando o modelo Gemini com prompt contextualizado ao comércio e redes brasileiras e cache concorrente em memória.
+  - Remoção de atribuição automática à categoria "Outros" para termos desconhecidos, preservando valor nulo para destacar ao usuário.
+- **Experiência de Uso no Extrato (Frontend):**
+  - Componente `InlineCategorySelect`: seletor de categorias em linha na tabela com criação rápida de novas categorias sem sair da página.
+  - Destaque estático `⚠️ Sem Categoria` em tom âmbar sem animações intrusivas, e botão de filtro rápido no topo do extrato (`⚠️ X sem categoria`).
+  - Componente `InlineDatePicker`: edição rápida de data diretamente na célula da tabela com calendário customizado e design refinado.
+  - Tratamento resiliente da API de Metas de Economia (`goalApi.ts`) para evitar alertas visuais de erro quando não houver metas cadastradas.
+
+---
+
 ## 5. Próximo Passo Recomendado
 
-A plataforma agora conta com o ciclo orçamentário completo, isolamento total entre contas e manipulação ágil de lançamentos:
-1. Controle de **Entradas/Receitas** e **Despesas** com cálculo direto de Saldo Líquido e sem necessidade de vincular contas bancárias.
-2. Definição e **Remoção Real de Teto Global de Gastos** com acompanhamento da margem disponível do mês isolado por conta.
-3. **Seleção múltipla e exclusão em lote** no Extrato de Movimentações com diálogo de confirmação seguro.
-4. Sugestão assistida por IA para orçamentos por categoria, pronta para uso em `http://localhost:3000`.
+1. A plataforma conta agora com 115 testes automatizados no backend e build de frontend 100% íntegros.
+2. Todo o histórico de categorização do usuário é aprendido e reaproveitado automaticamente em importações futuras.
+3. Repositório sincronizado e pronto para uso e deploy contínuo.
+

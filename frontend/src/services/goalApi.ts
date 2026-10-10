@@ -16,6 +16,11 @@ export async function fetchSavingsGoalsApi(token: string): Promise<SavingsGoal[]
     },
   });
 
+  if (res.status === 401 || res.status === 403) {
+    window.dispatchEvent(new CustomEvent('auth:expired'));
+    throw new Error('Sua sessão expirou. Por favor, faça login novamente.');
+  }
+
   if (!res.ok) {
     throw new Error('Falha ao carregar metas de economia.');
   }

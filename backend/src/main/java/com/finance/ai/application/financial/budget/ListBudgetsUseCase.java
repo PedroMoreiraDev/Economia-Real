@@ -52,18 +52,30 @@ public class ListBudgetsUseCase {
             if (exact.isPresent()) {
                 budgets.add(exact.get());
             } else {
-                catBudgets.stream()
-                        .max(Comparator.comparing(Budget::getMonthReference))
-                        .ifPresent(latest -> budgets.add(new Budget(
-                                latest.getId(),
-                                latest.getUserId(),
-                                latest.getCategoryId(),
-                                normalizedMonth,
-                                latest.getMonthlyLimit(),
-                                latest.getAlertThresholdPercentage(),
-                                latest.getCreatedAt(),
-                                latest.getUpdatedAt()
-                        )));
+                // Seleciona a meta mais recente que foi criada até o mês consultado (monthReference <= normalizedMonth)
+                Optional<Budget> latestPast = catBudgets.stream()
+                        .filter(b -> !b.getMonthReference().withDayOfMonth(1).isAfter(normalizedMonth))
+                        .max(Comparator.comparing(Budget::getMonthReference));
+
+                // Se o mês consultado for anterior a qualquer meta registrada, usa a primeira meta histórica cadastrada
+                Budget referenceBudget = latestPast.orElseGet(() ->
+                        catBudgets.stream()
+                                .min(Comparator.comparing(Budget::getMonthReference))
+                                .orElse(null)
+                );
+
+                if (referenceBudget != null) {
+                    budgets.add(new Budget(
+                            referenceBudget.getId(),
+                            referenceBudget.getUserId(),
+                            referenceBudget.getCategoryId(),
+                            normalizedMonth,
+                            referenceBudget.getMonthlyLimit(),
+                            referenceBudget.getAlertThresholdPercentage(),
+                            referenceBudget.getCreatedAt(),
+                            referenceBudget.getUpdatedAt()
+                    ));
+                }
             }
         }
 

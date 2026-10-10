@@ -48,6 +48,7 @@ export default {
         sans: ['Plus Jakarta Sans', 'Nunito', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
+        'xs': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
         'duo-sm': '0 2px 0 0 rgba(0, 0, 0, 0.08)',
         'duo': '0 4px 0 0 #E2E8F0',
         'duo-green': '0 4px 0 0 #0153AB',

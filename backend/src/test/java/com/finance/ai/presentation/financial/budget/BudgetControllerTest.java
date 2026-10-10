@@ -1,9 +1,11 @@
 package com.finance.ai.presentation.financial.budget;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.finance.ai.application.financial.budget.BatchCreateBudgetsUseCase;
 import com.finance.ai.application.financial.budget.CreateOrUpdateBudgetUseCase;
 import com.finance.ai.application.financial.budget.DeleteBudgetUseCase;
 import com.finance.ai.application.financial.budget.ListBudgetsUseCase;
+import com.finance.ai.application.financial.budget.SuggestBudgetsWithAiUseCase;
 import com.finance.ai.application.financial.budget.dto.BudgetProgressDto;
 import com.finance.ai.domain.financial.budget.Budget;
 import com.finance.ai.domain.user.User;
@@ -55,6 +57,12 @@ class BudgetControllerTest {
 
     @MockBean
     private DeleteBudgetUseCase deleteBudgetUseCase;
+
+    @MockBean
+    private SuggestBudgetsWithAiUseCase suggestBudgetsWithAiUseCase;
+
+    @MockBean
+    private BatchCreateBudgetsUseCase batchCreateBudgetsUseCase;
 
     @MockBean
     private UserRepository userRepository;
