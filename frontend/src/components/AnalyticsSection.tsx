@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { 
   TrendingUp, 
   PieChart as PieIcon, 
@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { AnalyticsOverview } from '../types/analytics';
 import { BudgetProgressDto } from '../types/budget';
+import { FinancialEvolutionChart } from './FinancialEvolutionChart';
 
 interface AnalyticsSectionProps {
   analytics: AnalyticsOverview | null;
@@ -35,17 +36,9 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({
   onOpenAiBudgetModal,
   globalLimit,
 }) => {
-  const [hoveredMonth, setHoveredMonth] = useState<number | null>(null);
-
   if (!analytics) return null;
 
   const { monthlyEvolution, categoryDistribution, burnRate } = analytics;
-
-  // Encontra o valor máximo para a escala do gráfico de barras
-  const maxBarValue = Math.max(
-    ...monthlyEvolution.flatMap(m => [m.income, m.expense]),
-    1000
-  );
 
   return (
     <div className="space-y-6">
@@ -196,73 +189,9 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({
       {/* 2. GRÁFICOS: EVOLUÇÃO TEMPORAL (6 MESES) & DISTRIBUIÇÃO EM PIZZA */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* Gráfico 1: Evolução Mensal (Barras duplas SVG em fundo branco) */}
-        <div className="lg:col-span-2 card-duo p-6 sm:p-8 space-y-6">
-          <div className="flex items-center justify-between border-b-2 border-slate-100 pb-4">
-            <div className="space-y-0.5">
-              <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-[#58CC02]" />
-                Evolução Financeira (Últimos 6 Meses)
-              </h3>
-              <p className="text-xs font-bold text-slate-400">Comparativo mês a mês de entradas e saídas</p>
-            </div>
-
-            {/* Legenda */}
-            <div className="flex items-center gap-4 text-xs font-black">
-              <span className="flex items-center gap-1.5 text-[#46A302]">
-                <span className="w-3 h-3 rounded-full bg-[#58CC02]" /> Receitas
-              </span>
-              <span className="flex items-center gap-1.5 text-[#FF4B4B]">
-                <span className="w-3 h-3 rounded-full bg-[#FF4B4B]" /> Despesas
-              </span>
-            </div>
-          </div>
-
-          {/* Gráfico SVG de Barras Responsivo */}
-          <div className="h-64 flex items-end justify-between gap-3 pt-6 pb-2 px-2 border-b-2 border-slate-100">
-            {monthlyEvolution.map((item, idx) => {
-              const incomeHeight = Math.max(8, (item.income / maxBarValue) * 180);
-              const expenseHeight = Math.max(8, (item.expense / maxBarValue) * 180);
-              const isHovered = hoveredMonth === idx;
-
-              return (
-                <div
-                  key={item.monthIso}
-                  className="flex-1 flex flex-col items-center h-full justify-end group cursor-pointer relative"
-                  onMouseEnter={() => setHoveredMonth(idx)}
-                  onMouseLeave={() => setHoveredMonth(null)}
-                >
-                  {/* Tooltip em hover com balão estilo Duolingo */}
-                  {isHovered && (
-                    <div className="absolute -top-16 z-20 bg-white border-2 border-slate-200 p-2.5 rounded-2xl shadow-xl text-center whitespace-nowrap animate-in fade-in zoom-in-95 duration-150">
-                      <p className="text-[10px] text-slate-500 font-bold">{item.monthLabel} • Saldo: {formatBRL(item.netSavings)}</p>
-                      <p className="text-xs text-[#46A302] font-black">+{formatBRL(item.income)}</p>
-                      <p className="text-xs text-[#FF4B4B] font-black">-{formatBRL(item.expense)}</p>
-                    </div>
-                  )}
-
-                  {/* Par de Barras Lado a Lado */}
-                  <div className="w-full flex items-end justify-center gap-2 max-w-[48px]">
-                    {/* Barra de Receita (Verde Duolingo com Relevo) */}
-                    <div
-                      style={{ height: `${incomeHeight}px` }}
-                      className="w-1/2 rounded-t-xl bg-[#58CC02] border-t-2 border-x-2 border-[#46A302] group-hover:brightness-105 transition-all duration-300"
-                    />
-                    {/* Barra de Despesa (Vermelho Duolingo com Relevo) */}
-                    <div
-                      style={{ height: `${expenseHeight}px` }}
-                      className="w-1/2 rounded-t-xl bg-[#FF4B4B] border-t-2 border-x-2 border-[#EA2B2B] group-hover:brightness-105 transition-all duration-300"
-                    />
-                  </div>
-
-                  {/* Rótulo do Mês */}
-                  <span className="text-xs font-black text-slate-500 mt-2">
-                    {item.monthLabel}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
+        {/* Gráfico 1: Evolução Mensal (Componente Moderno e Interativo) */}
+        <div className="lg:col-span-2">
+          <FinancialEvolutionChart data={monthlyEvolution} />
         </div>
 
         {/* Gráfico 2: Distribuição por Categoria */}

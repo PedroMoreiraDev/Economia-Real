@@ -1,8 +1,14 @@
-import React, { useState } from 'react';
-import { Target, X, AlertCircle, Trash2, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Target, X, AlertCircle, Trash2, CheckCircle2, Globe } from 'lucide-react';
 import { Category } from '../types/financial';
 import { BudgetProgressDto, CreateBudgetPayload } from '../types/budget';
-import { createOrUpdateBudgetApi, deleteBudgetApi } from '../services/budgetApi';
+import { 
+  createOrUpdateBudgetApi, 
+  deleteBudgetApi, 
+  updateGlobalAlertThresholdApi, 
+  getStoredGlobalAlertThreshold, 
+  setStoredGlobalAlertThreshold 
+} from '../services/budgetApi';
 import { useAuth } from '../context/AuthContext';
 
 interface BudgetModalProps {
@@ -22,25 +28,41 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
   onBudgetUpdated,
   monthReference,
 }) => {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const [categoryId, setCategoryId] = useState('');
   const [monthlyLimit, setMonthlyLimit] = useState('');
-  const [alertThreshold, setAlertThreshold] = useState('80');
+  const [alertThreshold, setAlertThreshold] = useState(() => {
+    const stored = getStoredGlobalAlertThreshold(user?.id);
+    if (stored) return stored.toString();
+    if (existingBudgets.length > 0 && existingBudgets[0].alertThresholdPercentage) {
+      return existingBudgets[0].alertThresholdPercentage.toString();
+    }
+    return '80';
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (isOpen) {
+      const stored = getStoredGlobalAlertThreshold(user?.id);
+      if (stored) {
+        setAlertThreshold(stored.toString());
+      } else if (existingBudgets.length > 0 && existingBudgets[0].alertThresholdPercentage) {
+        setAlertThreshold(existingBudgets[0].alertThresholdPercentage.toString());
+      }
+    }
+  }, [isOpen, user?.id, existingBudgets]);
+
   if (!isOpen) return null;
 
-  // Quando o usuário seleciona uma categoria, se já houver orçamento, pré-preenche
+  // Quando o usuário seleciona uma categoria, se já houver orçamento, pré-preenche o limite
   const handleCategoryChange = (catId: string) => {
     setCategoryId(catId);
     const existing = existingBudgets.find(b => b.categoryId === catId);
     if (existing) {
       setMonthlyLimit(existing.monthlyLimit.toString());
-      setAlertThreshold(existing.alertThresholdPercentage.toString());
     } else {
       setMonthlyLimit('');
-      setAlertThreshold('80');
     }
   };
 
@@ -52,28 +74,38 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
     setLoading(true);
 
     try {
-      const limitVal = parseFloat(monthlyLimit);
-      if (isNaN(limitVal) || limitVal <= 0) {
-        throw new Error('O limite mensal deve ser maior que zero.');
-      }
-
       const thresholdVal = parseInt(alertThreshold, 10);
       if (isNaN(thresholdVal) || thresholdVal < 1 || thresholdVal > 100) {
         throw new Error('O percentual de alerta deve estar entre 1 e 100%.');
       }
 
-      const payload: CreateBudgetPayload = {
-        categoryId,
-        monthReference: monthReference || undefined,
-        monthlyLimit: limitVal,
-        alertThresholdPercentage: thresholdVal,
-      };
+      // Se o usuário selecionou uma categoria, valida e salva a meta individual
+      if (categoryId) {
+        const limitVal = parseFloat(monthlyLimit);
+        if (isNaN(limitVal) || limitVal <= 0) {
+          throw new Error('O limite mensal deve ser maior que zero.');
+        }
 
-      await createOrUpdateBudgetApi(token, payload);
+        const payload: CreateBudgetPayload = {
+          categoryId,
+          monthReference: monthReference || undefined,
+          monthlyLimit: limitVal,
+          alertThresholdPercentage: thresholdVal,
+        };
+
+        await createOrUpdateBudgetApi(token, payload);
+      }
+
+      // Aplica o percentual de alerta de consumo próximo para todas as categorias existentes no mês
+      await updateGlobalAlertThresholdApi(token, thresholdVal, monthReference);
+
+      // Persiste nas preferências locais do usuário para futuras metas e I.A
+      setStoredGlobalAlertThreshold(user?.id, thresholdVal);
+
       onBudgetUpdated();
       onClose();
     } catch (err: any) {
-      setError(err.message || 'Erro ao salvar orçamento.');
+      setError(err.message || 'Erro ao salvar configurações.');
     } finally {
       setLoading(false);
     }
@@ -96,6 +128,7 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
   };
 
   const selectedBudget = existingBudgets.find(b => b.categoryId === categoryId);
+  const isCategorySelected = Boolean(categoryId);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
@@ -109,7 +142,7 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
             </div>
             <div>
               <h2 className="text-xl sm:text-2xl font-black text-slate-800">Meta de Orçamento</h2>
-              <p className="text-xs sm:text-sm font-bold text-slate-400">Estabeleça limites para monitorar gastos</p>
+              <p className="text-xs sm:text-sm font-bold text-slate-400">Estabeleça limites e alertas de monitoramento</p>
             </div>
           </div>
           <button
@@ -131,16 +164,20 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
 
           {/* Selecionar Categoria */}
           <div>
-            <label className="block text-xs font-black uppercase tracking-wider text-slate-500 mb-1.5">
-              Categoria de Despesa
+            <label className="block text-xs font-black uppercase tracking-wider text-slate-500 mb-1.5 flex items-center justify-between">
+              <span>Categoria de Despesa</span>
+              {!isCategorySelected && (
+                <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">
+                  Opcional p/ alerta geral
+                </span>
+              )}
             </label>
             <select
-              required
               value={categoryId}
               onChange={(e) => handleCategoryChange(e.target.value)}
               className="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:border-[#026CD6] focus:bg-white transition-all"
             >
-              <option value="">Selecione uma categoria...</option>
+              <option value="">Nenhuma selecionada (Apenas definir alerta geral)</option>
               {categories.map((cat) => {
                 const hasBudget = existingBudgets.some(b => b.categoryId === cat.id);
                 return (
@@ -160,20 +197,26 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
             <input
               type="number"
               step="0.01"
-              required
+              required={isCategorySelected}
+              disabled={!isCategorySelected}
               value={monthlyLimit}
               onChange={(e) => setMonthlyLimit(e.target.value)}
-              placeholder="Ex: 1200.00"
-              className="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-4 py-2.5 text-sm font-black text-slate-800 focus:outline-none focus:border-[#026CD6] focus:bg-white transition-all"
+              placeholder={isCategorySelected ? "Ex: 1200.00" : "Selecione uma categoria para definir limite"}
+              className="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-4 py-2.5 text-sm font-black text-slate-800 focus:outline-none focus:border-[#026CD6] focus:bg-white transition-all disabled:opacity-50 disabled:bg-slate-100"
             />
           </div>
 
-          {/* Limite de Alerta Percentual */}
-          <div>
-            <label className="block text-xs font-black uppercase tracking-wider text-slate-500 mb-1.5 flex items-center justify-between">
-              <span>Alerta de Consumo Próximo</span>
-              <span className="text-[#026CD6] font-black">{alertThreshold}%</span>
-            </label>
+          {/* Limite de Alerta Percentual (Global para todas as categorias) */}
+          <div className="p-3.5 bg-blue-50/60 border-2 border-blue-100/80 rounded-2xl space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                <Globe className="w-3.5 h-3.5 text-[#026CD6]" />
+                <span>Alerta de Consumo Próximo</span>
+              </label>
+              <span className="text-[#026CD6] font-black text-xs px-2 py-0.5 bg-blue-100 rounded-lg">
+                {alertThreshold}% (Todas as Categorias)
+              </span>
+            </div>
             <input
               type="range"
               min="50"
@@ -183,8 +226,8 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
               onChange={(e) => setAlertThreshold(e.target.value)}
               className="w-full accent-[#026CD6] cursor-pointer"
             />
-            <p className="text-xs font-bold text-slate-400 mt-1.5">
-              A interface mudará para estado de aviso quando os gastos atingirem este percentual do limite.
+            <p className="text-[11px] font-bold text-slate-500 leading-snug">
+              Configuração geral: aplica-se a todas as categorias do mês e também às metas geradas por I.A. A interface mudará para estado de aviso amarelo ao atingir este percentual.
             </p>
           </div>
 
@@ -196,7 +239,7 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
                 onClick={() => handleDelete(selectedBudget.id)}
                 disabled={loading}
                 className="p-3 rounded-2xl border-2 border-rose-200 text-[#FF4B4B] hover:bg-rose-50 transition-colors"
-                title="Excluir meta"
+                title="Excluir meta desta categoria"
               >
                 <Trash2 className="w-5 h-5 stroke-[2.5]" />
               </button>
@@ -210,11 +253,11 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
             </button>
             <button
               type="submit"
-              disabled={loading || !categoryId}
+              disabled={loading || (isCategorySelected && (!monthlyLimit || parseFloat(monthlyLimit) <= 0))}
               className="btn-duo btn-duo-green flex-1 py-3 text-xs sm:text-sm font-black flex items-center justify-center gap-2 disabled:opacity-50"
             >
               <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
-              <span>Salvar Meta</span>
+              <span>{isCategorySelected ? 'Salvar Meta' : 'Aplicar Alerta Geral'}</span>
             </button>
           </div>
 
@@ -223,3 +266,4 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
     </div>
   );
 };
+

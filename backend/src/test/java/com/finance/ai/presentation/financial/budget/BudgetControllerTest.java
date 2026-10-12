@@ -65,6 +65,9 @@ class BudgetControllerTest {
     private BatchCreateBudgetsUseCase batchCreateBudgetsUseCase;
 
     @MockBean
+    private com.finance.ai.application.financial.budget.UpdateGlobalAlertThresholdUseCase updateGlobalAlertThresholdUseCase;
+
+    @MockBean
     private UserRepository userRepository;
 
     @MockBean
@@ -135,5 +138,26 @@ class BudgetControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.monthlyLimit").value(1500.00))
                 .andExpect(jsonPath("$.alertThresholdPercentage").value(80));
+    }
+
+    @Test
+    @DisplayName("PATCH /api/v1/budgets/alert-threshold - Deve atualizar percentual global de alerta")
+    void deveAtualizarPercentualAlertaGlobalComSucesso() throws Exception {
+        mockAuthentication();
+        UUID catId = UUID.randomUUID();
+        LocalDate month = LocalDate.of(2026, 10, 1);
+        Budget updated = Budget.create(userId, catId, month, new BigDecimal("2000.00"), 85);
+
+        when(updateGlobalAlertThresholdUseCase.execute(eq(userId), any(), eq(85)))
+                .thenReturn(List.of(updated));
+
+        var request = new com.finance.ai.presentation.financial.budget.dto.UpdateAlertThresholdRequest(85, month);
+
+        mockMvc.perform(patch("/api/v1/budgets/alert-threshold")
+                        .header("Authorization", "Bearer " + validToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].alertThresholdPercentage").value(85));
     }
 }

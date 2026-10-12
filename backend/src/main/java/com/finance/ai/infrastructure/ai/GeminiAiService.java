@@ -84,15 +84,15 @@ public class GeminiAiService implements AiExtractionPort, AudioTranscriptionPort
         }
 
         if (apiKey.isBlank()) {
-            log.debug("GEMINI_API_KEY não configurada para áudio. Retornando simulação contextual para ambiente de testes.");
-            return "Almoço no restaurante 38 reais no débito hoje";
+            log.warn("GEMINI_API_KEY não configurada para transcrição de áudio.");
+            throw new IllegalStateException("Para transcrição de arquivos de áudio via servidor, a variável GEMINI_API_KEY deve estar configurada.");
         }
 
         try {
             return callGeminiApiForAudioTranscription(audioBytes, contentType);
         } catch (Exception ex) {
-            log.warn("Falha na transcrição de áudio via API Gemini ({}). Retornando fallback seguro.", ex.getMessage());
-            return "Lançamento em voz não transcrito";
+            log.warn("Falha na transcrição de áudio via API Gemini ({}).", ex.getMessage());
+            throw new RuntimeException("Não foi possível transcrever o áudio: " + ex.getMessage(), ex);
         }
     }
 

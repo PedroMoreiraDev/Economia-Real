@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { 
-  Sparkles, 
-  RefreshCw, 
+import {
+  Sparkles,
+  RefreshCw,
   LogOut,
   LogIn,
   CheckCircle2,
@@ -14,8 +14,6 @@ import {
   DollarSign,
   TrendingUp,
   Receipt,
-  CreditCard as CardIcon,
-  ShoppingBag,
   UploadCloud,
   Mic,
   Download,
@@ -35,8 +33,7 @@ import {
   Search,
   X,
   Eye,
-  EyeOff,
-  Wifi
+  EyeOff
 } from 'lucide-react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AuthModal } from './components/AuthModal';
@@ -44,7 +41,6 @@ import { AccountModal } from './components/AccountModal';
 import { TransactionModal } from './components/TransactionModal';
 import { CreditCardModal } from './components/CreditCardModal';
 import { CreditCardPurchaseModal } from './components/CreditCardPurchaseModal';
-import { PayInvoiceModal } from './components/PayInvoiceModal';
 import { ImportModal } from './components/ImportModal';
 import { AiTransactionModal } from './components/AiTransactionModal';
 import { AnalyticsSection } from './components/AnalyticsSection';
@@ -55,36 +51,34 @@ import { InlineDatePicker } from './components/InlineDatePicker';
 import { RecurringBillsSection } from './components/RecurringBillsSection';
 import { SavingsGoalsSection } from './components/SavingsGoalsSection';
 import { exportTransactionsCsvApi } from './services/goalApi';
-import { 
-  Account, 
-  Category, 
-  Transaction, 
+import {
+  Account,
+  Category,
+  Transaction,
   TransactionType,
-  FinancialSummary 
+  FinancialSummary
 } from './types/financial';
-import { 
-  CreditCard, 
-  CreditCardInvoice 
+import {
+  CreditCard
 } from './types/card';
 import { BudgetProgressDto } from './types/budget';
 import { AnalyticsOverview } from './types/analytics';
-import { 
-  fetchAccountsApi, 
-  fetchCategoriesApi, 
-  fetchTransactionsApi, 
+import {
+  fetchAccountsApi,
+  fetchCategoriesApi,
+  fetchTransactionsApi,
   fetchSummaryApi,
   deleteTransactionApi,
   deleteBatchTransactionsApi,
   updateTransactionApi,
-  createCategoryApi 
+  createCategoryApi
 } from './services/financialApi';
-import { 
-  fetchCreditCardsApi, 
-  fetchInvoicesApi 
+import {
+  fetchCreditCardsApi
 } from './services/cardApi';
 import { fetchBudgetsApi, deleteBudgetApi } from './services/budgetApi';
 import { fetchAnalyticsOverviewApi } from './services/analyticsApi';
-import { 
+import {
   resolveTimelineLimit,
   getSpendingLimitsTimeline,
   saveSpendingLimitForMonth,
@@ -135,12 +129,12 @@ const CATEGORY_COLORS = [
   '#64748B', // Ardósia Neutro
 ];
 
-type TabType = 'overview' | 'analytics' | 'recurring' | 'goals' | 'cards';
+type TabType = 'overview' | 'analytics' | 'recurring' | 'goals';
 
 const MainDashboard: React.FC = () => {
   const { user, token, isAuthenticated, logout } = useAuth();
   const firstName = user?.fullName?.trim().split(' ')[0] || '';
-  
+
   // Abas de navegação estilo Duolingo
   const [activeTab, setActiveTab] = useState<TabType>('overview');
 
@@ -174,12 +168,9 @@ const MainDashboard: React.FC = () => {
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [cardModalOpen, setCardModalOpen] = useState<boolean>(false);
   const [purchaseModalOpen, setPurchaseModalOpen] = useState<boolean>(false);
-  const [payInvoiceModalOpen, setPayInvoiceModalOpen] = useState<boolean>(false);
   const [importModalOpen, setImportModalOpen] = useState<boolean>(false);
   const [aiModalOpen, setAiModalOpen] = useState<boolean>(false);
   const [budgetModalOpen, setBudgetModalOpen] = useState<boolean>(false);
-  const [selectedInvoice, setSelectedInvoice] = useState<CreditCardInvoice | null>(null);
-  const [selectedCardName, setSelectedCardName] = useState<string>('');
   const [initialTransactionType, setInitialTransactionType] = useState<TransactionType>('EXPENSE');
   const [aiBudgetModalOpen, setAiBudgetModalOpen] = useState<boolean>(false);
 
@@ -221,7 +212,6 @@ const MainDashboard: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [creditCards, setCreditCards] = useState<CreditCard[]>([]);
-  const [invoicesByCard, setInvoicesByCard] = useState<Record<string, CreditCardInvoice[]>>({});
   const [budgets, setBudgets] = useState<BudgetProgressDto[]>([]);
   const [analytics, setAnalytics] = useState<AnalyticsOverview | null>(null);
   const [summary, setSummary] = useState<FinancialSummary>({
@@ -257,17 +247,7 @@ const MainDashboard: React.FC = () => {
       setBudgets(bgs);
       setAnalytics(anls);
 
-      // Carrega faturas dos cartões
-      const invoicesMap: Record<string, CreditCardInvoice[]> = {};
-      for (const card of cards) {
-        try {
-          const invs = await fetchInvoicesApi(token, card.id);
-          invoicesMap[card.id] = invs;
-        } catch {
-          invoicesMap[card.id] = [];
-        }
-      }
-      setInvoicesByCard(invoicesMap);
+
     } catch (err) {
       console.warn('Erro ao carregar dados financeiros:', err);
     } finally {
@@ -311,7 +291,7 @@ const MainDashboard: React.FC = () => {
       setCategories([]);
       setTransactions([]);
       setCreditCards([]);
-      setInvoicesByCard({});
+
       setBudgets([]);
       setAnalytics(null);
       setSummary({
@@ -338,11 +318,7 @@ const MainDashboard: React.FC = () => {
     }
   };
 
-  const handleOpenPayInvoice = (invoice: CreditCardInvoice, cardName: string) => {
-    setSelectedInvoice(invoice);
-    setSelectedCardName(cardName);
-    setPayInvoiceModalOpen(true);
-  };
+
 
   const handleEditTransaction = (tx: Transaction) => {
     setEditingTransaction(tx);
@@ -605,8 +581,8 @@ const MainDashboard: React.FC = () => {
   const effectiveGlobalLimit = spendingResolution.isExplicitZero
     ? 0
     : spendingResolution.limit > 0
-    ? spendingResolution.limit
-    : totalBudgetFromCategories;
+      ? spendingResolution.limit
+      : totalBudgetFromCategories;
 
   const handleSaveGlobalLimit = () => {
     const parsed = parseFloat(tempLimitInput);
@@ -665,11 +641,11 @@ const MainDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-800 flex flex-col font-sans">
-      
+
       {/* Top Header Economia Real com Glassmorphism Refinado */}
       <header className="glass-panel sticky top-0 z-40 border-b-2 border-slate-200/90 shadow-sm transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          
+
           {/* Logo e Nome da Plataforma */}
           <div className="flex items-center gap-3.5">
             <div className="relative group">
@@ -703,11 +679,10 @@ const MainDashboard: React.FC = () => {
               <button
                 type="button"
                 onClick={togglePrivacyMode}
-                className={`btn-duo text-xs px-3 py-2 flex items-center gap-1.5 transition-all ${
-                  privacyMode 
-                    ? 'btn-duo-yellow font-black ring-2 ring-amber-300' 
-                    : 'btn-duo-white hover:text-[#026CD6]'
-                }`}
+                className={`btn-duo text-xs px-3 py-2 flex items-center gap-1.5 transition-all ${privacyMode
+                  ? 'btn-duo-yellow font-black ring-2 ring-amber-300'
+                  : 'btn-duo-white hover:text-[#026CD6]'
+                  }`}
                 title={privacyMode ? "Valores monetários ocultos. Clique para exibir." : "Ocultar valores monetários na tela (Modo Privacidade)"}
               >
                 {privacyMode ? (
@@ -775,7 +750,7 @@ const MainDashboard: React.FC = () => {
 
       {/* Conteúdo Principal */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        
+
         {/* Banner Destaque Economia Real (Azul Suave, Moderno e Confiável) */}
         <div className="card-real-blue p-6 sm:p-8 relative overflow-hidden">
           <div className="max-w-2xl lg:max-w-3xl space-y-3 relative z-10">
@@ -783,7 +758,7 @@ const MainDashboard: React.FC = () => {
               <Sparkles className="h-3.5 w-3.5 text-blue-500 fill-blue-400" />
               {isAuthenticated ? 'Painel de Controle Financeiro' : 'Sua Plataforma Financeira Inteligente'}
             </div>
-            
+
             {isAuthenticated ? (
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-slate-900 leading-tight">
                 Olá{firstName ? `, ${firstName}` : ''}! <span className="text-[#026CD6] underline decoration-blue-300 decoration-4">Pronto para organizar suas contas? Vamos começar!</span> 🎩✨
@@ -793,7 +768,7 @@ const MainDashboard: React.FC = () => {
                 Economia real, utilizando inteligência artificial <span className="text-[#026CD6] underline decoration-blue-300 decoration-4">para te fazer economizar de verdade</span> 🎩✨
               </h1>
             )}
-            
+
             <p className="text-slate-700 text-sm sm:text-base font-bold leading-relaxed">
               {isAuthenticated
                 ? 'Monitore seu fluxo de caixa, planeje seus lançamentos e acompanhe suas metas com precisão e suporte de IA.'
@@ -866,10 +841,10 @@ const MainDashboard: React.FC = () => {
 
         {isAuthenticated && user ? (
           <div className="space-y-8">
-            
+
             {/* Seletor Global de Mês / Navegação Temporal no Estilo Duolingo */}
             <div className="card-duo p-4 sm:p-5 flex flex-col md:flex-row items-center justify-between gap-4 bg-gradient-to-r from-white via-blue-50/40 to-white">
-              
+
               {/* Lado Esquerdo: Identificação do Mês Ativo */}
               <div className="flex items-center gap-3.5 w-full md:w-auto">
                 <div className="h-12 w-12 rounded-2xl bg-[#DDF4FF] border-2 border-[#BAE6FD] text-[#026CD6] flex items-center justify-center shadow-sm shrink-0">
@@ -948,10 +923,10 @@ const MainDashboard: React.FC = () => {
                 )}
               </div>
             </div>
-            
+
             {/* 4 Cards de Métricas Principais (KPIs com Relevo Tátil e Modo Privacidade) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              
+
               {/* Receitas Totais */}
               <div className="card-duo card-duo-interactive p-5 space-y-2.5 hover:border-emerald-400 group">
                 <div className="flex items-center justify-between">
@@ -1002,13 +977,12 @@ const MainDashboard: React.FC = () => {
                   <span className="text-[11px] font-black uppercase text-slate-500 tracking-wider">
                     {effectiveGlobalLimit > 0 ? 'Disponível no Mês' : 'Economia'}
                   </span>
-                  <div className={`h-10 w-10 rounded-2xl border-2 flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform ${
-                    effectiveGlobalLimit > 0
-                      ? effectiveGlobalLimit - summary.totalExpense >= 0
-                        ? 'bg-[#EBF5FF] border-[#BAE0FD] text-[#026CD6]'
-                        : 'bg-[#FFEAEA] border-[#FFDFDF] text-[#EF4444]'
-                      : 'bg-[#EBF5FF] border-[#BAE0FD] text-[#026CD6]'
-                  }`}>
+                  <div className={`h-10 w-10 rounded-2xl border-2 flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform ${effectiveGlobalLimit > 0
+                    ? effectiveGlobalLimit - summary.totalExpense >= 0
+                      ? 'bg-[#EBF5FF] border-[#BAE0FD] text-[#026CD6]'
+                      : 'bg-[#FFEAEA] border-[#FFDFDF] text-[#EF4444]'
+                    : 'bg-[#EBF5FF] border-[#BAE0FD] text-[#026CD6]'
+                    }`}>
                     {effectiveGlobalLimit > 0 ? (
                       <Target className="h-5 w-5 stroke-[3]" />
                     ) : (
@@ -1018,21 +992,19 @@ const MainDashboard: React.FC = () => {
                 </div>
                 {effectiveGlobalLimit > 0 ? (
                   <>
-                    <p className={`text-2xl sm:text-3xl font-black tracking-tight font-numeric ${
-                      effectiveGlobalLimit - summary.totalExpense >= 0 ? 'text-[#026CD6]' : 'text-[#DC2626]'
-                    }`}>
+                    <p className={`text-2xl sm:text-3xl font-black tracking-tight font-numeric ${effectiveGlobalLimit - summary.totalExpense >= 0 ? 'text-[#026CD6]' : 'text-[#DC2626]'
+                      }`}>
                       {formatValue(effectiveGlobalLimit - summary.totalExpense)}
                     </p>
                     <div className="space-y-1">
                       <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200">
-                        <div 
-                          className={`h-full rounded-full transition-all ${
-                            summary.totalExpense >= effectiveGlobalLimit 
-                              ? 'bg-rose-500' 
-                              : summary.totalExpense >= effectiveGlobalLimit * 0.85 
-                              ? 'bg-amber-500' 
+                        <div
+                          className={`h-full rounded-full transition-all ${summary.totalExpense >= effectiveGlobalLimit
+                            ? 'bg-rose-500'
+                            : summary.totalExpense >= effectiveGlobalLimit * 0.85
+                              ? 'bg-amber-500'
                               : 'bg-[#026CD6]'
-                          }`}
+                            }`}
                           style={{ width: `${Math.min(100, Math.round((summary.totalExpense / effectiveGlobalLimit) * 100))}%` }}
                         />
                       </div>
@@ -1045,9 +1017,8 @@ const MainDashboard: React.FC = () => {
                   </>
                 ) : (
                   <>
-                    <p className={`text-2xl sm:text-3xl font-black tracking-tight font-numeric ${
-                      (summary.totalIncome - summary.totalExpense) >= 0 ? 'text-[#026CD6]' : 'text-amber-600'
-                    }`}>
+                    <p className={`text-2xl sm:text-3xl font-black tracking-tight font-numeric ${(summary.totalIncome - summary.totalExpense) >= 0 ? 'text-[#026CD6]' : 'text-amber-600'
+                      }`}>
                       {formatValue(summary.totalIncome - summary.totalExpense)}
                     </p>
                     <p className="text-xs font-bold text-slate-400">
@@ -1067,9 +1038,8 @@ const MainDashboard: React.FC = () => {
                     <Wallet className="h-5 w-5 stroke-[3]" />
                   </div>
                 </div>
-                <p className={`text-2xl sm:text-3xl font-black tracking-tight font-numeric ${
-                  (summary.totalIncome - summary.totalExpense) >= 0 ? 'text-slate-900' : 'text-[#DC2626]'
-                }`}>
+                <p className={`text-2xl sm:text-3xl font-black tracking-tight font-numeric ${(summary.totalIncome - summary.totalExpense) >= 0 ? 'text-slate-900' : 'text-[#DC2626]'
+                  }`}>
                   {formatValue(summary.totalIncome - summary.totalExpense)}
                 </p>
                 <div className="flex items-center justify-between text-xs font-bold text-slate-400">
@@ -1091,11 +1061,10 @@ const MainDashboard: React.FC = () => {
             <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
               <button
                 onClick={() => setActiveTab('overview')}
-                className={`btn-duo text-xs sm:text-sm px-4 py-2.5 rounded-2xl whitespace-nowrap flex items-center gap-2 ${
-                  activeTab === 'overview'
-                    ? 'btn-duo-green'
-                    : 'btn-duo-white'
-                }`}
+                className={`btn-duo text-xs sm:text-sm px-4 py-2.5 rounded-2xl whitespace-nowrap flex items-center gap-2 ${activeTab === 'overview'
+                  ? 'btn-duo-green'
+                  : 'btn-duo-white'
+                  }`}
               >
                 <Receipt className="w-4 h-4" />
                 <span>Extrato & Contas</span>
@@ -1103,11 +1072,10 @@ const MainDashboard: React.FC = () => {
 
               <button
                 onClick={() => setActiveTab('analytics')}
-                className={`btn-duo text-xs sm:text-sm px-4 py-2.5 rounded-2xl whitespace-nowrap flex items-center gap-2 ${
-                  activeTab === 'analytics'
-                    ? 'btn-duo-green'
-                    : 'btn-duo-white'
-                }`}
+                className={`btn-duo text-xs sm:text-sm px-4 py-2.5 rounded-2xl whitespace-nowrap flex items-center gap-2 ${activeTab === 'analytics'
+                  ? 'btn-duo-green'
+                  : 'btn-duo-white'
+                  }`}
               >
                 <PieChart className="w-4 h-4" />
                 <span>Gráficos & Orçamento</span>
@@ -1115,11 +1083,10 @@ const MainDashboard: React.FC = () => {
 
               <button
                 onClick={() => setActiveTab('recurring')}
-                className={`btn-duo text-xs sm:text-sm px-4 py-2.5 rounded-2xl whitespace-nowrap flex items-center gap-2 ${
-                  activeTab === 'recurring'
-                    ? 'btn-duo-green'
-                    : 'btn-duo-white'
-                }`}
+                className={`btn-duo text-xs sm:text-sm px-4 py-2.5 rounded-2xl whitespace-nowrap flex items-center gap-2 ${activeTab === 'recurring'
+                  ? 'btn-duo-green'
+                  : 'btn-duo-white'
+                  }`}
               >
                 <CalendarDays className="w-4 h-4" />
                 <span>Despesas Fixas</span>
@@ -1127,26 +1094,13 @@ const MainDashboard: React.FC = () => {
 
               <button
                 onClick={() => setActiveTab('goals')}
-                className={`btn-duo text-xs sm:text-sm px-4 py-2.5 rounded-2xl whitespace-nowrap flex items-center gap-2 ${
-                  activeTab === 'goals'
-                    ? 'btn-duo-green'
-                    : 'btn-duo-white'
-                }`}
+                className={`btn-duo text-xs sm:text-sm px-4 py-2.5 rounded-2xl whitespace-nowrap flex items-center gap-2 ${activeTab === 'goals'
+                  ? 'btn-duo-green'
+                  : 'btn-duo-white'
+                  }`}
               >
                 <Target className="w-4 h-4" />
                 <span>Metas de Economia</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab('cards')}
-                className={`btn-duo text-xs sm:text-sm px-4 py-2.5 rounded-2xl whitespace-nowrap flex items-center gap-2 ${
-                  activeTab === 'cards'
-                    ? 'btn-duo-green'
-                    : 'btn-duo-white'
-                }`}
-              >
-                <CardIcon className="w-4 h-4" />
-                <span>Cartões de Crédito ({creditCards.length})</span>
               </button>
             </div>
 
@@ -1155,10 +1109,10 @@ const MainDashboard: React.FC = () => {
             {/* ABA 1: VISÃO GERAL (Extrato e Contas Bancárias) */}
             {activeTab === 'overview' && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                
+
                 {/* Coluna 1: Minhas Entradas & Meta Máxima de Gastos (substitui Contas Bancárias) */}
                 <div className="lg:col-span-1 space-y-6">
-                  
+
                   {/* Bloco 1: Minhas Entradas / Receitas */}
                   <div className="card-duo p-6 space-y-4">
                     <div className="flex items-center justify-between border-b-2 border-slate-100 pb-3">
@@ -1359,9 +1313,8 @@ const MainDashboard: React.FC = () => {
                           </div>
                           <div className="text-right">
                             <span className="text-[11px] font-bold text-slate-400 block uppercase">Gasto Atual</span>
-                            <span className={`text-base font-black font-numeric ${
-                              summary.totalExpense > effectiveGlobalLimit ? 'text-[#EA2B2B]' : 'text-slate-800'
-                            }`}>
+                            <span className={`text-base font-black font-numeric ${summary.totalExpense > effectiveGlobalLimit ? 'text-[#EA2B2B]' : 'text-slate-800'
+                              }`}>
                               {formatValue(summary.totalExpense)}
                             </span>
                           </div>
@@ -1377,13 +1330,12 @@ const MainDashboard: React.FC = () => {
                           </div>
                           <div className="progress-duo-track">
                             <div
-                              className={`progress-duo-fill ${
-                                summary.totalExpense >= effectiveGlobalLimit
-                                  ? 'bg-[#FF4B4B]'
-                                  : summary.totalExpense >= effectiveGlobalLimit * 0.85
+                              className={`progress-duo-fill ${summary.totalExpense >= effectiveGlobalLimit
+                                ? 'bg-[#FF4B4B]'
+                                : summary.totalExpense >= effectiveGlobalLimit * 0.85
                                   ? 'bg-[#FF9600]'
                                   : 'bg-[#10B981]'
-                              }`}
+                                }`}
                               style={{
                                 width: `${Math.min(100, (summary.totalExpense / effectiveGlobalLimit) * 100)}%`,
                               }}
@@ -1451,17 +1403,16 @@ const MainDashboard: React.FC = () => {
                           Extrato de Movimentações
                         </h2>
                       </div>
-                      
+
                       {/* Pílulas de Alternância de Filtro: Mês Selecionado vs Todas */}
                       <div className="flex items-center gap-2 pt-1 flex-wrap">
                         <button
                           type="button"
                           onClick={() => setTxFilterMode('month')}
-                          className={`btn-duo text-[11px] px-2.5 py-1 rounded-xl flex items-center gap-1.5 transition-all ${
-                            txFilterMode === 'month'
-                              ? 'btn-duo-blue font-black'
-                              : 'btn-duo-white font-bold text-slate-500'
-                          }`}
+                          className={`btn-duo text-[11px] px-2.5 py-1 rounded-xl flex items-center gap-1.5 transition-all ${txFilterMode === 'month'
+                            ? 'btn-duo-blue font-black'
+                            : 'btn-duo-white font-bold text-slate-500'
+                            }`}
                         >
                           <Calendar className="w-3 h-3" />
                           <span>{formatMonthLabel(selectedMonth)} ({monthTransactionsCount})</span>
@@ -1470,11 +1421,10 @@ const MainDashboard: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => setTxFilterMode('all')}
-                          className={`btn-duo text-[11px] px-2.5 py-1 rounded-xl flex items-center gap-1.5 transition-all ${
-                            txFilterMode === 'all'
-                              ? 'btn-duo-blue font-black'
-                              : 'btn-duo-white font-bold text-slate-500'
-                          }`}
+                          className={`btn-duo text-[11px] px-2.5 py-1 rounded-xl flex items-center gap-1.5 transition-all ${txFilterMode === 'all'
+                            ? 'btn-duo-blue font-black'
+                            : 'btn-duo-white font-bold text-slate-500'
+                            }`}
                         >
                           <span>Todas as Movimentações ({transactions.length})</span>
                         </button>
@@ -1532,33 +1482,30 @@ const MainDashboard: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setTypeFilter('ALL')}
-                        className={`text-[11px] font-extrabold px-2.5 py-1 rounded-xl transition-all ${
-                          typeFilter === 'ALL'
-                            ? 'bg-[#026CD6] text-white shadow-sm'
-                            : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
-                        }`}
+                        className={`text-[11px] font-extrabold px-2.5 py-1 rounded-xl transition-all ${typeFilter === 'ALL'
+                          ? 'bg-[#026CD6] text-white shadow-sm'
+                          : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                          }`}
                       >
                         Todas
                       </button>
                       <button
                         type="button"
                         onClick={() => setTypeFilter('INCOME')}
-                        className={`text-[11px] font-extrabold px-2.5 py-1 rounded-xl transition-all ${
-                          typeFilter === 'INCOME'
-                            ? 'bg-[#10B981] text-white shadow-sm'
-                            : 'bg-white text-emerald-700 hover:bg-emerald-50 border border-emerald-200'
-                        }`}
+                        className={`text-[11px] font-extrabold px-2.5 py-1 rounded-xl transition-all ${typeFilter === 'INCOME'
+                          ? 'bg-[#10B981] text-white shadow-sm'
+                          : 'bg-white text-emerald-700 hover:bg-emerald-50 border border-emerald-200'
+                          }`}
                       >
                         Receitas
                       </button>
                       <button
                         type="button"
                         onClick={() => setTypeFilter('EXPENSE')}
-                        className={`text-[11px] font-extrabold px-2.5 py-1 rounded-xl transition-all ${
-                          typeFilter === 'EXPENSE'
-                            ? 'bg-rose-600 text-white shadow-sm'
-                            : 'bg-white text-rose-700 hover:bg-rose-50 border border-rose-200'
-                        }`}
+                        className={`text-[11px] font-extrabold px-2.5 py-1 rounded-xl transition-all ${typeFilter === 'EXPENSE'
+                          ? 'bg-rose-600 text-white shadow-sm'
+                          : 'bg-white text-rose-700 hover:bg-rose-50 border border-rose-200'
+                          }`}
                       >
                         Despesas
                       </button>
@@ -1567,11 +1514,10 @@ const MainDashboard: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => setShowOnlyUncategorized(!showOnlyUncategorized)}
-                          className={`text-[11px] font-black px-2.5 py-1 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ml-1 ${
-                            showOnlyUncategorized
-                              ? 'bg-amber-500 text-white shadow-sm ring-2 ring-amber-300'
-                              : 'bg-amber-50 text-amber-900 hover:bg-amber-100 border-2 border-amber-300/80'
-                          }`}
+                          className={`text-[11px] font-black px-2.5 py-1 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ml-1 ${showOnlyUncategorized
+                            ? 'bg-amber-500 text-white shadow-sm ring-2 ring-amber-300'
+                            : 'bg-amber-50 text-amber-900 hover:bg-amber-100 border-2 border-amber-300/80'
+                            }`}
                           title={showOnlyUncategorized ? 'Mostrar todas as movimentações' : 'Filtrar apenas movimentações sem categoria'}
                         >
                           <span className="text-xs leading-none select-none">⚠️</span>
@@ -1621,8 +1567,8 @@ const MainDashboard: React.FC = () => {
                           {searchQuery
                             ? `Nenhum resultado encontrado para "${searchQuery}".`
                             : txFilterMode === 'month'
-                            ? `Nenhuma movimentação registrada em ${formatMonthLabel(selectedMonth)}.`
-                            : 'Nenhuma movimentação registrada.'}
+                              ? `Nenhuma movimentação registrada em ${formatMonthLabel(selectedMonth)}.`
+                              : 'Nenhuma movimentação registrada.'}
                         </p>
                         {searchQuery ? (
                           <button
@@ -1671,15 +1617,14 @@ const MainDashboard: React.FC = () => {
                             const isRowUncategorized = !tx.categoryId && tx.type !== 'TRANSFER' && tx.type !== 'INVOICE_PAYMENT';
 
                             return (
-                              <tr 
-                                key={tx.id} 
-                                className={`transition-colors group ${
-                                  isSelected 
-                                    ? 'bg-blue-50/80 hover:bg-blue-100/70 border-l-4 border-l-[#026CD6]' 
-                                    : isRowUncategorized
-                                      ? 'bg-amber-50/50 hover:bg-amber-100/60 border-l-4 border-l-amber-500'
-                                      : 'hover:bg-slate-50/90'
-                                }`}
+                              <tr
+                                key={tx.id}
+                                className={`transition-colors group ${isSelected
+                                  ? 'bg-blue-50/80 hover:bg-blue-100/70 border-l-4 border-l-[#026CD6]'
+                                  : isRowUncategorized
+                                    ? 'bg-amber-50/50 hover:bg-amber-100/60 border-l-4 border-l-amber-500'
+                                    : 'hover:bg-slate-50/90'
+                                  }`}
                               >
                                 <td className="py-2 px-1.5 text-center">
                                   <input
@@ -1765,9 +1710,8 @@ const MainDashboard: React.FC = () => {
                                     <span className="font-numeric font-black text-slate-400 text-xs">••••••</span>
                                   ) : (
                                     <div className="inline-flex items-center justify-end gap-1 group/amt">
-                                      <span className={`text-[11px] font-black select-none ${
-                                        tx.type === 'INCOME' ? 'text-[#10B981]' : 'text-rose-500'
-                                      }`}>
+                                      <span className={`text-[11px] font-black select-none ${tx.type === 'INCOME' ? 'text-[#10B981]' : 'text-rose-500'
+                                        }`}>
                                         {tx.type === 'EXPENSE' ? '-' : (tx.type === 'INCOME' ? '+' : '')} R$
                                       </span>
                                       <input
@@ -1790,9 +1734,8 @@ const MainDashboard: React.FC = () => {
                                             e.target.value = tx.amount.toString();
                                           }
                                         }}
-                                        className={`w-20 text-right font-black text-xs font-numeric bg-slate-50/80 hover:bg-blue-50/60 focus:bg-white px-1.5 py-0.5 rounded-lg border border-slate-200/90 hover:border-blue-300 focus:border-[#026CD6] focus:ring-1 focus:ring-blue-100 focus:outline-none transition-all cursor-pointer shadow-2xs disabled:opacity-50 ${
-                                          tx.type === 'INCOME' ? 'text-[#10B981]' : 'text-slate-900'
-                                        }`}
+                                        className={`w-20 text-right font-black text-xs font-numeric bg-slate-50/80 hover:bg-blue-50/60 focus:bg-white px-1.5 py-0.5 rounded-lg border border-slate-200/90 hover:border-blue-300 focus:border-[#026CD6] focus:ring-1 focus:ring-blue-100 focus:outline-none transition-all cursor-pointer shadow-2xs disabled:opacity-50 ${tx.type === 'INCOME' ? 'text-[#10B981]' : 'text-slate-900'
+                                          }`}
                                         title="Clique para alterar o valor (Enter para salvar)"
                                       />
                                     </div>
@@ -1859,183 +1802,6 @@ const MainDashboard: React.FC = () => {
               />
             )}
 
-            {/* ABA 5: CARTÕES DE CRÉDITO */}
-            {activeTab === 'cards' && (
-              <div className="card-duo p-6 sm:p-8 space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b-2 border-slate-100 pb-5">
-                  <div className="space-y-1">
-                    <h2 className="text-xl font-black text-slate-800 flex items-center gap-2">
-                      <CardIcon className="h-6 w-6 text-[#026CD6]" />
-                      Cartões de Crédito & Faturas Mensais
-                    </h2>
-                    <p className="text-xs font-bold text-slate-400">
-                      Acompanhe limites, datas de fechamento e compras parceladas de 1x até 48x
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => setCardModalOpen(true)}
-                      className="btn-duo btn-duo-white text-xs px-4 py-2 flex items-center gap-1.5"
-                    >
-                      <Plus className="h-4 w-4" />
-                      Novo Cartão
-                    </button>
-                    <button
-                      onClick={() => setPurchaseModalOpen(true)}
-                      disabled={creditCards.length === 0}
-                      className="btn-duo btn-duo-blue text-xs px-4 py-2 flex items-center gap-1.5 disabled:opacity-50"
-                    >
-                      <ShoppingBag className="h-4 w-4" />
-                      Lançar Compra Parcelada
-                    </button>
-                  </div>
-                </div>
-
-                {creditCards.length === 0 ? (
-                  <div className="p-12 rounded-3xl border-2 border-dashed border-slate-200 text-center space-y-3">
-                    <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto text-slate-400">
-                      <CardIcon className="w-6 h-6" />
-                    </div>
-                    <p className="text-xs font-bold text-slate-400">Nenhum cartão de crédito cadastrado.</p>
-                    <button
-                      onClick={() => setCardModalOpen(true)}
-                      className="btn-duo btn-emerald text-xs px-4 py-2"
-                    >
-                      Cadastrar Primeiro Cartão
-                    </button>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {creditCards.map((card) => {
-                      const cardInvoices = invoicesByCard[card.id] || [];
-                      return (
-                        <div
-                          key={card.id}
-                          className="rounded-3xl bg-white border-2 border-slate-200/90 shadow-[0_4px_0_0_#E2E8F0] p-5 space-y-5 hover:border-blue-300 transition-all flex flex-col justify-between"
-                        >
-                          {/* Cartão de Crédito Físico Virtual de Luxo */}
-                          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white p-5 shadow-lg border border-slate-800 space-y-4">
-                            {/* Brilhos de Fundo */}
-                            <div className="absolute -right-8 -top-8 w-36 h-36 bg-blue-500/15 rounded-full blur-xl pointer-events-none" />
-                            <div className="absolute -left-8 -bottom-8 w-36 h-36 bg-indigo-500/15 rounded-full blur-xl pointer-events-none" />
-
-                            {/* Topo do Cartão: Logo & Contactless */}
-                            <div className="flex items-center justify-between relative z-10">
-                              <span className="text-[10px] font-black tracking-widest uppercase text-slate-300">
-                                Economia Real
-                              </span>
-                              <div className="flex items-center gap-1.5 text-slate-400">
-                                <Wifi className="w-4 h-4 rotate-90" />
-                              </div>
-                            </div>
-
-                            {/* Chip EMV & Número Mascarado */}
-                            <div className="flex items-center justify-between relative z-10 pt-1">
-                              {/* Chip Dourado */}
-                              <div className="w-10 h-7 rounded-md bg-gradient-to-tr from-amber-300 via-yellow-200 to-amber-500 border border-amber-300/80 shadow-sm relative overflow-hidden flex items-center justify-center">
-                                <div className="w-full h-[1px] bg-amber-700/30 absolute top-1.5" />
-                                <div className="w-full h-[1px] bg-amber-700/30 absolute bottom-1.5" />
-                                <div className="h-full w-[1px] bg-amber-700/30 absolute left-2.5" />
-                                <div className="h-full w-[1px] bg-amber-700/30 absolute right-2.5" />
-                              </div>
-
-                              <span className="text-[11px] font-mono tracking-widest text-slate-300 font-bold">
-                                •••• 8842
-                              </span>
-                            </div>
-
-                            {/* Rodapé do Cartão Virtual: Nome, Datas e Círculos */}
-                            <div className="flex items-end justify-between relative z-10 pt-2 border-t border-slate-800">
-                              <div>
-                                <p className="font-black text-sm text-white tracking-wide uppercase truncate max-w-[170px]">
-                                  {card.name}
-                                </p>
-                                <span className="text-[9px] font-bold text-slate-400 block tracking-wider uppercase">
-                                  Fecha {card.closingDay} • Vence {card.dueDay}
-                                </span>
-                              </div>
-
-                              {/* Esferas de Bandeira */}
-                              <div className="flex -space-x-2">
-                                <div className="w-5 h-5 rounded-full bg-rose-500 opacity-90 shadow-sm" />
-                                <div className="w-5 h-5 rounded-full bg-amber-400 opacity-90 shadow-sm" />
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Painel Informativo de Limite */}
-                          <div className="p-4 rounded-2xl bg-slate-50 border-2 border-slate-100 space-y-1">
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">
-                              Limite de Crédito Disponível
-                            </span>
-                            <p className="text-xl font-black text-slate-900 font-numeric">
-                              {formatValue(card.creditLimit)}
-                            </p>
-                          </div>
-
-                          {/* Faturas deste Cartão */}
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between">
-                              <p className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">
-                                Faturas ({cardInvoices.length})
-                              </p>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setPurchaseModalOpen(true);
-                                }}
-                                className="text-[11px] font-bold text-[#026CD6] hover:underline"
-                              >
-                                + Compra parcelada
-                              </button>
-                            </div>
-
-                            {cardInvoices.length === 0 ? (
-                              <p className="text-xs text-slate-400 italic py-2 text-center bg-slate-50 rounded-xl">
-                                Nenhuma fatura gerada para este cartão.
-                              </p>
-                            ) : (
-                              <div className="space-y-2 max-h-44 overflow-y-auto pr-0.5">
-                                {cardInvoices.map((inv) => (
-                                  <div
-                                    key={inv.id}
-                                    className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between text-xs hover:border-slate-300 transition-colors"
-                                  >
-                                    <div>
-                                      <p className="font-extrabold text-slate-800">Ref. {inv.referenceMonth}</p>
-                                      <span className="text-[10px] font-bold text-slate-400">Vence em {inv.dueDate}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                      <span className={`text-[10px] font-black px-2.5 py-0.5 rounded-full border ${
-                                        inv.status === 'PAID'
-                                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                          : 'bg-amber-100 text-amber-800 border-amber-200'
-                                      }`}>
-                                        {inv.status === 'PAID' ? 'Paga 🎉' : 'Aberta'}
-                                      </span>
-                                      {inv.status !== 'PAID' && (
-                                        <button
-                                          onClick={() => handleOpenPayInvoice(inv, card.name)}
-                                          className="btn-duo btn-duo-yellow text-[10px] px-2.5 py-1"
-                                        >
-                                          Pagar
-                                        </button>
-                                      )}
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            )}
-
           </div>
         ) : (
           /* Estado Não Autenticado (Acolhedor e Amigável) */
@@ -2072,35 +1838,35 @@ const MainDashboard: React.FC = () => {
           </div>
         )}
 
-        {/* Pilares de Rigor e Qualidade (Cards Limpos com Ícones Coloridos) */}
+        {/* Pilares de Valor do Produto (Benefícios Claros e Comerciais) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
           <div className="card-duo p-6 space-y-3">
-            <div className="h-12 w-12 rounded-2xl bg-blue-50 border-2 border-blue-200 flex items-center justify-center text-[#026CD6] shadow-sm">
-              <CheckCircle2 className="h-6 w-6 stroke-[3]" />
+            <div className="h-12 w-12 rounded-2xl bg-emerald-50 border-2 border-emerald-200 flex items-center justify-center text-emerald-600 shadow-sm">
+              <ShieldCheck className="h-6 w-6 stroke-[2.5]" />
             </div>
-            <h3 className="text-base font-black text-slate-900">85 Testes Validados</h3>
+            <h3 className="text-base font-black text-slate-900">Precisão ao Centavo</h3>
             <p className="text-xs font-bold text-slate-500 leading-relaxed">
-              Cálculos em BigDecimal sem float/double, precisão monetária determinística e divisão de centavo na 1ª parcela.
+              Controle faturas de cartão, parcelas futuras e saldos bancários com exatidão matemática. Saiba exatamente onde cada real está, sem surpresas no fim do mês.
             </p>
           </div>
 
           <div className="card-duo p-6 space-y-3">
             <div className="h-12 w-12 rounded-2xl bg-[#DDF4FF] border-2 border-[#BAE6FD] flex items-center justify-center text-[#1CB0F6] shadow-sm">
-              <Layers className="h-6 w-6 stroke-[3]" />
+              <Layers className="h-6 w-6 stroke-[2.5]" />
             </div>
-            <h3 className="text-base font-black text-slate-900">Sem Dupla Contagem</h3>
+            <h3 className="text-base font-black text-slate-900">Visão Real dos Seus Gastos</h3>
             <p className="text-xs font-bold text-slate-500 leading-relaxed">
-              O pagamento de faturas e transferências não polui o consumo primário nem distorce seus relatórios contábeis.
+              Pagamentos de faturas e transferências não distorcem seu orçamento. Você enxerga seu consumo real de despesas sem duplicidades nem confusão contábil.
             </p>
           </div>
 
           <div className="card-duo p-6 space-y-3">
             <div className="h-12 w-12 rounded-2xl bg-[#F5EBFF] border-2 border-[#E9D5FF] flex items-center justify-center text-[#CE82FF] shadow-sm">
-              <Sparkles className="h-6 w-6 stroke-[3]" />
+              <Sparkles className="h-6 w-6 stroke-[2.5]" />
             </div>
-            <h3 className="text-base font-black text-slate-900">Inteligência Amigável</h3>
+            <h3 className="text-base font-black text-slate-900">Lançamento Ágil com I.A</h3>
             <p className="text-xs font-bold text-slate-500 leading-relaxed">
-              Entrada por áudio e texto com sanitização de dados LGPD e fallback offline determinístico via regras.
+              Fale por voz ou digite livremente — como <em>"ifood 49,19"</em> ou <em>"uber 25"</em> — e a inteligência artificial categoriza, data e organiza tudo em segundos.
             </p>
           </div>
         </div>
@@ -2109,13 +1875,19 @@ const MainDashboard: React.FC = () => {
       {/* Footer Limpo e Amigável */}
       <footer className="border-t-2 border-slate-200 bg-white py-8 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-bold text-slate-400">
-          <p className="flex items-center gap-1.5">
-            <span className="text-slate-700 font-black">💼 Economia Real</span> • <span>Inteligência Financeira e Previsibilidade Patrimonial</span>
+          <p className="flex items-center gap-1.5 text-slate-500">
+            <span className="text-slate-800 font-black">💼 Economia Real</span> • <span>© 2026 Economia Real. Todos os direitos reservados.</span>
           </p>
-          <p className="flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">Spring Boot 3.3.5</span>
-            <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">React 18</span>
-            <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">PostgreSQL 16</span>
+          <p className="flex items-center gap-1.5 text-slate-500">
+            <span>Developed by:</span>
+            <a
+              href="https://www.linkedin.com/in/moreirapedroh/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#026CD6] hover:text-[#0A7DEF] hover:underline font-black transition-colors"
+            >
+              Pedro Moreira
+            </a>
           </p>
         </div>
       </footer>
@@ -2161,14 +1933,7 @@ const MainDashboard: React.FC = () => {
         onPurchaseCreated={loadFinancialData}
       />
 
-      <PayInvoiceModal
-        isOpen={payInvoiceModalOpen}
-        onClose={() => setPayInvoiceModalOpen(false)}
-        invoice={selectedInvoice}
-        cardName={selectedCardName}
-        accounts={accounts}
-        onInvoicePaid={loadFinancialData}
-      />
+
 
       <ImportModal
         isOpen={importModalOpen}
@@ -2198,7 +1963,16 @@ const MainDashboard: React.FC = () => {
         isOpen={aiBudgetModalOpen}
         onClose={() => setAiBudgetModalOpen(false)}
         initialGlobalLimit={effectiveGlobalLimit > 0 ? effectiveGlobalLimit : 3000}
-        onApplied={loadFinancialData}
+        existingBudgets={budgets}
+        onApplied={(appliedGlobalLimit) => {
+          if (user?.id && appliedGlobalLimit && appliedGlobalLimit > 0) {
+            const updated = saveSpendingLimitForMonth(user.id, selectedMonth, appliedGlobalLimit);
+            setSpendingTimeline(updated);
+            const res = resolveTimelineLimit(updated, selectedMonth);
+            setSpendingResolution(res);
+          }
+          loadFinancialData();
+        }}
         monthReference={`${selectedMonth}-01`}
       />
 
@@ -2214,7 +1988,7 @@ const MainDashboard: React.FC = () => {
                 <div>
                   <h3 className="text-base font-black text-slate-800">Nova Categoria</h3>
                   <p className="text-xs font-bold text-slate-400">
-                    {quickCategoryModal.targetTx 
+                    {quickCategoryModal.targetTx
                       ? `Aplicar em "${quickCategoryModal.targetTx.description}"`
                       : 'Cadastre e use em qualquer movimentação'}
                   </p>
@@ -2259,9 +2033,8 @@ const MainDashboard: React.FC = () => {
                       key={color}
                       type="button"
                       onClick={() => setNewCatColor(color)}
-                      className={`w-7 h-7 rounded-xl transition-all cursor-pointer ${
-                        newCatColor === color ? 'scale-115 ring-2 ring-offset-2 ring-slate-800 shadow-sm' : 'hover:scale-105 opacity-85 hover:opacity-100'
-                      }`}
+                      className={`w-7 h-7 rounded-xl transition-all cursor-pointer ${newCatColor === color ? 'scale-115 ring-2 ring-offset-2 ring-slate-800 shadow-sm' : 'hover:scale-105 opacity-85 hover:opacity-100'
+                        }`}
                       style={{ backgroundColor: color }}
                     />
                   ))}

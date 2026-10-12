@@ -16,7 +16,7 @@ public record CreateBudgetRequest(
         LocalDate monthReference,
 
         @NotNull(message = "O limite mensal é obrigatório.")
-        @DecimalMin(value = "0.01", message = "O limite mensal deve ser maior que zero.")
+        @DecimalMin(value = "0.00", message = "O limite mensal não pode ser negativo.")
         BigDecimal monthlyLimit,
 
         @Min(value = 1, message = "O percentual de alerta deve ser no mínimo 1%.")

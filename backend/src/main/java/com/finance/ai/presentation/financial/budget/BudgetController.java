@@ -5,12 +5,14 @@ import com.finance.ai.application.financial.budget.CreateOrUpdateBudgetUseCase;
 import com.finance.ai.application.financial.budget.DeleteBudgetUseCase;
 import com.finance.ai.application.financial.budget.ListBudgetsUseCase;
 import com.finance.ai.application.financial.budget.SuggestBudgetsWithAiUseCase;
+import com.finance.ai.application.financial.budget.UpdateGlobalAlertThresholdUseCase;
 import com.finance.ai.application.financial.budget.dto.AiBudgetSuggestionResult;
 import com.finance.ai.application.financial.budget.dto.BudgetProgressDto;
 import com.finance.ai.domain.financial.budget.Budget;
 import com.finance.ai.infrastructure.security.AuthenticatedUser;
 import com.finance.ai.presentation.financial.budget.dto.CreateBudgetRequest;
 import com.finance.ai.presentation.financial.budget.dto.SuggestBudgetsRequest;
+import com.finance.ai.presentation.financial.budget.dto.UpdateAlertThresholdRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -36,17 +38,20 @@ public class BudgetController {
     private final DeleteBudgetUseCase deleteBudgetUseCase;
     private final SuggestBudgetsWithAiUseCase suggestBudgetsWithAiUseCase;
     private final BatchCreateBudgetsUseCase batchCreateBudgetsUseCase;
+    private final UpdateGlobalAlertThresholdUseCase updateGlobalAlertThresholdUseCase;
 
     public BudgetController(CreateOrUpdateBudgetUseCase createOrUpdateBudgetUseCase,
                             ListBudgetsUseCase listBudgetsUseCase,
                             DeleteBudgetUseCase deleteBudgetUseCase,
                             SuggestBudgetsWithAiUseCase suggestBudgetsWithAiUseCase,
-                            BatchCreateBudgetsUseCase batchCreateBudgetsUseCase) {
+                            BatchCreateBudgetsUseCase batchCreateBudgetsUseCase,
+                            UpdateGlobalAlertThresholdUseCase updateGlobalAlertThresholdUseCase) {
         this.createOrUpdateBudgetUseCase = createOrUpdateBudgetUseCase;
         this.listBudgetsUseCase = listBudgetsUseCase;
         this.deleteBudgetUseCase = deleteBudgetUseCase;
         this.suggestBudgetsWithAiUseCase = suggestBudgetsWithAiUseCase;
         this.batchCreateBudgetsUseCase = batchCreateBudgetsUseCase;
+        this.updateGlobalAlertThresholdUseCase = updateGlobalAlertThresholdUseCase;
     }
 
     @GetMapping
@@ -119,5 +124,22 @@ public class BudgetController {
 
         var saved = batchCreateBudgetsUseCase.execute(user.userId(), requests);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    }
+
+    @PatchMapping("/alert-threshold")
+    @Operation(summary = "Atualiza o percentual de alerta de consumo próximo para todas as categorias no mês")
+    public ResponseEntity<List<Budget>> updateGlobalAlertThreshold(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @Valid @RequestBody UpdateAlertThresholdRequest request) {
+
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        LocalDate targetMonth = request.monthReference() != null ? request.monthReference() : LocalDate.now();
+        var updated = updateGlobalAlertThresholdUseCase.execute(
+                user.userId(),
+                targetMonth,
+                request.alertThresholdPercentage()
+        );
+        return ResponseEntity.ok(updated);
     }
 }

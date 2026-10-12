@@ -75,10 +75,15 @@ export async function getAiBudgetSuggestionsApi(
   });
 
   if (!res.ok) {
+    if (res.status === 401) {
+      window.dispatchEvent(new Event('auth:expired'));
+      throw new Error('Sua sessão expirou. Por favor, entre na sua conta novamente.');
+    }
     let errMessage = 'Falha ao gerar sugestões com inteligência artificial.';
     try {
       const data = await res.json();
       if (data.message) errMessage = data.message;
+      else if (data.error) errMessage = data.error;
     } catch {
       // Ignora erro
     }
@@ -103,10 +108,21 @@ export async function saveBatchBudgetsApi(
   });
 
   if (!res.ok) {
+    if (res.status === 401) {
+      window.dispatchEvent(new Event('auth:expired'));
+      throw new Error('Sua sessão expirou. Por favor, entre na sua conta novamente.');
+    }
     let errMessage = 'Erro ao salvar metas em lote.';
     try {
       const data = await res.json();
-      if (data.message) errMessage = data.message;
+      if (data.message) {
+        errMessage = data.message;
+      } else if (data.details && typeof data.details === 'object') {
+        const detailValues = Object.values(data.details).join(', ');
+        if (detailValues) errMessage = `Erro de validação: ${detailValues}`;
+      } else if (data.error) {
+        errMessage = data.error;
+      }
     } catch {
       // Ignora erro
     }
@@ -115,4 +131,64 @@ export async function saveBatchBudgetsApi(
 
   return res.json();
 }
+
+export async function updateGlobalAlertThresholdApi(
+  token: string,
+  alertThresholdPercentage: number,
+  monthReference?: string
+): Promise<BudgetProgressDto[]> {
+  const res = await fetch(`${API_BASE_URL}/budgets/alert-threshold`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      alertThresholdPercentage,
+      monthReference,
+    }),
+  });
+
+  if (!res.ok) {
+    if (res.status === 401) {
+      window.dispatchEvent(new Event('auth:expired'));
+      throw new Error('Sua sessão expirou. Por favor, entre na sua conta novamente.');
+    }
+    let errMessage = 'Erro ao atualizar alerta global de consumo.';
+    try {
+      const data = await res.json();
+      if (data.message) errMessage = data.message;
+      else if (data.error) errMessage = data.error;
+    } catch {
+      // Ignora erro
+    }
+    throw new Error(errMessage);
+  }
+
+  return res.json();
+}
+
+export function getStoredGlobalAlertThreshold(userId?: string): number {
+  try {
+    const val = localStorage.getItem(`finance_global_alert_threshold_${userId || 'default'}`);
+    if (val) {
+      const parsed = parseInt(val, 10);
+      if (!isNaN(parsed) && parsed >= 1 && parsed <= 100) return parsed;
+    }
+  } catch {
+    // ignora
+  }
+  return 80;
+}
+
+export function setStoredGlobalAlertThreshold(userId: string | undefined, percentage: number): void {
+  try {
+    localStorage.setItem(`finance_global_alert_threshold_${userId || 'default'}`, percentage.toString());
+  } catch {
+    // ignora
+  }
+}
+
+
 

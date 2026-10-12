@@ -63,8 +63,8 @@ Este documento registra o estado real, factual e auditável do desenvolvimento d
 ### 2.7. Fase 6 — Inteligência Artificial: Extração de Transações (Texto e Áudio)
 - [x] Contratos e Domínio de IA: `ExtractedTransaction`, `AiExtractionPort`, `AudioTranscriptionPort`.
 - [x] Privacidade e Governança (LGPD): Sanitização de CPFs, cartões e emails via `PiiSanitizer`.
-- [x] Adaptador Gemini com fallback determinístico offline (`NaturalLanguageRuleParser`).
-- [x] Modal `AiTransactionModal` com entrada por texto e gravação de voz (microfone via Web Audio API) com confirmação humana obrigatória.
+- [x] Adaptador Gemini com fallback determinístico offline (`NaturalLanguageRuleParser`) aprimorado para valores falados compostos (reais e centavos) e marcas brasileiras populares (iFood, Uber, etc.).
+- [x] Modal `AiTransactionModal` com entrada por texto e gravação de voz: integração com a **Web Speech API nativa** do navegador em tempo real (transcrição instantânea em pt-BR e envio ao extrator estruturado), remoção de mocks fixos de áudio no backend e confirmação humana obrigatória sem alucinações.
 
 ### 2.8. Fase 7 — Dashboard Analítico Avançado, Gráficos Reativos & Orçamentos
 - [x] **Domínio de Orçamentos:**
@@ -79,6 +79,8 @@ Este documento registra o estado real, factual e auditável do desenvolvimento d
 - [x] **Endpoints REST Autenticados:**
   - `GET /api/v1/budgets`: lista metas com progresso percentual e alertas.
   - `POST /api/v1/budgets`: define ou atualiza meta por categoria.
+  - `POST /api/v1/budgets/batch`: persistência atômica em lote de metas por categoria geradas ou ajustadas.
+  - `PATCH /api/v1/budgets/alert-threshold`: atualiza o percentual de alerta de consumo próximo para todas as categorias cadastradas no mês do usuário de forma global.
   - `DELETE /api/v1/budgets/{id}`: remove meta configurada.
   - `GET /api/v1/analytics/overview`: visão consolidada de gráficos e KPIs.
 - [x] **Interface Rica no Frontend:**
@@ -91,7 +93,8 @@ Este documento registra o estado real, factual e auditável do desenvolvimento d
       - Metas definidas em um mês propagam automaticamente para os meses subsequentes.
       - Ao reajustar uma meta em um mês posterior (ex: de R$ 4.000 para R$ 8.000 após 2 meses), os meses anteriores preservam estritamente o valor histórico original (R$ 4.000), enquanto o mês do reajuste e todos os meses seguintes herdam o novo valor (R$ 8.000).
       - Aplicado de ponta a ponta no backend (`ListBudgetsUseCase` e `GetAnalyticsOverviewUseCase`) e no frontend (`spendingLimitTimeline` no `App.tsx` com persistência isolada por usuário).
-  - Modal `BudgetModal`: formulário intuitivo para definir limites mensais e percentual de aviso prévio.
+  - Modal `BudgetModal`: formulário intuitivo para definir limites mensais e percentual de alerta de consumo próximo unificado globalmente para todas as categorias e metas de I.A. Permite salvar a regra global mesmo sem selecionar uma categoria específica.
+  - Modal `AiBudgetSuggestionModal`: distribuição inteligente com IA, com suporte a travas de personalização por categoria (toggles com ícones de cadeado), rebalanceamento estrito do teto total e aplicação do percentual global de alerta configurado.
 
 ### 2.9. Fase 8 — Despesas Fixas Recorrentes, Assinaturas & Robustez Operacional
 - [x] **Domínio de Despesas Recorrentes:**

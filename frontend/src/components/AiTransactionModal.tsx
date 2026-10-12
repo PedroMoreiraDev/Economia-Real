@@ -40,12 +40,15 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
   const [activeTab, setActiveTab] = useState<'text' | 'voice'>('text');
   const [inputText, setInputText] = useState('');
 
-  // Estados de gravação de áudio
+  // Estados de gravação de áudio e reconhecimento de voz nativo
   const [isRecording, setIsRecording] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const [liveTranscript, setLiveTranscript] = useState('');
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<number | null>(null);
+  const speechRecognitionRef = useRef<any>(null);
+  const speechTranscriptRef = useRef<string>('');
 
   // Estados de IA e Proposta
   const [isProcessingAi, setIsProcessingAi] = useState(false);
@@ -61,10 +64,13 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
   const [confirmCategoryId, setConfirmCategoryId] = useState('');
   const [confirmAccountId, setConfirmAccountId] = useState('');
 
-  // Limpeza de timers e gravador
+  // Limpeza de timers, gravador e speech recognition
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
+      if (speechRecognitionRef.current) {
+        try { speechRecognitionRef.current.stop(); } catch {}
+      }
       if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
         mediaRecorderRef.current.stop();
       }
@@ -115,10 +121,58 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
     }
   };
 
-  // Iniciar gravação de voz
+  // Processar fala capturada em tempo real pela Web Speech API
+  const processRecognizedText = async (text: string) => {
+    if (!token) return;
+    setError(null);
+    setIsProcessingAi(true);
+
+    try {
+      const response = await extractFromTextApi(token, text.trim());
+      handleAiSuccess({
+        ...response,
+        transcribedText: text.trim(),
+        origin: 'AI_AUDIO' as any,
+      });
+    } catch (err: any) {
+      setError(err.message || 'Falha ao processar comando de voz.');
+    } finally {
+      setIsProcessingAi(false);
+    }
+  };
+
+  // Iniciar gravação de voz e reconhecimento simultâneo
   const startRecording = async () => {
     setError(null);
     audioChunksRef.current = [];
+    speechTranscriptRef.current = '';
+    setLiveTranscript('');
+
+    // Inicia reconhecimento de fala nativo do navegador (Web Speech API)
+    const SpeechRecognitionClass = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognitionClass) {
+      try {
+        const recognition = new SpeechRecognitionClass();
+        recognition.lang = 'pt-BR';
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.onresult = (event: any) => {
+          let current = '';
+          for (let i = 0; i < event.results.length; i++) {
+            current += event.results[i][0].transcript;
+          }
+          speechTranscriptRef.current = current;
+          setLiveTranscript(current);
+        };
+        recognition.onerror = (e: any) => {
+          console.warn('SpeechRecognition erro ou cancelamento:', e);
+        };
+        recognition.start();
+        speechRecognitionRef.current = recognition;
+      } catch (err) {
+        console.warn('Não foi possível iniciar SpeechRecognition nativo:', err);
+      }
+    }
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -133,8 +187,16 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
 
       recorder.onstop = async () => {
         stream.getTracks().forEach(track => track.stop());
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        await processAudioBlob(audioBlob);
+
+        const capturedText = speechTranscriptRef.current.trim();
+        if (capturedText) {
+          // Processa diretamente o texto falado e capturado com fidelidade total
+          await processRecognizedText(capturedText);
+        } else {
+          // Fallback para envio do áudio ao backend
+          const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+          await processAudioBlob(audioBlob);
+        }
       };
 
       recorder.start();
@@ -146,6 +208,9 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
       }, 1000);
     } catch (err: any) {
       setError('Não foi possível acessar o microfone. Verifique as permissões do navegador.');
+      if (speechRecognitionRef.current) {
+        try { speechRecognitionRef.current.stop(); } catch {}
+      }
     }
   };
 
@@ -153,12 +218,19 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
   const stopRecording = () => {
     if (timerRef.current) clearInterval(timerRef.current);
     setIsRecording(false);
+    if (speechRecognitionRef.current) {
+      try {
+        speechRecognitionRef.current.stop();
+      } catch (e) {
+        // ignora
+      }
+    }
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
       mediaRecorderRef.current.stop();
     }
   };
 
-  // Processar áudio (Blob ou File)
+  // Processar áudio (Blob ou File) via backend
   const processAudioBlob = async (blob: Blob) => {
     if (!token) return;
     setError(null);
@@ -394,17 +466,26 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
                     </div>
 
                     {isRecording ? (
-                      <div className="space-y-1">
+                      <div className="space-y-2">
                         <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black bg-rose-50 text-[#EA2B2B] border-2 border-[#FF4B4B]">
                           <span className="w-2 h-2 rounded-full bg-[#FF4B4B] animate-pulse" />
                           Gravando áudio ({String(Math.floor(recordingSeconds / 60)).padStart(2, '0')}:{String(recordingSeconds % 60).padStart(2, '0')})
                         </span>
-                        <p className="text-xs font-bold text-slate-400">Fale normalmente e clique no botão vermelho para finalizar.</p>
+                        {liveTranscript ? (
+                          <div className="p-3 bg-purple-50 border-2 border-purple-200 rounded-2xl text-purple-900 font-bold text-xs sm:text-sm max-w-sm mx-auto shadow-sm">
+                            <span className="text-[10px] uppercase font-black tracking-wider text-purple-600 block mb-0.5">
+                              Ouvindo em tempo real:
+                            </span>
+                            "{liveTranscript}"
+                          </div>
+                        ) : (
+                          <p className="text-xs font-bold text-slate-400">Fale normalmente e clique no botão vermelho para finalizar.</p>
+                        )}
                       </div>
                     ) : (
                       <p className="text-xs sm:text-sm font-bold text-slate-600">
                         Clique no microfone e diga, por exemplo: <br />
-                        <span className="text-[#58CC02] font-black">"Gastei trinta e cinco reais no almoço hoje"</span>
+                        <span className="text-[#58CC02] font-black">"Ifood 49,19 no débito hoje"</span>
                       </p>
                     )}
                   </div>

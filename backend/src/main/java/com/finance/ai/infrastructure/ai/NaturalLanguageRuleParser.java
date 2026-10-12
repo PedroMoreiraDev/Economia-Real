@@ -101,7 +101,25 @@ public class NaturalLanguageRuleParser {
     }
 
     private BigDecimal extractAmount(String text) {
-        // Padrão específico para "X reais", "R$ X" ou apenas número decimal isolado
+        // 1. Padrão para valores falados compostos (ex: "49 reais e 19 centavos", "49 e 19")
+        Pattern compoundPattern = Pattern.compile(
+                "\\b(\\d{1,6})\\s*(?:reais)?\\s*e\\s*(\\d{1,2})(?:\\s*centavos)?\\b",
+                Pattern.CASE_INSENSITIVE
+        );
+        Matcher compoundMatcher = compoundPattern.matcher(text);
+        if (compoundMatcher.find()) {
+            String intPart = compoundMatcher.group(1);
+            String decPart = compoundMatcher.group(2);
+            if (decPart.length() == 1) {
+                decPart = decPart + "0";
+            }
+            try {
+                return new BigDecimal(intPart + "." + decPart).setScale(2, RoundingMode.HALF_EVEN);
+            } catch (Exception ignored) {
+            }
+        }
+
+        // 2. Padrão específico para "X reais", "R$ X" ou número decimal padrão (ex: "49,19" ou "49.19")
         Pattern pattern = Pattern.compile("(?:r\\$\\s*|\\b)(\\d{1,6}(?:[.,]\\d{1,2})?)\\s*(?:reais|conto|pila|mangos)?\\b");
         Matcher matcher = pattern.matcher(text);
 
@@ -225,6 +243,7 @@ public class NaturalLanguageRuleParser {
                 "(?i)\\b(gastei|comprei|paguei|recebi|valor\\s+de|transferi)\\b",
                 "(?i)\\b(hoje|ontem|anteontem)\\b",
                 "(?i)\\b(no\\s+crédito|no\\s+credito|no\\s+débito|no\\s+debito|no\\s+pix|via\\s+pix|em\\s+dinheiro|no\\s+cartão)\\b",
+                "(?i)\\b(\\d{1,6}\\s*(?:reais)?\\s*e\\s*\\d{1,2}(?:\\s*centavos)?)\\b",
                 "(?i)\\b(r\\$\\s*\\d+(?:[.,]\\d{1,2})?|\\d+(?:[.,]\\d{1,2})?\\s*(?:reais|conto|pila|mangos)?)\\b",
                 "(?i)\\bdia\\s+\\d{1,2}(?:/\\d{1,2})?\\b"
         };
@@ -237,6 +256,7 @@ public class NaturalLanguageRuleParser {
 
         if (cleaned.isBlank() || cleaned.length() < 2) {
             // Se limpou tudo, tenta inferir algo significativo do original
+            if (lowerText.contains("ifood")) return "iFood";
             if (lowerText.contains("almoço") || lowerText.contains("almoco")) return "Almoço";
             if (lowerText.contains("uber")) return "Uber";
             if (lowerText.contains("mercado")) return "Mercado";

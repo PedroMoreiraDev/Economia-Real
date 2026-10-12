@@ -74,4 +74,28 @@ class NaturalLanguageRuleParserTest {
         assertThat(result.amount()).isEqualByComparingTo(BigDecimal.ZERO);
         assertThat(result.ambiguities()).isNotEmpty();
     }
+
+    @Test
+    @DisplayName("Deve extrair 'ifood 49,19' com valor 49.19 e categoria Alimentação")
+    void shouldExtractIfoodWithDecimalAmount() {
+        String text = "ifood 49,19";
+        ExtractedTransaction result = parser.parse(text, categories, TransactionOrigin.AI_AUDIO);
+
+        assertThat(result.type()).isEqualTo(TransactionType.EXPENSE);
+        assertThat(result.amount()).isEqualByComparingTo(new BigDecimal("49.19"));
+        assertThat(result.suggestedCategoryName()).isEqualTo("Alimentação");
+        assertThat(result.description()).containsIgnoringCase("ifood");
+    }
+
+    @Test
+    @DisplayName("Deve extrair 'ifood 49 reais e 19 centavos' com valor 49.19 e categoria Alimentação")
+    void shouldExtractIfoodWithSpokenCompoundAmount() {
+        String text = "ifood 49 reais e 19 centavos";
+        ExtractedTransaction result = parser.parse(text, categories, TransactionOrigin.AI_AUDIO);
+
+        assertThat(result.type()).isEqualTo(TransactionType.EXPENSE);
+        assertThat(result.amount()).isEqualByComparingTo(new BigDecimal("49.19"));
+        assertThat(result.suggestedCategoryName()).isEqualTo("Alimentação");
+        assertThat(result.description()).containsIgnoringCase("ifood");
+    }
 }

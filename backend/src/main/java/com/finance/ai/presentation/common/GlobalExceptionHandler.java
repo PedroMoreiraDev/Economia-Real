@@ -10,6 +10,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -54,6 +55,26 @@ public class GlobalExceptionHandler {
         for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
             fieldErrors.put(fieldError.getField(), fieldError.getDefaultMessage());
         }
+
+        var error = new ValidationErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Bad Request",
+                "Erro de validação nos campos informados.",
+                fieldErrors,
+                Instant.now()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<ValidationErrorResponse> handleMethodValidation(HandlerMethodValidationException ex) {
+        Map<String, String> fieldErrors = new HashMap<>();
+        ex.getAllValidationResults().forEach(result -> {
+            result.getResolvableErrors().forEach(error -> {
+                String paramName = result.getMethodParameter().getParameterName();
+                fieldErrors.put(paramName != null ? paramName : "payload", error.getDefaultMessage());
+            });
+        });
 
         var error = new ValidationErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
