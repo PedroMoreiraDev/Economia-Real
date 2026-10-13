@@ -39,11 +39,18 @@ async function handleResponse<T>(res: Response): Promise<T> {
 }
 
 export async function fetchCaptchaApi(): Promise<CaptchaChallenge> {
-  const res = await fetch(`${API_BASE_URL}/auth/captcha`, {
-    method: 'GET',
-    headers: { 'Accept': 'application/json' },
-  });
-  return handleResponse<CaptchaChallenge>(res);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 7000);
+  try {
+    const res = await fetch(`${API_BASE_URL}/auth/captcha`, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+      signal: controller.signal,
+    });
+    return await handleResponse<CaptchaChallenge>(res);
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 export async function loginApi(payload: LoginPayload): Promise<AuthResponse> {
