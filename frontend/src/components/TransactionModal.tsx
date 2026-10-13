@@ -56,7 +56,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       }
       setNotes(transactionToEdit.notes || '');
     } else {
-      const startType = initialType || 'EXPENSE';
+      const startType = initialType || 'INCOME';
       setType(startType);
       setDescription('');
       setAmount('');
@@ -175,18 +175,6 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         <div className="flex bg-slate-100 p-1.5 rounded-2xl mb-6 border-2 border-slate-200/80 gap-1.5">
           <button
             type="button"
-            onClick={() => { setType('EXPENSE'); setError(null); }}
-            className={`flex-1 py-2 text-xs font-black rounded-xl flex items-center justify-center gap-1.5 transition-all ${
-              type === 'EXPENSE'
-                ? 'bg-[#FF4B4B] text-white shadow-[0_3px_0_0_#EA2B2B]'
-                : 'text-slate-600 hover:text-slate-800 hover:bg-white/60'
-            }`}
-          >
-            <ArrowDownLeft className="h-4 w-4 stroke-[3]" />
-            Despesa
-          </button>
-          <button
-            type="button"
             onClick={() => { setType('INCOME'); setError(null); }}
             className={`flex-1 py-2 text-xs font-black rounded-xl flex items-center justify-center gap-1.5 transition-all ${
               type === 'INCOME'
@@ -196,6 +184,18 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           >
             <ArrowUpRight className="h-4 w-4 stroke-[3]" />
             Receita
+          </button>
+          <button
+            type="button"
+            onClick={() => { setType('EXPENSE'); setError(null); }}
+            className={`flex-1 py-2 text-xs font-black rounded-xl flex items-center justify-center gap-1.5 transition-all ${
+              type === 'EXPENSE'
+                ? 'bg-[#FF4B4B] text-white shadow-[0_3px_0_0_#EA2B2B]'
+                : 'text-slate-600 hover:text-slate-800 hover:bg-white/60'
+            }`}
+          >
+            <ArrowDownLeft className="h-4 w-4 stroke-[3]" />
+            Despesa
           </button>
           {accounts.length > 1 && (
             <button

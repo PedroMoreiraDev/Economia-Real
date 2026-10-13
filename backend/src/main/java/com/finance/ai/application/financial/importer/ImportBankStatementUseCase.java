@@ -158,8 +158,47 @@ public class ImportBankStatementUseCase {
         );
         importBatchRepository.save(batch);
 
-        String message = String.format("Importação concluída: %d novos lançamentos importados, %d duplicados ignorados.",
-                importedCount, skippedCount);
+        // Calcula o mês de referência predominante nos registros do arquivo
+        String referenceMonth = null;
+        String referenceMonthDisplay = null;
+        if (!parsedItems.isEmpty()) {
+            var monthCounts = parsedItems.stream()
+                    .filter(item -> item.date() != null)
+                    .map(item -> java.time.YearMonth.from(item.date()))
+                    .collect(java.util.stream.Collectors.groupingBy(ym -> ym, java.util.stream.Collectors.counting()));
+
+            if (!monthCounts.isEmpty()) {
+                java.time.YearMonth predominantMonth = monthCounts.entrySet().stream()
+                        .max(java.util.Map.Entry.<java.time.YearMonth, Long>comparingByValue()
+                                .thenComparing(java.util.Map.Entry.comparingByKey()))
+                        .map(java.util.Map.Entry::getKey)
+                        .orElse(java.time.YearMonth.now());
+
+                referenceMonth = predominantMonth.toString();
+                String monthName = switch (predominantMonth.getMonthValue()) {
+                    case 1 -> "Janeiro";
+                    case 2 -> "Fevereiro";
+                    case 3 -> "Março";
+                    case 4 -> "Abril";
+                    case 5 -> "Maio";
+                    case 6 -> "Junho";
+                    case 7 -> "Julho";
+                    case 8 -> "Agosto";
+                    case 9 -> "Setembro";
+                    case 10 -> "Outubro";
+                    case 11 -> "Novembro";
+                    case 12 -> "Dezembro";
+                    default -> "";
+                };
+                referenceMonthDisplay = monthName + " de " + predominantMonth.getYear();
+            }
+        }
+
+        String message = referenceMonthDisplay != null
+                ? String.format("Importação concluída: %d novos lançamentos em %s, %d duplicados ignorados.",
+                        importedCount, referenceMonthDisplay, skippedCount)
+                : String.format("Importação concluída: %d novos lançamentos importados, %d duplicados ignorados.",
+                        importedCount, skippedCount);
 
         return new ImportStatementResult(
                 batchId,
@@ -167,7 +206,9 @@ public class ImportBankStatementUseCase {
                 fileType,
                 importedCount,
                 skippedCount,
-                message
+                message,
+                referenceMonth,
+                referenceMonthDisplay
         );
     }
 

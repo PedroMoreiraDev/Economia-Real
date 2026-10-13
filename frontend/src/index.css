@@ -184,3 +184,26 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #94A3B8;
 }
+
+/* =============================================================================
+   Destaque Visual Interativo do Tutorial / Tour Guiado
+   ============================================================================= */
+@keyframes tourPulseHalo {
+  0%, 100% {
+    box-shadow: 0 0 0 3px #026CD6, 0 0 25px rgba(2, 108, 214, 0.45);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 7px #38BDF8, 0 0 45px rgba(56, 189, 248, 0.65);
+    transform: scale(1.01);
+  }
+}
+
+.tour-target-highlight {
+  outline: 3px solid #026CD6 !important;
+  outline-offset: 6px !important;
+  animation: tourPulseHalo 1.8s ease-in-out infinite !important;
+  transition: all 0.3s ease !important;
+  z-index: 35 !important;
+  position: relative !important;
+}

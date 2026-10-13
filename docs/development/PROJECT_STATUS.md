@@ -228,10 +228,19 @@ dist/assets/index-CVcJJLIG.js   305.65 kB │ gzip: 75.31 kB
   - `handleRemoveGlobalLimit` agora salva flag de desativação explícita (`economia_real_spending_limit_disabled_${user.id}`) e, se houver metas/orçamentos cadastrados no banco de dados para o mês, remove-os atomicamente via `deleteBudgetApi` e sincroniza o estado.
   - Botão de "Remover" teto adicionado diretamente ao lado de "Ajustar" no cabeçalho do card de teto, e dentro do formulário de edição, visível sempre que existir qualquer limite ativo.
 
-- **Seleção Múltipla e Exclusão em Massa no Extrato de Movimentações:**
+- **Seleção Múltipla e Exclusão (Individual e em Massa) no Extrato com Modal Estilizado:**
   - Backend: endpoint `POST /api/v1/transactions/batch-delete` em `TransactionController.java` e `DeleteTransactionUseCase.executeBatch` com garantia de isolamento por usuário (`userId`).
-  - Frontend: checkboxes integrados no cabeçalho da tabela (selecionar todos / desmarcar todos) e em cada linha de lançamento, com destaque visual de seleção.
-  - Barra de ações em massa com contagem dinâmica e diálogo nativo de confirmação: *"Deseja excluir os X registros selecionados?"*.
+  - Frontend: substituição completa dos diálogos nativos do navegador (`window.confirm` e `alert`) pelo componente moderno `ConfirmModal.tsx`, integrado ao design system tátil (Duolingo style).
+  - Experiência visual refinada: backdrop com desfoque (`backdrop-blur-sm`), ícone de lixeira em vermelho suave, resumo da movimentação (descrição, valor formatado em R$ e data) ou contagem total de itens em lote, alerta de irreversibilidade e botões táteis (`btn-duo-white` e `btn-duo-red`).
+  - Feedback suave via toasts temporários de sucesso/erro sem bloqueio da interface.
+
+- **Tutorial Guiado Interativo / Onboarding Acolhedor (`OnboardingTourModal.tsx`):**
+  - Exibição automática ao fazer login na plataforma para usuários que ainda não desabilitaram o tour.
+  - 7 passos estruturados, curtos e didáticos (Importação de Fatura, Entradas & Extras, Categorização Ágil, Contas Fixas Recorrentes, Teto & Metas com IA, Lançamentos por Voz/Texto e Perspectiva Anual).
+  - Destaque dinâmico no site (`tour-target-highlight`): o tutorial troca de abas automaticamente e rola suavemente (`scrollIntoView`) até o elemento em foco, aplicando aura pulsante em azul suave.
+  - Demonstração visual ilustrada para cada passo com componentes táteis em miniatura.
+  - Opção persistida de *"Não exibir automaticamente ao entrar"* via `localStorage` isolado por usuário.
+  - Botão de acesso rápido integrado ao header superior (`Compass` / "Guia"), posicionado de forma compacta e discreta ao lado do botão de Privacidade, permitindo reabrir o tutorial a qualquer momento com 1 clique.
 
 ---
 

@@ -8,5 +8,18 @@ public record ImportStatementResult(
         String fileType,
         int importedCount,
         int skippedCount,
-        String message
-) {}
+        String message,
+        String referenceMonth,
+        String referenceMonthDisplay
+) {
+    public ImportStatementResult(
+            UUID batchId,
+            String fileName,
+            String fileType,
+            int importedCount,
+            int skippedCount,
+            String message
+    ) {
+        this(batchId, fileName, fileType, importedCount, skippedCount, message, null, null);
+    }
+}

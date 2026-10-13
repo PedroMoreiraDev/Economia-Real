@@ -5,6 +5,8 @@ export interface ImportStatementResult {
   importedCount: number;
   skippedCount: number;
   message: string;
+  referenceMonth?: string;
+  referenceMonthDisplay?: string;
 }
 
 export interface ImportBatch {

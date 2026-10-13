@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UploadCloud, FileText, CheckCircle2, AlertCircle, X, CreditCard } from 'lucide-react';
+import { UploadCloud, FileText, CheckCircle2, AlertCircle, X, CreditCard, Calendar } from 'lucide-react';
 import { Account } from '../types/financial';
 import { ImportStatementResult } from '../types/import';
 import { uploadStatementApi } from '../services/importApi';
@@ -9,7 +9,7 @@ interface ImportModalProps {
   isOpen: boolean;
   onClose: () => void;
   accounts: Account[];
-  onImportCompleted: () => void;
+  onImportCompleted: (importedMonth?: string) => void;
 }
 
 export const ImportModal: React.FC<ImportModalProps> = ({
@@ -66,7 +66,7 @@ export const ImportModal: React.FC<ImportModalProps> = ({
       const res = await uploadStatementApi(token, targetAccId, file, isCreditCard);
       setResult(res);
       setFile(null);
-      onImportCompleted();
+      onImportCompleted(res.referenceMonth);
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
@@ -118,12 +118,21 @@ export const ImportModal: React.FC<ImportModalProps> = ({
 
         {result ? (
           <div className="space-y-4 py-2 animate-fade-in">
-            <div className="p-4 rounded-2xl bg-blue-50 border-2 border-blue-200 text-blue-900 space-y-2">
+            <div className="p-4 rounded-2xl bg-blue-50 border-2 border-blue-200 text-blue-900 space-y-2.5">
               <div className="flex items-center gap-2 text-sm font-black text-[#026CD6]">
                 <CheckCircle2 className="h-5 w-5 stroke-[2.5]" />
                 <span>Importação Concluída com Sucesso!</span>
               </div>
               <p className="text-xs font-bold text-slate-600">{result.message}</p>
+
+              {result.referenceMonthDisplay && (
+                <div className="flex items-center gap-2 pt-1">
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white border-2 border-blue-200 text-xs font-black text-[#026CD6] shadow-sm">
+                    <Calendar className="h-4 w-4 text-[#026CD6] stroke-[2.5]" />
+                    <span>Mês dos registros importados: <strong className="text-slate-900 underline decoration-blue-400 decoration-2">{result.referenceMonthDisplay}</strong></span>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-3 text-center">
@@ -147,7 +156,12 @@ export const ImportModal: React.FC<ImportModalProps> = ({
               </button>
               <button
                 type="button"
-                onClick={onClose}
+                onClick={() => {
+                  if (result?.referenceMonth) {
+                    onImportCompleted(result.referenceMonth);
+                  }
+                  onClose();
+                }}
                 className="btn-duo btn-duo-green px-5 py-2.5 text-xs sm:text-sm font-black"
               >
                 Concluir

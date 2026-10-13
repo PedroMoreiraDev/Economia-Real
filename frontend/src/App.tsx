@@ -33,7 +33,8 @@ import {
   Search,
   X,
   Eye,
-  EyeOff
+  EyeOff,
+  Compass
 } from 'lucide-react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AuthModal } from './components/AuthModal';
@@ -50,6 +51,9 @@ import { InlineCategorySelect } from './components/InlineCategorySelect';
 import { InlineDatePicker } from './components/InlineDatePicker';
 import { RecurringBillsSection } from './components/RecurringBillsSection';
 import { SavingsGoalsSection } from './components/SavingsGoalsSection';
+import { LandingPage } from './components/LandingPage';
+import { ConfirmModal } from './components/ConfirmModal';
+import { OnboardingTourModal } from './components/OnboardingTourModal';
 import { exportTransactionsCsvApi } from './services/goalApi';
 import {
   Account,
@@ -171,8 +175,26 @@ const MainDashboard: React.FC = () => {
   const [importModalOpen, setImportModalOpen] = useState<boolean>(false);
   const [aiModalOpen, setAiModalOpen] = useState<boolean>(false);
   const [budgetModalOpen, setBudgetModalOpen] = useState<boolean>(false);
-  const [initialTransactionType, setInitialTransactionType] = useState<TransactionType>('EXPENSE');
+  const [initialTransactionType, setInitialTransactionType] = useState<TransactionType>('INCOME');
   const [aiBudgetModalOpen, setAiBudgetModalOpen] = useState<boolean>(false);
+
+  // Tutorial Guiado / Onboarding Interativo
+  const [isTourOpen, setIsTourOpen] = useState<boolean>(false);
+
+  // Exibe o tutorial automaticamente ao entrar na área logada (se o usuário não tiver desabilitado)
+  useEffect(() => {
+    if (isAuthenticated && user?.id) {
+      const isTourDisabled = localStorage.getItem(`economia_real_tutorial_disabled_${user.id}`) === 'true';
+      if (!isTourDisabled) {
+        const timer = setTimeout(() => {
+          setIsTourOpen(true);
+        }, 600);
+        return () => clearTimeout(timer);
+      }
+    } else {
+      setIsTourOpen(false);
+    }
+  }, [isAuthenticated, user?.id]);
 
   // Meta global de gastos (Teto Mensal) - Linha do tempo histórica contábil por usuário
   const [, setSpendingTimeline] = useState<Record<string, number>>({});
@@ -187,6 +209,18 @@ const MainDashboard: React.FC = () => {
   // Seleção múltipla para exclusão em massa de transações
   const [selectedTxIds, setSelectedTxIds] = useState<Set<string>>(new Set());
   const [deletingBatch, setDeletingBatch] = useState<boolean>(false);
+
+  // Modal de confirmação estilizado para exclusão de movimentações
+  const [deleteConfirmState, setDeleteConfirmState] = useState<{
+    isOpen: boolean;
+    type: 'single' | 'batch';
+    targetId?: string;
+    loading: boolean;
+  }>({
+    isOpen: false,
+    type: 'single',
+    loading: false,
+  });
 
   // Sincroniza a linha do tempo histórica do teto de gastos para o usuário e mês ativo
   useEffect(() => {
@@ -325,21 +359,13 @@ const MainDashboard: React.FC = () => {
     setTransactionModalOpen(true);
   };
 
-  const handleDeleteTransaction = async (id: string) => {
-    if (!token) return;
-    if (window.confirm('Deseja excluir o registro selecionado?')) {
-      try {
-        await deleteTransactionApi(token, id);
-        setSelectedTxIds((prev) => {
-          const next = new Set(prev);
-          next.delete(id);
-          return next;
-        });
-        loadFinancialData();
-      } catch (err: unknown) {
-        alert(err instanceof Error ? err.message : 'Erro ao excluir movimentação.');
-      }
-    }
+  const handleRequestDeleteTransaction = (id: string) => {
+    setDeleteConfirmState({
+      isOpen: true,
+      type: 'single',
+      targetId: id,
+      loading: false,
+    });
   };
 
   // Funções de Seleção Múltipla e Exclusão em Massa
@@ -404,26 +430,13 @@ const MainDashboard: React.FC = () => {
     setSelectedTxIds(new Set());
   };
 
-  const handleDeleteSelected = async () => {
-    if (!token || selectedTxIds.size === 0) return;
-    const count = selectedTxIds.size;
-    const confirmMessage = count === 1
-      ? 'Deseja excluir o registro selecionado?'
-      : `Deseja excluir os ${count} registros selecionados?`;
-
-    if (window.confirm(confirmMessage)) {
-      try {
-        setDeletingBatch(true);
-        const ids = Array.from(selectedTxIds);
-        await deleteBatchTransactionsApi(token, ids);
-        setSelectedTxIds(new Set());
-        await loadFinancialData();
-      } catch (err: unknown) {
-        alert(err instanceof Error ? err.message : 'Erro ao excluir movimentações selecionadas.');
-      } finally {
-        setDeletingBatch(false);
-      }
-    }
+  const handleRequestDeleteSelected = () => {
+    if (selectedTxIds.size === 0) return;
+    setDeleteConfirmState({
+      isOpen: true,
+      type: 'batch',
+      loading: false,
+    });
   };
 
   // Estados para atualização inline e feedback na tabela
@@ -435,6 +448,38 @@ const MainDashboard: React.FC = () => {
     setTimeout(() => {
       setToastMessage((prev) => (prev === msg ? null : prev));
     }, 2800);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!token) return;
+    setDeleteConfirmState((prev) => ({ ...prev, loading: true }));
+
+    try {
+      if (deleteConfirmState.type === 'single' && deleteConfirmState.targetId) {
+        const id = deleteConfirmState.targetId;
+        await deleteTransactionApi(token, id);
+        setSelectedTxIds((prev) => {
+          const next = new Set(prev);
+          next.delete(id);
+          return next;
+        });
+        showToast('Movimentação excluída com sucesso.');
+      } else if (deleteConfirmState.type === 'batch') {
+        const ids = Array.from(selectedTxIds);
+        setDeletingBatch(true);
+        await deleteBatchTransactionsApi(token, ids);
+        setSelectedTxIds(new Set());
+        showToast(`${ids.length} movimentação(ões) excluída(s) com sucesso.`);
+      }
+      setDeleteConfirmState({ isOpen: false, type: 'single', loading: false });
+      await loadFinancialData();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erro ao excluir movimentação(ões).';
+      showToast(msg);
+      setDeleteConfirmState((prev) => ({ ...prev, loading: false }));
+    } finally {
+      setDeletingBatch(false);
+    }
   };
 
   const handleInlineUpdateCategory = async (tx: Transaction, newCategoryId: string) => {
@@ -674,6 +719,19 @@ const MainDashboard: React.FC = () => {
 
           {/* Área Direita: Controles, Perfil e Autenticação */}
           <div className="flex items-center gap-2.5">
+            {/* Botão do Guia / Tutorial do App */}
+            {isAuthenticated && (
+              <button
+                type="button"
+                onClick={() => setIsTourOpen(true)}
+                className="btn-duo btn-duo-white text-xs px-3 py-2 flex items-center gap-1.5 text-slate-700 hover:text-amber-600 transition-colors"
+                title="Abrir o tutorial e guia passo a passo do site"
+              >
+                <Compass className="h-4 w-4 stroke-[2.5] text-amber-500" />
+                <span className="hidden sm:inline">Guia</span>
+              </button>
+            )}
+
             {/* Botão de Modo Privacidade (Ocultar/Mostrar Valores) */}
             {isAuthenticated && (
               <button
@@ -751,96 +809,90 @@ const MainDashboard: React.FC = () => {
       {/* Conteúdo Principal */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
-        {/* Banner Destaque Economia Real (Azul Suave, Moderno e Confiável) */}
-        <div className="card-real-blue p-6 sm:p-8 relative overflow-hidden">
-          <div className="max-w-2xl lg:max-w-3xl space-y-3 relative z-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/90 border-2 border-blue-200 text-[#026CD6] text-xs font-black shadow-sm uppercase tracking-wider">
-              <Sparkles className="h-3.5 w-3.5 text-blue-500 fill-blue-400" />
-              {isAuthenticated ? 'Painel de Controle Financeiro' : 'Sua Plataforma Financeira Inteligente'}
-            </div>
-
-            {isAuthenticated ? (
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-slate-900 leading-tight">
-                Olá{firstName ? `, ${firstName}` : ''}! <span className="text-[#026CD6] underline decoration-blue-300 decoration-4">Pronto para organizar suas contas? Vamos começar!</span> 🎩✨
-              </h1>
-            ) : (
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-slate-900 leading-tight">
-                Economia real, utilizando inteligência artificial <span className="text-[#026CD6] underline decoration-blue-300 decoration-4">para te fazer economizar de verdade</span> 🎩✨
-              </h1>
-            )}
-
-            <p className="text-slate-700 text-sm sm:text-base font-bold leading-relaxed">
-              {isAuthenticated
-                ? 'Monitore seu fluxo de caixa, planeje seus lançamentos e acompanhe suas metas com precisão e suporte de IA.'
-                : 'Monitore seu fluxo de caixa, planeje parcelas do cartão sem surpresas e alcance suas metas financeiras com precisão determinística e suporte de IA.'}
-            </p>
-
-            {/* Ações Rápidas em Destaque */}
-            {isAuthenticated && (
-              <div className="pt-2 flex flex-wrap items-center gap-3">
-                <button
-                  onClick={() => setTransactionModalOpen(true)}
-                  className="btn-duo btn-duo-green text-xs sm:text-sm px-4 py-2.5 flex items-center gap-2"
-                >
-                  <Plus className="h-4 w-4 stroke-[3]" />
-                  Novo Lançamento
-                </button>
-
-                <button
-                  onClick={() => setAiModalOpen(true)}
-                  className="btn-duo btn-duo-purple text-xs sm:text-sm px-4 py-2.5 flex items-center gap-2"
-                >
-                  <Mic className="h-4 w-4" />
-                  Falar com a IA (Voz/Texto)
-                </button>
-
-                <button
-                  onClick={() => setImportModalOpen(true)}
-                  className="btn-duo btn-duo-white text-xs sm:text-sm px-4 py-2.5 flex items-center gap-2"
-                >
-                  <UploadCloud className="h-4 w-4 text-[#0284C7]" />
-                  Importar Extrato
-                </button>
-
-                <button
-                  onClick={handleExportCsv}
-                  disabled={transactions.length === 0 || exportingCsv}
-                  className="btn-duo btn-duo-white text-xs sm:text-sm px-4 py-2.5 flex items-center gap-2 disabled:opacity-50"
-                  title="Exportar para Excel em CSV formatado"
-                >
-                  <Download className={`h-4 w-4 text-blue-600 ${exportingCsv ? 'animate-bounce' : ''}`} />
-                  {exportingCsv ? 'Gerando...' : 'Exportar Planilha'}
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Indicador Flutuante de IA e Projeção de Economia */}
-          <div className="hidden lg:flex absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none select-none items-center">
-            <div className="bg-white/95 backdrop-blur-md rounded-3xl border-2 border-blue-200/90 p-4 shadow-xl shadow-blue-900/10 space-y-2.5 w-64 rotate-1">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                  Radar de IA Ativo
-                </span>
-                <span className="text-[11px] font-black px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                  +18.4%
-                </span>
-              </div>
-              <div>
-                <span className="text-[11px] font-bold text-slate-400">Economia Projetada</span>
-                <p className="text-2xl font-black text-slate-900 tracking-tight">R$ 1.420,00</p>
-              </div>
-              <div className="flex items-center gap-1.5 text-[11px] font-bold text-blue-800 bg-blue-50 px-2.5 py-1.5 rounded-xl border border-blue-100">
-                <Sparkles className="w-3.5 h-3.5 text-[#026CD6] shrink-0" />
-                <span>Otimização contínua ativada</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {isAuthenticated && user ? (
-          <div className="space-y-8">
+          <>
+            {/* Banner Destaque Economia Real (Azul Suave, Moderno e Confiável - Área Logada) */}
+            <div className="card-real-blue p-6 sm:p-8 relative overflow-hidden">
+              <div className="max-w-2xl lg:max-w-3xl space-y-3 relative z-10">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/90 border-2 border-blue-200 text-[#026CD6] text-xs font-black shadow-sm uppercase tracking-wider">
+                  <Sparkles className="h-3.5 w-3.5 text-blue-500 fill-blue-400" />
+                  Painel de Controle Financeiro
+                </div>
+
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-slate-900 leading-tight">
+                  Olá{firstName ? `, ${firstName}` : ''}! <span className="text-[#026CD6] underline decoration-blue-300 decoration-4">Pronto para organizar suas contas? Vamos começar!</span> 🎩✨
+                </h1>
+
+                <p className="text-slate-700 text-sm sm:text-base font-bold leading-relaxed">
+                  Monitore seu fluxo de caixa, planeje seus lançamentos e acompanhe suas metas com precisão e suporte de IA.
+                </p>
+
+                {/* Ações Rápidas em Destaque */}
+                <div className="pt-2 flex flex-wrap items-center gap-3">
+                  <button
+                    id="tour-add-btn"
+                    onClick={() => setTransactionModalOpen(true)}
+                    className="btn-duo btn-duo-green text-xs sm:text-sm px-4 py-2.5 flex items-center gap-2"
+                  >
+                    <Plus className="h-4 w-4 stroke-[3]" />
+                    Novo Lançamento
+                  </button>
+
+                  <button
+                    id="tour-ai-btn"
+                    onClick={() => setAiModalOpen(true)}
+                    className="btn-duo btn-duo-purple text-xs sm:text-sm px-4 py-2.5 flex items-center gap-2"
+                  >
+                    <Mic className="h-4 w-4" />
+                    Falar com a IA (Voz/Texto)
+                  </button>
+
+                  <button
+                    id="tour-import-btn"
+                    onClick={() => setImportModalOpen(true)}
+                    className="btn-duo btn-duo-white text-xs sm:text-sm px-4 py-2.5 flex items-center gap-2"
+                  >
+                    <UploadCloud className="h-4 w-4 text-[#0284C7]" />
+                    Importar Extrato
+                  </button>
+
+                  <button
+                    onClick={handleExportCsv}
+                    disabled={transactions.length === 0 || exportingCsv}
+                    className="btn-duo btn-duo-white text-xs sm:text-sm px-4 py-2.5 flex items-center gap-2 disabled:opacity-50"
+                    title="Exportar para Excel em CSV formatado"
+                  >
+                    <Download className={`h-4 w-4 text-blue-600 ${exportingCsv ? 'animate-bounce' : ''}`} />
+                    {exportingCsv ? 'Gerando...' : 'Exportar Planilha'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Indicador Flutuante de IA e Projeção de Economia */}
+              <div className="hidden lg:flex absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none select-none items-center">
+                <div className="bg-white/95 backdrop-blur-md rounded-3xl border-2 border-blue-200/90 p-4 shadow-xl shadow-blue-900/10 space-y-2.5 w-64 rotate-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                      Radar de IA Ativo
+                    </span>
+                    <span className="text-[11px] font-black px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      +18.4%
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[11px] font-bold text-slate-400">Economia Projetada</span>
+                    <p className="text-2xl font-black text-slate-900 tracking-tight">R$ 1.420,00</p>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-[11px] font-bold text-blue-800 bg-blue-50 px-2.5 py-1.5 rounded-xl border border-blue-100">
+                    <Sparkles className="w-3.5 h-3.5 text-[#026CD6] shrink-0" />
+                    <span>Otimização contínua ativada</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-8">
 
             {/* Seletor Global de Mês / Navegação Temporal no Estilo Duolingo */}
             <div className="card-duo p-4 sm:p-5 flex flex-col md:flex-row items-center justify-between gap-4 bg-gradient-to-r from-white via-blue-50/40 to-white">
@@ -1182,7 +1234,7 @@ const MainDashboard: React.FC = () => {
                                   </button>
                                   <button
                                     type="button"
-                                    onClick={() => handleDeleteTransaction(tx.id)}
+                                    onClick={() => handleRequestDeleteTransaction(tx.id)}
                                     className="p-1 text-slate-400 hover:text-rose-600 rounded-lg transition"
                                     title="Excluir entrada"
                                   >
@@ -1204,7 +1256,7 @@ const MainDashboard: React.FC = () => {
                   </div>
 
                   {/* Bloco 2: Meta Máxima de Gastos (Teto Mensal & IA) */}
-                  <div className="card-duo p-6 space-y-4">
+                  <div id="tour-spending-limit-card" className="card-duo p-6 space-y-4">
                     <div className="flex items-center justify-between border-b-2 border-slate-100 pb-3">
                       <div className="flex items-center gap-2">
                         <Target className="h-5 w-5 text-[#026CD6] stroke-[2.5]" />
@@ -1394,7 +1446,7 @@ const MainDashboard: React.FC = () => {
                 </div>
 
                 {/* Coluna 2 e 3: Extrato de Transações */}
-                <div className="lg:col-span-2 card-duo p-4 sm:p-5 space-y-4">
+                <div id="tour-statement-section" className="lg:col-span-2 card-duo p-4 sm:p-5 space-y-4">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-slate-100 pb-4">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
@@ -1550,7 +1602,7 @@ const MainDashboard: React.FC = () => {
 
                       <button
                         type="button"
-                        onClick={handleDeleteSelected}
+                        onClick={handleRequestDeleteSelected}
                         disabled={deletingBatch}
                         className="btn-duo btn-duo-white text-xs px-3.5 py-1.5 flex items-center gap-1.5 text-rose-600 hover:text-rose-700 border-rose-300 bg-rose-50 hover:bg-rose-100 shadow-sm disabled:opacity-50"
                       >
@@ -1753,7 +1805,7 @@ const MainDashboard: React.FC = () => {
                                     </button>
                                     <button
                                       type="button"
-                                      onClick={() => handleDeleteTransaction(tx.id)}
+                                      onClick={() => handleRequestDeleteTransaction(tx.id)}
                                       className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
                                       title="Excluir movimentação"
                                     >
@@ -1774,24 +1826,28 @@ const MainDashboard: React.FC = () => {
 
             {/* ABA 2: ANÁLISE & ORÇAMENTOS */}
             {activeTab === 'analytics' && (
-              <AnalyticsSection
-                analytics={analytics}
-                budgets={budgets}
-                onOpenBudgetModal={() => setBudgetModalOpen(true)}
-                onOpenAiBudgetModal={() => setAiBudgetModalOpen(true)}
-                globalLimit={effectiveGlobalLimit}
-              />
+              <div id="tour-analytics-tab-content">
+                <AnalyticsSection
+                  analytics={analytics}
+                  budgets={budgets}
+                  onOpenBudgetModal={() => setBudgetModalOpen(true)}
+                  onOpenAiBudgetModal={() => setAiBudgetModalOpen(true)}
+                  globalLimit={effectiveGlobalLimit}
+                />
+              </div>
             )}
 
             {/* ABA 3: DESPESAS RECORRENTES */}
             {activeTab === 'recurring' && (
-              <RecurringBillsSection
-                categories={categories}
-                accounts={accounts}
-                creditCards={creditCards}
-                selectedMonth={selectedMonth}
-                onDataChanged={loadFinancialData}
-              />
+              <div id="tour-recurring-tab-content">
+                <RecurringBillsSection
+                  categories={categories}
+                  accounts={accounts}
+                  creditCards={creditCards}
+                  selectedMonth={selectedMonth}
+                  onDataChanged={loadFinancialData}
+                />
+              </div>
             )}
 
             {/* ABA 4: METAS DE ECONOMIA */}
@@ -1803,73 +1859,53 @@ const MainDashboard: React.FC = () => {
             )}
 
           </div>
-        ) : (
-          /* Estado Não Autenticado (Acolhedor e Amigável) */
-          <div className="card-duo p-10 text-center space-y-5 max-w-xl mx-auto">
-            <div className="inline-flex items-center justify-center h-16 w-16 rounded-3xl bg-blue-50 border-2 border-blue-200 text-[#026CD6] shadow-sm mx-auto mb-1">
-              <ShieldCheck className="h-8 w-8 stroke-[2.2]" />
-            </div>
-            <div className="space-y-2">
-              <h2 className="text-2xl font-black text-slate-900">Bem-vindo à Economia Real!</h2>
-              <p className="text-sm font-bold text-slate-500 leading-relaxed">
-                Economia real, utilizando inteligência artificial para te fazer economizar de verdade.
+
+          {/* Pilares de Valor do Produto (Área Logada) */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
+            <div className="card-duo p-6 space-y-3">
+              <div className="h-12 w-12 rounded-2xl bg-emerald-50 border-2 border-emerald-200 flex items-center justify-center text-emerald-600 shadow-sm">
+                <ShieldCheck className="h-6 w-6 stroke-[2.5]" />
+              </div>
+              <h3 className="text-base font-black text-slate-900">Precisão ao Centavo</h3>
+              <p className="text-xs font-bold text-slate-500 leading-relaxed">
+                Controle faturas de cartão, parcelas futuras e saldos bancários com exatidão matemática. Saiba exatamente onde cada real está, sem surpresas no fim do mês.
               </p>
             </div>
-            <div className="flex items-center justify-center gap-3 pt-2">
-              <button
-                onClick={() => {
-                  setAuthModalMode('login');
-                  setAuthModalOpen(true);
-                }}
-                className="btn-duo btn-duo-green text-sm px-6 py-3"
-              >
-                Entrar na Minha Conta
-              </button>
-              <button
-                onClick={() => {
-                  setAuthModalMode('register');
-                  setAuthModalOpen(true);
-                }}
-                className="btn-duo btn-duo-white text-sm px-6 py-3"
-              >
-                Criar Conta Grátis
-              </button>
-            </div>
-          </div>
-        )}
 
-        {/* Pilares de Valor do Produto (Benefícios Claros e Comerciais) */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
-          <div className="card-duo p-6 space-y-3">
-            <div className="h-12 w-12 rounded-2xl bg-emerald-50 border-2 border-emerald-200 flex items-center justify-center text-emerald-600 shadow-sm">
-              <ShieldCheck className="h-6 w-6 stroke-[2.5]" />
+            <div className="card-duo p-6 space-y-3">
+              <div className="h-12 w-12 rounded-2xl bg-[#DDF4FF] border-2 border-[#BAE6FD] flex items-center justify-center text-[#1CB0F6] shadow-sm">
+                <Layers className="h-6 w-6 stroke-[2.5]" />
+              </div>
+              <h3 className="text-base font-black text-slate-900">Visão Real dos Seus Gastos</h3>
+              <p className="text-xs font-bold text-slate-500 leading-relaxed">
+                Pagamentos de faturas e transferências não distorcem seu orçamento. Você enxerga seu consumo real de despesas sem duplicidades nem confusão contábil.
+              </p>
             </div>
-            <h3 className="text-base font-black text-slate-900">Precisão ao Centavo</h3>
-            <p className="text-xs font-bold text-slate-500 leading-relaxed">
-              Controle faturas de cartão, parcelas futuras e saldos bancários com exatidão matemática. Saiba exatamente onde cada real está, sem surpresas no fim do mês.
-            </p>
-          </div>
 
-          <div className="card-duo p-6 space-y-3">
-            <div className="h-12 w-12 rounded-2xl bg-[#DDF4FF] border-2 border-[#BAE6FD] flex items-center justify-center text-[#1CB0F6] shadow-sm">
-              <Layers className="h-6 w-6 stroke-[2.5]" />
+            <div className="card-duo p-6 space-y-3">
+              <div className="h-12 w-12 rounded-2xl bg-[#F5EBFF] border-2 border-[#E9D5FF] flex items-center justify-center text-[#CE82FF] shadow-sm">
+                <Sparkles className="h-6 w-6 stroke-[2.5]" />
+              </div>
+              <h3 className="text-base font-black text-slate-900">Lançamento Ágil com I.A</h3>
+              <p className="text-xs font-bold text-slate-500 leading-relaxed">
+                Fale por voz ou digite livremente — como <em>"ifood 49,19"</em> ou <em>"uber 25"</em> — e a inteligência artificial categoriza, data e organiza tudo em segundos.
+              </p>
             </div>
-            <h3 className="text-base font-black text-slate-900">Visão Real dos Seus Gastos</h3>
-            <p className="text-xs font-bold text-slate-500 leading-relaxed">
-              Pagamentos de faturas e transferências não distorcem seu orçamento. Você enxerga seu consumo real de despesas sem duplicidades nem confusão contábil.
-            </p>
           </div>
-
-          <div className="card-duo p-6 space-y-3">
-            <div className="h-12 w-12 rounded-2xl bg-[#F5EBFF] border-2 border-[#E9D5FF] flex items-center justify-center text-[#CE82FF] shadow-sm">
-              <Sparkles className="h-6 w-6 stroke-[2.5]" />
-            </div>
-            <h3 className="text-base font-black text-slate-900">Lançamento Ágil com I.A</h3>
-            <p className="text-xs font-bold text-slate-500 leading-relaxed">
-              Fale por voz ou digite livremente — como <em>"ifood 49,19"</em> ou <em>"uber 25"</em> — e a inteligência artificial categoriza, data e organiza tudo em segundos.
-            </p>
-          </div>
-        </div>
+        </>
+      ) : (
+        /* Landing Page Completa de Alta Conversão para Área Deslogada */
+        <LandingPage
+          onOpenLogin={() => {
+            setAuthModalMode('login');
+            setAuthModalOpen(true);
+          }}
+          onOpenRegister={() => {
+            setAuthModalMode('register');
+            setAuthModalOpen(true);
+          }}
+        />
+      )}
       </main>
 
       {/* Footer Limpo e Amigável */}
@@ -1939,7 +1975,12 @@ const MainDashboard: React.FC = () => {
         isOpen={importModalOpen}
         onClose={() => setImportModalOpen(false)}
         accounts={accounts}
-        onImportCompleted={loadFinancialData}
+        onImportCompleted={(importedMonth?: string) => {
+          if (importedMonth) {
+            setSelectedMonth(importedMonth);
+          }
+          loadFinancialData();
+        }}
       />
 
       <AiTransactionModal
@@ -2065,6 +2106,92 @@ const MainDashboard: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Modal de Confirmação Estilizado para Exclusão */}
+      {(() => {
+        const isBatch = deleteConfirmState.type === 'batch';
+        const singleTx = !isBatch && deleteConfirmState.targetId
+          ? displayedTransactions.find((t) => t.id === deleteConfirmState.targetId) ||
+            transactions.find((t) => t.id === deleteConfirmState.targetId)
+          : null;
+
+        const title = isBatch
+          ? `Excluir ${selectedTxIds.size} movimentação(ões)?`
+          : 'Excluir movimentação?';
+
+        const description = isBatch ? (
+          <div className="space-y-2">
+            <p>
+              Tem certeza que deseja excluir permanentemente as{' '}
+              <strong className="text-slate-800">{selectedTxIds.size} movimentações</strong> selecionadas?
+            </p>
+            <p className="text-[11px] font-bold text-rose-500">
+              Essa ação não poderá ser desfeita.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2.5">
+            <p>Tem certeza que deseja excluir esta movimentação?</p>
+            {singleTx && (
+              <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-black text-slate-800 text-xs sm:text-sm truncate">
+                    {singleTx.description}
+                  </span>
+                  <span
+                    className={`font-black font-numeric text-xs sm:text-sm whitespace-nowrap ${
+                      singleTx.type === 'INCOME' ? 'text-emerald-600' : 'text-rose-600'
+                    }`}
+                  >
+                    {singleTx.type === 'EXPENSE' ? '- ' : '+ '}
+                    {formatBRL(singleTx.amount)}
+                  </span>
+                </div>
+                <div className="text-[11px] font-bold text-slate-400">
+                  {singleTx.accrualDate}
+                </div>
+              </div>
+            )}
+            <p className="text-[11px] font-bold text-rose-500">
+              Essa ação não poderá ser desfeita.
+            </p>
+          </div>
+        );
+
+        return (
+          <ConfirmModal
+            isOpen={deleteConfirmState.isOpen}
+            onClose={() => {
+              if (!deleteConfirmState.loading) {
+                setDeleteConfirmState({ isOpen: false, type: 'single', loading: false });
+              }
+            }}
+            onConfirm={handleConfirmDelete}
+            title={title}
+            description={description}
+            confirmText={isBatch ? `Excluir (${selectedTxIds.size})` : 'Sim, Excluir'}
+            cancelText="Cancelar"
+            isDanger={true}
+            loading={deleteConfirmState.loading}
+          />
+        );
+      })()}
+
+      {/* Tutorial Guiado Interativo (Onboarding) */}
+      <OnboardingTourModal
+        isOpen={isTourOpen}
+        onClose={() => setIsTourOpen(false)}
+        currentTab={activeTab}
+        onSelectTab={setActiveTab}
+        userId={user?.id}
+        onOpenImportModal={() => setImportModalOpen(true)}
+        onOpenTransactionModal={() => {
+          setEditingTransaction(null);
+          setTransactionModalOpen(true);
+        }}
+        onOpenAiModal={() => setAiModalOpen(true)}
+        onOpenAiBudgetModal={() => setAiBudgetModalOpen(true)}
+      />
 
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 bg-slate-900/95 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5 border border-slate-700/80 animate-fadeIn backdrop-blur-md">
