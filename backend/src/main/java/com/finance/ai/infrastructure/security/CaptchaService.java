@@ -223,10 +223,62 @@ public class CaptchaService {
             ImageIO.write(image, "png", baos);
             byte[] bytes = baos.toByteArray();
             return "data:image/png;base64," + Base64.getEncoder().encodeToString(bytes);
-        } catch (Exception e) {
-            log.error("Erro ao gerar imagem de CAPTCHA: {}", e.getMessage(), e);
-            throw new RuntimeException("Falha ao gerar imagem de segurança.", e);
+        } catch (Throwable t) {
+            log.warn("Aviso: Falha ao renderizar CAPTCHA via AWT (possível container headless/sem fontes). Acionando gerador vetorial SVG resiliente: {}", t.getMessage());
+            return renderFallbackSvg(code);
         }
+    }
+
+    /**
+     * Fallback gráfico que gera imagem vetorial SVG com distorções, rotações e ruído,
+     * 100% livre de dependências de fontes nativas de sistema operacional (C/X11/fontconfig).
+     */
+    private String renderFallbackSvg(String code) {
+        StringBuilder svg = new StringBuilder(1500);
+        svg.append("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"150\" height=\"46\" viewBox=\"0 0 150 46\">");
+        svg.append("<defs><linearGradient id=\"bg\" x1=\"0%\" y1=\"0%\" x2=\"100%\" y2=\"100%\">");
+        svg.append("<stop offset=\"0%\" stop-color=\"#f0f5ff\"/>");
+        svg.append("<stop offset=\"100%\" stop-color=\"#e1ebfa\"/>");
+        svg.append("</linearGradient></defs>");
+        svg.append("<rect width=\"150\" height=\"46\" rx=\"10\" fill=\"url(#bg)\" stroke=\"#cbd5e1\" stroke-width=\"1.5\"/>");
+
+        // Linhas de ruído
+        for (int i = 0; i < 4; i++) {
+            int x1 = RANDOM.nextInt(150);
+            int y1 = RANDOM.nextInt(46);
+            int x2 = RANDOM.nextInt(150);
+            int y2 = RANDOM.nextInt(46);
+            svg.append("<line x1=\"").append(x1).append("\" y1=\"").append(y1)
+               .append("\" x2=\"").append(x2).append("\" y2=\"").append(y2)
+               .append("\" stroke=\"rgba(100,120,160,0.4)\" stroke-width=\"1.5\" stroke-dasharray=\"4,3\"/>");
+        }
+
+        // Curva suave de interferência
+        svg.append("<path d=\"M ").append(RANDOM.nextInt(15)).append(" ").append(RANDOM.nextInt(20, 35))
+           .append(" Q ").append(RANDOM.nextInt(50, 90)).append(" ").append(RANDOM.nextInt(10, 40))
+           .append(" ").append(RANDOM.nextInt(130, 150)).append(" ").append(RANDOM.nextInt(20, 35))
+           .append("\" stroke=\"rgba(2,108,214,0.45)\" stroke-width=\"2\" fill=\"none\"/>");
+
+        // Caracteres com rotações e tons de alto contraste
+        int charSpacing = 120 / code.length();
+        String[] colors = {"#0a3d62", "#1e3799", "#2c3e50", "#192a56", "#026cd6"};
+
+        for (int i = 0; i < code.length(); i++) {
+            char c = code.charAt(i);
+            int x = 16 + (i * charSpacing) + RANDOM.nextInt(-2, 3);
+            int y = 32 + RANDOM.nextInt(-2, 3);
+            int rot = RANDOM.nextInt(-20, 21);
+            String color = colors[RANDOM.nextInt(colors.length)];
+
+            svg.append("<text x=\"").append(x).append("\" y=\"").append(y)
+               .append("\" transform=\"rotate(").append(rot).append(" ").append(x + 8).append(" ").append(y - 8).append(")\"")
+               .append(" font-family=\"monospace, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif\"")
+               .append(" font-size=\"24\" font-weight=\"900\" fill=\"").append(color).append("\">")
+               .append(c).append("</text>");
+        }
+
+        svg.append("</svg>");
+        return "data:image/svg+xml;base64," + Base64.getEncoder().encodeToString(svg.toString().getBytes(StandardCharsets.UTF_8));
     }
 
     private String hashAnswer(String challengeId, String answer) {

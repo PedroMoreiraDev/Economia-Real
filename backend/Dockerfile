@@ -20,8 +20,9 @@ FROM eclipse-temurin:21-jre-alpine AS runner
 
 WORKDIR /app
 
-# Criação de usuário não-privilegiado (Segurança OWASP / Least Privilege)
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+# Instalação de bibliotecas gráficas e fontes TrueType para suporte a gráficos/CAPTCHA em Alpine
+RUN apk add --no-cache fontconfig freetype ttf-dejavu && \
+    addgroup -S appgroup && adduser -S appuser -G appgroup
 
 # Cópia do executável JAR a partir do estágio de build
 COPY --from=builder /build/target/finance-backend-*.jar /app/app.jar
@@ -30,7 +31,7 @@ RUN chown -R appuser:appgroup /app
 USER appuser
 
 # Parâmetros JVM de alta performance para contêineres Docker
-ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom"
+ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Djava.awt.headless=true"
 ENV SERVER_PORT=8080
 ENV SPRING_PROFILES_ACTIVE=prod
 

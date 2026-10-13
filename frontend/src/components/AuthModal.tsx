@@ -56,21 +56,24 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Estado do CAPTCHA visual com imagem (Base64 PNG)
+  // Estado do CAPTCHA visual com imagem (Base64 PNG ou SVG)
   const [captcha, setCaptcha] = useState<CaptchaChallenge | null>(null);
   const [captchaAnswer, setCaptchaAnswer] = useState('');
   const [loadingCaptcha, setLoadingCaptcha] = useState(false);
+  const [captchaLoadError, setCaptchaLoadError] = useState<string | null>(null);
 
   const { login } = useAuth();
 
   const loadCaptcha = useCallback(async () => {
     setLoadingCaptcha(true);
+    setCaptchaLoadError(null);
     try {
       const challenge = await fetchCaptchaApi();
       setCaptcha(challenge);
       setCaptchaAnswer('');
-    } catch {
-      // Ignora erro temporário se backend estiver subindo
+    } catch (err) {
+      console.error('Falha ao carregar captcha:', err);
+      setCaptchaLoadError('Falha ao conectar com o servidor para carregar a segurança.');
     } finally {
       setLoadingCaptcha(false);
     }
@@ -115,6 +118,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setLoading(true);
 
     try {
+      if ((mode === 'login' || mode === 'register' || mode === 'forgot') && !captcha) {
+        setErrorMessage('Aguarde o carregamento do código de segurança antes de prosseguir.');
+        setLoading(false);
+        return;
+      }
+
       if (mode === 'login') {
         const response = await loginApi({
           email: email.trim(),
@@ -247,7 +256,36 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   // Renderiza o componente do CAPTCHA visual com imagem
   const renderCaptchaWidget = () => {
+    if (loadingCaptcha && !captcha) {
+      return (
+        <div className="p-3.5 bg-slate-50 border-2 border-slate-200 rounded-2xl min-h-[96px] flex items-center justify-center animate-pulse">
+          <div className="flex items-center gap-2.5 text-xs font-bold text-slate-500">
+            <span className="h-4 w-4 border-2 border-[#026CD6] border-t-transparent rounded-full animate-spin" />
+            <span>Carregando verificação de segurança...</span>
+          </div>
+        </div>
+      );
+    }
+
+    if (captchaLoadError && !captcha) {
+      return (
+        <div className="p-3 bg-rose-50/70 border-2 border-rose-200 rounded-2xl min-h-[96px] flex flex-col items-center justify-center text-center gap-2">
+          <p className="text-xs font-bold text-rose-600">Não foi possível carregar a imagem de segurança (servidor inicializando).</p>
+          <button
+            type="button"
+            onClick={loadCaptcha}
+            disabled={loadingCaptcha}
+            className="px-3 py-1.5 bg-white border border-rose-300 rounded-xl text-xs font-black text-rose-700 hover:bg-rose-50 shadow-sm flex items-center gap-1.5 transition-all"
+          >
+            <RefreshCw className={`h-3 w-3 ${loadingCaptcha ? 'animate-spin' : ''}`} />
+            Tentar carregar novamente
+          </button>
+        </div>
+      );
+    }
+
     if (!captcha) return null;
+
     return (
       <div className="p-3 bg-slate-50 border-2 border-slate-200 rounded-2xl space-y-2.5">
         <div className="flex items-center justify-between text-xs font-black text-slate-600">
