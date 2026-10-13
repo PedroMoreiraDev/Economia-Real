@@ -83,9 +83,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   }, [isOpen, mode, loadCaptcha]);
 
-  // Ao fechar ou alternar
+  // Sincroniza o modo e reseta campos sempre que o modal abre ou o defaultMode é alterado
   useEffect(() => {
-    if (!isOpen) {
+    if (isOpen) {
+      setMode(defaultMode);
+      setErrorMessage(null);
+      setFieldErrors({});
+      setSuccessMessage(null);
+      setPassword('');
+      setConfirmPassword('');
+      setVerificationCode('');
+      setResetCode('');
+      setCaptchaAnswer('');
+    } else {
       setErrorMessage(null);
       setFieldErrors({});
       setSuccessMessage(null);
@@ -93,7 +103,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       setResetCode('');
       setCaptchaAnswer('');
     }
-  }, [isOpen]);
+  }, [isOpen, defaultMode]);
 
   if (!isOpen) return null;
 
