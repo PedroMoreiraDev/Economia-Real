@@ -58,10 +58,8 @@ public class ForgotPasswordUseCase {
 
                 if (emailSenderService != null) {
                     emailSenderService.sendPasswordResetCode(user.getEmail(), user.getFullName(), code);
-                    if (!emailSenderService.isConfigured()) {
-                        return "Código de recuperação: " + code + " (Servidor SMTP não configurado localmente).";
-                    }
                 }
+                return "Código de recuperação gerado! Se o e-mail não chegar na caixa de entrada, utilize o código: " + code;
             }
         }
 

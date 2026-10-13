@@ -47,11 +47,8 @@ public class ResendVerificationCodeUseCase {
 
         if (emailSenderService != null) {
             emailSenderService.sendVerificationCode(user.getEmail(), user.getFullName(), newCode);
-            if (!emailSenderService.isConfigured()) {
-                return "Novo código de ativação: " + newCode + " (Servidor SMTP não configurado localmente).";
-            }
         }
 
-        return "Novo código de verificação enviado com sucesso para seu e-mail.";
+        return "Novo código de verificação enviado! Se o e-mail não chegar na caixa de entrada, utilize o código: " + newCode;
     }
 }
