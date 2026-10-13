@@ -9,18 +9,32 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.mail.internet.MimeMessage;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 /**
  * Serviço de envio de e-mails de validação e confirmação com template HTML.
- * Suporta provedores gratuitos (Resend, Brevo, Gmail SMTP) e possui fallback resiliente
- * para logs locais quando o servidor de e-mail ainda não estiver configurado.
+ * Suporta provedores gratuitos via HTTPS porta 443 (Brevo, Resend) e SMTP (Gmail).
+ * O envio via HTTPS contorna o bloqueio de portas SMTP (25, 465, 587) no plano gratuito do Render.
  */
 @Service
 public class EmailSenderService {
 
     private static final Logger log = LoggerFactory.getLogger(EmailSenderService.class);
+    private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(6))
+            .build();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private final JavaMailSender mailSender;
     private final String host;
@@ -28,26 +42,40 @@ public class EmailSenderService {
     private final String password;
     private final String fromEmail;
     private final String appName;
+    private final String brevoApiKey;
+    private final String resendApiKey;
 
     public EmailSenderService(
             @Autowired(required = false) JavaMailSender mailSender,
             @Value("${spring.mail.host:}") String host,
             @Value("${spring.mail.username:}") String username,
             @Value("${spring.mail.password:}") String password,
-            @Value("${spring.application.name:Economia Real}") String appName) {
+            @Value("${spring.application.name:Economia Real}") String appName,
+            @Value("${app.email.brevo-api-key:}") String brevoApiKey,
+            @Value("${app.email.resend-api-key:}") String resendApiKey) {
         this.mailSender = mailSender;
         this.host = host;
         this.username = username;
         this.password = password;
-        this.fromEmail = (username != null && !username.isBlank()) ? username : "noreply@economiareal.com.br";
+        this.fromEmail = (username != null && !username.isBlank()) ? username : "economiareal.ia@gmail.com";
         this.appName = appName;
+        this.brevoApiKey = (brevoApiKey != null) ? brevoApiKey.trim() : "";
+        this.resendApiKey = (resendApiKey != null) ? resendApiKey.trim() : "";
     }
 
     public boolean isConfigured() {
+        return isHttpConfigured() || isSmtpConfigured();
+    }
+
+    public boolean isSmtpConfigured() {
         return this.mailSender != null
                 && this.host != null && !this.host.isBlank()
                 && this.username != null && !this.username.isBlank()
                 && this.password != null && !this.password.isBlank();
+    }
+
+    public boolean isHttpConfigured() {
+        return !this.brevoApiKey.isBlank() || !this.resendApiKey.isBlank();
     }
 
     @Async
@@ -56,27 +84,9 @@ public class EmailSenderService {
         log.info("📧 [CÓDIGO DE ATIVAÇÃO] E-mail: {} | Código: {}", toEmail, code);
         log.info("=================================================================");
 
-        if (!isConfigured()) {
-            log.warn("Servidor SMTP não configurado (host vazio). Código registrado no console para desenvolvimento.");
-            return CompletableFuture.completedFuture(null);
-        }
-
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-            helper.setFrom(fromEmail, appName);
-            helper.setTo(toEmail);
-            helper.setSubject("Seu código de ativação na Economia Real: " + code);
-
-            String html = buildEmailTemplate(fullName, code);
-            helper.setText(html, true);
-
-            mailSender.send(message);
-            log.info("E-mail de confirmação enviado com sucesso para: {}", toEmail);
-        } catch (Exception e) {
-            log.error("Não foi possível enviar e-mail via SMTP para {}: {}. O código permanece registrado nos logs.", toEmail, e.getMessage());
-        }
+        String subject = "Seu código de ativação na Economia Real: " + code;
+        String html = buildEmailTemplate(fullName, code);
+        dispatchEmail(toEmail, fullName, subject, html);
 
         return CompletableFuture.completedFuture(null);
     }
@@ -87,29 +97,116 @@ public class EmailSenderService {
         log.info("🔑 [RECUPERAÇÃO DE SENHA] E-mail: {} | Código: {}", toEmail, code);
         log.info("=================================================================");
 
-        if (!isConfigured()) {
-            log.warn("Servidor SMTP não configurado (host vazio). Código registrado no console para desenvolvimento.");
-            return CompletableFuture.completedFuture(null);
-        }
-
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-            helper.setFrom(fromEmail, appName);
-            helper.setTo(toEmail);
-            helper.setSubject("Código para redefinição de senha: " + code);
-
-            String html = buildResetPasswordEmailTemplate(fullName, code);
-            helper.setText(html, true);
-
-            mailSender.send(message);
-            log.info("E-mail de redefinição de senha enviado com sucesso para: {}", toEmail);
-        } catch (Exception e) {
-            log.error("Não foi possível enviar e-mail via SMTP para {}: {}. O código permanece registrado nos logs.", toEmail, e.getMessage());
-        }
+        String subject = "Código para redefinição de senha: " + code;
+        String html = buildResetPasswordEmailTemplate(fullName, code);
+        dispatchEmail(toEmail, fullName, subject, html);
 
         return CompletableFuture.completedFuture(null);
+    }
+
+    private void dispatchEmail(String toEmail, String fullName, String subject, String htmlContent) {
+        // 1. Tenta Brevo API (HTTPS porta 443 - compatível com Render Free)
+        if (!brevoApiKey.isBlank()) {
+            try {
+                sendViaBrevoHttp(toEmail, fullName, subject, htmlContent);
+                return;
+            } catch (Exception e) {
+                log.error("Falha ao enviar e-mail via Brevo HTTPS API: {}. Tentando próximo provedor...", e.getMessage());
+            }
+        }
+
+        // 2. Tenta Resend API (HTTPS porta 443 - compatível com Render Free)
+        if (!resendApiKey.isBlank()) {
+            try {
+                sendViaResendHttp(toEmail, subject, htmlContent);
+                return;
+            } catch (Exception e) {
+                log.error("Falha ao enviar e-mail via Resend HTTPS API: {}. Tentando próximo provedor...", e.getMessage());
+            }
+        }
+
+        // 3. Tenta SMTP padrão (porta 587/465)
+        if (isSmtpConfigured()) {
+            try {
+                MimeMessage message = mailSender.createMimeMessage();
+                MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+                helper.setFrom(fromEmail, appName);
+                helper.setTo(toEmail);
+                helper.setSubject(subject);
+                helper.setText(htmlContent, true);
+
+                mailSender.send(message);
+                log.info("E-mail enviado com sucesso via SMTP para: {}", toEmail);
+                return;
+            } catch (Exception e) {
+                log.error("Não foi possível enviar e-mail via SMTP para {}: {}. "
+                        + "(Nota: O plano gratuito do Render bloqueia tráfego nas portas SMTP 25, 465 e 587. "
+                        + "Configure a variável BREVO_API_KEY no painel do Render para envio gratuito via HTTPS porta 443).",
+                        toEmail, e.getMessage());
+            }
+        } else {
+            log.warn("Nenhum provedor de e-mail configurado (SMTP ou API HTTP). O código foi registrado nos logs do servidor.");
+        }
+    }
+
+    private void sendViaBrevoHttp(String toEmail, String fullName, String subject, String htmlContent) throws Exception {
+        Map<String, Object> bodyMap = new HashMap<>();
+        Map<String, String> sender = new HashMap<>();
+        sender.put("name", appName);
+        sender.put("email", fromEmail);
+        bodyMap.put("sender", sender);
+
+        Map<String, String> recipient = new HashMap<>();
+        recipient.put("email", toEmail);
+        if (fullName != null && !fullName.isBlank()) {
+            recipient.put("name", fullName);
+        }
+        bodyMap.put("to", List.of(recipient));
+        bodyMap.put("subject", subject);
+        bodyMap.put("htmlContent", htmlContent);
+
+        String jsonPayload = OBJECT_MAPPER.writeValueAsString(bodyMap);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://api.brevo.com/v3/smtp/email"))
+                .header("Content-Type", "application/json")
+                .header("api-key", brevoApiKey)
+                .POST(HttpRequest.BodyPublishers.ofString(jsonPayload, StandardCharsets.UTF_8))
+                .timeout(Duration.ofSeconds(8))
+                .build();
+
+        HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() >= 200 && response.statusCode() < 300) {
+            log.info("E-mail enviado com sucesso via Brevo HTTPS API para: {}", toEmail);
+        } else {
+            throw new RuntimeException("Brevo API HTTP " + response.statusCode() + ": " + response.body());
+        }
+    }
+
+    private void sendViaResendHttp(String toEmail, String subject, String htmlContent) throws Exception {
+        Map<String, Object> bodyMap = new HashMap<>();
+        bodyMap.put("from", appName + " <" + fromEmail + ">");
+        bodyMap.put("to", List.of(toEmail));
+        bodyMap.put("subject", subject);
+        bodyMap.put("html", htmlContent);
+
+        String jsonPayload = OBJECT_MAPPER.writeValueAsString(bodyMap);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://api.resend.com/emails"))
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + resendApiKey)
+                .POST(HttpRequest.BodyPublishers.ofString(jsonPayload, StandardCharsets.UTF_8))
+                .timeout(Duration.ofSeconds(8))
+                .build();
+
+        HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() >= 200 && response.statusCode() < 300) {
+            log.info("E-mail enviado com sucesso via Resend HTTPS API para: {}", toEmail);
+        } else {
+            throw new RuntimeException("Resend API HTTP " + response.statusCode() + ": " + response.body());
+        }
     }
 
     private String buildEmailTemplate(String fullName, String code) {

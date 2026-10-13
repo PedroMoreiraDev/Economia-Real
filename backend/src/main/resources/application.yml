@@ -74,6 +74,9 @@ springdoc:
 app:
   security:
     jwt-secret: ${JWT_SECRET:super-secret-jwt-key-finance-ai-2026-minimum-32-chars-long!}
+  email:
+    brevo-api-key: ${BREVO_API_KEY:}
+    resend-api-key: ${RESEND_API_KEY:}
 
 ai:
   gemini:
