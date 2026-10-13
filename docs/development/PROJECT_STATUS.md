@@ -39,6 +39,9 @@ Este documento registra o estado real, factual e auditável do desenvolvimento d
   - Verificação de registros DNS MX em tempo real via JNDI com bypass instantâneo para provedores confiáveis (`gmail.com`, `outlook.com`, `yahoo.com`, `icloud.com`).
 - [x] Desafio CAPTCHA Visual Profissional com Imagem Distorcida (`CaptchaService`):
   - Geração nativa em memória de imagens PNG Base64 (`data:image/png;base64,...`) com ruído de fundo, rotação aleatória de caracteres (-22° a +22°), linhas cruzadas e degradê.
+  - Fallback vetorial SVG puro (`renderFallbackSvg`) com captura abrangente (`catch (Throwable t)`), garantindo renderização instantânea mesmo em containers Linux/Alpine mínimos sem bibliotecas nativas de fontes do SO.
+  - Instalação de `fontconfig`, `freetype` e `ttf-dejavu` no Dockerfile multi-stage com flag `-Djava.awt.headless=true`.
+  - Frontend resiliente no `AuthModal.tsx` com estados elegantes de loading (skeleton com spinner) e retry com um clique contra cold-starts da nuvem.
   - Sem texto claro exposto em JSON ou DOM (bloqueia bots e scrapers automatizados).
   - Assinatura criptográfica HMAC-SHA256 com hash da resposta e salt interno do backend (impossibilita adulteração).
   - Expiração de 3 minutos e renovação com 1 clique no frontend.
