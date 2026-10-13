@@ -23,16 +23,31 @@ public class EmailSenderService {
     private static final Logger log = LoggerFactory.getLogger(EmailSenderService.class);
 
     private final JavaMailSender mailSender;
+    private final String host;
+    private final String username;
+    private final String password;
     private final String fromEmail;
     private final String appName;
 
     public EmailSenderService(
             @Autowired(required = false) JavaMailSender mailSender,
-            @Value("${spring.mail.username:noreply@economiareal.com.br}") String fromEmail,
+            @Value("${spring.mail.host:}") String host,
+            @Value("${spring.mail.username:}") String username,
+            @Value("${spring.mail.password:}") String password,
             @Value("${spring.application.name:Economia Real}") String appName) {
         this.mailSender = mailSender;
-        this.fromEmail = fromEmail;
+        this.host = host;
+        this.username = username;
+        this.password = password;
+        this.fromEmail = (username != null && !username.isBlank()) ? username : "noreply@economiareal.com.br";
         this.appName = appName;
+    }
+
+    public boolean isConfigured() {
+        return this.mailSender != null
+                && this.host != null && !this.host.isBlank()
+                && this.username != null && !this.username.isBlank()
+                && this.password != null && !this.password.isBlank();
     }
 
     @Async
@@ -41,8 +56,8 @@ public class EmailSenderService {
         log.info("📧 [CÓDIGO DE ATIVAÇÃO] E-mail: {} | Código: {}", toEmail, code);
         log.info("=================================================================");
 
-        if (mailSender == null) {
-            log.warn("JavaMailSender não configurado. Código registrado no console para desenvolvimento.");
+        if (!isConfigured()) {
+            log.warn("Servidor SMTP não configurado (host vazio). Código registrado no console para desenvolvimento.");
             return CompletableFuture.completedFuture(null);
         }
 
@@ -72,8 +87,8 @@ public class EmailSenderService {
         log.info("🔑 [RECUPERAÇÃO DE SENHA] E-mail: {} | Código: {}", toEmail, code);
         log.info("=================================================================");
 
-        if (mailSender == null) {
-            log.warn("JavaMailSender não configurado. Código registrado no console para desenvolvimento.");
+        if (!isConfigured()) {
+            log.warn("Servidor SMTP não configurado (host vazio). Código registrado no console para desenvolvimento.");
             return CompletableFuture.completedFuture(null);
         }
 

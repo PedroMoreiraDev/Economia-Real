@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -31,12 +32,8 @@ class ResetPasswordUseCaseTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @InjectMocks
     private ResetPasswordUseCase useCase;
-
-    @BeforeEach
-    void setUp() {
-        useCase = new ResetPasswordUseCase(userRepository, passwordEncoder);
-    }
 
     @Test
     @DisplayName("Deve redefinir a senha com sucesso quando o código é correto e válido")

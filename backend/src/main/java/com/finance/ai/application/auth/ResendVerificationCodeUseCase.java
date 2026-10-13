@@ -26,7 +26,7 @@ public class ResendVerificationCodeUseCase {
     }
 
     @Transactional
-    public void execute(String email) {
+    public String execute(String email) {
         if (email == null || email.isBlank()) {
             throw new IllegalArgumentException("E-mail é obrigatório.");
         }
@@ -45,6 +45,13 @@ public class ResendVerificationCodeUseCase {
         user.renewVerificationCode(newCode, expiresAt);
         userRepository.save(user);
 
-        emailSenderService.sendVerificationCode(user.getEmail(), user.getFullName(), newCode);
+        if (emailSenderService != null) {
+            emailSenderService.sendVerificationCode(user.getEmail(), user.getFullName(), newCode);
+            if (!emailSenderService.isConfigured()) {
+                return "Novo código de ativação: " + newCode + " (Servidor SMTP não configurado localmente).";
+            }
+        }
+
+        return "Novo código de verificação enviado com sucesso para seu e-mail.";
     }
 }

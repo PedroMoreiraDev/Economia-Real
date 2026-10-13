@@ -89,8 +89,8 @@ public class AuthController {
     @PostMapping("/resend-code")
     @Operation(summary = "Reenvia um novo código de 6 dígitos para o e-mail informado")
     public ResponseEntity<Map<String, String>> resendCode(@Valid @RequestBody ResendCodeRequest request) {
-        resendVerificationCodeUseCase.execute(request.email());
-        return ResponseEntity.ok(Map.of("message", "Novo código de verificação enviado com sucesso para seu e-mail."));
+        String message = resendVerificationCodeUseCase.execute(request.email());
+        return ResponseEntity.ok(Map.of("message", message));
     }
 
     @PostMapping("/login")
@@ -108,8 +108,8 @@ public class AuthController {
     @PostMapping("/forgot-password")
     @Operation(summary = "Solicita envio de código de 6 dígitos para recuperação de senha")
     public ResponseEntity<Map<String, String>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
-        forgotPasswordUseCase.execute(request.email(), request.captchaToken(), request.captchaAnswer());
-        return ResponseEntity.ok(Map.of("message", "Se o e-mail informado estiver cadastrado, enviamos o código de recuperação para sua caixa de entrada."));
+        String message = forgotPasswordUseCase.execute(request.email(), request.captchaToken(), request.captchaAnswer());
+        return ResponseEntity.ok(Map.of("message", message));
     }
 
     @PostMapping("/reset-password")

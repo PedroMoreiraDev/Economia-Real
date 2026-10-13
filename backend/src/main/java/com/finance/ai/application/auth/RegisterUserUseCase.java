@@ -98,12 +98,16 @@ public class RegisterUserUseCase {
                 emailSenderService.sendVerificationCode(existing.getEmail(), existing.getFullName(), renewedCode);
             }
 
+            String renewMsg = (emailSenderService != null && emailSenderService.isConfigured())
+                    ? "Enviamos um novo código de verificação para o seu e-mail."
+                    : "Código de ativação: " + renewedCode + " (Servidor SMTP não configurado localmente).";
+
             return new RegistrationResult(
                     existing.getId().toString(),
                     existing.getEmail(),
                     existing.getFullName(),
                     true,
-                    "Enviamos um novo código de verificação para o seu e-mail."
+                    renewMsg
             );
         }
 
@@ -123,12 +127,16 @@ public class RegisterUserUseCase {
             emailSenderService.sendVerificationCode(saved.getEmail(), saved.getFullName(), code);
         }
 
+        String regMsg = (emailSenderService != null && emailSenderService.isConfigured())
+                ? "Código de verificação de 6 dígitos enviado para seu e-mail."
+                : "Código de ativação: " + code + " (Servidor SMTP não configurado localmente).";
+
         return new RegistrationResult(
                 saved.getId().toString(),
                 saved.getEmail(),
                 saved.getFullName(),
                 true,
-                "Código de verificação de 6 dígitos enviado para seu e-mail."
+                regMsg
         );
     }
 

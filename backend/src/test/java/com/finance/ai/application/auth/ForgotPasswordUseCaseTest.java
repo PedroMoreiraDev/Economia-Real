@@ -78,4 +78,16 @@ class ForgotPasswordUseCaseTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("E-mail é obrigatório");
     }
+
+    @Test
+    @DisplayName("Deve retornar mensagem com código quando SMTP não estiver configurado")
+    void shouldReturnCodeInMessageWhenSmtpNotConfigured() {
+        var user = new User(UUID.randomUUID(), "pedro@teste.com", "Pedro Silva", "hash", true, null, null, null, null, Instant.now(), Instant.now());
+        when(userRepository.findByEmail("pedro@teste.com")).thenReturn(Optional.of(user));
+        when(emailSenderService.isConfigured()).thenReturn(false);
+
+        String result = useCase.execute("pedro@teste.com", null, null);
+
+        assertThat(result).contains("Código de recuperação:").contains("(Servidor SMTP não configurado localmente)");
+    }
 }

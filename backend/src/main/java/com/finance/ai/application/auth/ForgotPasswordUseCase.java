@@ -34,7 +34,7 @@ public class ForgotPasswordUseCase {
     }
 
     @Transactional
-    public void execute(String email, String captchaToken, String captchaAnswer) {
+    public String execute(String email, String captchaToken, String captchaAnswer) {
         if (email == null || email.isBlank()) {
             throw new IllegalArgumentException("E-mail é obrigatório.");
         }
@@ -58,8 +58,13 @@ public class ForgotPasswordUseCase {
 
                 if (emailSenderService != null) {
                     emailSenderService.sendPasswordResetCode(user.getEmail(), user.getFullName(), code);
+                    if (!emailSenderService.isConfigured()) {
+                        return "Código de recuperação: " + code + " (Servidor SMTP não configurado localmente).";
+                    }
                 }
             }
         }
+
+        return "Se o e-mail informado estiver cadastrado, enviamos o código de recuperação para sua caixa de entrada.";
     }
 }
