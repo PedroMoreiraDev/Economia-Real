@@ -30,9 +30,20 @@ Este documento registra o estado real, factual e auditável do desenvolvimento d
 - [x] Endpoint `GET /api/v1/health` e OpenAPI Swagger em `/swagger-ui.html`.
 - [x] Frontend React com Tailwind CSS, TypeScript estrito e monitoramento em tempo real.
 
-### 2.3. Fase 2 — Identidade, Autenticação e Isolamento de Usuários
-- [x] Migração Flyway `V2__add_refresh_tokens.sql`.
-- [x] Entidade de domínio `User` pura e porta `UserRepository`.
+### 2.3. Fase 2 — Identidade, Autenticação, Isolamento de Usuários e Segurança Antifraude
+- [x] Migração Flyway `V2__add_refresh_tokens.sql` e `V3__add_email_verification.sql` (campos `email_verified`, `verification_code`, `verification_code_expires_at`).
+- [x] Entidade de domínio `User` pura e porta `UserRepository` com ciclo de ativação de conta.
+- [x] Validação Rigorosa e Gratuita de E-mail (`EmailValidationService`):
+  - Validação de sintaxe estrita RFC 5322.
+  - Blacklist em memória contra 30+ provedores de e-mail temporários/descartáveis conhecidos.
+  - Verificação de registros DNS MX em tempo real via JNDI com bypass instantâneo para provedores confiáveis (`gmail.com`, `outlook.com`, `yahoo.com`, `icloud.com`).
+- [x] Desafio CAPTCHA Nativo Zero-Cost (`CaptchaService`):
+  - Desafios matemáticos e lógicos gerados no backend com assinatura criptográfica HMAC-SHA256 e expiração de 3 minutos.
+  - Sem custos de APIs pagas (reCAPTCHA, hCaptcha) e com acessibilidade tátil.
+- [x] Fluxo de Ativação por Código de 6 Dígitos (`VerifyEmailUseCase`, `ResendVerificationCodeUseCase`, `EmailSenderService`):
+  - Envio de e-mail com template HTML responsivo e fallback seguro em console de desenvolvimento.
+  - Bloqueio de login (`403 Forbidden`) para contas não ativadas.
+  - Interface no Frontend com troca inteligente de tela, contagem de caracteres e botão de reenvio.
 - [x] Hashing BCrypt (custo 12) e emissão de tokens JWT com assinatura HMAC-SHA256 (`JwtTokenProvider`).
 - [x] Filtro stateless `JwtAuthenticationFilter` e principal seguro `AuthenticatedUser`.
 - [x] Casos de uso `RegisterUserUseCase`, `LoginUserUseCase` e endpoints REST `/api/v1/auth/*`.
