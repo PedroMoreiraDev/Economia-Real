@@ -236,8 +236,10 @@ dist/assets/index-CVcJJLIG.js   305.65 kB │ gzip: 75.31 kB
 
 - **Tutorial Guiado Interativo / Onboarding Acolhedor (`OnboardingTourModal.tsx`):**
   - Exibição automática ao fazer login na plataforma para usuários que ainda não desabilitaram o tour.
+  - Arquitetura Smart Corner Dock sem backdrop bloqueante: o card se posiciona dinamicamente nos cantos da tela (`bottom-right`, `bottom-left`, `top-right`, `top-left`), detectando automaticamente as coordenadas do elemento em foco (`getBoundingClientRect`) para desviar e **nunca ficar na frente** do botão, tabela ou card que está sendo demonstrado.
+  - O centro da tela fica 100% livre e nítido, com indicador visual de foco (`Eye` / "Destaque em foco: ...") e botão de alternância manual de canto (`ArrowLeftRight`).
   - 7 passos estruturados, curtos e didáticos (Importação de Fatura, Entradas & Extras, Categorização Ágil, Contas Fixas Recorrentes, Teto & Metas com IA, Lançamentos por Voz/Texto e Perspectiva Anual).
-  - Destaque dinâmico no site (`tour-target-highlight`): o tutorial troca de abas automaticamente e rola suavemente (`scrollIntoView`) até o elemento em foco, aplicando aura pulsante em azul suave.
+  - Destaque dinâmico no site (`tour-target-highlight`): o tutorial troca de abas automaticamente e rola suavemente (`scrollIntoView`) até o elemento em foco, aplicando aura pulsante em azul real e ciano.
   - Demonstração visual ilustrada para cada passo com componentes táteis em miniatura.
   - Opção persistida de *"Não exibir automaticamente ao entrar"* via `localStorage` isolado por usuário.
   - Botão de acesso rápido integrado ao header superior (`Compass` / "Guia"), posicionado de forma compacta e discreta ao lado do botão de Privacidade, permitindo reabrir o tutorial a qualquer momento com 1 clique.
@@ -262,9 +264,34 @@ dist/assets/index-CVcJJLIG.js   305.65 kB │ gzip: 75.31 kB
 
 ---
 
+## 4.8. Máscara Financeira Estilo ATM / Maquininha de Cartão em Todo o Sistema (Implementado)
+
+- **Digitação com Deslocamento Progressivo de Centavos:**
+  - Componente centralizado `CurrencyInput.tsx` e `InlineCurrencyInput` substituindo completamente inputs nativos de `type="number"`.
+  - Comportamento de maquininha de cartão / caixa eletrônico: dígitos entram sempre pelos centavos (da direita para a esquerda). Exemplo: `1` vira `0,01`, `7` vira `0,17`, `6` vira `1,76`, `0` vira `17,60`, `0` vira `176,00`.
+  - Suporte completo a `Backspace` diminuindo casas decimais em tempo real (`176,00` -> `17,60` -> `1,76`).
+  - Sincronização e parsing bidirecional seguro (`parseRawToCents`) para valores iniciais vindos da API, strings decimais ou números float.
+- **Cobertura Integral em Todos os Módulos do Sistema:**
+  - **Nova Movimentação (`TransactionModal.tsx`):** Receita, Despesa e Transferência (com ordenação de Receita primeiro).
+  - **Compras no Cartão (`CreditCardPurchaseModal.tsx`):** Valor total da transação parcelada.
+  - **Custos Recorrentes (`RecurringBillModal.tsx`):** Despesas fixas e assinaturas mensais.
+  - **Edição Rápida no Extrato (`App.tsx`):** Componente `InlineCurrencyInput` na tabela com salvamento em `onBlur` ou `Enter`.
+  - **Teto Mensal Global (`App.tsx`):** Ajuste manual de teto de gastos.
+  - **Contas Bancárias (`AccountModal.tsx`):** Saldo inicial.
+  - **Cartões de Crédito (`CreditCardModal.tsx`):** Limite total do cartão.
+  - **Fatura de Cartão (`PayInvoiceModal.tsx`):** Valor do pagamento.
+  - **Metas de Economia (`SavingsGoalModal.tsx` e `GoalTransactionModal.tsx`):** Valor alvo e aportes/resgates.
+  - **Orçamentos e Metas com IA (`BudgetModal.tsx` e `AiBudgetSuggestionModal.tsx`):** Teto global e ajuste individual de categorias.
+  - **Lançamento com IA (`AiTransactionModal.tsx`):** Revisão de valor extraído por áudio/texto.
+- **Integridade Contábil Garantida:**
+  - O backend permanece recebendo valores matematicamente exatos em `BigDecimal`, mantendo conformidade com as regras de integridade contábil.
+
+---
+
 ## 5. Próximo Passo Recomendado
 
 1. A plataforma conta agora com 115 testes automatizados no backend e build de frontend 100% íntegros.
 2. Todo o histórico de categorização do usuário é aprendido e reaproveitado automaticamente em importações futuras.
-3. Repositório sincronizado e pronto para uso e deploy contínuo.
+3. Máscara financeira estilo ATM/maquininha ativa e padronizada em todos os formulários.
+4. Repositório sincronizado e pronto para uso e deploy contínuo.
 

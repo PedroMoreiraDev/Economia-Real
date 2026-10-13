@@ -4,6 +4,7 @@ import { SavingsGoal } from '../types/goal';
 import { Account } from '../types/financial';
 import { depositToSavingsGoalApi, withdrawFromSavingsGoalApi } from '../services/goalApi';
 import { useAuth } from '../context/AuthContext';
+import { CurrencyInput } from './CurrencyInput';
 
 interface GoalTransactionModalProps {
   isOpen: boolean;
@@ -140,15 +141,11 @@ export const GoalTransactionModal: React.FC<GoalTransactionModalProps> = ({
             <label className="block text-xs font-black uppercase tracking-wider text-slate-500 mb-1.5">
               Valor (R$)
             </label>
-            <input
-              type="number"
-              step="0.01"
-              min="0.01"
-              required
-              placeholder="0,00"
+            <CurrencyInput
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border-2 border-slate-200 text-slate-800 font-black placeholder-slate-400 focus:outline-none focus:border-[#026CD6] focus:bg-white transition-all"
+              onChangeValue={(val) => setAmount(val > 0 ? val.toString() : '')}
+              placeholder="0,00"
+              className="py-2.5 rounded-2xl bg-slate-50 border-2 border-slate-200 text-slate-800 font-black placeholder-slate-400 focus:border-[#026CD6] focus:bg-white"
             />
           </div>
 

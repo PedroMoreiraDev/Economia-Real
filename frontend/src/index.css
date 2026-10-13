@@ -190,12 +190,12 @@
    ============================================================================= */
 @keyframes tourPulseHalo {
   0%, 100% {
-    box-shadow: 0 0 0 3px #026CD6, 0 0 25px rgba(2, 108, 214, 0.45);
+    box-shadow: 0 0 0 4px #026CD6, 0 0 35px rgba(2, 108, 214, 0.55);
     transform: scale(1);
   }
   50% {
-    box-shadow: 0 0 0 7px #38BDF8, 0 0 45px rgba(56, 189, 248, 0.65);
-    transform: scale(1.01);
+    box-shadow: 0 0 0 8px #38BDF8, 0 0 60px rgba(56, 189, 248, 0.8);
+    transform: scale(1.015);
   }
 }
 
@@ -204,6 +204,6 @@
   outline-offset: 6px !important;
   animation: tourPulseHalo 1.8s ease-in-out infinite !important;
   transition: all 0.3s ease !important;
-  z-index: 35 !important;
+  z-index: 40 !important;
   position: relative !important;
 }

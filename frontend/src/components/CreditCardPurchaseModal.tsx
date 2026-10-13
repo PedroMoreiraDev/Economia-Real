@@ -5,6 +5,7 @@ import { Category } from '../types/financial';
 import { createPurchaseApi } from '../services/cardApi';
 import { createCategoryApi } from '../services/financialApi';
 import { CategoryCombobox } from './CategoryCombobox';
+import { CurrencyInput } from './CurrencyInput';
 import { useAuth } from '../context/AuthContext';
 
 interface CreditCardPurchaseModalProps {
@@ -139,14 +140,12 @@ export const CreditCardPurchaseModal: React.FC<CreditCardPurchaseModalProps> = (
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="block text-xs font-black uppercase tracking-wider text-slate-500">Valor Total (R$)</label>
-              <input
-                type="number"
-                step="0.01"
+              <CurrencyInput
                 required
                 placeholder="0,00"
                 value={totalAmount}
-                onChange={(e) => setTotalAmount(e.target.value)}
-                className="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-black text-slate-800 focus:outline-none focus:border-[#CE82FF] focus:bg-white transition-all"
+                onChangeValue={(val) => setTotalAmount(val > 0 ? val.toString() : '')}
+                className="py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-black text-slate-800 focus:border-[#026CD6] focus:bg-white"
               />
             </div>
 

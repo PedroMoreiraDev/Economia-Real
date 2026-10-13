@@ -6,6 +6,7 @@ import { RecurringBill, RecurringFrequency, CreateRecurringBillPayload, UpdateRe
 import { createRecurringBillApi, updateRecurringBillApi, payRecurringBillApi } from '../services/recurringApi';
 import { createCategoryApi } from '../services/financialApi';
 import { CategoryCombobox } from './CategoryCombobox';
+import { CurrencyInput } from './CurrencyInput';
 import { useAuth } from '../context/AuthContext';
 
 function getCurrentMonthStr(): string {
@@ -233,15 +234,12 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
               <label className="block text-xs font-black uppercase tracking-wider text-slate-500 mb-1.5">
                 Valor Recorrente (R$)
               </label>
-              <input
-                type="number"
-                step="0.01"
-                min="0.01"
+              <CurrencyInput
                 required
                 placeholder="0,00"
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border-2 border-slate-200 text-slate-800 font-bold placeholder-slate-400 focus:outline-none focus:border-[#58CC02] focus:bg-white transition-all"
+                onChangeValue={(val) => setAmount(val > 0 ? val.toString() : '')}
+                className="py-2.5 rounded-2xl bg-slate-50 border-2 border-slate-200 text-slate-800 font-bold placeholder-slate-400 focus:border-[#026CD6] focus:bg-white"
               />
             </div>
 

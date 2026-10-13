@@ -10,6 +10,7 @@ import {
   setStoredGlobalAlertThreshold 
 } from '../services/budgetApi';
 import { useAuth } from '../context/AuthContext';
+import { CurrencyInput } from './CurrencyInput';
 
 interface BudgetModalProps {
   isOpen: boolean;
@@ -194,15 +195,12 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
             <label className="block text-xs font-black uppercase tracking-wider text-slate-500 mb-1.5">
               Limite Mensal Máximo (R$)
             </label>
-            <input
-              type="number"
-              step="0.01"
-              required={isCategorySelected}
+            <CurrencyInput
               disabled={!isCategorySelected}
               value={monthlyLimit}
-              onChange={(e) => setMonthlyLimit(e.target.value)}
-              placeholder={isCategorySelected ? "Ex: 1200.00" : "Selecione uma categoria para definir limite"}
-              className="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-4 py-2.5 text-sm font-black text-slate-800 focus:outline-none focus:border-[#026CD6] focus:bg-white transition-all disabled:opacity-50 disabled:bg-slate-100"
+              onChangeValue={(val) => setMonthlyLimit(val > 0 ? val.toString() : '')}
+              placeholder={isCategorySelected ? "0,00" : "Selecione uma categoria"}
+              className="bg-slate-50 border-2 border-slate-200 rounded-2xl py-2.5 text-sm font-black text-slate-800 focus:border-[#026CD6] focus:bg-white disabled:opacity-50 disabled:bg-slate-100"
             />
           </div>
 

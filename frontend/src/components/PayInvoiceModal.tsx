@@ -4,6 +4,7 @@ import { CreditCardInvoice, PayInvoicePayload } from '../types/card';
 import { Account } from '../types/financial';
 import { payInvoiceApi } from '../services/cardApi';
 import { useAuth } from '../context/AuthContext';
+import { CurrencyInput } from './CurrencyInput';
 
 interface PayInvoiceModalProps {
   isOpen: boolean;
@@ -126,14 +127,11 @@ export const PayInvoiceModal: React.FC<PayInvoiceModalProps> = ({
 
           <div className="space-y-1.5">
             <label className="block text-xs font-black uppercase tracking-wider text-slate-500">Valor do Pagamento (R$)</label>
-            <input
-              type="number"
-              step="0.01"
-              required
-              placeholder="0,00"
+            <CurrencyInput
               value={paymentAmount}
-              onChange={(e) => setPaymentAmount(e.target.value)}
-              className="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-black text-slate-800 focus:outline-none focus:border-[#026CD6] focus:bg-white transition-all"
+              onChangeValue={(val) => setPaymentAmount(val > 0 ? val.toString() : '')}
+              placeholder="0,00"
+              className="py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-black text-slate-800 focus:border-[#026CD6] focus:bg-white"
             />
           </div>
 

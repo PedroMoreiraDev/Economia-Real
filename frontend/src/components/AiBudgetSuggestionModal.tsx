@@ -3,6 +3,7 @@ import { Sparkles, X, Check, AlertCircle, Lock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { getAiBudgetSuggestionsApi, saveBatchBudgetsApi, getStoredGlobalAlertThreshold } from '../services/budgetApi';
 import { AiBudgetSuggestionResponse, CategoryBudgetSuggestion, CreateBudgetPayload, BudgetProgressDto } from '../types/budget';
+import { CurrencyInput } from './CurrencyInput';
 
 interface AiBudgetSuggestionModalProps {
   isOpen: boolean;
@@ -688,13 +689,10 @@ export const AiBudgetSuggestionModal: React.FC<AiBudgetSuggestionModalProps> = (
             <label className="text-[11px] font-black text-slate-600 uppercase tracking-wider block mb-1">
               Teto Máximo de Gastos Mensal (R$)
             </label>
-            <input
-              type="number"
-              step="0.01"
-              min="10"
+            <CurrencyInput
               value={globalLimitInput}
-              onChange={(e) => setGlobalLimitInput(e.target.value)}
-              placeholder="Ex: 3500.00"
+              onChangeValue={(val) => setGlobalLimitInput(val > 0 ? val.toString() : '')}
+              placeholder="Ex: 3.500,00"
               className="w-full px-4 py-2 bg-white border-2 border-slate-200 rounded-xl text-base font-black text-slate-800 focus:outline-none focus:border-[#026CD6]"
             />
           </div>
@@ -821,12 +819,12 @@ export const AiBudgetSuggestionModal: React.FC<AiBudgetSuggestionModalProps> = (
                         <div className="flex items-center gap-1.5">
                           <span className="text-xs font-bold text-slate-400">R$</span>
                           {isCustomized ? (
-                            <input
-                              type="number"
-                              step="0.01"
-                              min="0"
+                            <CurrencyInput
+                              hidePrefix
                               value={displayValue}
-                              onChange={(e) => handleLimitChange(item.categoryId, e.target.value)}
+                              onChangeValue={(val) => {
+                                handleLimitChange(item.categoryId, val > 0 ? val.toString() : '0');
+                              }}
                               onBlur={() => handleLimitBlur(item.categoryId)}
                               className="w-24 px-2.5 py-1.5 bg-white border-2 border-[#026CD6] rounded-xl text-right font-black text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all shadow-xs"
                             />

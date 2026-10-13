@@ -3,6 +3,7 @@ import { CreditCard as CardIcon, X, AlertCircle } from 'lucide-react';
 import { CreateCardPayload } from '../types/card';
 import { createCreditCardApi } from '../services/cardApi';
 import { useAuth } from '../context/AuthContext';
+import { CurrencyInput } from './CurrencyInput';
 
 interface CreditCardModalProps {
   isOpen: boolean;
@@ -100,14 +101,11 @@ export const CreditCardModal: React.FC<CreditCardModalProps> = ({
 
           <div className="space-y-1.5">
             <label className="block text-xs font-black uppercase tracking-wider text-slate-500">Limite Total (R$)</label>
-            <input
-              type="number"
-              step="0.01"
-              required
-              placeholder="Ex: 10000,00"
+            <CurrencyInput
               value={creditLimit}
-              onChange={(e) => setCreditLimit(e.target.value)}
-              className="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-black text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#CE82FF] focus:bg-white transition-all"
+              onChangeValue={(val) => setCreditLimit(val > 0 ? val.toString() : '')}
+              placeholder="0,00"
+              className="py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-black text-slate-800 placeholder-slate-400 focus:border-[#CE82FF] focus:bg-white"
             />
           </div>
 

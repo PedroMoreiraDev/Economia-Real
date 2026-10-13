@@ -54,6 +54,7 @@ import { SavingsGoalsSection } from './components/SavingsGoalsSection';
 import { LandingPage } from './components/LandingPage';
 import { ConfirmModal } from './components/ConfirmModal';
 import { OnboardingTourModal } from './components/OnboardingTourModal';
+import { CurrencyInput, InlineCurrencyInput } from './components/CurrencyInput';
 import { exportTransactionsCsvApi } from './services/goalApi';
 import {
   Account,
@@ -1313,14 +1314,11 @@ const MainDashboard: React.FC = () => {
                         <label className="text-[11px] font-black text-slate-600 uppercase tracking-wider block">
                           Definir Teto Mensal (R$)
                         </label>
-                        <input
-                          type="number"
-                          step="10"
-                          min="0"
+                        <CurrencyInput
                           value={tempLimitInput}
-                          onChange={(e) => setTempLimitInput(e.target.value)}
-                          placeholder="Ex: 3500.00 (ou 0 para remover)"
-                          className="w-full px-3 py-2 bg-white border-2 border-slate-200 rounded-xl text-base font-black text-slate-800 focus:outline-none focus:border-[#026CD6]"
+                          onChangeValue={(val) => setTempLimitInput(val > 0 ? val.toString() : '')}
+                          placeholder="Ex: 3.500,00 (ou 0 para remover)"
+                          className="bg-white border-2 border-slate-200 rounded-xl text-base font-black text-slate-800 focus:outline-none focus:border-[#026CD6] py-2"
                           autoFocus
                         />
                         <div className="flex items-center justify-between pt-1">
@@ -1766,26 +1764,10 @@ const MainDashboard: React.FC = () => {
                                         }`}>
                                         {tx.type === 'EXPENSE' ? '-' : (tx.type === 'INCOME' ? '+' : '')} R$
                                       </span>
-                                      <input
-                                        type="number"
-                                        step="0.01"
-                                        min="0.01"
-                                        defaultValue={tx.amount}
-                                        key={`${tx.id}-${tx.amount}`}
+                                      <InlineCurrencyInput
+                                        initialValue={tx.amount}
                                         disabled={inlineUpdatingTxId === tx.id}
-                                        onKeyDown={(e) => {
-                                          if (e.key === 'Enter') {
-                                            (e.target as HTMLInputElement).blur();
-                                          }
-                                        }}
-                                        onBlur={(e) => {
-                                          const val = parseFloat(e.target.value);
-                                          if (!isNaN(val) && val > 0 && Math.abs(val - tx.amount) > 0.001) {
-                                            handleInlineUpdateAmount(tx, val);
-                                          } else {
-                                            e.target.value = tx.amount.toString();
-                                          }
-                                        }}
+                                        onSave={(val) => handleInlineUpdateAmount(tx, val)}
                                         className={`w-20 text-right font-black text-xs font-numeric bg-slate-50/80 hover:bg-blue-50/60 focus:bg-white px-1.5 py-0.5 rounded-lg border border-slate-200/90 hover:border-blue-300 focus:border-[#026CD6] focus:ring-1 focus:ring-blue-100 focus:outline-none transition-all cursor-pointer shadow-2xs disabled:opacity-50 ${tx.type === 'INCOME' ? 'text-[#10B981]' : 'text-slate-900'
                                           }`}
                                         title="Clique para alterar o valor (Enter para salvar)"

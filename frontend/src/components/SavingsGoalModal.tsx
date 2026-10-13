@@ -3,6 +3,7 @@ import { Target, X, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { SavingsGoal, CreateSavingsGoalPayload, UpdateSavingsGoalPayload } from '../types/goal';
 import { createSavingsGoalApi, updateSavingsGoalApi } from '../services/goalApi';
 import { useAuth } from '../context/AuthContext';
+import { CurrencyInput } from './CurrencyInput';
 
 interface SavingsGoalModalProps {
   isOpen: boolean;
@@ -131,15 +132,11 @@ export const SavingsGoalModal: React.FC<SavingsGoalModalProps> = ({
             <label className="block text-xs font-black uppercase tracking-wider text-slate-500 mb-1.5">
               Valor Alvo (R$)
             </label>
-            <input
-              type="number"
-              step="0.01"
-              min="0.01"
-              required
-              placeholder="0,00"
+            <CurrencyInput
               value={targetAmount}
-              onChange={(e) => setTargetAmount(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border-2 border-slate-200 text-slate-800 font-black placeholder-slate-400 focus:outline-none focus:border-[#58CC02] focus:bg-white transition-all"
+              onChangeValue={(val) => setTargetAmount(val > 0 ? val.toString() : '')}
+              placeholder="0,00"
+              className="py-2.5 rounded-2xl bg-slate-50 border-2 border-slate-200 text-slate-800 font-black placeholder-slate-400 focus:border-[#58CC02] focus:bg-white"
             />
           </div>
 

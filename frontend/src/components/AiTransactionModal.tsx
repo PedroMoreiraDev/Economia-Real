@@ -18,6 +18,7 @@ import { AiExtractionResponse } from '../types/ai';
 import { extractFromTextApi, extractFromAudioApi } from '../services/aiApi';
 import { createTransactionApi } from '../services/financialApi';
 import { useAuth } from '../context/AuthContext';
+import { CurrencyInput } from './CurrencyInput';
 
 interface AiTransactionModalProps {
   isOpen: boolean;
@@ -571,14 +572,11 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
                 {/* Valor Monetário (R$) */}
                 <div>
                   <label className="block text-xs font-black uppercase tracking-wider text-slate-500 mb-1">Valor (R$)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    required
+                  <CurrencyInput
                     value={confirmAmount}
-                    onChange={(e) => setConfirmAmount(e.target.value)}
-                    placeholder="0.00"
-                    className="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-3.5 py-2.5 text-xs sm:text-sm font-black text-slate-800 focus:outline-none focus:border-[#58CC02] focus:bg-white transition-all"
+                    onChangeValue={(val) => setConfirmAmount(val > 0 ? val.toString() : '')}
+                    placeholder="0,00"
+                    className="bg-slate-50 border-2 border-slate-200 rounded-2xl py-2.5 text-xs sm:text-sm font-black text-slate-800 focus:border-[#58CC02] focus:bg-white"
                   />
                 </div>
               </div>

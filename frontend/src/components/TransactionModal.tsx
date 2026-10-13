@@ -3,6 +3,7 @@ import { ArrowDownLeft, ArrowUpRight, ArrowLeftRight, X, AlertCircle } from 'luc
 import { Account, Category, CreateTransactionPayload, UpdateTransactionPayload, Transaction, TransactionType } from '../types/financial';
 import { createTransactionApi, updateTransactionApi, createCategoryApi } from '../services/financialApi';
 import { CategoryCombobox } from './CategoryCombobox';
+import { CurrencyInput } from './CurrencyInput';
 import { useAuth } from '../context/AuthContext';
 
 interface TransactionModalProps {
@@ -224,14 +225,12 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="block text-xs font-black uppercase tracking-wider text-slate-500">Valor (R$)</label>
-              <input
-                type="number"
-                step="0.01"
+              <CurrencyInput
                 required
                 placeholder="0,00"
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                className="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-base font-black text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#58CC02] focus:bg-white transition-all"
+                onChangeValue={(val) => setAmount(val > 0 ? val.toString() : '')}
+                className="py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-base font-black text-slate-800 placeholder-slate-400 focus:border-[#026CD6] focus:bg-white"
               />
             </div>
 
