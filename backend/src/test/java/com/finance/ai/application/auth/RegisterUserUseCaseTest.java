@@ -2,7 +2,7 @@ package com.finance.ai.application.auth;
 
 import com.finance.ai.domain.user.User;
 import com.finance.ai.domain.user.UserRepository;
-import com.finance.ai.infrastructure.security.JwtTokenProvider;
+import com.finance.ai.infrastructure.security.TokenProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,7 +30,7 @@ class RegisterUserUseCaseTest {
     private PasswordEncoder passwordEncoder;
 
     @Mock
-    private JwtTokenProvider jwtTokenProvider;
+    private TokenProvider tokenProvider;
 
     @Mock
     private com.finance.ai.application.financial.DefaultCategorySeeder defaultCategorySeeder;
@@ -50,7 +50,7 @@ class RegisterUserUseCaseTest {
         when(userRepository.existsByEmail(email)).thenReturn(false);
         when(passwordEncoder.encode(rawPassword)).thenReturn(encodedHash);
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
-        when(jwtTokenProvider.generateAccessToken(any(UUID.class), eq(email))).thenReturn(fakeToken);
+        when(tokenProvider.generateAccessToken(any(UUID.class), eq(email))).thenReturn(fakeToken);
 
         AuthResult result = registerUserUseCase.execute(email, fullName, rawPassword);
 

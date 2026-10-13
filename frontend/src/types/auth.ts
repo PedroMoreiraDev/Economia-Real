@@ -13,15 +13,42 @@ export interface AuthResponse {
   tokenType: string;
 }
 
+export interface RegistrationResultResponse {
+  userId: string;
+  email: string;
+  fullName: string;
+  requiresVerification: boolean;
+  message: string;
+}
+
+export interface CaptchaChallenge {
+  challengeId: string;
+  question: string;
+  token: string;
+}
+
 export interface LoginPayload {
   email: string;
   password: string;
+  captchaToken?: string;
+  captchaAnswer?: string;
 }
 
 export interface RegisterPayload {
   email: string;
   fullName: string;
   password: string;
+  captchaToken?: string;
+  captchaAnswer?: string;
+}
+
+export interface VerifyEmailPayload {
+  email: string;
+  code: string;
+}
+
+export interface ResendCodePayload {
+  email: string;
 }
 
 export interface ApiError {

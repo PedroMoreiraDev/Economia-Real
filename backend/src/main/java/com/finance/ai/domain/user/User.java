@@ -13,32 +13,88 @@ public class User {
     private final String email;
     private final String fullName;
     private String passwordHash;
+    private boolean emailVerified;
+    private String verificationCode;
+    private Instant verificationCodeExpiresAt;
     private final Instant createdAt;
     private Instant updatedAt;
 
-    // Construtor para criação de novo usuário
-    public User(UUID id, String email, String fullName, String passwordHash, Instant createdAt) {
+    // Construtor completo (utilizado na reidratação a partir da infraestrutura)
+    public User(UUID id, String email, String fullName, String passwordHash,
+                boolean emailVerified, String verificationCode, Instant verificationCodeExpiresAt,
+                Instant createdAt, Instant updatedAt) {
         this.id = id;
         this.email = email;
         this.fullName = fullName;
         this.passwordHash = passwordHash;
+        this.emailVerified = emailVerified;
+        this.verificationCode = verificationCode;
+        this.verificationCodeExpiresAt = verificationCodeExpiresAt;
         this.createdAt = createdAt;
-        this.updatedAt = createdAt;
+        this.updatedAt = updatedAt != null ? updatedAt : createdAt;
     }
 
-    // Invariante: e-mail não pode ser vazio
+    // Construtor de compatibilidade para testes e entidades legadas
+    public User(UUID id, String email, String fullName, String passwordHash, Instant createdAt) {
+        this(id, email, fullName, passwordHash, true, null, null, createdAt, createdAt);
+    }
+
+    // Criação de usuário com fluxo de verificação de e-mail ativo
+    public static User createWithVerification(String email, String fullName, String passwordHash,
+                                             String verificationCode, Instant verificationCodeExpiresAt) {
+        if (email == null || email.isBlank()) throw new IllegalArgumentException("E-mail é obrigatório.");
+        if (fullName == null || fullName.isBlank()) throw new IllegalArgumentException("Nome completo é obrigatório.");
+        if (passwordHash == null || passwordHash.isBlank()) throw new IllegalArgumentException("Hash de senha é obrigatório.");
+        var now = Instant.now();
+        return new User(UUID.randomUUID(), email.toLowerCase().trim(), fullName.trim(), passwordHash,
+                false, verificationCode, verificationCodeExpiresAt, now, now);
+    }
+
+    // Criação tradicional (já verificado)
     public static User create(String email, String fullName, String passwordHash) {
         if (email == null || email.isBlank()) throw new IllegalArgumentException("E-mail é obrigatório.");
         if (fullName == null || fullName.isBlank()) throw new IllegalArgumentException("Nome completo é obrigatório.");
         if (passwordHash == null || passwordHash.isBlank()) throw new IllegalArgumentException("Hash de senha é obrigatório.");
         var now = Instant.now();
-        return new User(UUID.randomUUID(), email.toLowerCase().trim(), fullName.trim(), passwordHash, now);
+        return new User(UUID.randomUUID(), email.toLowerCase().trim(), fullName.trim(), passwordHash,
+                true, null, null, now, now);
+    }
+
+    /**
+     * Valida o código de 6 dígitos informado pelo usuário e ativa a conta.
+     */
+    public void verifyEmail(String code) {
+        if (this.emailVerified) {
+            return;
+        }
+        if (this.verificationCode == null || !this.verificationCode.trim().equalsIgnoreCase(code.trim())) {
+            throw new IllegalArgumentException("Código de verificação incorreto.");
+        }
+        if (this.verificationCodeExpiresAt != null && Instant.now().isAfter(this.verificationCodeExpiresAt)) {
+            throw new IllegalStateException("Código de verificação expirado. Solicite um novo código.");
+        }
+        this.emailVerified = true;
+        this.verificationCode = null;
+        this.verificationCodeExpiresAt = null;
+        this.updatedAt = Instant.now();
+    }
+
+    /**
+     * Atualiza o código de verificação para reenvio.
+     */
+    public void renewVerificationCode(String newCode, Instant newExpiresAt) {
+        this.verificationCode = newCode;
+        this.verificationCodeExpiresAt = newExpiresAt;
+        this.updatedAt = Instant.now();
     }
 
     public UUID getId() { return id; }
     public String getEmail() { return email; }
     public String getFullName() { return fullName; }
     public String getPasswordHash() { return passwordHash; }
+    public boolean isEmailVerified() { return emailVerified; }
+    public String getVerificationCode() { return verificationCode; }
+    public Instant getVerificationCodeExpiresAt() { return verificationCodeExpiresAt; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
 }

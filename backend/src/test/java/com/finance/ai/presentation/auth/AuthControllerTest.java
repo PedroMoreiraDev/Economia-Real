@@ -12,6 +12,8 @@ import com.finance.ai.infrastructure.security.JwtAuthenticationFilter;
 import com.finance.ai.infrastructure.security.JwtTokenProvider;
 import com.finance.ai.infrastructure.security.SecurityConfig;
 import com.finance.ai.presentation.common.GlobalExceptionHandler;
+import com.finance.ai.application.auth.*;
+import com.finance.ai.infrastructure.security.CaptchaService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +27,9 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -58,13 +62,22 @@ class AuthControllerTest {
     @MockBean
     private JwtTokenProvider jwtTokenProvider;
 
+    @MockBean
+    private VerifyEmailUseCase verifyEmailUseCase;
+
+    @MockBean
+    private ResendVerificationCodeUseCase resendVerificationCodeUseCase;
+
+    @MockBean
+    private CaptchaService captchaService;
+
     @Test
-    @DisplayName("POST /api/v1/auth/register - deve retornar 201 com token quando dados são válidos")
+    @DisplayName("POST /api/v1/auth/register - deve retornar 201 com confirmação de verificação quando dados são válidos")
     void shouldRegisterSuccessfully() throws Exception {
         var request = new AuthController.RegisterRequest("novo@teste.com", "Pedro Silva", "senha12345");
-        var result = new AuthResult(UUID.randomUUID().toString(), "novo@teste.com", "Pedro Silva", "token.jwt.valido");
+        var result = new RegistrationResult(UUID.randomUUID().toString(), "novo@teste.com", "Pedro Silva", true, "Código enviado com sucesso.");
 
-        when(registerUseCase.execute(request.email(), request.fullName(), request.password()))
+        when(registerUseCase.executeWithVerification(eq(request.email()), eq(request.fullName()), eq(request.password()), any(), any()))
                 .thenReturn(result);
 
         mockMvc.perform(post("/api/v1/auth/register")
@@ -72,8 +85,7 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.email").value("novo@teste.com"))
-                .andExpect(jsonPath("$.accessToken").value("token.jwt.valido"))
-                .andExpect(jsonPath("$.tokenType").value("Bearer"));
+                .andExpect(jsonPath("$.requiresVerification").value(true));
     }
 
     @Test
@@ -95,7 +107,7 @@ class AuthControllerTest {
         var request = new AuthController.LoginRequest("pedro@teste.com", "senha12345");
         var result = new AuthResult(UUID.randomUUID().toString(), "pedro@teste.com", "Pedro", "token.jwt.valido");
 
-        when(loginUseCase.execute(request.email(), request.password())).thenReturn(result);
+        when(loginUseCase.execute(eq(request.email()), eq(request.password()), any(), any())).thenReturn(result);
 
         mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -110,7 +122,7 @@ class AuthControllerTest {
     void shouldReturn401OnInvalidCredentials() throws Exception {
         var request = new AuthController.LoginRequest("pedro@teste.com", "senhaErrada");
 
-        when(loginUseCase.execute(anyString(), anyString()))
+        when(loginUseCase.execute(anyString(), anyString(), any(), any()))
                 .thenThrow(new InvalidCredentialsException("Credenciais inválidas."));
 
         mockMvc.perform(post("/api/v1/auth/login")

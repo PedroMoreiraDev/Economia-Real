@@ -1,4 +1,14 @@
-import { AuthResponse, LoginPayload, RegisterPayload, User, ApiError } from '../types/auth';
+import {
+  AuthResponse,
+  LoginPayload,
+  RegisterPayload,
+  User,
+  ApiError,
+  CaptchaChallenge,
+  RegistrationResultResponse,
+  VerifyEmailPayload,
+  ResendCodePayload,
+} from '../types/auth';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
 
@@ -26,6 +36,14 @@ async function handleResponse<T>(res: Response): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+export async function fetchCaptchaApi(): Promise<CaptchaChallenge> {
+  const res = await fetch(`${API_BASE_URL}/auth/captcha`, {
+    method: 'GET',
+    headers: { 'Accept': 'application/json' },
+  });
+  return handleResponse<CaptchaChallenge>(res);
+}
+
 export async function loginApi(payload: LoginPayload): Promise<AuthResponse> {
   const res = await fetch(`${API_BASE_URL}/auth/login`, {
     method: 'POST',
@@ -35,13 +53,31 @@ export async function loginApi(payload: LoginPayload): Promise<AuthResponse> {
   return handleResponse<AuthResponse>(res);
 }
 
-export async function registerApi(payload: RegisterPayload): Promise<AuthResponse> {
+export async function registerApi(payload: RegisterPayload): Promise<RegistrationResultResponse> {
   const res = await fetch(`${API_BASE_URL}/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
     body: JSON.stringify(payload),
   });
+  return handleResponse<RegistrationResultResponse>(res);
+}
+
+export async function verifyEmailApi(payload: VerifyEmailPayload): Promise<AuthResponse> {
+  const res = await fetch(`${API_BASE_URL}/auth/verify-email`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify(payload),
+  });
   return handleResponse<AuthResponse>(res);
+}
+
+export async function resendVerificationCodeApi(payload: ResendCodePayload): Promise<{ message: string }> {
+  const res = await fetch(`${API_BASE_URL}/auth/resend-code`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  return handleResponse<{ message: string }>(res);
 }
 
 export async function getMeApi(token: string): Promise<User> {

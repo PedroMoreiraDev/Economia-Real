@@ -21,7 +21,7 @@ import java.util.UUID;
  * O segredo é injetado via variável de ambiente — nunca hardcoded.
  */
 @Component
-public class JwtTokenProvider {
+public class JwtTokenProvider implements TokenProvider {
 
     private static final Logger log = LoggerFactory.getLogger(JwtTokenProvider.class);
     private static final long ACCESS_TOKEN_MINUTES = 60 * 24; // 24 horas de sessão contínua
