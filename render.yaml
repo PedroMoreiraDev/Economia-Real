@@ -15,6 +15,14 @@ services:
         fromDatabase:
           name: economia-real-db
           property: connectionString
+      - key: POSTGRES_HOST
+        fromDatabase:
+          name: economia-real-db
+          property: host
+      - key: POSTGRES_DB
+        fromDatabase:
+          name: economia-real-db
+          property: database
       - key: SPRING_DATASOURCE_USERNAME
         fromDatabase:
           name: economia-real-db
