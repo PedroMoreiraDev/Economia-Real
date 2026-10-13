@@ -31,19 +31,25 @@ Este documento registra o estado real, factual e auditável do desenvolvimento d
 - [x] Frontend React com Tailwind CSS, TypeScript estrito e monitoramento em tempo real.
 
 ### 2.3. Fase 2 — Identidade, Autenticação, Isolamento de Usuários e Segurança Antifraude
-- [x] Migração Flyway `V2__add_refresh_tokens.sql` e `V3__add_email_verification.sql` (campos `email_verified`, `verification_code`, `verification_code_expires_at`).
-- [x] Entidade de domínio `User` pura e porta `UserRepository` com ciclo de ativação de conta.
+- [x] Migração Flyway `V2__add_refresh_tokens.sql`, `V3__add_email_verification.sql` e `V4__add_password_reset.sql` (`password_reset_code`, `password_reset_expires_at`).
+- [x] Entidade de domínio `User` pura e porta `UserRepository` com ciclo de ativação de conta e redefinição de senha segura.
 - [x] Validação Rigorosa e Gratuita de E-mail (`EmailValidationService`):
   - Validação de sintaxe estrita RFC 5322.
   - Blacklist em memória contra 30+ provedores de e-mail temporários/descartáveis conhecidos.
   - Verificação de registros DNS MX em tempo real via JNDI com bypass instantâneo para provedores confiáveis (`gmail.com`, `outlook.com`, `yahoo.com`, `icloud.com`).
-- [x] Desafio CAPTCHA Nativo Zero-Cost (`CaptchaService`):
-  - Desafios matemáticos e lógicos gerados no backend com assinatura criptográfica HMAC-SHA256 e expiração de 3 minutos.
-  - Sem custos de APIs pagas (reCAPTCHA, hCaptcha) e com acessibilidade tátil.
+- [x] Desafio CAPTCHA Visual Profissional com Imagem Distorcida (`CaptchaService`):
+  - Geração nativa em memória de imagens PNG Base64 (`data:image/png;base64,...`) com ruído de fundo, rotação aleatória de caracteres (-22° a +22°), linhas cruzadas e degradê.
+  - Sem texto claro exposto em JSON ou DOM (bloqueia bots e scrapers automatizados).
+  - Assinatura criptográfica HMAC-SHA256 com hash da resposta e salt interno do backend (impossibilita adulteração).
+  - Expiração de 3 minutos e renovação com 1 clique no frontend.
 - [x] Fluxo de Ativação por Código de 6 Dígitos (`VerifyEmailUseCase`, `ResendVerificationCodeUseCase`, `EmailSenderService`):
   - Envio de e-mail com template HTML responsivo e fallback seguro em console de desenvolvimento.
   - Bloqueio de login (`403 Forbidden`) para contas não ativadas.
   - Interface no Frontend com troca inteligente de tela, contagem de caracteres e botão de reenvio.
+- [x] Fluxo Completo de Recuperação e Redefinição de Senha (`ForgotPasswordUseCase`, `ResetPasswordUseCase`):
+  - Endpoint `POST /api/v1/auth/forgot-password` protegido por CAPTCHA visual com envio de código de 6 dígitos válido por 15 minutos e proteção Anti-User-Enumeration (OWASP).
+  - Endpoint `POST /api/v1/auth/reset-password` validando código e nova senha com criptografia BCrypt.
+  - Telas no Frontend integradas no modal de login ("Esqueceu a senha?", envio de código e criação de nova senha).
 - [x] Hashing BCrypt (custo 12) e emissão de tokens JWT com assinatura HMAC-SHA256 (`JwtTokenProvider`).
 - [x] Filtro stateless `JwtAuthenticationFilter` e principal seguro `AuthenticatedUser`.
 - [x] Casos de uso `RegisterUserUseCase`, `LoginUserUseCase` e endpoints REST `/api/v1/auth/*`.

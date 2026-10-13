@@ -28,6 +28,8 @@ public class AuthController {
     private final DeleteAccountUseCase deleteAccountUseCase;
     private final VerifyEmailUseCase verifyEmailUseCase;
     private final ResendVerificationCodeUseCase resendVerificationCodeUseCase;
+    private final ForgotPasswordUseCase forgotPasswordUseCase;
+    private final ResetPasswordUseCase resetPasswordUseCase;
     private final CaptchaService captchaService;
     private final UserRepository userRepository;
 
@@ -37,6 +39,8 @@ public class AuthController {
             DeleteAccountUseCase deleteAccountUseCase,
             VerifyEmailUseCase verifyEmailUseCase,
             ResendVerificationCodeUseCase resendVerificationCodeUseCase,
+            ForgotPasswordUseCase forgotPasswordUseCase,
+            ResetPasswordUseCase resetPasswordUseCase,
             CaptchaService captchaService,
             UserRepository userRepository) {
         this.registerUseCase = registerUseCase;
@@ -44,6 +48,8 @@ public class AuthController {
         this.deleteAccountUseCase = deleteAccountUseCase;
         this.verifyEmailUseCase = verifyEmailUseCase;
         this.resendVerificationCodeUseCase = resendVerificationCodeUseCase;
+        this.forgotPasswordUseCase = forgotPasswordUseCase;
+        this.resetPasswordUseCase = resetPasswordUseCase;
         this.captchaService = captchaService;
         this.userRepository = userRepository;
     }
@@ -97,6 +103,20 @@ public class AuthController {
                 request.captchaAnswer()
         );
         return ResponseEntity.ok(toResponse(result));
+    }
+
+    @PostMapping("/forgot-password")
+    @Operation(summary = "Solicita envio de código de 6 dígitos para recuperação de senha")
+    public ResponseEntity<Map<String, String>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        forgotPasswordUseCase.execute(request.email(), request.captchaToken(), request.captchaAnswer());
+        return ResponseEntity.ok(Map.of("message", "Se o e-mail informado estiver cadastrado, enviamos o código de recuperação para sua caixa de entrada."));
+    }
+
+    @PostMapping("/reset-password")
+    @Operation(summary = "Redefine a senha utilizando o código de 6 dígitos")
+    public ResponseEntity<Map<String, String>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        resetPasswordUseCase.execute(request.email(), request.code(), request.newPassword());
+        return ResponseEntity.ok(Map.of("message", "Senha redefinida com sucesso! Você já pode entrar com sua nova senha."));
     }
 
     @GetMapping("/me")
@@ -175,5 +195,17 @@ public class AuthController {
 
     public record UserProfileResponse(
             String id, String email, String fullName, String createdAt
+    ) {}
+
+    public record ForgotPasswordRequest(
+            @Email(message = "E-mail inválido.") @NotBlank String email,
+            String captchaToken,
+            String captchaAnswer
+    ) {}
+
+    public record ResetPasswordRequest(
+            @Email(message = "E-mail inválido.") @NotBlank String email,
+            @NotBlank @Size(min = 6, max = 6, message = "O código deve ter 6 dígitos.") String code,
+            @NotBlank @Size(min = 8, max = 100, message = "A nova senha deve ter entre 8 e 100 caracteres.") String newPassword
     ) {}
 }

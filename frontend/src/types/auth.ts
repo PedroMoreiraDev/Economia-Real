@@ -23,8 +23,21 @@ export interface RegistrationResultResponse {
 
 export interface CaptchaChallenge {
   challengeId: string;
-  question: string;
+  imageBase64: string;
+  question?: string;
   token: string;
+}
+
+export interface ForgotPasswordPayload {
+  email: string;
+  captchaToken?: string;
+  captchaAnswer?: string;
+}
+
+export interface ResetPasswordPayload {
+  email: string;
+  code: string;
+  newPassword: string;
 }
 
 export interface LoginPayload {

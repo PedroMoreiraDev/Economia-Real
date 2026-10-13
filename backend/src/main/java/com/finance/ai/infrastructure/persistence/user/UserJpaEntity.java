@@ -35,6 +35,12 @@ public class UserJpaEntity {
     @Column(name = "verification_code_expires_at")
     private Instant verificationCodeExpiresAt;
 
+    @Column(name = "password_reset_code", length = 6)
+    private String passwordResetCode;
+
+    @Column(name = "password_reset_expires_at")
+    private Instant passwordResetExpiresAt;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -45,6 +51,7 @@ public class UserJpaEntity {
 
     public UserJpaEntity(UUID id, String email, String passwordHash, String fullName,
                          boolean emailVerified, String verificationCode, Instant verificationCodeExpiresAt,
+                         String passwordResetCode, Instant passwordResetExpiresAt,
                          Instant createdAt, Instant updatedAt) {
         this.id = id;
         this.email = email;
@@ -53,6 +60,8 @@ public class UserJpaEntity {
         this.emailVerified = emailVerified;
         this.verificationCode = verificationCode;
         this.verificationCodeExpiresAt = verificationCodeExpiresAt;
+        this.passwordResetCode = passwordResetCode;
+        this.passwordResetExpiresAt = passwordResetExpiresAt;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -64,6 +73,8 @@ public class UserJpaEntity {
     public boolean isEmailVerified() { return emailVerified; }
     public String getVerificationCode() { return verificationCode; }
     public Instant getVerificationCodeExpiresAt() { return verificationCodeExpiresAt; }
+    public String getPasswordResetCode() { return passwordResetCode; }
+    public Instant getPasswordResetExpiresAt() { return passwordResetExpiresAt; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
 }

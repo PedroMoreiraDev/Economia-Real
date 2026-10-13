@@ -28,7 +28,7 @@ public class JwtTokenProvider implements TokenProvider {
 
     private final SecretKey signingKey;
 
-    public JwtTokenProvider(@Value("${app.security.jwt-secret}") String jwtSecret) {
+    public JwtTokenProvider(@Value("${app.security.jwt-secret:super-secret-jwt-key-finance-ai-2026-minimum-32-chars-long!}") String jwtSecret) {
         if (jwtSecret.length() < 32) {
             throw new IllegalStateException("JWT secret deve ter ao menos 32 caracteres.");
         }

@@ -71,6 +71,12 @@ class AuthControllerTest {
     @MockBean
     private CaptchaService captchaService;
 
+    @MockBean
+    private ForgotPasswordUseCase forgotPasswordUseCase;
+
+    @MockBean
+    private ResetPasswordUseCase resetPasswordUseCase;
+
     @Test
     @DisplayName("POST /api/v1/auth/register - deve retornar 201 com confirmação de verificação quando dados são válidos")
     void shouldRegisterSuccessfully() throws Exception {

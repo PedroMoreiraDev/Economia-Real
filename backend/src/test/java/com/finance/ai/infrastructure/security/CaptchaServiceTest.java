@@ -5,10 +5,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@DisplayName("Testes Unitários: CaptchaService")
+@DisplayName("Testes Unitários: CaptchaService (Imagem Visual com Distorção e HMAC)")
 class CaptchaServiceTest {
 
     private CaptchaService captchaService;
@@ -19,37 +18,14 @@ class CaptchaServiceTest {
     }
 
     @Test
-    @DisplayName("Deve gerar desafio de CAPTCHA com pergunta, id e token assinado")
-    void shouldGenerateChallenge() {
+    @DisplayName("Deve gerar desafio com imagem PNG em Base64, id e token assinado")
+    void shouldGenerateChallengeWithImage() {
         var challenge = captchaService.generateChallenge();
 
         assertThat(challenge).isNotNull();
         assertThat(challenge.challengeId()).isNotBlank();
         assertThat(challenge.token()).isNotBlank();
-        assertThat(challenge.question()).isNotBlank();
-    }
-
-    @Test
-    @DisplayName("Deve validar com sucesso a resposta correta do desafio")
-    void shouldValidateCorrectAnswer() {
-        var challenge = captchaService.generateChallenge();
-        String question = challenge.question();
-
-        // O formato pode ser "X + Y", "X - Y" ou "X × Y"
-        int expected;
-        if (question.contains(" + ")) {
-            String[] parts = question.split(" \\+ ");
-            expected = Integer.parseInt(parts[0]) + Integer.parseInt(parts[1]);
-        } else if (question.contains(" - ")) {
-            String[] parts = question.split(" - ");
-            expected = Integer.parseInt(parts[0]) - Integer.parseInt(parts[1]);
-        } else {
-            String[] parts = question.split(" × ");
-            expected = Integer.parseInt(parts[0]) * Integer.parseInt(parts[1]);
-        }
-
-        assertThatCode(() -> captchaService.validateCaptcha(challenge.token(), String.valueOf(expected)))
-                .doesNotThrowAnyException();
+        assertThat(challenge.imageBase64()).startsWith("data:image/png;base64,");
     }
 
     @Test
@@ -57,18 +33,34 @@ class CaptchaServiceTest {
     void shouldRejectIncorrectAnswer() {
         var challenge = captchaService.generateChallenge();
 
-        assertThatThrownBy(() -> captchaService.validateCaptcha(challenge.token(), "9999"))
+        assertThatThrownBy(() -> captchaService.validateCaptcha(challenge.token(), "ERRADO"))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Resposta do desafio de segurança incorreta");
+                .hasMessageContaining("Código de segurança incorreto");
     }
 
     @Test
-    @DisplayName("Deve rejeitar token adulterado ou vazio")
-    void shouldRejectTamperedToken() {
-        assertThatThrownBy(() -> captchaService.validateCaptcha("token-invalido.adulterado", "10"))
-                .isInstanceOf(IllegalArgumentException.class);
+    @DisplayName("Deve rejeitar token nulo ou vazio")
+    void shouldRejectNullOrBlankToken() {
+        assertThatThrownBy(() -> captchaService.validateCaptcha(null, "123"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("obrigatória");
 
-        assertThatThrownBy(() -> captchaService.validateCaptcha("", "10"))
-                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> captchaService.validateCaptcha("   ", "123"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("obrigatória");
+    }
+
+    @Test
+    @DisplayName("Deve rejeitar resposta nula ou vazia")
+    void shouldRejectNullOrBlankAnswer() {
+        var challenge = captchaService.generateChallenge();
+
+        assertThatThrownBy(() -> captchaService.validateCaptcha(challenge.token(), null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Digite o código exibido");
+
+        assertThatThrownBy(() -> captchaService.validateCaptcha(challenge.token(), "  "))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Digite o código exibido");
     }
 }

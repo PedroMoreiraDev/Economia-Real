@@ -8,6 +8,8 @@ import {
   RegistrationResultResponse,
   VerifyEmailPayload,
   ResendCodePayload,
+  ForgotPasswordPayload,
+  ResetPasswordPayload,
 } from '../types/auth';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
@@ -73,6 +75,24 @@ export async function verifyEmailApi(payload: VerifyEmailPayload): Promise<AuthR
 
 export async function resendVerificationCodeApi(payload: ResendCodePayload): Promise<{ message: string }> {
   const res = await fetch(`${API_BASE_URL}/auth/resend-code`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  return handleResponse<{ message: string }>(res);
+}
+
+export async function forgotPasswordApi(payload: ForgotPasswordPayload): Promise<{ message: string }> {
+  const res = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  return handleResponse<{ message: string }>(res);
+}
+
+export async function resetPasswordApi(payload: ResetPasswordPayload): Promise<{ message: string }> {
+  const res = await fetch(`${API_BASE_URL}/auth/reset-password`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
     body: JSON.stringify(payload),

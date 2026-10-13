@@ -56,6 +56,8 @@ class UserRepositoryAdapter implements UserRepository {
                 e.isEmailVerified(),
                 e.getVerificationCode(),
                 e.getVerificationCodeExpiresAt(),
+                e.getPasswordResetCode(),
+                e.getPasswordResetExpiresAt(),
                 e.getCreatedAt(),
                 e.getUpdatedAt()
         );
@@ -70,6 +72,8 @@ class UserRepositoryAdapter implements UserRepository {
                 u.isEmailVerified(),
                 u.getVerificationCode(),
                 u.getVerificationCodeExpiresAt(),
+                u.getPasswordResetCode(),
+                u.getPasswordResetExpiresAt(),
                 u.getCreatedAt(),
                 u.getUpdatedAt()
         );
