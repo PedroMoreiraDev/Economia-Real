@@ -1,6 +1,6 @@
 import { RecurringBill, CreateRecurringBillPayload, UpdateRecurringBillPayload, PayRecurringBillPayload } from '../types/recurring';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
+import { API_BASE_URL } from './apiConfig';
 
 export async function fetchRecurringBillsApi(token: string, month?: string): Promise<RecurringBill[]> {
   const url = month 

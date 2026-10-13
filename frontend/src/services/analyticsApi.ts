@@ -1,6 +1,6 @@
 import { AnalyticsOverview } from '../types/analytics';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
+import { API_BASE_URL } from './apiConfig';
 
 export async function fetchAnalyticsOverviewApi(token: string, month?: string): Promise<AnalyticsOverview> {
   const url = month 

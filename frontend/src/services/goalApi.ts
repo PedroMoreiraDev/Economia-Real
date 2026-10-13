@@ -6,7 +6,7 @@ import {
   WithdrawGoalPayload 
 } from '../types/goal';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
+import { API_BASE_URL } from './apiConfig';
 
 export async function fetchSavingsGoalsApi(token: string): Promise<SavingsGoal[]> {
   const res = await fetch(`${API_BASE_URL}/savings-goals`, {

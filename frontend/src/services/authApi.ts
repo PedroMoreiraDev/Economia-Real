@@ -12,7 +12,7 @@ import {
   ResetPasswordPayload,
 } from '../types/auth';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
+import { API_BASE_URL } from './apiConfig';
 
 export class AuthApiException extends Error {
   constructor(public apiError: ApiError) {

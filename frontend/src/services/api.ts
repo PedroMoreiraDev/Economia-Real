@@ -1,6 +1,6 @@
 import { HealthStatus } from '../types/health';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
+import { API_BASE_URL } from './apiConfig';
 
 export async function fetchHealth(): Promise<HealthStatus> {
   const controller = new AbortController();
