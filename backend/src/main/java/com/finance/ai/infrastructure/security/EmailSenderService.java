@@ -45,6 +45,7 @@ public class EmailSenderService {
     private final String brevoApiKey;
     private final String resendApiKey;
 
+    @Autowired
     public EmailSenderService(
             @Autowired(required = false) JavaMailSender mailSender,
             @Value("${spring.mail.host:}") String host,
@@ -61,6 +62,16 @@ public class EmailSenderService {
         this.appName = appName;
         this.brevoApiKey = (brevoApiKey != null) ? brevoApiKey.trim() : "";
         this.resendApiKey = (resendApiKey != null) ? resendApiKey.trim() : "";
+    }
+
+    public EmailSenderService(
+            String host,
+            String username,
+            String password,
+            String appName,
+            String brevoApiKey,
+            String resendApiKey) {
+        this(null, host, username, password, appName, brevoApiKey, resendApiKey);
     }
 
     public boolean isConfigured() {
@@ -186,7 +197,10 @@ public class EmailSenderService {
 
     private void sendViaResendHttp(String toEmail, String subject, String htmlContent) throws Exception {
         Map<String, Object> bodyMap = new HashMap<>();
-        bodyMap.put("from", appName + " <" + fromEmail + ">");
+        String sender = (fromEmail != null && !fromEmail.isBlank() && !fromEmail.endsWith("@gmail.com"))
+                ? appName + " <" + fromEmail + ">"
+                : "Economia Real <onboarding@resend.dev>";
+        bodyMap.put("from", sender);
         bodyMap.put("to", List.of(toEmail));
         bodyMap.put("subject", subject);
         bodyMap.put("html", htmlContent);
