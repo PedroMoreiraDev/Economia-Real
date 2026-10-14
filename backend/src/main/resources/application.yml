@@ -20,6 +20,12 @@ spring:
     username: ${SPRING_DATASOURCE_USERNAME:${POSTGRES_USER:finance_user}}
     password: ${SPRING_DATASOURCE_PASSWORD:${POSTGRES_PASSWORD:finance_password}}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-timeout: 20000
+      max-lifetime: 1200000
+      idle-timeout: 300000
+      keepalive-time: 30000
+      leak-detection-threshold: 60000
 
   jpa:
     open-in-view: false

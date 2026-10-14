@@ -323,14 +323,16 @@ dist/assets/index-CVcJJLIG.js   305.65 kB │ gzip: 75.31 kB
   - Ao clicar em "Confirmar e Salvar", o sistema salva a transação e atualiza o extrato em segundo plano.
   - Em vez de fechar o modal, exibe um banner verde de sucesso: *"Registro '[descrição]' salvo com sucesso no seu extrato de movimentações! Você já pode clicar no microfone abaixo e falar o próximo registro!"*.
   - O modal retorna diretamente para a aba de voz com o microfone pronto para o próximo comando falado, acelerando o lançamento em lote de despesas do dia a dia.
-- **Remoção do Campo "Conta de Pagamento / Depósito" no Lançamento com IA:**
-  - O campo de conta bancária foi removido da tela de confirmação estruturada da IA, simplificando a interface e eliminando atrito desnecessário no fluxo rápido por voz.
+- **Otimização de Performance e Latência (Frontend & Backend):**
+  - **Filtro Temporal no Extrato:** A listagem de movimentações (`fetchTransactionsApi`) agora passa `startDate` e `endDate` do mês ativo por padrão, evitando o download desnecessário de 100% do histórico e aliviando processamento no PostgreSQL e na rede.
+  - **Eliminação de Refetch Redundante de Dados Estáticos:** A função `loadFinancialData` passou a utilizar referências para dados estáticos (`accounts`, `categories`, `creditCards`). Ao salvar uma movimentação ou alternar de mês, apenas as métricas dinâmicas do mês (transações, resumo financeiro, orçamentos e analytics) são requisitadas, reduzindo a concorrência no Tomcat e no banco de dados.
+  - **Keep-Alive e Resiliência no HikariCP:** Parametrização explícita de `keepalive-time: 30000` (ping a cada 30 segundos) no `application.yml`, mantendo conexões ativas e impedindo quedas silenciosas por timeout de inatividade em bancos serverless/nuvem.
 
 ---
 
 ## 5. Próximo Passo Recomendado
 
 1. A plataforma conta agora com 141 testes automatizados no backend e build de frontend 100% íntegros.
-2. Todo o fluxo contínuo de voz por IA, filtro por categoria no extrato e validações foram entregues e validados no frontend.
+2. Otimizações de latência e consumo de rede aplicadas no frontend e backend.
 3. Deploy sincronizado no GitHub (`main`) e publicado na Vercel (`https://economia-real.ia.br`).
 

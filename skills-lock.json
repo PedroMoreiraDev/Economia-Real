@@ -12,6 +12,12 @@
       "sourceType": "github",
       "skillPath": "skills/frontend-design/SKILL.md",
       "computedHash": "106acf230014cbb43ca34e6410371321b56ca742f9ee0442e8ec05bf02eb0384"
+    },
+    "social-media": {
+      "source": "langchain-ai/deepagents",
+      "sourceType": "github",
+      "skillPath": "examples/content-builder-agent/skills/social-media/SKILL.md",
+      "computedHash": "97bc977551906fb3ea72f3e36cd875d683426f8aba834b3e1438746d3834ee4a"
     }
   }
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   Sparkles,
   RefreshCw,
@@ -260,37 +260,62 @@ const MainDashboard: React.FC = () => {
   });
   const [loadingData, setLoadingData] = useState<boolean>(false);
 
-  const loadFinancialData = useCallback(async () => {
+  // Referências para evitar refetch desnecessário de dados estáticos
+  const accountsRef = useRef<Account[]>([]);
+  accountsRef.current = accounts;
+  const categoriesRef = useRef<Category[]>([]);
+  categoriesRef.current = categories;
+  const creditCardsRef = useRef<CreditCard[]>([]);
+  creditCardsRef.current = creditCards;
+
+  const loadFinancialData = useCallback(async (options?: { reloadStatic?: boolean; loadAllTransactions?: boolean }) => {
     if (!token) return;
     setLoadingData(true);
     try {
       const { startDate, endDate } = getMonthRange(selectedMonth);
       const monthParam = `${selectedMonth}-01`;
+      const isAllTx = options?.loadAllTransactions ?? (txFilterMode === 'all');
 
-      const [accs, cats, txs, sum, cards, bgs, anls] = await Promise.all([
-        fetchAccountsApi(token),
-        fetchCategoriesApi(token),
-        fetchTransactionsApi(token),
+      // Só recarrega contas, categorias e cartões se for solicitado ou se a lista estiver vazia
+      const shouldLoadStatic = options?.reloadStatic ||
+                               accountsRef.current.length === 0 ||
+                               categoriesRef.current.length === 0 ||
+                               creditCardsRef.current.length === 0;
+
+      const dynamicPromises = [
+        fetchTransactionsApi(token, isAllTx ? undefined : startDate, isAllTx ? undefined : endDate),
         fetchSummaryApi(token, startDate, endDate),
-        fetchCreditCardsApi(token),
         fetchBudgetsApi(token, monthParam),
         fetchAnalyticsOverviewApi(token, monthParam),
-      ]);
-      setAccounts(accs);
-      setCategories(cats);
-      setTransactions(txs);
-      setSummary(sum);
-      setCreditCards(cards);
-      setBudgets(bgs);
-      setAnalytics(anls);
+      ] as const;
 
-
+      if (shouldLoadStatic) {
+        const [txs, sum, bgs, anls, accs, cats, cards] = await Promise.all([
+          ...dynamicPromises,
+          fetchAccountsApi(token),
+          fetchCategoriesApi(token),
+          fetchCreditCardsApi(token),
+        ]);
+        setTransactions(txs);
+        setSummary(sum);
+        setBudgets(bgs);
+        setAnalytics(anls);
+        setAccounts(accs);
+        setCategories(cats);
+        setCreditCards(cards);
+      } else {
+        const [txs, sum, bgs, anls] = await Promise.all(dynamicPromises);
+        setTransactions(txs);
+        setSummary(sum);
+        setBudgets(bgs);
+        setAnalytics(anls);
+      }
     } catch (err) {
       console.warn('Erro ao carregar dados financeiros:', err);
     } finally {
       setLoadingData(false);
     }
-  }, [token, selectedMonth]);
+  }, [token, selectedMonth, txFilterMode]);
 
   const handlePrevMonth = () => {
     const [y, m] = selectedMonth.split('-').map(Number);
@@ -1468,7 +1493,10 @@ const MainDashboard: React.FC = () => {
                       <div className="flex items-center gap-2 pt-1 flex-wrap">
                         <button
                           type="button"
-                          onClick={() => setTxFilterMode('month')}
+                          onClick={() => {
+                            setTxFilterMode('month');
+                            loadFinancialData({ loadAllTransactions: false });
+                          }}
                           className={`btn-duo text-[11px] px-2.5 py-1 rounded-xl flex items-center gap-1.5 transition-all ${txFilterMode === 'month'
                             ? 'btn-duo-blue font-black'
                             : 'btn-duo-white font-bold text-slate-500'
@@ -1480,7 +1508,10 @@ const MainDashboard: React.FC = () => {
 
                         <button
                           type="button"
-                          onClick={() => setTxFilterMode('all')}
+                          onClick={() => {
+                            setTxFilterMode('all');
+                            loadFinancialData({ loadAllTransactions: true });
+                          }}
                           className={`btn-duo text-[11px] px-2.5 py-1 rounded-xl flex items-center gap-1.5 transition-all ${txFilterMode === 'all'
                             ? 'btn-duo-blue font-black'
                             : 'btn-duo-white font-bold text-slate-500'
@@ -1493,10 +1524,10 @@ const MainDashboard: React.FC = () => {
 
                     <div className="flex items-center gap-2 self-start sm:self-auto">
                       <button
-                        onClick={loadFinancialData}
+                        onClick={() => loadFinancialData({ reloadStatic: true })}
                         disabled={loadingData}
                         className="btn-duo btn-duo-white text-xs px-2.5 py-1.5"
-                        title="Atualizar lançamentos"
+                        title="Atualizar lançamentos (sincronização completa)"
                       >
                         <RefreshCw className={`h-3.5 w-3.5 ${loadingData ? 'animate-spin text-[#026CD6]' : ''}`} />
                       </button>
@@ -1964,7 +1995,7 @@ const MainDashboard: React.FC = () => {
       <AccountModal
         isOpen={accountModalOpen}
         onClose={() => setAccountModalOpen(false)}
-        onAccountCreated={loadFinancialData}
+        onAccountCreated={() => loadFinancialData({ reloadStatic: true })}
       />
 
       <TransactionModal
@@ -1984,7 +2015,7 @@ const MainDashboard: React.FC = () => {
       <CreditCardModal
         isOpen={cardModalOpen}
         onClose={() => setCardModalOpen(false)}
-        onCardCreated={loadFinancialData}
+        onCardCreated={() => loadFinancialData({ reloadStatic: true })}
       />
 
       <CreditCardPurchaseModal
@@ -2005,7 +2036,7 @@ const MainDashboard: React.FC = () => {
           if (importedMonth) {
             setSelectedMonth(importedMonth);
           }
-          loadFinancialData();
+          loadFinancialData({ reloadStatic: true });
         }}
       />
 
