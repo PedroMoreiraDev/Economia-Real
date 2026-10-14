@@ -310,10 +310,12 @@ dist/assets/index-CVcJJLIG.js   305.65 kB │ gzip: 75.31 kB
 
 ## 4.9. Filtro por Categoria no Extrato e Fluxo Contínuo de Lançamento por Voz com IA (Implementado)
 
-- **Filtro por Categoria no Extrato de Movimentações (`App.tsx`):**
-  - Dropdown elegante com ícone de `Tag` integrado à barra de busca e filtros do extrato.
-  - Opções: "Todas as categorias", "⚠️ Sem categoria" e cada uma das categorias cadastradas do usuário.
-  - Botão de limpeza rápida (`X`) quando um filtro estiver ativo.
+- **Filtro por Categoria Moderno no Extrato (`CategoryFilterDropdown.tsx` e `App.tsx`):**
+  - Substituição total do `<select>` nativo e rígido do sistema operacional por um componente customizado com popover flutuante via `createPortal`.
+  - Design visual harmonizado com o restante da aplicação: fundo com desfoque (`backdrop-blur-md`), bordas arredondadas `rounded-2xl`, sombras elegantes `shadow-2xl` e micro-animações.
+  - Indicadores visuais ricos: cada categoria exibe seu círculo com a cor hexadecimal real cadastrada (`colorHex`), badges contextuais e check azul na categoria ativa.
+  - Campo de busca rápida integrado no topo do dropdown com ícone de lupa para filtrar categorias instantaneamente.
+  - Botão de limpeza rápida (`X`) integrado ao gatilho quando um filtro estiver ativo.
   - Sincronização inteligente com o botão de alerta "⚠️ X sem categoria" e tratamento do empty state com botão para "Limpar filtros".
   - Respeita os filtros ativos de período (mês ou geral), tipo (receita/despesa) e busca textual por descrição/notas.
 - **Fluxo Contínuo de Gravação por Voz no Lançamento com IA (`AiTransactionModal.tsx`):**
