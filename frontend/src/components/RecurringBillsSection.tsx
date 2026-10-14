@@ -127,12 +127,12 @@ export const RecurringBillsSection: React.FC<RecurringBillsSectionProps> = ({
 
   const handleDelete = async (bill: RecurringBill) => {
     if (!token) return;
-    if (!window.confirm(`Deseja realmente remover a despesa recorrente "${bill.description}"?`)) {
+    if (!window.confirm(`Deseja realmente remover a despesa fixa "${bill.description}" e todos os seus lançamentos no extrato (inclusive meses futuros)?`)) {
       return;
     }
     try {
       await deleteRecurringBillApi(token, bill.id);
-      setFeedbackMessage({ type: 'success', text: `"${bill.description}" removida com sucesso.` });
+      setFeedbackMessage({ type: 'success', text: `"${bill.description}" e seus lançamentos no extrato foram removidos com sucesso.` });
       await loadBills();
       if (onDataChanged) onDataChanged();
       setTimeout(() => setFeedbackMessage(null), 4000);

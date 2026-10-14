@@ -22,6 +22,7 @@ class EmailSenderServiceTest {
         assertThat(service.isHttpConfigured()).isFalse();
 
         CompletableFuture<Void> future = service.sendVerificationCode("teste@exemplo.com", "Usuário Teste", "123456");
+        future.join();
         assertThat(future).isCompleted();
     }
 

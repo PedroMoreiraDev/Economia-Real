@@ -4,12 +4,15 @@ import com.finance.ai.application.financial.recurring.dto.RecurringBillResponse;
 import com.finance.ai.application.financial.recurring.dto.UpdateRecurringBillCommand;
 import com.finance.ai.domain.financial.AccountRepository;
 import com.finance.ai.domain.financial.CategoryRepository;
+import com.finance.ai.domain.financial.Transaction;
+import com.finance.ai.domain.financial.TransactionRepository;
 import com.finance.ai.domain.financial.card.CreditCardRepository;
 import com.finance.ai.domain.financial.recurring.RecurringBillRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -19,15 +22,18 @@ public class UpdateRecurringBillUseCase {
     private final CategoryRepository categoryRepository;
     private final AccountRepository accountRepository;
     private final CreditCardRepository creditCardRepository;
+    private final TransactionRepository transactionRepository;
 
     public UpdateRecurringBillUseCase(RecurringBillRepository recurringBillRepository,
                                       CategoryRepository categoryRepository,
                                       AccountRepository accountRepository,
-                                      CreditCardRepository creditCardRepository) {
+                                      CreditCardRepository creditCardRepository,
+                                      TransactionRepository transactionRepository) {
         this.recurringBillRepository = recurringBillRepository;
         this.categoryRepository = categoryRepository;
         this.accountRepository = accountRepository;
         this.creditCardRepository = creditCardRepository;
+        this.transactionRepository = transactionRepository;
     }
 
     @Transactional
@@ -60,6 +66,39 @@ public class UpdateRecurringBillUseCase {
         );
 
         var saved = recurringBillRepository.save(updated);
+
+        // Sincroniza todas as movimentações existentes no extrato (mês atual e meses futuros) geradas por esta despesa fixa
+        String prefix = "RECURRING_BILL:" + existing.getId();
+        List<Transaction> linkedTransactions = transactionRepository.findAllByUserIdAndNotesStartingWith(authenticatedUserId, prefix);
+
+        for (Transaction tx : linkedTransactions) {
+            LocalDate currentAccrual = tx.getAccrualDate();
+            LocalDate newAccrualDate = currentAccrual;
+
+            if (cmd.dayOfMonth() > 0) {
+                int maxDaysInMonth = currentAccrual.lengthOfMonth();
+                int targetDay = Math.min(cmd.dayOfMonth(), maxDaysInMonth);
+                newAccrualDate = currentAccrual.withDayOfMonth(targetDay);
+            }
+
+            LocalDate newSettlementDate = tx.getSettlementDate() != null ? newAccrualDate : null;
+            UUID targetAccountId = cmd.creditCardId() != null ? null : cmd.accountId();
+            String newNotes = "RECURRING_BILL:" + existing.getId() + " - Lançamento da despesa fixa: " + cmd.description().trim();
+
+            Transaction updatedTx = tx.withUpdates(
+                    tx.getType(),
+                    cmd.amount(),
+                    newAccrualDate,
+                    newSettlementDate,
+                    cmd.description().trim(),
+                    targetAccountId,
+                    tx.getDestinationAccountId(),
+                    cmd.categoryId(),
+                    newNotes
+            );
+
+            transactionRepository.save(updatedTx);
+        }
 
         LocalDate today = LocalDate.now();
         LocalDate dueDate = saved.calculateDueDate(today);

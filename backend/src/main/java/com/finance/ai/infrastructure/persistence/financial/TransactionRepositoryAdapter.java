@@ -40,6 +40,14 @@ class TransactionRepositoryAdapter implements TransactionRepository {
     }
 
     @Override
+    public List<Transaction> findAllByUserIdAndNotesStartingWith(UUID userId, String notesPrefix) {
+        return jpa.findAllByUserIdAndNotesStartingWith(userId, notesPrefix)
+                .stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
+    @Override
     public Transaction save(Transaction transaction) {
         var entity = toJpaEntity(transaction);
         var saved = jpa.save(entity);
@@ -49,6 +57,11 @@ class TransactionRepositoryAdapter implements TransactionRepository {
     @Override
     public void deleteByIdAndUserId(UUID id, UUID userId) {
         jpa.deleteByIdAndUserId(id, userId);
+    }
+
+    @Override
+    public void deleteAllByUserIdAndNotesStartingWith(UUID userId, String notesPrefix) {
+        jpa.deleteAllByUserIdAndNotesStartingWith(userId, notesPrefix);
     }
 
     private Transaction toDomain(TransactionJpaEntity e) {

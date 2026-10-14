@@ -121,16 +121,17 @@ Este documento registra o estado real, factual e auditável do desenvolvimento d
   - Entidade `RecurringBill` com precisão em `BigDecimal` escala 2, frequências (`WEEKLY`, `MONTHLY`, `YEARLY`), e ajuste determinístico de dia de vencimento para meses curtos.
   - Porta `RecurringBillRepository` e adaptador JPA com isolamento estrito por `user_id`.
   - Casos de uso: `CreateRecurringBillUseCase`, `ListRecurringBillsUseCase`, `UpdateRecurringBillUseCase`, `DeleteRecurringBillUseCase` e `PayRecurringBillUseCase`.
+  - Sincronização e cascata com extratos: ao editar uma despesa fixa (`UpdateRecurringBillUseCase`), todas as movimentações associadas geradas no extrato (mês atual e meses futuros) são sincronizadas com nova descrição, valor, categoria, dia de competência e notas de auditoria. Ao remover uma despesa fixa (`DeleteRecurringBillUseCase`), todos os lançamentos gerados por ela no extrato (`notes LIKE 'RECURRING_BILL:<id>%'`) são excluídos em cascata pelo usuário autenticado (anti-IDOR).
   - Prevenção de dupla contagem através do marcador `RECURRING_BILL:<UUID>` nos lançamentos, suportando débito em conta bancária ou fatura de cartão.
 - [x] **Endpoints REST Autenticados:**
   - `GET /api/v1/recurring-bills`: lista compromissos fixos com detecção de contas a vencer em 7 dias e status de pagamento no mês (com suporte ao parâmetro `month`).
   - `POST /api/v1/recurring-bills`: cadastro de nova despesa ou assinatura.
-  - `PUT /api/v1/recurring-bills/{id}`: edição de parâmetros e ativação/desativação.
-  - `DELETE /api/v1/recurring-bills/{id}`: exclusão segura de assinatura.
+  - `PUT /api/v1/recurring-bills/{id}`: edição de parâmetros e sincronização em lote com o extrato (meses correntes e futuros).
+  - `DELETE /api/v1/recurring-bills/{id}`: exclusão segura de assinatura com remoção em cascata dos lançamentos do extrato.
   - `POST /api/v1/recurring-bills/{id}/pay`: efetivação da despesa no mês com suporte a `replicateMonths` (replicação para meses subsequentes) e data customizada.
 - [x] **Frontend Moderno:**
-  - `RecurringBillsSection.tsx`: painel com cards de métricas sincronizados com o mês selecionado (`selectedMonth`), remoção de seleção/exibição de conta bancária, modal de lançamento perguntando o mês e opções de replicação (1, 3, 6, 12 meses).
-  - `RecurringBillModal.tsx`: formulário simplificado sem seleção de conta bancária (apenas À Vista/Pix/Boleto ou Cartão de Crédito) e opção de auto-lançamento imediato com replicação para os meses seguintes.
+  - `RecurringBillsSection.tsx`: painel com cards de métricas sincronizados com o mês selecionado (`selectedMonth`), confirmação e feedback explícitos na exclusão indicando remoção no extrato (inclusive meses futuros).
+  - `RecurringBillModal.tsx`: formulário com aviso visual contextual de que a edição sincroniza automaticamente todos os lançamentos gerados no extrato (mês atual e meses futuros).
 
 ### 2.10. Fase 9 — Metas de Economia (Savings Goals), Auditoria & Relatórios
 - [x] **Domínio de Metas de Economia:**

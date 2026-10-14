@@ -214,6 +214,15 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
           </div>
         )}
 
+        {billToEdit && (
+          <div className="mb-5 flex items-start space-x-2.5 p-3.5 rounded-2xl bg-blue-50 border-2 border-blue-200 text-[#026CD6] text-xs sm:text-sm font-bold">
+            <Sparkles className="w-4 h-4 shrink-0 mt-0.5" />
+            <span>
+              Ao atualizar, todos os lançamentos desta despesa no extrato (mês atual e meses futuros) serão atualizados automaticamente com os novos dados.
+            </span>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-black uppercase tracking-wider text-slate-500 mb-1.5">
