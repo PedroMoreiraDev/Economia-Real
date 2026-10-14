@@ -59,7 +59,6 @@ public class ForgotPasswordUseCase {
                 if (emailSenderService != null) {
                     emailSenderService.sendPasswordResetCode(user.getEmail(), user.getFullName(), code);
                 }
-                return "Código de recuperação gerado! Se o e-mail não chegar na caixa de entrada, utilize o código: " + code;
             }
         }
 

@@ -98,7 +98,7 @@ public class RegisterUserUseCase {
                 emailSenderService.sendVerificationCode(existing.getEmail(), existing.getFullName(), renewedCode);
             }
 
-            String renewMsg = "Novo código de verificação enviado! Se o e-mail não chegar na caixa de entrada, utilize o código: " + renewedCode;
+            String renewMsg = "Enviamos um novo código de verificação para o seu e-mail.";
 
             return new RegistrationResult(
                     existing.getId().toString(),
@@ -125,7 +125,7 @@ public class RegisterUserUseCase {
             emailSenderService.sendVerificationCode(saved.getEmail(), saved.getFullName(), code);
         }
 
-        String regMsg = "Código de verificação enviado! Se o e-mail não chegar na caixa de entrada, utilize o código: " + code;
+        String regMsg = "Código de verificação de 6 dígitos enviado para seu e-mail.";
 
         return new RegistrationResult(
                 saved.getId().toString(),

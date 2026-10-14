@@ -49,6 +49,6 @@ public class ResendVerificationCodeUseCase {
             emailSenderService.sendVerificationCode(user.getEmail(), user.getFullName(), newCode);
         }
 
-        return "Novo código de verificação enviado! Se o e-mail não chegar na caixa de entrada, utilize o código: " + newCode;
+        return "Novo código de verificação enviado com sucesso para seu e-mail.";
     }
 }
