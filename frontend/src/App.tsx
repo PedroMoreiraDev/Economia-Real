@@ -700,7 +700,7 @@ const MainDashboard: React.FC = () => {
 
       {/* Top Header Economia Real com Glassmorphism Refinado */}
       <header className="glass-panel sticky top-0 z-40 border-b-2 border-slate-200/90 shadow-sm transition-all">
-        <div className="max-w-[1720px] w-full mx-auto px-3 sm:px-5 lg:px-6 h-16 sm:h-20 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
 
           {/* Logo e Nome da Plataforma */}
           <div className="flex items-center gap-3.5">
@@ -708,13 +708,13 @@ const MainDashboard: React.FC = () => {
               <img
                 src="/logo-economia-real.png"
                 alt="Economia Real Logo"
-                className="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl object-cover border-2 border-blue-200 shadow-md group-hover:scale-105 transition-transform"
+                className="h-12 w-12 rounded-2xl object-cover border-2 border-blue-200 shadow-md group-hover:scale-105 transition-transform"
               />
               <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white animate-pulse" title="Sistema online e conectado" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xl sm:text-2xl font-black tracking-tight text-slate-900">
+                <span className="text-2xl font-black tracking-tight text-slate-900">
                   Economia<span className="text-[#026CD6]">Real</span>
                 </span>
                 <span className="hidden md:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-900 border border-blue-200 shadow-sm uppercase tracking-wider">
@@ -817,13 +817,13 @@ const MainDashboard: React.FC = () => {
         </div>
       </header>
 
-      {/* Conteúdo Principal com Mais Ocupação Horizontal e Menos Margem */}
-      <main className="flex-1 max-w-[1720px] w-full mx-auto px-2.5 sm:px-4 lg:px-6 py-4 sm:py-6 space-y-5 sm:space-y-6">
+      {/* Conteúdo Principal */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
         {isAuthenticated && user ? (
           <>
             {/* Banner Destaque Economia Real (Azul Suave, Moderno e Confiável - Área Logada) */}
-            <div className="card-real-blue p-4 sm:p-6 relative overflow-hidden">
+            <div className="card-real-blue p-6 sm:p-8 relative overflow-hidden">
               <div className="max-w-2xl lg:max-w-3xl space-y-3 relative z-10">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/90 border-2 border-blue-200 text-[#026CD6] text-xs font-black shadow-sm uppercase tracking-wider">
                   <Sparkles className="h-3.5 w-3.5 text-blue-500 fill-blue-400" />
@@ -903,15 +903,15 @@ const MainDashboard: React.FC = () => {
               </div>
             </div>
 
-            <div className="space-y-5 sm:space-y-6">
+            <div className="space-y-8">
 
             {/* Seletor Global de Mês / Navegação Temporal no Estilo Duolingo */}
-            <div className="card-duo p-3.5 sm:p-4 flex flex-col md:flex-row items-center justify-between gap-3 bg-gradient-to-r from-white via-blue-50/40 to-white">
+            <div className="card-duo p-4 sm:p-5 flex flex-col md:flex-row items-center justify-between gap-4 bg-gradient-to-r from-white via-blue-50/40 to-white">
 
               {/* Lado Esquerdo: Identificação do Mês Ativo */}
               <div className="flex items-center gap-3.5 w-full md:w-auto">
-                <div className="h-11 w-11 sm:h-12 sm:w-12 rounded-2xl bg-[#DDF4FF] border-2 border-[#BAE6FD] text-[#026CD6] flex items-center justify-center shadow-sm shrink-0">
-                  <Calendar className="h-5 w-5 sm:h-6 sm:w-6 stroke-[2.5]" />
+                <div className="h-12 w-12 rounded-2xl bg-[#DDF4FF] border-2 border-[#BAE6FD] text-[#026CD6] flex items-center justify-center shadow-sm shrink-0">
+                  <Calendar className="h-6 w-6 stroke-[2.5]" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
@@ -988,10 +988,10 @@ const MainDashboard: React.FC = () => {
             </div>
 
             {/* 4 Cards de Métricas Principais (KPIs com Relevo Tátil e Modo Privacidade) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
 
               {/* Receitas Totais */}
-              <div className="card-duo card-duo-interactive p-4 sm:p-5 space-y-2 hover:border-emerald-400 group">
+              <div className="card-duo card-duo-interactive p-5 space-y-2.5 hover:border-emerald-400 group">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-black uppercase text-slate-500 tracking-wider">
                     Entradas
@@ -1012,7 +1012,7 @@ const MainDashboard: React.FC = () => {
               </div>
 
               {/* Despesas de Consumo */}
-              <div className="card-duo card-duo-interactive p-4 sm:p-5 space-y-2 hover:border-rose-400 group">
+              <div className="card-duo card-duo-interactive p-5 space-y-2.5 hover:border-rose-400 group">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-black uppercase text-slate-500 tracking-wider">
                     Despesas
@@ -1035,7 +1035,7 @@ const MainDashboard: React.FC = () => {
               </div>
 
               {/* Disponível para Gastar / Meta de Gastos (substitui Economia conforme meta) */}
-              <div className="card-duo card-duo-interactive p-4 sm:p-5 space-y-2 hover:border-[#026CD6] group">
+              <div className="card-duo card-duo-interactive p-5 space-y-2.5 hover:border-[#026CD6] group">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-black uppercase text-slate-500 tracking-wider">
                     {effectiveGlobalLimit > 0 ? 'Disponível no Mês' : 'Economia'}
@@ -1092,7 +1092,7 @@ const MainDashboard: React.FC = () => {
               </div>
 
               {/* Saldo Total: Entradas menos Despesas */}
-              <div className="card-duo card-duo-interactive p-4 sm:p-5 space-y-2 hover:border-amber-400 group">
+              <div className="card-duo card-duo-interactive p-5 space-y-2.5 hover:border-amber-400 group">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-black uppercase text-slate-500 tracking-wider">
                     Saldo Total
@@ -1169,38 +1169,38 @@ const MainDashboard: React.FC = () => {
 
             {/* CONTEÚDO DA ABA SELECIONADA */}
 
-            {/* ABA 1: VISÃO GERAL (Extrato e Resumo Financeiro) */}
+            {/* ABA 1: VISÃO GERAL (Extrato e Contas Bancárias) */}
             {activeTab === 'overview' && (
-              <div className="flex flex-col lg:flex-row items-start gap-4 sm:gap-5">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                {/* Coluna Lateral: Minhas Entradas & Meta Máxima de Gastos (20% no Desktop) */}
-                <div className="w-full lg:w-[24%] xl:w-[20%] shrink-0 space-y-4">
+                {/* Coluna 1: Minhas Entradas & Meta Máxima de Gastos (substitui Contas Bancárias) */}
+                <div className="lg:col-span-1 space-y-6">
 
                   {/* Bloco 1: Minhas Entradas / Receitas */}
-                  <div className="card-duo p-4 sm:p-5 space-y-3">
-                    <div className="flex items-center justify-between border-b-2 border-slate-100 pb-2.5">
+                  <div className="card-duo p-6 space-y-4">
+                    <div className="flex items-center justify-between border-b-2 border-slate-100 pb-3">
                       <div>
-                        <h2 className="text-sm sm:text-base font-black text-slate-800 flex items-center gap-1.5">
-                          <ArrowUpRight className="h-4 w-4 sm:h-5 sm:w-5 text-[#10B981] stroke-[3]" />
+                        <h2 className="text-base font-black text-slate-800 flex items-center gap-2">
+                          <ArrowUpRight className="h-5 w-5 text-[#10B981] stroke-[3]" />
                           Minhas Entradas
                         </h2>
-                        <span className="text-[11px] font-bold text-slate-400">
-                          <strong className="text-emerald-700 font-numeric">{formatValue(summary.totalIncome)}</strong> no mês
+                        <span className="text-xs font-bold text-slate-400">
+                          <strong className="text-emerald-700 font-numeric">{formatValue(summary.totalIncome)}</strong> recebidos no mês
                         </span>
                       </div>
                       <button
                         onClick={handleOpenNewIncome}
-                        className="btn-duo btn-emerald text-xs px-2.5 py-1 flex items-center gap-1 shadow-sm"
+                        className="btn-duo btn-emerald text-xs px-3 py-1.5 flex items-center gap-1 shadow-sm"
                         title="Registrar nova entrada ou salário"
                       >
-                        <Plus className="h-3 w-3 stroke-[3]" />
-                        <span>Nova</span>
+                        <Plus className="h-3.5 w-3.5 stroke-[3]" />
+                        Nova Entrada
                       </button>
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="space-y-2.5">
                       {incomeTransactions.length === 0 ? (
-                        <div className="p-4 rounded-2xl border-2 border-dashed border-slate-200 text-center space-y-2">
+                        <div className="p-5 rounded-2xl border-2 border-dashed border-slate-200 text-center space-y-2">
                           <p className="text-xs font-bold text-slate-400">Nenhuma entrada registrada este mês.</p>
                           <button
                             onClick={handleOpenNewIncome}
@@ -1215,7 +1215,7 @@ const MainDashboard: React.FC = () => {
                           return (
                             <div
                               key={tx.id}
-                              className="p-2.5 rounded-2xl bg-slate-50 border-2 border-slate-100 hover:border-emerald-200 transition-all flex items-center justify-between group"
+                              className="p-3 rounded-2xl bg-slate-50 border-2 border-slate-100 hover:border-emerald-200 transition-all flex items-center justify-between group"
                             >
                               <div className="space-y-0.5 min-w-0 pr-2">
                                 <p className="font-black text-xs text-slate-800 truncate">{tx.description}</p>
@@ -1230,7 +1230,7 @@ const MainDashboard: React.FC = () => {
                                   )}
                                 </div>
                               </div>
-                              <div className="flex items-center gap-1.5 flex-shrink-0">
+                              <div className="flex items-center gap-2 flex-shrink-0">
                                 <span className="text-xs font-black text-[#10B981] font-numeric">
                                   + {formatValue(tx.amount)}
                                 </span>
@@ -1267,7 +1267,7 @@ const MainDashboard: React.FC = () => {
                   </div>
 
                   {/* Bloco 2: Meta Máxima de Gastos (Teto Mensal & IA) */}
-                  <div id="tour-spending-limit-card" className="card-duo p-4 sm:p-5 space-y-3">
+                  <div id="tour-spending-limit-card" className="card-duo p-6 space-y-4">
                     <div className="flex items-center justify-between border-b-2 border-slate-100 pb-3">
                       <div className="flex items-center gap-2">
                         <Target className="h-5 w-5 text-[#026CD6] stroke-[2.5]" />
@@ -1453,8 +1453,8 @@ const MainDashboard: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Coluna Principal: Extrato de Transações (80% no Desktop) */}
-                <div id="tour-statement-section" className="w-full lg:flex-1 card-duo p-3.5 sm:p-5 space-y-4 min-w-0">
+                {/* Coluna 2 e 3: Extrato de Transações */}
+                <div id="tour-statement-section" className="lg:col-span-2 card-duo p-4 sm:p-5 space-y-4">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-slate-100 pb-4">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
@@ -1684,176 +1684,10 @@ const MainDashboard: React.FC = () => {
                         )}
                       </div>
                     ) : (
-                      <>
-                        {/* VISUALIZAÇÃO DESKTOP: Tabela Completa e Ampla (80% da tela) */}
-                        <div className="hidden lg:block overflow-x-auto">
-                          <table className="w-full text-left text-xs">
-                            <thead>
-                              <tr className="border-b-2 border-slate-100 text-slate-400 font-extrabold uppercase text-[10px] tracking-wider">
-                                <th className="py-2.5 px-1.5 w-8 text-center">
-                                  <input
-                                    type="checkbox"
-                                    checked={displayedTransactions.length > 0 && selectedTxIds.size === displayedTransactions.length}
-                                    onChange={handleToggleSelectAll}
-                                    className="w-4 h-4 rounded border-2 border-slate-300 text-[#026CD6] focus:ring-[#026CD6] cursor-pointer accent-[#026CD6]"
-                                    title={selectedTxIds.size === displayedTransactions.length ? 'Desmarcar todos' : 'Selecionar todos'}
-                                  />
-                                </th>
-                                <th className="py-2.5 px-1.5 w-[114px]">Data</th>
-                                <th className="py-2.5 px-2">Descrição</th>
-                                <th className="py-2.5 px-1.5">Categoria</th>
-                                <th className="py-2.5 px-1.5 text-center">Origem</th>
-                                <th className="py-2.5 px-1.5 text-center">Tipo</th>
-                                <th className="py-2.5 px-1.5 text-right">Valor</th>
-                                <th className="py-2.5 px-1 w-14 text-center">Ações</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100 font-bold">
-                              {displayedTransactions.map((tx) => {
-                                const isSelected = selectedTxIds.has(tx.id);
-                                const isRowUncategorized = !tx.categoryId && tx.type !== 'TRANSFER' && tx.type !== 'INVOICE_PAYMENT';
-
-                                return (
-                                  <tr
-                                    key={tx.id}
-                                    className={`transition-colors group ${isSelected
-                                      ? 'bg-blue-50/80 hover:bg-blue-100/70 border-l-4 border-l-[#026CD6]'
-                                      : isRowUncategorized
-                                        ? 'bg-amber-50/50 hover:bg-amber-100/60 border-l-4 border-l-amber-500'
-                                        : 'hover:bg-slate-50/90'
-                                      }`}
-                                  >
-                                    <td className="py-2 px-1.5 text-center">
-                                      <input
-                                        type="checkbox"
-                                        checked={isSelected}
-                                        onChange={() => handleToggleSelectTx(tx.id)}
-                                        className="w-4 h-4 rounded border-2 border-slate-300 text-[#026CD6] focus:ring-[#026CD6] cursor-pointer accent-[#026CD6]"
-                                      />
-                                    </td>
-                                    <td className="py-2 px-1.5 whitespace-nowrap">
-                                      <InlineDatePicker
-                                        value={tx.accrualDate}
-                                        onChange={(newDate) => handleInlineUpdateDate(tx, newDate)}
-                                        disabled={inlineUpdatingTxId === tx.id}
-                                      />
-                                    </td>
-                                    <td className="py-2 px-2 text-slate-800 min-w-0">
-                                      <div className="font-extrabold text-xs truncate max-w-[160px] xl:max-w-[260px]" title={tx.description}>
-                                        {tx.description}
-                                      </div>
-                                      {tx.notes && (
-                                        <span className="text-[10px] text-slate-400 font-normal truncate block max-w-[160px] xl:max-w-[260px]" title={tx.notes}>
-                                          {tx.notes}
-                                        </span>
-                                      )}
-                                    </td>
-                                    <td className="py-2 px-1.5 whitespace-nowrap">
-                                      <InlineCategorySelect
-                                        currentCategoryId={tx.categoryId}
-                                        categories={categories}
-                                        disabled={inlineUpdatingTxId === tx.id}
-                                        onSelectCategory={(newCatId) => handleInlineUpdateCategory(tx, newCatId)}
-                                        onOpenCreateCategory={() => setQuickCategoryModal({ isOpen: true, targetTx: tx })}
-                                      />
-                                    </td>
-                                    <td className="py-2 px-1.5 text-center whitespace-nowrap">
-                                      {tx.origin === 'AI_TEXT' ? (
-                                        <span className="inline-flex items-center gap-1 text-[10px] font-black text-purple-700 bg-purple-100 border border-purple-200 px-2 py-0.5 rounded-full">
-                                          <Sparkles className="w-2.5 h-2.5" /> IA Texto
-                                        </span>
-                                      ) : tx.origin === 'AI_AUDIO' ? (
-                                        <span className="inline-flex items-center gap-1 text-[10px] font-black text-indigo-700 bg-indigo-100 border border-indigo-200 px-2 py-0.5 rounded-full">
-                                          <Mic className="w-2.5 h-2.5" /> IA Voz
-                                        </span>
-                                      ) : tx.origin === 'CSV_IMPORT' ? (
-                                        <span className="inline-flex items-center gap-1 text-[10px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
-                                          <FileSpreadsheet className="w-2.5 h-2.5 stroke-[2.5]" /> Fatura CSV
-                                        </span>
-                                      ) : tx.origin === 'OFX_IMPORT' ? (
-                                        <span className="inline-flex items-center gap-1 text-[10px] font-black text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">
-                                          <FileText className="w-2.5 h-2.5 stroke-[2.5]" /> Extrato OFX
-                                        </span>
-                                      ) : (
-                                        <span className="text-[10px] text-slate-500 font-bold bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">
-                                          Manual
-                                        </span>
-                                      )}
-                                    </td>
-                                    <td className="py-2 px-1.5 text-center whitespace-nowrap">
-                                      {tx.type === 'INCOME' && (
-                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-black">
-                                          <ArrowUpRight className="h-3 w-3 stroke-[3]" /> Receita
-                                        </span>
-                                      )}
-                                      {tx.type === 'EXPENSE' && (
-                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-200 text-[10px] font-black">
-                                          <ArrowDownLeft className="h-3 w-3 stroke-[3]" /> Despesa
-                                        </span>
-                                      )}
-                                      {tx.type === 'TRANSFER' && (
-                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200 text-[10px] font-black">
-                                          <ArrowLeftRight className="h-3 w-3 stroke-[3]" /> Transf.
-                                        </span>
-                                      )}
-                                      {tx.type === 'INVOICE_PAYMENT' && (
-                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-black">
-                                          <DollarSign className="h-3 w-3 stroke-[3]" /> Fatura
-                                        </span>
-                                      )}
-                                    </td>
-                                    <td className="py-2 px-1.5 text-right whitespace-nowrap">
-                                      {privacyMode ? (
-                                        <span className="font-numeric font-black text-slate-400 text-xs">••••••</span>
-                                      ) : (
-                                        <div className="inline-flex items-center justify-end gap-1 group/amt">
-                                          <span className={`text-[11px] font-black select-none ${tx.type === 'INCOME' ? 'text-[#10B981]' : 'text-rose-500'
-                                            }`}>
-                                            {tx.type === 'EXPENSE' ? '-' : (tx.type === 'INCOME' ? '+' : '')} R$
-                                          </span>
-                                          <InlineCurrencyInput
-                                            initialValue={tx.amount}
-                                            disabled={inlineUpdatingTxId === tx.id}
-                                            onSave={(val) => handleInlineUpdateAmount(tx, val)}
-                                            className={`w-20 text-right font-black text-xs font-numeric bg-slate-50/80 hover:bg-blue-50/60 focus:bg-white px-1.5 py-0.5 rounded-lg border border-slate-200/90 hover:border-blue-300 focus:border-[#026CD6] focus:ring-1 focus:ring-blue-100 focus:outline-none transition-all cursor-pointer shadow-2xs disabled:opacity-50 ${tx.type === 'INCOME' ? 'text-[#10B981]' : 'text-slate-900'
-                                              }`}
-                                            title="Clique para alterar o valor (Enter para salvar)"
-                                          />
-                                        </div>
-                                      )}
-                                    </td>
-                                    <td className="py-2 px-1 text-center whitespace-nowrap">
-                                      <div className="flex items-center justify-center gap-0.5 opacity-80 group-hover:opacity-100 transition-opacity">
-                                        <button
-                                          type="button"
-                                          onClick={() => handleEditTransaction(tx)}
-                                          className="p-1 rounded-lg text-slate-400 hover:text-[#026CD6] hover:bg-blue-50 transition-colors"
-                                          title="Editar movimentação"
-                                        >
-                                          <Pencil className="w-3.5 h-3.5 stroke-[2.5]" />
-                                        </button>
-                                        <button
-                                          type="button"
-                                          onClick={() => handleRequestDeleteTransaction(tx.id)}
-                                          className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                                          title="Excluir movimentação"
-                                        >
-                                          <Trash2 className="w-3.5 h-3.5 stroke-[2.5]" />
-                                        </button>
-                                      </div>
-                                    </td>
-                                  </tr>
-                                );
-                              })}
-                            </tbody>
-                          </table>
-                        </div>
-
-                        {/* VISUALIZAÇÃO MOBILE & TABLET: Tabela Adaptada de Alta Densidade (Zero Scroll Horizontal) */}
-                        <div className="block lg:hidden space-y-2.5">
-                          {/* Cabeçalho da Tabela Mobile / Tablet */}
-                          <div className="flex items-center justify-between px-3 py-2 bg-slate-100/90 rounded-xl text-[10.5px] font-black uppercase text-slate-500 tracking-wider">
-                            <div className="flex items-center gap-2">
+                      <table className="w-full text-left text-xs">
+                        <thead>
+                          <tr className="border-b-2 border-slate-100 text-slate-400 font-extrabold uppercase text-[10px] tracking-wider">
+                            <th className="py-2.5 px-1.5 w-8 text-center">
                               <input
                                 type="checkbox"
                                 checked={displayedTransactions.length > 0 && selectedTxIds.size === displayedTransactions.length}
@@ -1861,158 +1695,155 @@ const MainDashboard: React.FC = () => {
                                 className="w-4 h-4 rounded border-2 border-slate-300 text-[#026CD6] focus:ring-[#026CD6] cursor-pointer accent-[#026CD6]"
                                 title={selectedTxIds.size === displayedTransactions.length ? 'Desmarcar todos' : 'Selecionar todos'}
                               />
-                              <span>Todos ({displayedTransactions.length})</span>
-                            </div>
-                            <span className="text-right">Valor & Ações</span>
-                          </div>
+                            </th>
+                            <th className="py-2.5 px-1.5 w-[114px]">Data</th>
+                            <th className="py-2.5 px-2">Descrição</th>
+                            <th className="py-2.5 px-1.5">Categoria</th>
+                            <th className="py-2.5 px-1.5 text-center">Origem</th>
+                            <th className="py-2.5 px-1.5 text-center">Tipo</th>
+                            <th className="py-2.5 px-1.5 text-right">Valor</th>
+                            <th className="py-2.5 px-1 w-14 text-center">Ações</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 font-bold">
+                          {displayedTransactions.map((tx) => {
+                            const isSelected = selectedTxIds.has(tx.id);
+                            const isRowUncategorized = !tx.categoryId && tx.type !== 'TRANSFER' && tx.type !== 'INVOICE_PAYMENT';
 
-                          {/* Linhas da Tabela Mobile/Tablet */}
-                          <div className="divide-y divide-slate-100 rounded-2xl border-2 border-slate-100 bg-white overflow-hidden shadow-2xs">
-                            {displayedTransactions.map((tx) => {
-                              const isSelected = selectedTxIds.has(tx.id);
-                              const isRowUncategorized = !tx.categoryId && tx.type !== 'TRANSFER' && tx.type !== 'INVOICE_PAYMENT';
-
-                              return (
-                                <div
-                                  key={tx.id}
-                                  className={`p-3 transition-colors ${isSelected
-                                    ? 'bg-blue-50/90 border-l-4 border-l-[#026CD6]'
-                                    : isRowUncategorized
-                                      ? 'bg-amber-50/60 border-l-4 border-l-amber-500'
-                                      : 'hover:bg-slate-50/80'
-                                    }`}
-                                >
-                                  {/* Linha Superior: Checkbox, Data, Categoria e Valor */}
-                                  <div className="flex items-center justify-between gap-2">
-                                    <div className="flex items-center gap-2 min-w-0 flex-wrap sm:flex-nowrap">
-                                      <input
-                                        type="checkbox"
-                                        checked={isSelected}
-                                        onChange={() => handleToggleSelectTx(tx.id)}
-                                        className="w-4 h-4 rounded border-2 border-slate-300 text-[#026CD6] focus:ring-[#026CD6] cursor-pointer accent-[#026CD6] shrink-0"
-                                      />
-                                      <InlineDatePicker
-                                        value={tx.accrualDate}
-                                        onChange={(newDate) => handleInlineUpdateDate(tx, newDate)}
-                                        disabled={inlineUpdatingTxId === tx.id}
-                                      />
-                                      <InlineCategorySelect
-                                        currentCategoryId={tx.categoryId}
-                                        categories={categories}
-                                        disabled={inlineUpdatingTxId === tx.id}
-                                        onSelectCategory={(newCatId) => handleInlineUpdateCategory(tx, newCatId)}
-                                        onOpenCreateCategory={() => setQuickCategoryModal({ isOpen: true, targetTx: tx })}
-                                      />
-                                    </div>
-
-                                    {/* Valor Formatado e Editável */}
-                                    <div className="text-right shrink-0">
-                                      {privacyMode ? (
-                                        <span className="font-numeric font-black text-slate-400 text-xs">••••••</span>
-                                      ) : (
-                                        <div className="inline-flex items-center justify-end gap-1">
-                                          <span className={`text-[11px] font-black select-none ${tx.type === 'INCOME' ? 'text-[#10B981]' : 'text-rose-500'
-                                            }`}>
-                                            {tx.type === 'EXPENSE' ? '-' : (tx.type === 'INCOME' ? '+' : '')} R$
-                                          </span>
-                                          <InlineCurrencyInput
-                                            initialValue={tx.amount}
-                                            disabled={inlineUpdatingTxId === tx.id}
-                                            onSave={(val) => handleInlineUpdateAmount(tx, val)}
-                                            className={`w-20 text-right font-black text-xs font-numeric bg-slate-50/80 hover:bg-blue-50/60 focus:bg-white px-1.5 py-0.5 rounded-lg border border-slate-200/90 hover:border-blue-300 focus:border-[#026CD6] focus:ring-1 focus:ring-blue-100 focus:outline-none transition-all cursor-pointer shadow-2xs disabled:opacity-50 ${tx.type === 'INCOME' ? 'text-[#10B981]' : 'text-slate-900'
-                                              }`}
-                                            title="Clique para alterar o valor (Enter para salvar)"
-                                          />
-                                        </div>
-                                      )}
-                                    </div>
+                            return (
+                              <tr
+                                key={tx.id}
+                                className={`transition-colors group ${isSelected
+                                  ? 'bg-blue-50/80 hover:bg-blue-100/70 border-l-4 border-l-[#026CD6]'
+                                  : isRowUncategorized
+                                    ? 'bg-amber-50/50 hover:bg-amber-100/60 border-l-4 border-l-amber-500'
+                                    : 'hover:bg-slate-50/90'
+                                  }`}
+                              >
+                                <td className="py-2 px-1.5 text-center">
+                                  <input
+                                    type="checkbox"
+                                    checked={isSelected}
+                                    onChange={() => handleToggleSelectTx(tx.id)}
+                                    className="w-4 h-4 rounded border-2 border-slate-300 text-[#026CD6] focus:ring-[#026CD6] cursor-pointer accent-[#026CD6]"
+                                  />
+                                </td>
+                                <td className="py-2 px-1.5 whitespace-nowrap">
+                                  <InlineDatePicker
+                                    value={tx.accrualDate}
+                                    onChange={(newDate) => handleInlineUpdateDate(tx, newDate)}
+                                    disabled={inlineUpdatingTxId === tx.id}
+                                  />
+                                </td>
+                                <td className="py-2 px-2 text-slate-800 min-w-0">
+                                  <div className="font-extrabold text-xs truncate max-w-[130px] sm:max-w-[160px] lg:max-w-[180px]" title={tx.description}>
+                                    {tx.description}
                                   </div>
-
-                                  {/* Linha Inferior: Descrição + Badges de Origem e Tipo + Ações */}
-                                  <div className="flex items-center justify-between gap-2 mt-2 pt-2 border-t border-slate-100/80">
-                                    <div className="min-w-0 pr-2">
-                                      <p className="font-extrabold text-xs text-slate-900 truncate" title={tx.description}>
-                                        {tx.description}
-                                      </p>
-                                      {tx.notes && (
-                                        <span className="text-[10px] text-slate-400 font-normal truncate block" title={tx.notes}>
-                                          {tx.notes}
-                                        </span>
-                                      )}
-                                      <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                                        {/* Badge de Tipo */}
-                                        {tx.type === 'INCOME' && (
-                                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9.5px] font-black">
-                                            <ArrowUpRight className="h-2.5 w-2.5 stroke-[3]" /> Receita
-                                          </span>
-                                        )}
-                                        {tx.type === 'EXPENSE' && (
-                                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded-md bg-rose-50 text-rose-600 border border-rose-200 text-[9.5px] font-black">
-                                            <ArrowDownLeft className="h-2.5 w-2.5 stroke-[3]" /> Despesa
-                                          </span>
-                                        )}
-                                        {tx.type === 'TRANSFER' && (
-                                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded-md bg-sky-50 text-sky-700 border border-sky-200 text-[9.5px] font-black">
-                                            <ArrowLeftRight className="h-2.5 w-2.5 stroke-[3]" /> Transf.
-                                          </span>
-                                        )}
-                                        {tx.type === 'INVOICE_PAYMENT' && (
-                                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded-md bg-amber-50 text-amber-800 border border-amber-200 text-[9.5px] font-black">
-                                            <DollarSign className="h-2.5 w-2.5 stroke-[3]" /> Fatura
-                                          </span>
-                                        )}
-
-                                        {/* Badge de Origem */}
-                                        {tx.origin === 'AI_TEXT' && (
-                                          <span className="inline-flex items-center gap-0.5 text-[9px] font-black text-purple-700 bg-purple-100 border border-purple-200 px-1.5 py-0.2 rounded-md">
-                                            <Sparkles className="w-2.5 h-2.5" /> IA Texto
-                                          </span>
-                                        )}
-                                        {tx.origin === 'AI_AUDIO' && (
-                                          <span className="inline-flex items-center gap-0.5 text-[9px] font-black text-indigo-700 bg-indigo-100 border border-indigo-200 px-1.5 py-0.2 rounded-md">
-                                            <Mic className="w-2.5 h-2.5" /> IA Voz
-                                          </span>
-                                        )}
-                                        {tx.origin === 'CSV_IMPORT' && (
-                                          <span className="inline-flex items-center gap-0.5 text-[9px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.2 rounded-md">
-                                            <FileSpreadsheet className="w-2.5 h-2.5 stroke-[2.5]" /> CSV
-                                          </span>
-                                        )}
-                                        {tx.origin === 'OFX_IMPORT' && (
-                                          <span className="inline-flex items-center gap-0.5 text-[9px] font-black text-blue-700 bg-blue-50 border border-blue-200 px-1.5 py-0.2 rounded-md">
-                                            <FileText className="w-2.5 h-2.5 stroke-[2.5]" /> OFX
-                                          </span>
-                                        )}
-                                      </div>
+                                  {tx.notes && (
+                                    <span className="text-[10px] text-slate-400 font-normal truncate block max-w-[130px] sm:max-w-[160px] lg:max-w-[180px]" title={tx.notes}>
+                                      {tx.notes}
+                                    </span>
+                                  )}
+                                </td>
+                                <td className="py-2 px-1.5 whitespace-nowrap">
+                                  <InlineCategorySelect
+                                    currentCategoryId={tx.categoryId}
+                                    categories={categories}
+                                    disabled={inlineUpdatingTxId === tx.id}
+                                    onSelectCategory={(newCatId) => handleInlineUpdateCategory(tx, newCatId)}
+                                    onOpenCreateCategory={() => setQuickCategoryModal({ isOpen: true, targetTx: tx })}
+                                  />
+                                </td>
+                                <td className="py-2 px-1.5 text-center whitespace-nowrap">
+                                  {tx.origin === 'AI_TEXT' ? (
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-black text-purple-700 bg-purple-100 border border-purple-200 px-2 py-0.5 rounded-full">
+                                      <Sparkles className="w-2.5 h-2.5" /> IA Texto
+                                    </span>
+                                  ) : tx.origin === 'AI_AUDIO' ? (
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-black text-indigo-700 bg-indigo-100 border border-indigo-200 px-2 py-0.5 rounded-full">
+                                      <Mic className="w-2.5 h-2.5" /> IA Voz
+                                    </span>
+                                  ) : tx.origin === 'CSV_IMPORT' ? (
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                                      <FileSpreadsheet className="w-2.5 h-2.5 stroke-[2.5]" /> Fatura CSV
+                                    </span>
+                                  ) : tx.origin === 'OFX_IMPORT' ? (
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-black text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">
+                                      <FileText className="w-2.5 h-2.5 stroke-[2.5]" /> Extrato OFX
+                                    </span>
+                                  ) : (
+                                    <span className="text-[10px] text-slate-500 font-bold bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">
+                                      Manual
+                                    </span>
+                                  )}
+                                </td>
+                                <td className="py-2 px-1.5 text-center whitespace-nowrap">
+                                  {tx.type === 'INCOME' && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-black">
+                                      <ArrowUpRight className="h-3 w-3 stroke-[3]" /> Receita
+                                    </span>
+                                  )}
+                                  {tx.type === 'EXPENSE' && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-200 text-[10px] font-black">
+                                      <ArrowDownLeft className="h-3 w-3 stroke-[3]" /> Despesa
+                                    </span>
+                                  )}
+                                  {tx.type === 'TRANSFER' && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200 text-[10px] font-black">
+                                      <ArrowLeftRight className="h-3 w-3 stroke-[3]" /> Transf.
+                                    </span>
+                                  )}
+                                  {tx.type === 'INVOICE_PAYMENT' && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-black">
+                                      <DollarSign className="h-3 w-3 stroke-[3]" /> Fatura
+                                    </span>
+                                  )}
+                                </td>
+                                <td className="py-2 px-1.5 text-right whitespace-nowrap">
+                                  {privacyMode ? (
+                                    <span className="font-numeric font-black text-slate-400 text-xs">••••••</span>
+                                  ) : (
+                                    <div className="inline-flex items-center justify-end gap-1 group/amt">
+                                      <span className={`text-[11px] font-black select-none ${tx.type === 'INCOME' ? 'text-[#10B981]' : 'text-rose-500'
+                                        }`}>
+                                        {tx.type === 'EXPENSE' ? '-' : (tx.type === 'INCOME' ? '+' : '')} R$
+                                      </span>
+                                      <InlineCurrencyInput
+                                        initialValue={tx.amount}
+                                        disabled={inlineUpdatingTxId === tx.id}
+                                        onSave={(val) => handleInlineUpdateAmount(tx, val)}
+                                        className={`w-20 text-right font-black text-xs font-numeric bg-slate-50/80 hover:bg-blue-50/60 focus:bg-white px-1.5 py-0.5 rounded-lg border border-slate-200/90 hover:border-blue-300 focus:border-[#026CD6] focus:ring-1 focus:ring-blue-100 focus:outline-none transition-all cursor-pointer shadow-2xs disabled:opacity-50 ${tx.type === 'INCOME' ? 'text-[#10B981]' : 'text-slate-900'
+                                          }`}
+                                        title="Clique para alterar o valor (Enter para salvar)"
+                                      />
                                     </div>
-
-                                    {/* Ações Rápidas Mobile */}
-                                    <div className="flex items-center gap-1 shrink-0">
-                                      <button
-                                        type="button"
-                                        onClick={() => handleEditTransaction(tx)}
-                                        className="btn-duo btn-duo-white text-xs px-2.5 py-1 flex items-center gap-1 text-slate-700 hover:text-[#026CD6]"
-                                        title="Editar movimentação"
-                                      >
-                                        <Pencil className="w-3.5 h-3.5 stroke-[2.5]" />
-                                        <span className="text-[10px]">Editar</span>
-                                      </button>
-                                      <button
-                                        type="button"
-                                        onClick={() => handleRequestDeleteTransaction(tx.id)}
-                                        className="btn-duo btn-duo-white text-xs px-2 py-1 flex items-center text-rose-600 hover:bg-rose-50 border-rose-200"
-                                        title="Excluir movimentação"
-                                      >
-                                        <Trash2 className="w-3.5 h-3.5 stroke-[2.5]" />
-                                      </button>
-                                    </div>
+                                  )}
+                                </td>
+                                <td className="py-2 px-1 text-center whitespace-nowrap">
+                                  <div className="flex items-center justify-center gap-0.5 opacity-80 group-hover:opacity-100 transition-opacity">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleEditTransaction(tx)}
+                                      className="p-1 rounded-lg text-slate-400 hover:text-[#026CD6] hover:bg-blue-50 transition-colors"
+                                      title="Editar movimentação"
+                                    >
+                                      <Pencil className="w-3.5 h-3.5 stroke-[2.5]" />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRequestDeleteTransaction(tx.id)}
+                                      className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                                      title="Excluir movimentação"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5 stroke-[2.5]" />
+                                    </button>
                                   </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      </>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
                     )}
                   </div>
                 </div>
