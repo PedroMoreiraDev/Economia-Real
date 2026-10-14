@@ -308,10 +308,26 @@ dist/assets/index-CVcJJLIG.js   305.65 kB │ gzip: 75.31 kB
 
 ---
 
+## 4.9. Filtro por Categoria no Extrato e Fluxo Contínuo de Lançamento por Voz com IA (Implementado)
+
+- **Filtro por Categoria no Extrato de Movimentações (`App.tsx`):**
+  - Dropdown elegante com ícone de `Tag` integrado à barra de busca e filtros do extrato.
+  - Opções: "Todas as categorias", "⚠️ Sem categoria" e cada uma das categorias cadastradas do usuário.
+  - Botão de limpeza rápida (`X`) quando um filtro estiver ativo.
+  - Sincronização inteligente com o botão de alerta "⚠️ X sem categoria" e tratamento do empty state com botão para "Limpar filtros".
+  - Respeita os filtros ativos de período (mês ou geral), tipo (receita/despesa) e busca textual por descrição/notas.
+- **Fluxo Contínuo de Gravação por Voz no Lançamento com IA (`AiTransactionModal.tsx`):**
+  - Ao clicar em "Confirmar e Salvar", o sistema salva a transação e atualiza o extrato em segundo plano.
+  - Em vez de fechar o modal, exibe um banner verde de sucesso: *"Registro '[descrição]' salvo com sucesso no seu extrato de movimentações! Você já pode clicar no microfone abaixo e falar o próximo registro!"*.
+  - O modal retorna diretamente para a aba de voz com o microfone pronto para o próximo comando falado, acelerando o lançamento em lote de despesas do dia a dia.
+- **Remoção do Campo "Conta de Pagamento / Depósito" no Lançamento com IA:**
+  - O campo de conta bancária foi removido da tela de confirmação estruturada da IA, simplificando a interface e eliminando atrito desnecessário no fluxo rápido por voz.
+
+---
+
 ## 5. Próximo Passo Recomendado
 
-1. A plataforma conta agora com 115 testes automatizados no backend e build de frontend 100% íntegros.
-2. Todo o histórico de categorização do usuário é aprendido e reaproveitado automaticamente em importações futuras.
-3. Máscara financeira estilo ATM/maquininha ativa e padronizada em todos os formulários.
-4. Repositório sincronizado e pronto para uso e deploy contínuo.
+1. A plataforma conta agora com 141 testes automatizados no backend e build de frontend 100% íntegros.
+2. Todo o fluxo contínuo de voz por IA, filtro por categoria no extrato e validações foram entregues e validados no frontend.
+3. Deploy sincronizado no GitHub (`main`) e publicado na Vercel (`https://economia-real.ia.br`).
 
