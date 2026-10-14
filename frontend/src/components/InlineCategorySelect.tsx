@@ -126,7 +126,7 @@ export const InlineCategorySelect: React.FC<InlineCategorySelectProps> = ({
         type="button"
         onClick={handleToggle}
         disabled={disabled}
-        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10.5px] font-bold border transition-all cursor-pointer focus:outline-none disabled:opacity-50 ${
+        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[11px] font-black border transition-all cursor-pointer focus:outline-none disabled:opacity-50 ${
           isUncategorized
             ? 'bg-amber-100 hover:bg-amber-200 text-amber-950 border-amber-400 hover:border-amber-500 shadow-2xs hover:shadow-xs active:scale-97'
             : 'border-slate-200 shadow-2xs hover:brightness-95 active:scale-97'
@@ -149,13 +149,13 @@ export const InlineCategorySelect: React.FC<InlineCategorySelectProps> = ({
         {isUncategorized ? (
           <span className="text-xs leading-none select-none">⚠️</span>
         ) : (
-          <Tag className="w-2.5 h-2.5 flex-shrink-0 stroke-[2.5]" style={{ color: catColor }} />
+          <Tag className="w-3 h-3 flex-shrink-0 stroke-[2.5]" style={{ color: catColor }} />
         )}
-        <span className="truncate max-w-[75px] sm:max-w-[90px]">
+        <span className="truncate max-w-[110px]">
           {isUncategorized ? 'Sem Categoria' : selectedCategory.name}
         </span>
         <ChevronDown
-          className={`w-2.5 h-2.5 flex-shrink-0 stroke-[2.5] transition-transform duration-200 ${
+          className={`w-3 h-3 flex-shrink-0 stroke-[2.5] transition-transform duration-200 ${
             isUncategorized ? 'text-amber-800' : 'text-slate-400'
           } ${isOpen ? 'rotate-180' : ''}`}
         />
