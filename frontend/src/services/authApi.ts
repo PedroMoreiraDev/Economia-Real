@@ -40,7 +40,8 @@ async function handleResponse<T>(res: Response): Promise<T> {
 
 export async function fetchCaptchaApi(): Promise<CaptchaChallenge> {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 7000);
+  // 45 segundos para tolerar o tempo de cold start (spin-up) do plano gratuito do Render
+  const timeoutId = setTimeout(() => controller.abort(), 45000);
   try {
     const res = await fetch(`${API_BASE_URL}/auth/captcha`, {
       method: 'GET',

@@ -258,11 +258,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const renderCaptchaWidget = () => {
     if (loadingCaptcha && !captcha) {
       return (
-        <div className="p-3.5 bg-slate-50 border-2 border-slate-200 rounded-2xl min-h-[96px] flex items-center justify-center animate-pulse">
-          <div className="flex items-center gap-2.5 text-xs font-bold text-slate-500">
-            <span className="h-4 w-4 border-2 border-[#026CD6] border-t-transparent rounded-full animate-spin" />
+        <div className="p-3.5 bg-slate-50 border-2 border-slate-200 rounded-2xl min-h-[96px] flex flex-col items-center justify-center text-center gap-1.5 animate-pulse">
+          <div className="flex items-center gap-2.5 text-xs font-bold text-slate-600">
+            <span className="h-4 w-4 border-2 border-[#026CD6] border-t-transparent rounded-full animate-spin shrink-0" />
             <span>Carregando verificação de segurança...</span>
           </div>
+          <span className="text-[11px] font-semibold text-slate-400">
+            Aguardando resposta do servidor seguro
+          </span>
         </div>
       );
     }
@@ -270,12 +273,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     if (captchaLoadError && !captcha) {
       return (
         <div className="p-3 bg-rose-50/70 border-2 border-rose-200 rounded-2xl min-h-[96px] flex flex-col items-center justify-center text-center gap-2">
-          <p className="text-xs font-bold text-rose-600">Não foi possível carregar a imagem de segurança (servidor inicializando).</p>
+          <p className="text-xs font-bold text-rose-600">
+            Não foi possível carregar a imagem de segurança (o servidor pode estar acordando).
+          </p>
           <button
             type="button"
             onClick={loadCaptcha}
             disabled={loadingCaptcha}
-            className="px-3 py-1.5 bg-white border border-rose-300 rounded-xl text-xs font-black text-rose-700 hover:bg-rose-50 shadow-sm flex items-center gap-1.5 transition-all"
+            className="px-3 py-1.5 bg-white border border-rose-300 rounded-xl text-xs font-black text-rose-700 hover:bg-rose-50 shadow-sm flex items-center gap-1.5 transition-all cursor-pointer"
           >
             <RefreshCw className={`h-3 w-3 ${loadingCaptcha ? 'animate-spin' : ''}`} />
             Tentar carregar novamente
