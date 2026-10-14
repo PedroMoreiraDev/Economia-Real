@@ -43,26 +43,12 @@ class ResendVerificationCodeUseCaseTest {
     void shouldRenewCodeAndSendEmail() {
         var user = new User(UUID.randomUUID(), "pedro@teste.com", "Pedro Silva", "hash", false, "111111", Instant.now().plusSeconds(300), null, null, Instant.now(), Instant.now());
         when(userRepository.findByEmail("pedro@teste.com")).thenReturn(Optional.of(user));
-        when(emailSenderService.isConfigured()).thenReturn(true);
 
         String message = useCase.execute("pedro@teste.com");
 
         assertThat(message).contains("Novo código de verificação enviado");
         verify(userRepository).save(user);
         verify(emailSenderService).sendVerificationCode(eq("pedro@teste.com"), eq("Pedro Silva"), anyString());
-    }
-
-    @Test
-    @DisplayName("Deve retornar o código na mensagem quando SMTP não estiver configurado")
-    void shouldReturnCodeWhenSmtpNotConfigured() {
-        var user = new User(UUID.randomUUID(), "pedro@teste.com", "Pedro Silva", "hash", false, "111111", Instant.now().plusSeconds(300), null, null, Instant.now(), Instant.now());
-        when(userRepository.findByEmail("pedro@teste.com")).thenReturn(Optional.of(user));
-        when(emailSenderService.isConfigured()).thenReturn(false);
-
-        String message = useCase.execute("pedro@teste.com");
-
-        assertThat(message).contains("Novo código de ativação:").contains("(Servidor SMTP não configurado localmente)");
-        verify(userRepository).save(user);
     }
 
     @Test

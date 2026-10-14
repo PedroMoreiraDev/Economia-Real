@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -53,15 +52,24 @@ public class EmailSenderService {
             @Value("${spring.mail.password:}") String password,
             @Value("${spring.application.name:Economia Real}") String appName,
             @Value("${app.email.brevo-api-key:}") String brevoApiKey,
-            @Value("${app.email.resend-api-key:}") String resendApiKey) {
+            @Value("${app.email.resend-api-key:}") String resendApiKey,
+            @Value("${app.email.from-email:nao-responda@economia-real.ia.br}") String fromEmail) {
         this.mailSender = mailSender;
         this.host = host;
         this.username = username;
         this.password = password;
-        this.fromEmail = (username != null && !username.isBlank()) ? username : "economiareal.ia@gmail.com";
         this.appName = appName;
         this.brevoApiKey = (brevoApiKey != null) ? brevoApiKey.trim() : "";
         this.resendApiKey = (resendApiKey != null) ? resendApiKey.trim() : "";
+
+        // Garante remetente com domínio próprio verificado (economia-real.ia.br) para o Resend
+        if (fromEmail != null && !fromEmail.isBlank() && !fromEmail.endsWith("@gmail.com")) {
+            this.fromEmail = fromEmail.trim();
+        } else if (username != null && !username.isBlank() && !username.endsWith("@gmail.com")) {
+            this.fromEmail = username.trim();
+        } else {
+            this.fromEmail = "nao-responda@economia-real.ia.br";
+        }
     }
 
     public EmailSenderService(
@@ -71,7 +79,18 @@ public class EmailSenderService {
             String appName,
             String brevoApiKey,
             String resendApiKey) {
-        this(null, host, username, password, appName, brevoApiKey, resendApiKey);
+        this(null, host, username, password, appName, brevoApiKey, resendApiKey, "nao-responda@economia-real.ia.br");
+    }
+
+    public EmailSenderService(
+            String host,
+            String username,
+            String password,
+            String appName,
+            String brevoApiKey,
+            String resendApiKey,
+            String fromEmail) {
+        this(null, host, username, password, appName, brevoApiKey, resendApiKey, fromEmail);
     }
 
     public boolean isConfigured() {
@@ -86,10 +105,9 @@ public class EmailSenderService {
     }
 
     public boolean isHttpConfigured() {
-        return !this.brevoApiKey.isBlank() || !this.resendApiKey.isBlank();
+        return !this.resendApiKey.isBlank() || !this.brevoApiKey.isBlank();
     }
 
-    @Async
     public CompletableFuture<Void> sendVerificationCode(String toEmail, String fullName, String code) {
         log.info("=================================================================");
         log.info("📧 [CÓDIGO DE ATIVAÇÃO] E-mail: {} | Código: {}", toEmail, code);
@@ -97,12 +115,9 @@ public class EmailSenderService {
 
         String subject = "Seu código de ativação na Economia Real: " + code;
         String html = buildEmailTemplate(fullName, code);
-        dispatchEmail(toEmail, fullName, subject, html);
-
-        return CompletableFuture.completedFuture(null);
+        return CompletableFuture.runAsync(() -> dispatchEmail(toEmail, fullName, subject, html));
     }
 
-    @Async
     public CompletableFuture<Void> sendPasswordResetCode(String toEmail, String fullName, String code) {
         log.info("=================================================================");
         log.info("🔑 [RECUPERAÇÃO DE SENHA] E-mail: {} | Código: {}", toEmail, code);
@@ -110,29 +125,27 @@ public class EmailSenderService {
 
         String subject = "Código para redefinição de senha: " + code;
         String html = buildResetPasswordEmailTemplate(fullName, code);
-        dispatchEmail(toEmail, fullName, subject, html);
-
-        return CompletableFuture.completedFuture(null);
+        return CompletableFuture.runAsync(() -> dispatchEmail(toEmail, fullName, subject, html));
     }
 
     private void dispatchEmail(String toEmail, String fullName, String subject, String htmlContent) {
-        // 1. Tenta Brevo API (HTTPS porta 443 - compatível com Render Free)
-        if (!brevoApiKey.isBlank()) {
-            try {
-                sendViaBrevoHttp(toEmail, fullName, subject, htmlContent);
-                return;
-            } catch (Exception e) {
-                log.error("Falha ao enviar e-mail via Brevo HTTPS API: {}. Tentando próximo provedor...", e.getMessage());
-            }
-        }
-
-        // 2. Tenta Resend API (HTTPS porta 443 - compatível com Render Free)
+        // 1. Tenta Resend API (HTTPS porta 443 com domínio verificado economia-real.ia.br)
         if (!resendApiKey.isBlank()) {
             try {
                 sendViaResendHttp(toEmail, subject, htmlContent);
                 return;
             } catch (Exception e) {
                 log.error("Falha ao enviar e-mail via Resend HTTPS API: {}. Tentando próximo provedor...", e.getMessage());
+            }
+        }
+
+        // 2. Tenta Brevo API (HTTPS porta 443 - compatível com Render Free)
+        if (!brevoApiKey.isBlank()) {
+            try {
+                sendViaBrevoHttp(toEmail, fullName, subject, htmlContent);
+                return;
+            } catch (Exception e) {
+                log.error("Falha ao enviar e-mail via Brevo HTTPS API: {}. Tentando próximo provedor...", e.getMessage());
             }
         }
 
@@ -197,9 +210,10 @@ public class EmailSenderService {
 
     private void sendViaResendHttp(String toEmail, String subject, String htmlContent) throws Exception {
         Map<String, Object> bodyMap = new HashMap<>();
-        String sender = (fromEmail != null && !fromEmail.isBlank() && !fromEmail.endsWith("@gmail.com"))
-                ? appName + " <" + fromEmail + ">"
-                : "Economia Real <onboarding@resend.dev>";
+        String effectiveEmail = (fromEmail != null && !fromEmail.isBlank() && !fromEmail.endsWith("@gmail.com"))
+                ? fromEmail
+                : "nao-responda@economia-real.ia.br";
+        String sender = appName + " <" + effectiveEmail + ">";
         bodyMap.put("from", sender);
         bodyMap.put("to", List.of(toEmail));
         bodyMap.put("subject", subject);
