@@ -1169,12 +1169,12 @@ const MainDashboard: React.FC = () => {
 
             {/* CONTEÚDO DA ABA SELECIONADA */}
 
-            {/* ABA 1: VISÃO GERAL (Extrato e Resumo Financeiro) */}
+            {/* ABA 1: VISÃO GERAL (Extrato e Contas Bancárias) */}
             {activeTab === 'overview' && (
-              <div className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                {/* Grade Superior: Minhas Entradas (esquerda) e Teto Máximo de Gastos (direita) */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Coluna 1: Minhas Entradas & Meta Máxima de Gastos (substitui Contas Bancárias) */}
+                <div className="lg:col-span-1 space-y-6">
 
                   {/* Bloco 1: Minhas Entradas / Receitas */}
                   <div className="card-duo p-6 space-y-4">
@@ -1453,8 +1453,8 @@ const MainDashboard: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Extrato de Transações em Largura Total */}
-                <div id="tour-statement-section" className="card-duo p-4 sm:p-6 space-y-4">
+                {/* Coluna 2 e 3: Extrato de Transações */}
+                <div id="tour-statement-section" className="lg:col-span-2 card-duo p-4 sm:p-5 space-y-4">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-slate-100 pb-4">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
@@ -1646,7 +1646,7 @@ const MainDashboard: React.FC = () => {
                     </div>
                   )}
 
-                  <div className="overflow-x-auto sm:overflow-x-visible">
+                  <div className="overflow-x-auto">
                     {displayedTransactions.length === 0 ? (
                       <div className="p-8 rounded-2xl border-2 border-dashed border-slate-200 text-center space-y-3">
                         <p className="text-xs font-bold text-slate-400">
@@ -1684,7 +1684,7 @@ const MainDashboard: React.FC = () => {
                         )}
                       </div>
                     ) : (
-                      <table className="w-full text-left text-xs table-fixed">
+                      <table className="w-full text-left text-xs">
                         <thead>
                           <tr className="border-b-2 border-slate-100 text-slate-400 font-extrabold uppercase text-[10px] tracking-wider">
                             <th className="py-2.5 px-1 w-7 text-center">
@@ -1696,12 +1696,12 @@ const MainDashboard: React.FC = () => {
                                 title={selectedTxIds.size === displayedTransactions.length ? 'Desmarcar todos' : 'Selecionar todos'}
                               />
                             </th>
-                            <th className="py-2.5 px-1 w-[86px]">Data</th>
-                            <th className="py-2.5 px-2">Descrição</th>
-                            <th className="py-2.5 px-1 w-[110px]">Categoria</th>
-                            <th className="py-2.5 px-1 w-9 text-center" title="Tipo da movimentação">Tipo</th>
+                            <th className="py-2.5 px-1 w-[88px]">Data</th>
+                            <th className="py-2.5 px-1.5 min-w-0">Descrição</th>
+                            <th className="py-2.5 px-1 w-[105px]">Categoria</th>
+                            <th className="py-2.5 px-1 w-8 text-center" title="Tipo da movimentação">Tipo</th>
                             <th className="py-2.5 px-1.5 text-right w-[110px]">Valor</th>
-                            <th className="py-2.5 px-1 w-14 text-center">Ações</th>
+                            <th className="py-2.5 px-1 w-12 text-center">Ações</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 font-bold">
@@ -1735,9 +1735,9 @@ const MainDashboard: React.FC = () => {
                                     triggerClassName="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-[10.5px] font-mono font-bold border border-slate-200/90 bg-slate-50/90 hover:bg-blue-50/80 hover:border-blue-300 text-slate-700 hover:text-blue-900 active:scale-97 transition-all cursor-pointer shadow-2xs focus:outline-none disabled:opacity-50"
                                   />
                                 </td>
-                                <td className="py-2 px-2 text-slate-800 min-w-0">
+                                <td className="py-2 px-1.5 text-slate-800 min-w-0">
                                   <div className="flex items-center gap-1.5 min-w-0">
-                                    <span className="font-extrabold text-xs truncate min-w-0 block" title={tx.description}>
+                                    <span className="font-extrabold text-xs truncate" title={tx.description}>
                                       {tx.description}
                                     </span>
                                     {tx.origin === 'AI_TEXT' && (
@@ -1762,7 +1762,7 @@ const MainDashboard: React.FC = () => {
                                     )}
                                   </div>
                                   {tx.notes && (
-                                    <span className="text-[10px] text-slate-400 font-normal truncate block min-w-0" title={tx.notes}>
+                                    <span className="text-[10px] text-slate-400 font-normal truncate block" title={tx.notes}>
                                       {tx.notes}
                                     </span>
                                   )}
@@ -1803,8 +1803,8 @@ const MainDashboard: React.FC = () => {
                                   {privacyMode ? (
                                     <span className="font-numeric font-black text-slate-400 text-xs">••••••</span>
                                   ) : (
-                                    <div className="inline-flex items-center justify-end gap-0.5 group/amt">
-                                      <span className={`text-[10px] font-black select-none ${tx.type === 'INCOME' ? 'text-[#10B981]' : 'text-rose-500'
+                                    <div className="inline-flex items-center justify-end gap-1 group/amt">
+                                      <span className={`text-[11px] font-black select-none ${tx.type === 'INCOME' ? 'text-[#10B981]' : 'text-rose-500'
                                         }`}>
                                         {tx.type === 'EXPENSE' ? '-' : (tx.type === 'INCOME' ? '+' : '')} R$
                                       </span>
@@ -1812,7 +1812,7 @@ const MainDashboard: React.FC = () => {
                                         initialValue={tx.amount}
                                         disabled={inlineUpdatingTxId === tx.id}
                                         onSave={(val) => handleInlineUpdateAmount(tx, val)}
-                                        className={`w-[68px] text-right font-black text-xs font-numeric bg-slate-50/80 hover:bg-blue-50/60 focus:bg-white px-1 py-0.5 rounded-lg border border-slate-200/90 hover:border-blue-300 focus:border-[#026CD6] focus:ring-1 focus:ring-blue-100 focus:outline-none transition-all cursor-pointer shadow-2xs disabled:opacity-50 ${tx.type === 'INCOME' ? 'text-[#10B981]' : 'text-slate-900'
+                                        className={`w-[74px] text-right font-black text-xs font-numeric bg-slate-50/80 hover:bg-blue-50/60 focus:bg-white px-1 py-0.5 rounded-lg border border-slate-200/90 hover:border-blue-300 focus:border-[#026CD6] focus:ring-1 focus:ring-blue-100 focus:outline-none transition-all cursor-pointer shadow-2xs disabled:opacity-50 ${tx.type === 'INCOME' ? 'text-[#10B981]' : 'text-slate-900'
                                           }`}
                                         title="Clique para alterar o valor (Enter para salvar)"
                                       />
