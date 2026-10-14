@@ -66,6 +66,10 @@ Este documento registra o estado real, factual e auditável do desenvolvimento d
 - [x] Interface completa no Frontend com aba dedicada `Categorias`, badges "Padrão" / "Personalizada", modal `CategoryModal` e atalho inline nos modais de transação e compra de cartão.
 - [x] `GetFinancialSummaryUseCase`: cálculo determinístico com `BigDecimal` e prevenção de dupla contagem.
 - [x] Endpoints REST `/api/v1/accounts`, `/api/v1/categories`, `/api/v1/transactions` e `/api/v1/transactions/summary`.
+- [x] Tabela de Extrato de Movimentações Responsiva de Alta Densidade:
+  - Eliminação da barra de rolagem horizontal forçada em telas de notebooks e desktops através da integração contextual da origem (`CSV`, `OFX`, `IA Texto`, `IA Voz`) na coluna de descrição como micro-tag.
+  - Coluna de Tipo ultra-compacta com ícones minimalistas e tooltips descritivos (`Receita`, `Despesa`, `Transferência`, `Fatura`).
+  - Inputs e botões inline (`InlineCategorySelect`, `InlineDatePicker`, `InlineCurrencyInput`) ajustados proporcionalmente para máxima legibilidade e densidade de informação sem cortes laterais.
 
 ### 2.5. Fase 4 — Cartões de Crédito, Compras Parceladas e Faturas
 - [x] `CreditCard`, `CreditCardInvoice` e ciclo de vida de faturas.
