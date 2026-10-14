@@ -29,6 +29,7 @@ import {
   FileText,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Calendar,
   Search,
   X,
@@ -160,9 +161,10 @@ const MainDashboard: React.FC = () => {
     });
   };
 
-  // Filtros Avançados de Busca e Tipo no Extrato
+  // Filtros Avançados de Busca, Categoria e Tipo no Extrato
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [typeFilter, setTypeFilter] = useState<'ALL' | 'INCOME' | 'EXPENSE'>('ALL');
+  const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
   const [showOnlyUncategorized, setShowOnlyUncategorized] = useState<boolean>(false);
 
   // Modais
@@ -400,13 +402,21 @@ const MainDashboard: React.FC = () => {
     (t) => !t.categoryId && t.type !== 'TRANSFER' && t.type !== 'INVOICE_PAYMENT'
   ).length;
 
-  // Filtragem avançada com busca textual e tipo de movimentação
+  // Filtragem avançada com busca textual, categoria e tipo de movimentação
   const displayedTransactions = baseTransactions.filter((t) => {
     if (showOnlyUncategorized && (t.categoryId || t.type === 'TRANSFER' || t.type === 'INVOICE_PAYMENT')) {
       return false;
     }
     if (typeFilter === 'INCOME' && t.type !== 'INCOME') return false;
     if (typeFilter === 'EXPENSE' && t.type !== 'EXPENSE') return false;
+
+    if (categoryFilter !== 'ALL') {
+      if (categoryFilter === 'NONE') {
+        if (t.categoryId || t.type === 'TRANSFER' || t.type === 'INVOICE_PAYMENT') return false;
+      } else if (t.categoryId !== categoryFilter) {
+        return false;
+      }
+    }
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
@@ -1504,31 +1514,79 @@ const MainDashboard: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Barra de Pesquisa Rápida e Filtros de Tipo */}
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-slate-50/80 p-3 rounded-2xl border-2 border-slate-200/80">
-                    <div className="relative flex-1">
-                      <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                      <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Pesquisar por descrição, categoria, notas..."
-                        className="w-full pl-9 pr-8 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#026CD6] focus:ring-2 focus:ring-blue-100 transition-all"
-                      />
-                      {searchQuery && (
-                        <button
-                          type="button"
-                          onClick={() => setSearchQuery('')}
-                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
-                          title="Limpar busca"
+                  {/* Barra de Pesquisa Rápida e Filtros de Categoria e Tipo */}
+                  <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-slate-50/80 p-3 rounded-2xl border-2 border-slate-200/80">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 flex-1">
+                      {/* Campo de Busca Textual */}
+                      <div className="relative flex-1">
+                        <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        <input
+                          type="text"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          placeholder="Pesquisar por descrição, categoria, notas..."
+                          className="w-full pl-9 pr-8 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#026CD6] focus:ring-2 focus:ring-blue-100 transition-all"
+                        />
+                        {searchQuery && (
+                          <button
+                            type="button"
+                            onClick={() => setSearchQuery('')}
+                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
+                            title="Limpar busca"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Filtro por Categoria */}
+                      <div className="relative min-w-[175px]">
+                        <Tag className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        <select
+                          value={categoryFilter}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setCategoryFilter(val);
+                            if (val === 'NONE') {
+                              setShowOnlyUncategorized(true);
+                            } else {
+                              setShowOnlyUncategorized(false);
+                            }
+                          }}
+                          className={`w-full pl-8 pr-7 py-1.5 rounded-xl text-xs font-extrabold transition-all border appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-100 ${categoryFilter !== 'ALL'
+                            ? 'bg-blue-50/90 border-[#026CD6] text-[#026CD6] shadow-sm'
+                            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                            }`}
+                          title="Filtrar por Categoria"
                         >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      )}
+                          <option value="ALL">Todas as categorias</option>
+                          <option value="NONE">⚠️ Sem categoria</option>
+                          {categories.map((c) => (
+                            <option key={c.id} value={c.id}>
+                              {c.name}
+                            </option>
+                          ))}
+                        </select>
+                        {categoryFilter !== 'ALL' ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCategoryFilter('ALL');
+                              setShowOnlyUncategorized(false);
+                            }}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
+                            title="Limpar filtro de categoria"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        ) : (
+                          <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        )}
+                      </div>
                     </div>
 
                     {/* Filtros por Tipo: Todas, Entradas, Despesas */}
-                    <div className="flex items-center gap-1.5 self-center sm:self-auto">
+                    <div className="flex items-center gap-1.5 self-center sm:self-auto flex-wrap">
                       <button
                         type="button"
                         onClick={() => setTypeFilter('ALL')}
@@ -1563,8 +1621,16 @@ const MainDashboard: React.FC = () => {
                       {uncategorizedCount > 0 && (
                         <button
                           type="button"
-                          onClick={() => setShowOnlyUncategorized(!showOnlyUncategorized)}
-                          className={`text-[11px] font-black px-2.5 py-1 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ml-1 ${showOnlyUncategorized
+                          onClick={() => {
+                            if (showOnlyUncategorized || categoryFilter === 'NONE') {
+                              setShowOnlyUncategorized(false);
+                              setCategoryFilter('ALL');
+                            } else {
+                              setShowOnlyUncategorized(true);
+                              setCategoryFilter('NONE');
+                            }
+                          }}
+                          className={`text-[11px] font-black px-2.5 py-1 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ml-1 ${showOnlyUncategorized || categoryFilter === 'NONE'
                             ? 'bg-amber-500 text-white shadow-sm ring-2 ring-amber-300'
                             : 'bg-amber-50 text-amber-900 hover:bg-amber-100 border-2 border-amber-300/80'
                             }`}
@@ -1616,16 +1682,24 @@ const MainDashboard: React.FC = () => {
                         <p className="text-xs font-bold text-slate-400">
                           {searchQuery
                             ? `Nenhum resultado encontrado para "${searchQuery}".`
-                            : txFilterMode === 'month'
-                              ? `Nenhuma movimentação registrada em ${formatMonthLabel(selectedMonth)}.`
-                              : 'Nenhuma movimentação registrada.'}
+                            : categoryFilter !== 'ALL'
+                              ? `Nenhuma movimentação encontrada para o filtro de categoria selecionado.`
+                              : showOnlyUncategorized
+                                ? `Nenhuma movimentação sem categoria encontrada.`
+                                : txFilterMode === 'month'
+                                  ? `Nenhuma movimentação registrada em ${formatMonthLabel(selectedMonth)}.`
+                                  : 'Nenhuma movimentação registrada.'}
                         </p>
-                        {searchQuery ? (
+                        {searchQuery || categoryFilter !== 'ALL' || showOnlyUncategorized ? (
                           <button
-                            onClick={() => setSearchQuery('')}
+                            onClick={() => {
+                              setSearchQuery('');
+                              setCategoryFilter('ALL');
+                              setShowOnlyUncategorized(false);
+                            }}
                             className="btn-duo btn-duo-white text-xs px-3.5 py-1.5"
                           >
-                            Limpar busca
+                            Limpar filtros
                           </button>
                         ) : (
                           <button

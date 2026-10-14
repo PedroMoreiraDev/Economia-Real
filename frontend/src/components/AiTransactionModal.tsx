@@ -10,8 +10,7 @@ import {
   HelpCircle,
   RefreshCw,
   Tag,
-  Calendar,
-  Wallet
+  Calendar
 } from 'lucide-react';
 import { Account, Category, CreateTransactionPayload, TransactionType } from '../types/financial';
 import { AiExtractionResponse } from '../types/ai';
@@ -23,7 +22,7 @@ import { CurrencyInput } from './CurrencyInput';
 interface AiTransactionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  accounts: Account[];
+  accounts?: Account[];
   categories: Category[];
   onTransactionCreated: () => void;
 }
@@ -31,7 +30,6 @@ interface AiTransactionModalProps {
 export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
   isOpen,
   onClose,
-  accounts,
   categories,
   onTransactionCreated,
 }) => {
@@ -55,6 +53,7 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
   const [isProcessingAi, setIsProcessingAi] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successFeedback, setSuccessFeedback] = useState<string | null>(null);
   const [extractedData, setExtractedData] = useState<AiExtractionResponse | null>(null);
 
   // Campos editáveis da proposta confirmada
@@ -63,7 +62,6 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
   const [confirmAmount, setConfirmAmount] = useState('');
   const [confirmDate, setConfirmDate] = useState('');
   const [confirmCategoryId, setConfirmCategoryId] = useState('');
-  const [confirmAccountId, setConfirmAccountId] = useState('');
 
   // Limpeza de timers, gravador e speech recognition
   useEffect(() => {
@@ -77,6 +75,17 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
       }
     };
   }, []);
+
+  // Reseta estados quando o modal é aberto ou fechado
+  useEffect(() => {
+    if (!isOpen) {
+      setSuccessFeedback(null);
+      setError(null);
+      setExtractedData(null);
+      setInputText('');
+      setLiveTranscript('');
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -97,11 +106,6 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
       );
       if (matched) setConfirmCategoryId(matched.id);
     }
-
-    // Seleciona a primeira conta como padrão se houver
-    if (accounts.length > 0 && !confirmAccountId) {
-      setConfirmAccountId(accounts[0].id);
-    }
   };
 
   // Processar texto natural
@@ -110,6 +114,7 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
     if (!text.trim() || !token) return;
 
     setError(null);
+    setSuccessFeedback(null);
     setIsProcessingAi(true);
 
     try {
@@ -126,6 +131,7 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
   const processRecognizedText = async (text: string) => {
     if (!token) return;
     setError(null);
+    setSuccessFeedback(null);
     setIsProcessingAi(true);
 
     try {
@@ -145,6 +151,7 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
   // Iniciar gravação de voz e reconhecimento simultâneo
   const startRecording = async () => {
     setError(null);
+    setSuccessFeedback(null);
     audioChunksRef.current = [];
     speechTranscriptRef.current = '';
     setLiveTranscript('');
@@ -287,14 +294,22 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
         amount: val,
         accrualDate: confirmDate,
         description: confirmDescription.trim(),
-        accountId: confirmAccountId || undefined,
         categoryId: confirmCategoryId || undefined,
         notes: `Criado via IA (${extractedData?.origin || 'AI'}) - "${extractedData?.rawInput || ''}"`,
       };
 
       await createTransactionApi(token, payload);
       onTransactionCreated();
-      onClose();
+
+      // Limpa a transação salva e volta para a tela de gravação por microfone
+      const savedDesc = confirmDescription.trim();
+      setExtractedData(null);
+      setInputText('');
+      setLiveTranscript('');
+      speechTranscriptRef.current = '';
+      audioChunksRef.current = [];
+      setActiveTab('voice');
+      setSuccessFeedback(`Registro "${savedDesc}" salvo com sucesso no seu extrato de movimentações!`);
     } catch (err: any) {
       setError(err.message || 'Erro ao salvar transação confirmada.');
     } finally {
@@ -342,6 +357,31 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
 
         {/* Abas e Conteúdo */}
         <div className="p-6 overflow-y-auto space-y-6">
+
+          {/* Mensagem de Sucesso após Salvar */}
+          {successFeedback && (
+            <div className="p-3.5 bg-[#E8F8E8] border-2 border-[#58CC02] rounded-2xl flex items-center justify-between gap-3 text-slate-800 text-xs sm:text-sm font-bold shadow-sm animate-fade-in">
+              <div className="flex items-center gap-2.5">
+                <div className="p-1.5 rounded-xl bg-[#58CC02] text-white shadow-[0_2px_0_0_#46A302]">
+                  <CheckCircle2 className="w-4 h-4 stroke-[3]" />
+                </div>
+                <div>
+                  <span className="text-slate-800">{successFeedback}</span>
+                  <p className="text-[11px] text-[#46A302] font-extrabold mt-0.5">
+                    Você já pode clicar no microfone abaixo e falar o próximo registro!
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSuccessFeedback(null)}
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-white/80 transition-colors"
+                title="Fechar aviso"
+              >
+                <X className="w-4 h-4 stroke-[2.5]" />
+              </button>
+            </div>
+          )}
 
           {/* Seletor de Modo: Texto ou Voz */}
           {!extractedData && (
@@ -484,10 +524,18 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
                         )}
                       </div>
                     ) : (
-                      <p className="text-xs sm:text-sm font-bold text-slate-600">
-                        Clique no microfone e diga, por exemplo: <br />
-                        <span className="text-[#58CC02] font-black">"Ifood 49,19 no débito hoje"</span>
-                      </p>
+                      <div className="space-y-1.5">
+                        <p className="text-xs sm:text-sm font-bold text-slate-600">
+                          Clique no microfone e diga, por exemplo: <br />
+                          <span className="text-[#58CC02] font-black">"Ifood 49,19 no débito hoje"</span>
+                        </p>
+                        {successFeedback && (
+                          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E8F8E8] text-[#46A302] border border-[#58CC02] text-xs font-black">
+                            <span className="w-2 h-2 rounded-full bg-[#58CC02] animate-ping" />
+                            <span>Pronto para o próximo! Clique no microfone acima</span>
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
 
@@ -628,26 +676,6 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
                     ))}
                   </select>
                 </div>
-              </div>
-
-              {/* Conta Bancária */}
-              <div>
-                <label className="block text-xs font-black uppercase tracking-wider text-slate-500 mb-1 flex items-center gap-1">
-                  <Wallet className="w-3.5 h-3.5 text-slate-400" />
-                  Conta de Pagamento / Depósito
-                </label>
-                <select
-                  value={confirmAccountId}
-                  onChange={(e) => setConfirmAccountId(e.target.value)}
-                  className="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-3.5 py-2.5 text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:border-[#58CC02] focus:bg-white transition-all"
-                >
-                  <option value="">Nenhuma / A definir</option>
-                  {accounts.map((acc) => (
-                    <option key={acc.id} value={acc.id}>
-                      {acc.name} ({acc.type}) — Saldo: R$ {acc.initialBalance.toFixed(2)}
-                    </option>
-                  ))}
-                </select>
               </div>
 
               {/* Ações: Descartar / Confirmar */}
