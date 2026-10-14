@@ -29,7 +29,6 @@ import {
   FileText,
   ChevronLeft,
   ChevronRight,
-  ChevronDown,
   Calendar,
   Search,
   X,
@@ -49,6 +48,7 @@ import { AnalyticsSection } from './components/AnalyticsSection';
 import { BudgetModal } from './components/BudgetModal';
 import { AiBudgetSuggestionModal } from './components/AiBudgetSuggestionModal';
 import { InlineCategorySelect } from './components/InlineCategorySelect';
+import { CategoryFilterDropdown } from './components/CategoryFilterDropdown';
 import { InlineDatePicker } from './components/InlineDatePicker';
 import { RecurringBillsSection } from './components/RecurringBillsSection';
 import { SavingsGoalsSection } from './components/SavingsGoalsSection';
@@ -1539,50 +1539,20 @@ const MainDashboard: React.FC = () => {
                         )}
                       </div>
 
-                      {/* Filtro por Categoria */}
-                      <div className="relative min-w-[175px]">
-                        <Tag className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                        <select
-                          value={categoryFilter}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            setCategoryFilter(val);
-                            if (val === 'NONE') {
-                              setShowOnlyUncategorized(true);
-                            } else {
-                              setShowOnlyUncategorized(false);
-                            }
-                          }}
-                          className={`w-full pl-8 pr-7 py-1.5 rounded-xl text-xs font-extrabold transition-all border appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-100 ${categoryFilter !== 'ALL'
-                            ? 'bg-blue-50/90 border-[#026CD6] text-[#026CD6] shadow-sm'
-                            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
-                            }`}
-                          title="Filtrar por Categoria"
-                        >
-                          <option value="ALL">Todas as categorias</option>
-                          <option value="NONE">⚠️ Sem categoria</option>
-                          {categories.map((c) => (
-                            <option key={c.id} value={c.id}>
-                              {c.name}
-                            </option>
-                          ))}
-                        </select>
-                        {categoryFilter !== 'ALL' ? (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setCategoryFilter('ALL');
-                              setShowOnlyUncategorized(false);
-                            }}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
-                            title="Limpar filtro de categoria"
-                          >
-                            <X className="w-3.5 h-3.5" />
-                          </button>
-                        ) : (
-                          <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
-                        )}
-                      </div>
+                      {/* Filtro por Categoria Moderno e Elegante */}
+                      <CategoryFilterDropdown
+                        categories={categories}
+                        selectedCategoryId={categoryFilter}
+                        uncategorizedCount={uncategorizedCount}
+                        onChange={(catId) => {
+                          setCategoryFilter(catId);
+                          if (catId === 'NONE') {
+                            setShowOnlyUncategorized(true);
+                          } else {
+                            setShowOnlyUncategorized(false);
+                          }
+                        }}
+                      />
                     </div>
 
                     {/* Filtros por Tipo: Todas, Entradas, Despesas */}
