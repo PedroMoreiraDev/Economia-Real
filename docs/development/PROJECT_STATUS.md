@@ -328,27 +328,9 @@ dist/assets/index-CVcJJLIG.js   305.65 kB │ gzip: 75.31 kB
 
 ---
 
-## 4.10. Layout 80/20 no Desktop, Redução de Margens e Tabela Dedicada para Mobile/Tablet (Implementado)
-
-- **Redução Geral de Margens e Aproveitamento Horizontal (`App.tsx`):**
-  - Expansão da largura máxima do container geral de `max-w-7xl` (1280px) para `max-w-[1720px]`, eliminando espaços vazios laterais em monitores modernos e notebooks.
-  - Otimização dos paddings no Header e Main de `px-8 py-8` para `px-2.5 sm:px-4 lg:px-6 py-4 sm:py-6`.
-  - Redução proporcional de paddings no Banner de Boas-Vindas (`p-4 sm:p-6`), no Seletor de Mês (`p-3.5 sm:p-4`) e nos 4 cards de KPIs (`gap-3 sm:gap-4`, `p-4 sm:p-5 space-y-2`), gerando maior densidade de informação e presença visual.
-- **Divisão 80% / 20% no Desktop:**
-  - A coluna lateral de **Minhas Entradas** e **Teto Máximo de Gastos** foi configurada para ocupar **20% da tela** (`w-full lg:w-[24%] xl:w-[20%] shrink-0`).
-  - O **Extrato de Movimentações** passa a ocupar **80% da tela** (`w-full lg:flex-1 min-w-0`), proporcionando mais de 1200px de área útil livre no desktop.
-- **Apresentação de Tabela Especializada para Mobile / Tablet:**
-  - **No Desktop (`hidden lg:block`):** Renderiza a tabela completa HTML tradicional com todas as 8 colunas (Checkbox, Data, Descrição, Categoria, Origem, Tipo, Valor e Ações), espaçosa e legível.
-  - **No Mobile e Tablet (`block lg:hidden`):** Apresentação em formato de tabela compacta / cartões tabulares de alta densidade tátil:
-    - Zero rolagem horizontal em smartphones e tablets.
-    - Linha superior com Checkbox, Data com `InlineDatePicker`, Categoria com `InlineCategorySelect` e Valor com `InlineCurrencyInput`.
-    - Linha inferior com Descrição completa, notas, badges de Tipo (Receita/Despesa/Transf) e Origem (IA/CSV/OFX/Manual), além de botões táteis de ação rápida (Editar e Excluir).
-
----
-
 ## 5. Próximo Passo Recomendado
 
-1. A plataforma conta com 141 testes automatizados no backend e build de frontend 100% íntegros.
-2. Layout 80%/20% no desktop, margens otimizadas e tabela mobile/tablet validados com sucesso e sincronizados no repositório.
+1. A plataforma conta agora com 141 testes automatizados no backend e build de frontend 100% íntegros.
+2. Todo o fluxo contínuo de voz por IA, filtro por categoria no extrato e validações foram entregues e validados no frontend.
 3. Deploy sincronizado no GitHub (`main`) e publicado na Vercel (`https://economia-real.ia.br`).
 
