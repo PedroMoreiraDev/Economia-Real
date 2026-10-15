@@ -173,6 +173,21 @@ Este documento registra o estado real, factual e auditável do desenvolvimento d
   - Ações em massa e seleção total alinhadas dinamicamente com as movimentações filtradas em tela.
   - Pré-preenchimento automático da data no modal de novo lançamento com base no mês ativo de navegação.
 
+### 2.13. Responsividade Total Mobile/Tablet & Bottom Sheet Inteligente do Tutorial
+- [x] **Guia / Tutorial do App Totalmente Reformulado para Telas Touch (`OnboardingTourModal.tsx`):**
+  - Transformação em **Bottom Sheet Flutuante** em telas móveis e tablets (< 1024px), fixado confortavelmente na parte inferior (`bottom-0` ou `bottom-3`).
+  - **Modo Minimizado com 1 Toque:** Barra ergonômica de ~54px de altura que permite ao usuário visualizar e interagir com o elemento destacado na tela sem nenhum bloqueio de visão.
+  - **Scroll Inteligente com Folga Superior:** Em telas touch, o elemento focado é automaticamente rolado para o terço superior da janela (`scrollTop + rect.top - 80`), eliminando qualquer risco de ser encoberto pelo card informativo inferior.
+  - Pílula tátil de recolhimento, botões de toque com tamanho mínimo de 40-44px e persistência sem conflito.
+- [x] **Layout Geral Responsivo em Smartphones e Tablets (`App.tsx`):**
+  - **Cabeçalho:** Logo e tipografia com escala fluida (`text-xl sm:text-2xl`), botões com ícones táteis e perfil de usuário compacto.
+  - **Banner de Boas-Vindas:** Ações rápidas organizadas em **Grid 2x2 no mobile** (`grid grid-cols-2 sm:flex sm:flex-wrap`), garantindo botões de largura uniforme e toque fácil em qualquer smartphone.
+  - **Seletor de Período:** Controles alinhados com `justify-between sm:justify-end`, input de mês preenchendo o espaço disponível no mobile sem truncamento.
+  - **4 Cards de KPIs Financeiros:** Grid adaptativo em **2x2 no mobile** (`grid-cols-2 lg:grid-cols-4`) com tipografia responsiva e ícones compactos, reduzindo a altura do dashboard pela metade em celulares e permitindo ver o extrato sem rolagem excessiva.
+  - **Abas de Navegação:** Suporte a touch scrolling horizontal (`snap-x touch-pan-x scrollbar-none`) com botões táteis (`shrink-0 snap-start`).
+  - **Extrato com Cards Móveis Táteis:** Visualização dedicada em **Cards Mobile (`block md:hidden`)** com edição inline de valor, categoria e data, mantendo a tabela contábil tabular apenas em telas médias e grandes (`hidden md:block`).
+  - **Modais com Scroll Seguro (`max-h-[92vh] overflow-y-auto`):** `TransactionModal`, `CreditCardPurchaseModal`, `ImportModal` e `AuthModal` protegidos contra corte de tela ou quebra com teclados virtuais abertos.
+
 ---
 
 ## 3. Evidências de Testes Executados Factualmente

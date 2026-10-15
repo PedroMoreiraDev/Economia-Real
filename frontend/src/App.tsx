@@ -737,18 +737,18 @@ const MainDashboard: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
 
           {/* Logo e Nome da Plataforma */}
-          <div className="flex items-center gap-3.5">
-            <div className="relative group">
+          <div className="flex items-center gap-2.5 sm:gap-3.5">
+            <div className="relative group shrink-0">
               <img
                 src="/logo-economia-real.png"
                 alt="Economia Real Logo"
-                className="h-12 w-12 rounded-2xl object-cover border-2 border-blue-200 shadow-md group-hover:scale-105 transition-transform"
+                className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl sm:rounded-2xl object-cover border-2 border-blue-200 shadow-md group-hover:scale-105 transition-transform"
               />
-              <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white animate-pulse" title="Sistema online e conectado" />
+              <span className="absolute -bottom-1 -right-1 w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-emerald-500 border-2 border-white animate-pulse" title="Sistema online e conectado" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="text-2xl font-black tracking-tight text-slate-900">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="text-xl sm:text-2xl font-black tracking-tight text-slate-900">
                   Economia<span className="text-[#026CD6]">Real</span>
                 </span>
                 <span className="hidden md:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-900 border border-blue-200 shadow-sm uppercase tracking-wider">
@@ -861,58 +861,58 @@ const MainDashboard: React.FC = () => {
         {isAuthenticated && user ? (
           <>
             {/* Banner Destaque Economia Real (Azul Suave, Moderno e Confiável - Área Logada) */}
-            <div className="card-real-blue p-6 sm:p-8 relative overflow-hidden">
+            <div className="card-real-blue p-4 sm:p-6 lg:p-8 relative overflow-hidden">
               <div className="max-w-2xl lg:max-w-3xl space-y-3 relative z-10">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/90 border-2 border-blue-200 text-[#026CD6] text-xs font-black shadow-sm uppercase tracking-wider">
                   <Sparkles className="h-3.5 w-3.5 text-blue-500 fill-blue-400" />
                   Painel de Controle Financeiro
                 </div>
 
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-slate-900 leading-tight">
+                <h1 className="text-xl sm:text-3xl lg:text-4xl font-black tracking-tight text-slate-900 leading-tight">
                   Olá{firstName ? `, ${firstName}` : ''}! <span className="text-[#026CD6] underline decoration-blue-300 decoration-4">Pronto para organizar suas contas? Vamos começar!</span> 🎩✨
                 </h1>
 
-                <p className="text-slate-700 text-sm sm:text-base font-bold leading-relaxed">
+                <p className="text-slate-700 text-xs sm:text-base font-bold leading-relaxed">
                   Monitore seu fluxo de caixa, planeje seus lançamentos e acompanhe suas metas com precisão e suporte de IA.
                 </p>
 
-                {/* Ações Rápidas em Destaque */}
-                <div className="pt-2 flex flex-wrap items-center gap-3">
+                {/* Ações Rápidas em Destaque (Grid 2x2 no mobile, Flex no desktop) */}
+                <div className="pt-2 grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-3">
                   <button
                     id="tour-add-btn"
                     onClick={() => setTransactionModalOpen(true)}
-                    className="btn-duo btn-duo-green text-xs sm:text-sm px-4 py-2.5 flex items-center gap-2"
+                    className="btn-duo btn-duo-green text-xs sm:text-sm px-3 sm:px-4 py-2.5 flex items-center justify-center gap-1.5 sm:gap-2 w-full sm:w-auto"
                   >
-                    <Plus className="h-4 w-4 stroke-[3]" />
-                    Novo Lançamento
+                    <Plus className="h-4 w-4 stroke-[3] shrink-0" />
+                    <span className="truncate">Novo Lançamento</span>
                   </button>
 
                   <button
                     id="tour-ai-btn"
                     onClick={() => setAiModalOpen(true)}
-                    className="btn-duo btn-duo-purple text-xs sm:text-sm px-4 py-2.5 flex items-center gap-2"
+                    className="btn-duo btn-duo-purple text-xs sm:text-sm px-3 sm:px-4 py-2.5 flex items-center justify-center gap-1.5 sm:gap-2 w-full sm:w-auto"
                   >
-                    <Mic className="h-4 w-4" />
-                    Falar com a IA (Voz/Texto)
+                    <Mic className="h-4 w-4 shrink-0" />
+                    <span className="truncate">Falar com IA</span>
                   </button>
 
                   <button
                     id="tour-import-btn"
                     onClick={() => setImportModalOpen(true)}
-                    className="btn-duo btn-duo-white text-xs sm:text-sm px-4 py-2.5 flex items-center gap-2"
+                    className="btn-duo btn-duo-white text-xs sm:text-sm px-3 sm:px-4 py-2.5 flex items-center justify-center gap-1.5 sm:gap-2 w-full sm:w-auto"
                   >
-                    <UploadCloud className="h-4 w-4 text-[#0284C7]" />
-                    Importar Extrato
+                    <UploadCloud className="h-4 w-4 text-[#0284C7] shrink-0" />
+                    <span className="truncate">Importar Extrato</span>
                   </button>
 
                   <button
                     onClick={handleExportCsv}
                     disabled={transactions.length === 0 || exportingCsv}
-                    className="btn-duo btn-duo-white text-xs sm:text-sm px-4 py-2.5 flex items-center gap-2 disabled:opacity-50"
+                    className="btn-duo btn-duo-white text-xs sm:text-sm px-3 sm:px-4 py-2.5 flex items-center justify-center gap-1.5 sm:gap-2 w-full sm:w-auto disabled:opacity-50"
                     title="Exportar para Excel em CSV formatado"
                   >
-                    <Download className={`h-4 w-4 text-blue-600 ${exportingCsv ? 'animate-bounce' : ''}`} />
-                    {exportingCsv ? 'Gerando...' : 'Exportar Planilha'}
+                    <Download className={`h-4 w-4 text-blue-600 shrink-0 ${exportingCsv ? 'animate-bounce' : ''}`} />
+                    <span className="truncate">{exportingCsv ? 'Gerando...' : 'Exportar Planilha'}</span>
                   </button>
                 </div>
               </div>
@@ -978,11 +978,11 @@ const MainDashboard: React.FC = () => {
               </div>
 
               {/* Lado Direito: Controles de Navegação (Mês Anterior, Seletor Rápido, Próximo Mês, Botão Mês Atual) */}
-              <div className="flex flex-wrap items-center justify-end gap-2 w-full md:w-auto">
+              <div className="flex items-center justify-between sm:justify-end gap-1.5 sm:gap-2 w-full md:w-auto">
                 <button
                   type="button"
                   onClick={handlePrevMonth}
-                  className="btn-duo btn-duo-white text-xs px-3 py-2 flex items-center gap-1.5"
+                  className="btn-duo btn-duo-white text-xs px-2.5 sm:px-3 py-2 flex items-center gap-1 sm:gap-1.5 shrink-0"
                   title="Voltar para o mês anterior"
                 >
                   <ChevronLeft className="h-4 w-4 stroke-[3] text-slate-600" />
@@ -990,13 +990,13 @@ const MainDashboard: React.FC = () => {
                 </button>
 
                 {/* Input de Seleção Direta de Mês / Ano */}
-                <div className="relative flex items-center">
+                <div className="relative flex-1 sm:flex-initial">
                   <input
                     type="month"
                     value={selectedMonth}
                     onChange={handleSelectMonthInput}
                     aria-label="Escolher mês e ano de referência"
-                    className="btn-duo btn-duo-white text-xs font-black px-3 py-1.5 cursor-pointer text-slate-700 hover:text-[#026CD6] border-2 border-slate-200 rounded-2xl focus:outline-none focus:border-[#026CD6]"
+                    className="btn-duo btn-duo-white text-xs font-black px-2.5 sm:px-3 py-1.5 cursor-pointer text-slate-700 hover:text-[#026CD6] border-2 border-slate-200 rounded-2xl focus:outline-none focus:border-[#026CD6] w-full text-center"
                     title="Clique para escolher qualquer mês e ano diretamente"
                   />
                 </div>
@@ -1004,7 +1004,7 @@ const MainDashboard: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleNextMonth}
-                  className="btn-duo btn-duo-white text-xs px-3 py-2 flex items-center gap-1.5"
+                  className="btn-duo btn-duo-white text-xs px-2.5 sm:px-3 py-2 flex items-center gap-1 sm:gap-1.5 shrink-0"
                   title="Avançar para o próximo mês"
                 >
                   <span className="hidden sm:inline">Próximo Mês</span>
@@ -1015,85 +1015,87 @@ const MainDashboard: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleCurrentMonth}
-                    className="btn-duo btn-duo-blue text-xs px-3.5 py-2 flex items-center gap-1.5 animate-fadeIn"
+                    className="btn-duo btn-duo-blue text-xs px-2.5 sm:px-3.5 py-2 flex items-center gap-1 sm:gap-1.5 animate-fadeIn shrink-0"
                     title="Voltar para o mês atual"
                   >
                     <RefreshCw className="h-3.5 w-3.5 stroke-[2.5]" />
-                    <span>Mês Atual</span>
+                    <span className="hidden xs:inline sm:inline">Mês Atual</span>
                   </button>
                 )}
               </div>
             </div>
 
-            {/* 4 Cards de Métricas Principais (KPIs com Relevo Tátil e Modo Privacidade) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {/* 4 Cards de Métricas Principais (KPIs com Relevo Tátil - Grid 2x2 no mobile, 4 colunas no desktop) */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 lg:gap-5">
 
               {/* Receitas Totais */}
-              <div className="card-duo card-duo-interactive p-5 space-y-2.5 hover:border-emerald-400 group">
+              <div className="card-duo card-duo-interactive p-3.5 sm:p-5 space-y-1.5 sm:space-y-2.5 hover:border-emerald-400 group">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-black uppercase text-slate-500 tracking-wider">
+                  <span className="text-[10px] sm:text-[11px] font-black uppercase text-slate-500 tracking-wider">
                     Entradas
                   </span>
-                  <div className="h-10 w-10 rounded-2xl bg-[#E8F8E8] border-2 border-[#D7FFB8] text-[#10B981] flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
-                    <ArrowUpRight className="h-5 w-5 stroke-[3]" />
+                  <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl sm:rounded-2xl bg-[#E8F8E8] border-2 border-[#D7FFB8] text-[#10B981] flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform shrink-0">
+                    <ArrowUpRight className="h-4 w-4 sm:h-5 sm:w-5 stroke-[3]" />
                   </div>
                 </div>
-                <p className="text-2xl sm:text-3xl font-black text-[#059669] tracking-tight font-numeric">
+                <p className="text-lg sm:text-2xl lg:text-3xl font-black text-[#059669] tracking-tight font-numeric truncate">
                   {formatValue(summary.totalIncome)}
                 </p>
                 <div className="flex items-center justify-between text-xs font-bold text-slate-400">
-                  <span>Recebido no período</span>
-                  <span className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <span className="hidden sm:inline">Recebido</span>
+                  <span className="text-[9px] sm:text-[10px] font-black px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
                     +{incomeTransactions.length} entrada(s)
                   </span>
                 </div>
               </div>
 
               {/* Despesas de Consumo */}
-              <div className="card-duo card-duo-interactive p-5 space-y-2.5 hover:border-rose-400 group">
+              <div className="card-duo card-duo-interactive p-3.5 sm:p-5 space-y-1.5 sm:space-y-2.5 hover:border-rose-400 group">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-black uppercase text-slate-500 tracking-wider">
+                  <span className="text-[10px] sm:text-[11px] font-black uppercase text-slate-500 tracking-wider">
                     Despesas
                   </span>
-                  <div className="h-10 w-10 rounded-2xl bg-[#FFEAEA] border-2 border-[#FFDFDF] text-[#EF4444] flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
-                    <ArrowDownLeft className="h-5 w-5 stroke-[3]" />
+                  <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl sm:rounded-2xl bg-[#FFEAEA] border-2 border-[#FFDFDF] text-[#EF4444] flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform shrink-0">
+                    <ArrowDownLeft className="h-4 w-4 sm:h-5 sm:w-5 stroke-[3]" />
                   </div>
                 </div>
-                <p className="text-2xl sm:text-3xl font-black text-[#DC2626] tracking-tight font-numeric">
+                <p className="text-lg sm:text-2xl lg:text-3xl font-black text-[#DC2626] tracking-tight font-numeric truncate">
                   {formatValue(summary.totalExpense)}
                 </p>
                 <div className="flex items-center justify-between text-xs font-bold text-slate-400">
-                  <span>Consumo no período</span>
-                  {summary.totalIncome > 0 && (
-                    <span className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-200">
+                  <span className="hidden sm:inline">Consumo</span>
+                  {summary.totalIncome > 0 ? (
+                    <span className="text-[9px] sm:text-[10px] font-black px-1.5 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-200">
                       {Math.round((summary.totalExpense / summary.totalIncome) * 100)}% da receita
                     </span>
+                  ) : (
+                    <span className="text-[9px] sm:text-[10px] font-bold text-slate-400">No período</span>
                   )}
                 </div>
               </div>
 
               {/* Disponível para Gastar / Meta de Gastos (substitui Economia conforme meta) */}
-              <div className="card-duo card-duo-interactive p-5 space-y-2.5 hover:border-[#026CD6] group">
+              <div className="card-duo card-duo-interactive p-3.5 sm:p-5 space-y-1.5 sm:space-y-2.5 hover:border-[#026CD6] group">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-black uppercase text-slate-500 tracking-wider">
-                    {effectiveGlobalLimit > 0 ? 'Disponível no Mês' : 'Economia'}
+                  <span className="text-[10px] sm:text-[11px] font-black uppercase text-slate-500 tracking-wider truncate mr-1">
+                    {effectiveGlobalLimit > 0 ? 'Disponível' : 'Economia'}
                   </span>
-                  <div className={`h-10 w-10 rounded-2xl border-2 flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform ${effectiveGlobalLimit > 0
+                  <div className={`h-8 w-8 sm:h-10 sm:w-10 rounded-xl sm:rounded-2xl border-2 flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform shrink-0 ${effectiveGlobalLimit > 0
                     ? effectiveGlobalLimit - summary.totalExpense >= 0
                       ? 'bg-[#EBF5FF] border-[#BAE0FD] text-[#026CD6]'
                       : 'bg-[#FFEAEA] border-[#FFDFDF] text-[#EF4444]'
                     : 'bg-[#EBF5FF] border-[#BAE0FD] text-[#026CD6]'
                     }`}>
                     {effectiveGlobalLimit > 0 ? (
-                      <Target className="h-5 w-5 stroke-[3]" />
+                      <Target className="h-4 w-4 sm:h-5 sm:w-5 stroke-[3]" />
                     ) : (
-                      <TrendingUp className="h-5 w-5 stroke-[3]" />
+                      <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 stroke-[3]" />
                     )}
                   </div>
                 </div>
                 {effectiveGlobalLimit > 0 ? (
                   <>
-                    <p className={`text-2xl sm:text-3xl font-black tracking-tight font-numeric ${effectiveGlobalLimit - summary.totalExpense >= 0 ? 'text-[#026CD6]' : 'text-[#DC2626]'
+                    <p className={`text-lg sm:text-2xl lg:text-3xl font-black tracking-tight font-numeric truncate ${effectiveGlobalLimit - summary.totalExpense >= 0 ? 'text-[#026CD6]' : 'text-[#DC2626]'
                       }`}>
                       {formatValue(effectiveGlobalLimit - summary.totalExpense)}
                     </p>
@@ -1109,48 +1111,48 @@ const MainDashboard: React.FC = () => {
                           style={{ width: `${Math.min(100, Math.round((summary.totalExpense / effectiveGlobalLimit) * 100))}%` }}
                         />
                       </div>
-                      <p className="text-[11px] font-bold text-slate-400">
+                      <p className="text-[10px] sm:text-[11px] font-bold text-slate-400 truncate">
                         {effectiveGlobalLimit - summary.totalExpense >= 0
-                          ? `Restam de ${formatValue(effectiveGlobalLimit)}`
-                          : `⚠️ Meta estourada em ${formatValue(Math.abs(effectiveGlobalLimit - summary.totalExpense))}`}
+                          ? `De ${formatValue(effectiveGlobalLimit)}`
+                          : `⚠️ Excedeu em ${formatValue(Math.abs(effectiveGlobalLimit - summary.totalExpense))}`}
                       </p>
                     </div>
                   </>
                 ) : (
                   <>
-                    <p className={`text-2xl sm:text-3xl font-black tracking-tight font-numeric ${(summary.totalIncome - summary.totalExpense) >= 0 ? 'text-[#026CD6]' : 'text-amber-600'
+                    <p className={`text-lg sm:text-2xl lg:text-3xl font-black tracking-tight font-numeric truncate ${(summary.totalIncome - summary.totalExpense) >= 0 ? 'text-[#026CD6]' : 'text-amber-600'
                       }`}>
                       {formatValue(summary.totalIncome - summary.totalExpense)}
                     </p>
-                    <p className="text-xs font-bold text-slate-400">
-                      Defina sua meta no painel ao lado
+                    <p className="text-[10px] sm:text-xs font-bold text-slate-400 truncate">
+                      Saldo livre
                     </p>
                   </>
                 )}
               </div>
 
               {/* Saldo Total: Entradas menos Despesas */}
-              <div className="card-duo card-duo-interactive p-5 space-y-2.5 hover:border-amber-400 group">
+              <div className="card-duo card-duo-interactive p-3.5 sm:p-5 space-y-1.5 sm:space-y-2.5 hover:border-amber-400 group">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-black uppercase text-slate-500 tracking-wider">
+                  <span className="text-[10px] sm:text-[11px] font-black uppercase text-slate-500 tracking-wider">
                     Saldo Total
                   </span>
-                  <div className="h-10 w-10 rounded-2xl bg-[#FFF8E6] border-2 border-[#FDE68A] text-[#D97706] flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
-                    <Wallet className="h-5 w-5 stroke-[3]" />
+                  <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl sm:rounded-2xl bg-[#FFF8E6] border-2 border-[#FDE68A] text-[#D97706] flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform shrink-0">
+                    <Wallet className="h-4 w-4 sm:h-5 sm:w-5 stroke-[3]" />
                   </div>
                 </div>
-                <p className={`text-2xl sm:text-3xl font-black tracking-tight font-numeric ${(summary.totalIncome - summary.totalExpense) >= 0 ? 'text-slate-900' : 'text-[#DC2626]'
+                <p className={`text-lg sm:text-2xl lg:text-3xl font-black tracking-tight font-numeric truncate ${(summary.totalIncome - summary.totalExpense) >= 0 ? 'text-slate-900' : 'text-[#DC2626]'
                   }`}>
                   {formatValue(summary.totalIncome - summary.totalExpense)}
                 </p>
                 <div className="flex items-center justify-between text-xs font-bold text-slate-400">
-                  <span>Resultado do período</span>
+                  <span className="hidden sm:inline">Resultado</span>
                   {(summary.totalIncome - summary.totalExpense) >= 0 ? (
-                    <span className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <span className="text-[9px] sm:text-[10px] font-black px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
                       Superávit ✨
                     </span>
                   ) : (
-                    <span className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-200">
+                    <span className="text-[9px] sm:text-[10px] font-black px-1.5 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-200">
                       Déficit ⚠️
                     </span>
                   )}
@@ -1158,11 +1160,11 @@ const MainDashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* Abas de Navegação Estilo Duolingo (Pílulas Táteis 3D) */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+            {/* Abas de Navegação Estilo Duolingo (Pílulas Táteis 3D com Rolagem Fluida) */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none snap-x touch-pan-x">
               <button
                 onClick={() => setActiveTab('overview')}
-                className={`btn-duo text-xs sm:text-sm px-4 py-2.5 rounded-2xl whitespace-nowrap flex items-center gap-2 ${activeTab === 'overview'
+                className={`btn-duo text-xs sm:text-sm px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl whitespace-nowrap flex items-center gap-2 shrink-0 snap-start ${activeTab === 'overview'
                   ? 'btn-duo-green'
                   : 'btn-duo-white'
                   }`}
@@ -1173,7 +1175,7 @@ const MainDashboard: React.FC = () => {
 
               <button
                 onClick={() => setActiveTab('analytics')}
-                className={`btn-duo text-xs sm:text-sm px-4 py-2.5 rounded-2xl whitespace-nowrap flex items-center gap-2 ${activeTab === 'analytics'
+                className={`btn-duo text-xs sm:text-sm px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl whitespace-nowrap flex items-center gap-2 shrink-0 snap-start ${activeTab === 'analytics'
                   ? 'btn-duo-green'
                   : 'btn-duo-white'
                   }`}
@@ -1184,7 +1186,7 @@ const MainDashboard: React.FC = () => {
 
               <button
                 onClick={() => setActiveTab('recurring')}
-                className={`btn-duo text-xs sm:text-sm px-4 py-2.5 rounded-2xl whitespace-nowrap flex items-center gap-2 ${activeTab === 'recurring'
+                className={`btn-duo text-xs sm:text-sm px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl whitespace-nowrap flex items-center gap-2 shrink-0 snap-start ${activeTab === 'recurring'
                   ? 'btn-duo-green'
                   : 'btn-duo-white'
                   }`}
@@ -1195,7 +1197,7 @@ const MainDashboard: React.FC = () => {
 
               <button
                 onClick={() => setActiveTab('goals')}
-                className={`btn-duo text-xs sm:text-sm px-4 py-2.5 rounded-2xl whitespace-nowrap flex items-center gap-2 ${activeTab === 'goals'
+                className={`btn-duo text-xs sm:text-sm px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl whitespace-nowrap flex items-center gap-2 shrink-0 snap-start ${activeTab === 'goals'
                   ? 'btn-duo-green'
                   : 'btn-duo-white'
                   }`}
@@ -1728,147 +1730,149 @@ const MainDashboard: React.FC = () => {
                         )}
                       </div>
                     ) : (
-                      <table className="w-full text-left text-xs">
-                        <thead>
-                          <tr className="border-b-2 border-slate-100 text-slate-400 font-extrabold uppercase text-[10px] tracking-wider">
-                            <th className="py-2.5 px-1.5 w-8 text-center">
+                      <>
+                        {/* 1. Visualização em Cards Táteis para Dispositivos Móveis (< md) */}
+                        <div className="block md:hidden space-y-3">
+                          <div className="flex items-center justify-between pb-1 px-1 text-xs text-slate-500 font-bold border-b border-slate-100">
+                            <label className="flex items-center gap-2 cursor-pointer select-none">
                               <input
                                 type="checkbox"
                                 checked={displayedTransactions.length > 0 && selectedTxIds.size === displayedTransactions.length}
                                 onChange={handleToggleSelectAll}
                                 className="w-4 h-4 rounded border-2 border-slate-300 text-[#026CD6] focus:ring-[#026CD6] cursor-pointer accent-[#026CD6]"
-                                title={selectedTxIds.size === displayedTransactions.length ? 'Desmarcar todos' : 'Selecionar todos'}
                               />
-                            </th>
-                            <th className="py-2.5 px-1.5 w-[114px]">Data</th>
-                            <th className="py-2.5 px-2">Descrição</th>
-                            <th className="py-2.5 px-1.5">Categoria</th>
-                            <th className="py-2.5 px-1.5 text-center">Origem</th>
-                            <th className="py-2.5 px-1.5 text-center">Tipo</th>
-                            <th className="py-2.5 px-1.5 text-right">Valor</th>
-                            <th className="py-2.5 px-1 w-14 text-center">Ações</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100 font-bold">
+                              <span className="text-[11px] font-black uppercase text-slate-500 tracking-wider">
+                                {selectedTxIds.size > 0 ? `${selectedTxIds.size} de ${displayedTransactions.length}` : `Todos (${displayedTransactions.length})`}
+                              </span>
+                            </label>
+                            <span className="text-[10px] text-slate-400">Toque no card para editar</span>
+                          </div>
+
                           {displayedTransactions.map((tx) => {
                             const isSelected = selectedTxIds.has(tx.id);
                             const isRowUncategorized = !tx.categoryId && tx.type !== 'TRANSFER' && tx.type !== 'INVOICE_PAYMENT';
 
                             return (
-                              <tr
+                              <div
                                 key={tx.id}
-                                className={`transition-colors group ${isSelected
-                                  ? 'bg-blue-50/80 hover:bg-blue-100/70 border-l-4 border-l-[#026CD6]'
-                                  : isRowUncategorized
-                                    ? 'bg-amber-50/50 hover:bg-amber-100/60 border-l-4 border-l-amber-500'
-                                    : 'hover:bg-slate-50/90'
-                                  }`}
+                                className={`p-3.5 rounded-2xl border-2 transition-all space-y-2.5 ${
+                                  isSelected
+                                    ? 'bg-blue-50/90 border-[#026CD6] shadow-sm'
+                                    : isRowUncategorized
+                                      ? 'bg-amber-50/40 border-amber-300 shadow-2xs'
+                                      : 'bg-white border-slate-200/90 shadow-2xs'
+                                }`}
                               >
-                                <td className="py-2 px-1.5 text-center">
-                                  <input
-                                    type="checkbox"
-                                    checked={isSelected}
-                                    onChange={() => handleToggleSelectTx(tx.id)}
-                                    className="w-4 h-4 rounded border-2 border-slate-300 text-[#026CD6] focus:ring-[#026CD6] cursor-pointer accent-[#026CD6]"
-                                  />
-                                </td>
-                                <td className="py-2 px-1.5 whitespace-nowrap">
-                                  <InlineDatePicker
-                                    value={tx.accrualDate}
-                                    onChange={(newDate) => handleInlineUpdateDate(tx, newDate)}
-                                    disabled={inlineUpdatingTxId === tx.id}
-                                  />
-                                </td>
-                                <td className="py-2 px-2 text-slate-800 min-w-0">
-                                  <div className="font-extrabold text-xs truncate max-w-[130px] sm:max-w-[160px] lg:max-w-[180px]" title={tx.description}>
-                                    {tx.description}
+                                {/* Linha 1: Checkbox, Data, Origem e Tipo */}
+                                <div className="flex items-center justify-between gap-2 flex-wrap">
+                                  <div className="flex items-center gap-2">
+                                    <input
+                                      type="checkbox"
+                                      checked={isSelected}
+                                      onChange={() => handleToggleSelectTx(tx.id)}
+                                      className="w-4 h-4 rounded border-2 border-slate-300 text-[#026CD6] focus:ring-[#026CD6] cursor-pointer accent-[#026CD6]"
+                                    />
+                                    <InlineDatePicker
+                                      value={tx.accrualDate}
+                                      onChange={(newDate) => handleInlineUpdateDate(tx, newDate)}
+                                      disabled={inlineUpdatingTxId === tx.id}
+                                    />
                                   </div>
-                                  {tx.notes && (
-                                    <span className="text-[10px] text-slate-400 font-normal truncate block max-w-[130px] sm:max-w-[160px] lg:max-w-[180px]" title={tx.notes}>
-                                      {tx.notes}
-                                    </span>
-                                  )}
-                                </td>
-                                <td className="py-2 px-1.5 whitespace-nowrap">
-                                  <InlineCategorySelect
-                                    currentCategoryId={tx.categoryId}
-                                    categories={categories}
-                                    disabled={inlineUpdatingTxId === tx.id}
-                                    onSelectCategory={(newCatId) => handleInlineUpdateCategory(tx, newCatId)}
-                                    onOpenCreateCategory={() => setQuickCategoryModal({ isOpen: true, targetTx: tx })}
-                                  />
-                                </td>
-                                <td className="py-2 px-1.5 text-center whitespace-nowrap">
-                                  {tx.origin === 'AI_TEXT' ? (
-                                    <span className="inline-flex items-center gap-1 text-[10px] font-black text-purple-700 bg-purple-100 border border-purple-200 px-2 py-0.5 rounded-full">
-                                      <Sparkles className="w-2.5 h-2.5" /> IA Texto
-                                    </span>
-                                  ) : tx.origin === 'AI_AUDIO' ? (
-                                    <span className="inline-flex items-center gap-1 text-[10px] font-black text-indigo-700 bg-indigo-100 border border-indigo-200 px-2 py-0.5 rounded-full">
-                                      <Mic className="w-2.5 h-2.5" /> IA Voz
-                                    </span>
-                                  ) : tx.origin === 'CSV_IMPORT' ? (
-                                    <span className="inline-flex items-center gap-1 text-[10px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
-                                      <FileSpreadsheet className="w-2.5 h-2.5 stroke-[2.5]" /> Fatura CSV
-                                    </span>
-                                  ) : tx.origin === 'OFX_IMPORT' ? (
-                                    <span className="inline-flex items-center gap-1 text-[10px] font-black text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">
-                                      <FileText className="w-2.5 h-2.5 stroke-[2.5]" /> Extrato OFX
-                                    </span>
-                                  ) : (
-                                    <span className="text-[10px] text-slate-500 font-bold bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">
-                                      Manual
-                                    </span>
-                                  )}
-                                </td>
-                                <td className="py-2 px-1.5 text-center whitespace-nowrap">
-                                  {tx.type === 'INCOME' && (
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-black">
-                                      <ArrowUpRight className="h-3 w-3 stroke-[3]" /> Receita
-                                    </span>
-                                  )}
-                                  {tx.type === 'EXPENSE' && (
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-200 text-[10px] font-black">
-                                      <ArrowDownLeft className="h-3 w-3 stroke-[3]" /> Despesa
-                                    </span>
-                                  )}
-                                  {tx.type === 'TRANSFER' && (
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200 text-[10px] font-black">
-                                      <ArrowLeftRight className="h-3 w-3 stroke-[3]" /> Transf.
-                                    </span>
-                                  )}
-                                  {tx.type === 'INVOICE_PAYMENT' && (
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-black">
-                                      <DollarSign className="h-3 w-3 stroke-[3]" /> Fatura
-                                    </span>
-                                  )}
-                                </td>
-                                <td className="py-2 px-1.5 text-right whitespace-nowrap">
-                                  {privacyMode ? (
-                                    <span className="font-numeric font-black text-slate-400 text-xs">••••••</span>
-                                  ) : (
-                                    <div className="inline-flex items-center justify-end gap-1 group/amt">
-                                      <span className={`text-[11px] font-black select-none ${tx.type === 'INCOME' ? 'text-[#10B981]' : 'text-rose-500'
-                                        }`}>
-                                        {tx.type === 'EXPENSE' ? '-' : (tx.type === 'INCOME' ? '+' : '')} R$
+
+                                  <div className="flex items-center gap-1.5">
+                                    {tx.origin === 'AI_TEXT' ? (
+                                      <span className="inline-flex items-center gap-1 text-[10px] font-black text-purple-700 bg-purple-100 border border-purple-200 px-2 py-0.5 rounded-full">
+                                        <Sparkles className="w-2.5 h-2.5" /> IA
                                       </span>
-                                      <InlineCurrencyInput
-                                        initialValue={tx.amount}
-                                        disabled={inlineUpdatingTxId === tx.id}
-                                        onSave={(val) => handleInlineUpdateAmount(tx, val)}
-                                        className={`w-20 text-right font-black text-xs font-numeric bg-slate-50/80 hover:bg-blue-50/60 focus:bg-white px-1.5 py-0.5 rounded-lg border border-slate-200/90 hover:border-blue-300 focus:border-[#026CD6] focus:ring-1 focus:ring-blue-100 focus:outline-none transition-all cursor-pointer shadow-2xs disabled:opacity-50 ${tx.type === 'INCOME' ? 'text-[#10B981]' : 'text-slate-900'
+                                    ) : tx.origin === 'AI_AUDIO' ? (
+                                      <span className="inline-flex items-center gap-1 text-[10px] font-black text-indigo-700 bg-indigo-100 border border-indigo-200 px-2 py-0.5 rounded-full">
+                                        <Mic className="w-2.5 h-2.5" /> Voz
+                                      </span>
+                                    ) : tx.origin === 'CSV_IMPORT' ? (
+                                      <span className="inline-flex items-center gap-1 text-[10px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                                        <FileSpreadsheet className="w-2.5 h-2.5 stroke-[2.5]" /> CSV
+                                      </span>
+                                    ) : tx.origin === 'OFX_IMPORT' ? (
+                                      <span className="inline-flex items-center gap-1 text-[10px] font-black text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">
+                                        <FileText className="w-2.5 h-2.5 stroke-[2.5]" /> OFX
+                                      </span>
+                                    ) : null}
+
+                                    {tx.type === 'INCOME' && (
+                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-black">
+                                        <ArrowUpRight className="h-3 w-3 stroke-[3]" /> Receita
+                                      </span>
+                                    )}
+                                    {tx.type === 'EXPENSE' && (
+                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-200 text-[10px] font-black">
+                                        <ArrowDownLeft className="h-3 w-3 stroke-[3]" /> Despesa
+                                      </span>
+                                    )}
+                                    {tx.type === 'TRANSFER' && (
+                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200 text-[10px] font-black">
+                                        <ArrowLeftRight className="h-3 w-3 stroke-[3]" /> Transf.
+                                      </span>
+                                    )}
+                                    {tx.type === 'INVOICE_PAYMENT' && (
+                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-black">
+                                        <DollarSign className="h-3 w-3 stroke-[3]" /> Fatura
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Linha 2: Descrição e Valor */}
+                                <div className="flex items-start justify-between gap-2">
+                                  <div className="min-w-0 flex-1">
+                                    <p className="font-black text-sm text-slate-800 truncate" title={tx.description}>
+                                      {tx.description}
+                                    </p>
+                                    {tx.notes && (
+                                      <span className="text-[11px] text-slate-400 font-normal truncate block mt-0.5" title={tx.notes}>
+                                        {tx.notes}
+                                      </span>
+                                    )}
+                                  </div>
+
+                                  <div className="shrink-0 text-right">
+                                    {privacyMode ? (
+                                      <span className="font-numeric font-black text-slate-400 text-sm">••••••</span>
+                                    ) : (
+                                      <div className="inline-flex items-center justify-end gap-1">
+                                        <span className={`text-xs font-black select-none ${tx.type === 'INCOME' ? 'text-[#10B981]' : 'text-rose-500'}`}>
+                                          {tx.type === 'EXPENSE' ? '-' : (tx.type === 'INCOME' ? '+' : '')} R$
+                                        </span>
+                                        <InlineCurrencyInput
+                                          initialValue={tx.amount}
+                                          disabled={inlineUpdatingTxId === tx.id}
+                                          onSave={(val) => handleInlineUpdateAmount(tx, val)}
+                                          className={`w-24 text-right font-black text-sm font-numeric bg-slate-50 hover:bg-blue-50/60 focus:bg-white px-2 py-1 rounded-xl border border-slate-200 hover:border-blue-300 focus:border-[#026CD6] focus:ring-1 focus:ring-blue-100 focus:outline-none transition-all cursor-pointer ${
+                                            tx.type === 'INCOME' ? 'text-[#10B981]' : 'text-slate-900'
                                           }`}
-                                        title="Clique para alterar o valor (Enter para salvar)"
-                                      />
-                                    </div>
-                                  )}
-                                </td>
-                                <td className="py-2 px-1 text-center whitespace-nowrap">
-                                  <div className="flex items-center justify-center gap-0.5 opacity-80 group-hover:opacity-100 transition-opacity">
+                                          title="Clique para alterar o valor (Enter para salvar)"
+                                        />
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Linha 3: Categoria e Ações */}
+                                <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-100">
+                                  <div className="flex-1 min-w-0">
+                                    <InlineCategorySelect
+                                      currentCategoryId={tx.categoryId}
+                                      categories={categories}
+                                      disabled={inlineUpdatingTxId === tx.id}
+                                      onSelectCategory={(newCatId) => handleInlineUpdateCategory(tx, newCatId)}
+                                      onOpenCreateCategory={() => setQuickCategoryModal({ isOpen: true, targetTx: tx })}
+                                    />
+                                  </div>
+
+                                  <div className="flex items-center gap-1.5 shrink-0">
                                     <button
                                       type="button"
                                       onClick={() => handleEditTransaction(tx)}
-                                      className="p-1 rounded-lg text-slate-400 hover:text-[#026CD6] hover:bg-blue-50 transition-colors"
+                                      className="p-2 min-h-[36px] min-w-[36px] rounded-xl text-slate-500 hover:text-[#026CD6] bg-slate-100 hover:bg-blue-50 transition-colors flex items-center justify-center"
                                       title="Editar movimentação"
                                     >
                                       <Pencil className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -1876,18 +1880,182 @@ const MainDashboard: React.FC = () => {
                                     <button
                                       type="button"
                                       onClick={() => handleRequestDeleteTransaction(tx.id)}
-                                      className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                                      className="p-2 min-h-[36px] min-w-[36px] rounded-xl text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 transition-colors flex items-center justify-center"
                                       title="Excluir movimentação"
                                     >
                                       <Trash2 className="w-3.5 h-3.5 stroke-[2.5]" />
                                     </button>
                                   </div>
-                                </td>
-                              </tr>
+                                </div>
+                              </div>
                             );
                           })}
-                        </tbody>
-                      </table>
+                        </div>
+
+                        {/* 2. Visualização em Tabela Completa para Desktop e Telas Grandes (>= md) */}
+                        <div className="hidden md:block overflow-x-auto">
+                          <table className="w-full text-left text-xs">
+                            <thead>
+                              <tr className="border-b-2 border-slate-100 text-slate-400 font-extrabold uppercase text-[10px] tracking-wider">
+                                <th className="py-2.5 px-1.5 w-8 text-center">
+                                  <input
+                                    type="checkbox"
+                                    checked={displayedTransactions.length > 0 && selectedTxIds.size === displayedTransactions.length}
+                                    onChange={handleToggleSelectAll}
+                                    className="w-4 h-4 rounded border-2 border-slate-300 text-[#026CD6] focus:ring-[#026CD6] cursor-pointer accent-[#026CD6]"
+                                    title={selectedTxIds.size === displayedTransactions.length ? 'Desmarcar todos' : 'Selecionar todos'}
+                                  />
+                                </th>
+                                <th className="py-2.5 px-1.5 w-[114px]">Data</th>
+                                <th className="py-2.5 px-2">Descrição</th>
+                                <th className="py-2.5 px-1.5">Categoria</th>
+                                <th className="py-2.5 px-1.5 text-center">Origem</th>
+                                <th className="py-2.5 px-1.5 text-center">Tipo</th>
+                                <th className="py-2.5 px-1.5 text-right">Valor</th>
+                                <th className="py-2.5 px-1 w-14 text-center">Ações</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 font-bold">
+                              {displayedTransactions.map((tx) => {
+                                const isSelected = selectedTxIds.has(tx.id);
+                                const isRowUncategorized = !tx.categoryId && tx.type !== 'TRANSFER' && tx.type !== 'INVOICE_PAYMENT';
+
+                                return (
+                                  <tr
+                                    key={tx.id}
+                                    className={`transition-colors group ${isSelected
+                                      ? 'bg-blue-50/80 hover:bg-blue-100/70 border-l-4 border-l-[#026CD6]'
+                                      : isRowUncategorized
+                                        ? 'bg-amber-50/50 hover:bg-amber-100/60 border-l-4 border-l-amber-500'
+                                        : 'hover:bg-slate-50/90'
+                                      }`}
+                                  >
+                                    <td className="py-2 px-1.5 text-center">
+                                      <input
+                                        type="checkbox"
+                                        checked={isSelected}
+                                        onChange={() => handleToggleSelectTx(tx.id)}
+                                        className="w-4 h-4 rounded border-2 border-slate-300 text-[#026CD6] focus:ring-[#026CD6] cursor-pointer accent-[#026CD6]"
+                                      />
+                                    </td>
+                                    <td className="py-2 px-1.5 whitespace-nowrap">
+                                      <InlineDatePicker
+                                        value={tx.accrualDate}
+                                        onChange={(newDate) => handleInlineUpdateDate(tx, newDate)}
+                                        disabled={inlineUpdatingTxId === tx.id}
+                                      />
+                                    </td>
+                                    <td className="py-2 px-2 text-slate-800 min-w-0">
+                                      <div className="font-extrabold text-xs truncate max-w-[130px] sm:max-w-[160px] lg:max-w-[180px]" title={tx.description}>
+                                        {tx.description}
+                                      </div>
+                                      {tx.notes && (
+                                        <span className="text-[10px] text-slate-400 font-normal truncate block max-w-[130px] sm:max-w-[160px] lg:max-w-[180px]" title={tx.notes}>
+                                          {tx.notes}
+                                        </span>
+                                      )}
+                                    </td>
+                                    <td className="py-2 px-1.5 whitespace-nowrap">
+                                      <InlineCategorySelect
+                                        currentCategoryId={tx.categoryId}
+                                        categories={categories}
+                                        disabled={inlineUpdatingTxId === tx.id}
+                                        onSelectCategory={(newCatId) => handleInlineUpdateCategory(tx, newCatId)}
+                                        onOpenCreateCategory={() => setQuickCategoryModal({ isOpen: true, targetTx: tx })}
+                                      />
+                                    </td>
+                                    <td className="py-2 px-1.5 text-center whitespace-nowrap">
+                                      {tx.origin === 'AI_TEXT' ? (
+                                        <span className="inline-flex items-center gap-1 text-[10px] font-black text-purple-700 bg-purple-100 border border-purple-200 px-2 py-0.5 rounded-full">
+                                          <Sparkles className="w-2.5 h-2.5" /> IA Texto
+                                        </span>
+                                      ) : tx.origin === 'AI_AUDIO' ? (
+                                        <span className="inline-flex items-center gap-1 text-[10px] font-black text-indigo-700 bg-indigo-100 border border-indigo-200 px-2 py-0.5 rounded-full">
+                                          <Mic className="w-2.5 h-2.5" /> IA Voz
+                                        </span>
+                                      ) : tx.origin === 'CSV_IMPORT' ? (
+                                        <span className="inline-flex items-center gap-1 text-[10px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                                          <FileSpreadsheet className="w-2.5 h-2.5 stroke-[2.5]" /> Fatura CSV
+                                        </span>
+                                      ) : tx.origin === 'OFX_IMPORT' ? (
+                                        <span className="inline-flex items-center gap-1 text-[10px] font-black text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">
+                                          <FileText className="w-2.5 h-2.5 stroke-[2.5]" /> Extrato OFX
+                                        </span>
+                                      ) : (
+                                        <span className="text-[10px] text-slate-500 font-bold bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">
+                                          Manual
+                                        </span>
+                                      )}
+                                    </td>
+                                    <td className="py-2 px-1.5 text-center whitespace-nowrap">
+                                      {tx.type === 'INCOME' && (
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-black">
+                                          <ArrowUpRight className="h-3 w-3 stroke-[3]" /> Receita
+                                        </span>
+                                      )}
+                                      {tx.type === 'EXPENSE' && (
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-200 text-[10px] font-black">
+                                          <ArrowDownLeft className="h-3 w-3 stroke-[3]" /> Despesa
+                                        </span>
+                                      )}
+                                      {tx.type === 'TRANSFER' && (
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200 text-[10px] font-black">
+                                          <ArrowLeftRight className="h-3 w-3 stroke-[3]" /> Transf.
+                                        </span>
+                                      )}
+                                      {tx.type === 'INVOICE_PAYMENT' && (
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-black">
+                                          <DollarSign className="h-3 w-3 stroke-[3]" /> Fatura
+                                        </span>
+                                      )}
+                                    </td>
+                                    <td className="py-2 px-1.5 text-right whitespace-nowrap">
+                                      {privacyMode ? (
+                                        <span className="font-numeric font-black text-slate-400 text-xs">••••••</span>
+                                      ) : (
+                                        <div className="inline-flex items-center justify-end gap-1 group/amt">
+                                          <span className={`text-[11px] font-black select-none ${tx.type === 'INCOME' ? 'text-[#10B981]' : 'text-rose-500'
+                                            }`}>
+                                            {tx.type === 'EXPENSE' ? '-' : (tx.type === 'INCOME' ? '+' : '')} R$
+                                          </span>
+                                          <InlineCurrencyInput
+                                            initialValue={tx.amount}
+                                            disabled={inlineUpdatingTxId === tx.id}
+                                            onSave={(val) => handleInlineUpdateAmount(tx, val)}
+                                            className={`w-20 text-right font-black text-xs font-numeric bg-slate-50/80 hover:bg-blue-50/60 focus:bg-white px-1.5 py-0.5 rounded-lg border border-slate-200/90 hover:border-blue-300 focus:border-[#026CD6] focus:ring-1 focus:ring-blue-100 focus:outline-none transition-all cursor-pointer shadow-2xs disabled:opacity-50 ${tx.type === 'INCOME' ? 'text-[#10B981]' : 'text-slate-900'
+                                              }`}
+                                            title="Clique para alterar o valor (Enter para salvar)"
+                                          />
+                                        </div>
+                                      )}
+                                    </td>
+                                    <td className="py-2 px-1 text-center whitespace-nowrap">
+                                      <div className="flex items-center justify-center gap-0.5 opacity-80 group-hover:opacity-100 transition-opacity">
+                                        <button
+                                          type="button"
+                                          onClick={() => handleEditTransaction(tx)}
+                                          className="p-1 rounded-lg text-slate-400 hover:text-[#026CD6] hover:bg-blue-50 transition-colors"
+                                          title="Editar movimentação"
+                                        >
+                                          <Pencil className="w-3.5 h-3.5 stroke-[2.5]" />
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleRequestDeleteTransaction(tx.id)}
+                                          className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                                          title="Excluir movimentação"
+                                        >
+                                          <Trash2 className="w-3.5 h-3.5 stroke-[2.5]" />
+                                        </button>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      </>
                     )}
                   </div>
                 </div>

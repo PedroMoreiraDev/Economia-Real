@@ -17,7 +17,9 @@ import {
   ArrowRight,
   Check,
   Eye,
-  ArrowLeftRight
+  ArrowLeftRight,
+  ChevronUp,
+  ChevronDown
 } from 'lucide-react';
 
 export type TourTabType = 'overview' | 'analytics' | 'recurring' | 'goals';
@@ -48,12 +50,23 @@ export const OnboardingTourModal: React.FC<OnboardingTourModalProps> = ({
 }) => {
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [cornerPosition, setCornerPosition] = useState<CornerPosition>('bottom-right');
+  const [isMobile, setIsMobile] = useState<boolean>(() => typeof window !== 'undefined' && window.innerWidth < 1024);
+  const [isMinimized, setIsMinimized] = useState<boolean>(false);
   const [dontShowAgain, setDontShowAgain] = useState<boolean>(() => {
     if (!userId) return false;
     return localStorage.getItem(`economia_real_tutorial_disabled_${userId}`) === 'true';
   });
 
   const activeHighlightedElRef = useRef<HTMLElement | null>(null);
+
+  // Monitora redimensionamento de tela para adaptar layout entre mobile/tablet e desktop
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Definição dos 7 passos didáticos
   const steps = [
@@ -335,7 +348,7 @@ export const OnboardingTourModal: React.FC<OnboardingTourModalProps> = ({
 
   const currentStepData = steps[currentStep];
 
-  // Efeito para navegar, destacar o elemento e posicionar o card no canto oposto anti-colisão
+  // Efeito para navegar, destacar o elemento e posicionar o card
   useEffect(() => {
     if (!isOpen) {
       if (activeHighlightedElRef.current) {
@@ -362,25 +375,34 @@ export const OnboardingTourModal: React.FC<OnboardingTourModalProps> = ({
       if (targetEl) {
         targetEl.classList.add('tour-target-highlight');
         activeHighlightedElRef.current = targetEl;
-        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-        // Calcula a posição do elemento após o scroll para posicionar o card fora do caminho
-        setTimeout(() => {
+        const isSmallScreen = window.innerWidth < 1024;
+        if (isSmallScreen) {
+          // No mobile e tablet, posiciona o elemento no terço superior da tela
+          // garantindo que ele NUNCA seja encoberto pelo card inferior
           const rect = targetEl.getBoundingClientRect();
-          const windowWidth = window.innerWidth;
-          const windowHeight = window.innerHeight;
+          const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+          const targetY = scrollTop + rect.top - (window.innerHeight < 700 ? 55 : 85);
+          window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
+        } else {
+          targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-          // Se o elemento estiver no lado direito da tela -> card vai para a esquerda
-          const isRight = rect.left + rect.width / 2 > windowWidth / 2;
-          // Se o elemento estiver muito embaixo (na metade inferior da viewport) -> card sobe para o topo
-          const isBottom = rect.top + rect.height / 2 > windowHeight * 0.6;
+          // Calcula a posição do elemento após o scroll para posicionar o card fora do caminho (desktop)
+          setTimeout(() => {
+            const rect = targetEl.getBoundingClientRect();
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
 
-          if (isBottom) {
-            setCornerPosition(isRight ? 'top-left' : 'top-right');
-          } else {
-            setCornerPosition(isRight ? 'bottom-left' : 'bottom-right');
-          }
-        }, 320);
+            const isRight = rect.left + rect.width / 2 > windowWidth / 2;
+            const isBottom = rect.top + rect.height / 2 > windowHeight * 0.6;
+
+            if (isBottom) {
+              setCornerPosition(isRight ? 'top-left' : 'top-right');
+            } else {
+              setCornerPosition(isRight ? 'bottom-left' : 'bottom-right');
+            }
+          }, 320);
+        }
       }
     }, 180);
 
@@ -436,164 +458,253 @@ export const OnboardingTourModal: React.FC<OnboardingTourModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    // Camada transparente e desimpedida: NÃO BLOQUEIA A TELA! O centro e os elementos ficam 100% visíveis
     <div className="fixed inset-0 z-50 pointer-events-none">
-      {/* Card Flutuante Inteligente (Smart Corner Dock) - Fica no canto oposto ao elemento focado */}
+      {/* Container Adaptativo: No mobile/tablet fica ancorado no rodapé; no desktop fica no canto oposto */}
       <div
-        className={`absolute pointer-events-auto transition-all duration-300 ease-out w-[92vw] sm:w-[410px] max-h-[88vh] overflow-y-auto card-duo p-4 sm:p-5 shadow-2xl border-2 border-slate-300 bg-white/98 backdrop-blur-md space-y-3.5 ${
-          cornerPosition === 'bottom-right'
-            ? 'bottom-5 right-4 sm:right-6'
-            : cornerPosition === 'bottom-left'
-            ? 'bottom-5 left-4 sm:left-6'
-            : cornerPosition === 'top-right'
-            ? 'top-20 right-4 sm:right-6'
-            : 'top-20 left-4 sm:left-6'
+        className={`pointer-events-auto transition-all duration-300 ease-out ${
+          isMobile
+            ? 'fixed bottom-0 inset-x-0 sm:bottom-3 sm:inset-x-3 max-w-lg mx-auto'
+            : `absolute w-[410px] max-h-[88vh] ${
+                cornerPosition === 'bottom-right'
+                  ? 'bottom-5 right-6'
+                  : cornerPosition === 'bottom-left'
+                  ? 'bottom-5 left-6'
+                  : cornerPosition === 'top-right'
+                  ? 'top-20 right-6'
+                  : 'top-20 left-6'
+              }`
         }`}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Cabeçalho do Card */}
-        <div className="flex items-center justify-between border-b-2 border-slate-100 pb-2.5">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-xl bg-amber-50 text-amber-600 border border-amber-200 shadow-2xs">
-              <Compass className="w-4 h-4 stroke-[2.5]" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm sm:text-base font-black text-slate-800">
-                  Guia do App
-                </h3>
-                <span className="text-[11px] font-black px-2 py-0.5 rounded-full bg-blue-50 text-[#026CD6] border border-blue-200">
-                  {currentStep + 1} de {steps.length}
+        {isMobile && isMinimized ? (
+          /* MODO MINIMIZADO EXCLUSIVO PARA MOBILE E TABLET */
+          <div className="bg-white/98 backdrop-blur-md border-t-2 sm:border-2 border-slate-300 shadow-2xl rounded-t-2xl sm:rounded-2xl p-2.5 px-3.5 flex items-center justify-between gap-2 animate-fadeIn">
+            <div
+              className="flex items-center gap-2.5 flex-1 min-w-0 cursor-pointer"
+              onClick={() => setIsMinimized(false)}
+            >
+              <div className="p-1.5 rounded-xl bg-blue-50 text-[#026CD6] border border-blue-200 shrink-0 shadow-2xs">
+                <Compass className="w-4 h-4 stroke-[2.5]" />
+              </div>
+              <div className="truncate">
+                <span className="text-xs font-black text-slate-800 truncate block">
+                  Passo {currentStep + 1}/{steps.length} • {currentStepData.title}
+                </span>
+                <span className="text-[10px] text-[#026CD6] font-bold block flex items-center gap-1">
+                  Toque para expandir <ChevronUp className="w-3 h-3 stroke-[3]" />
                 </span>
               </div>
             </div>
-          </div>
 
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              onClick={handleToggleCornerManual}
-              className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
-              title="Mover card para o outro canto da tela"
-            >
-              <ArrowLeftRight className="w-3.5 h-3.5 stroke-[2.5]" />
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
-              title="Fechar guia"
-            >
-              <X className="w-4 h-4 stroke-[2.5]" />
-            </button>
-          </div>
-        </div>
-
-        {/* Indicador Chamativo de Foco Visual na Tela */}
-        <div className="p-2 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 flex items-center gap-2 text-xs font-black text-[#026CD6]">
-          <Eye className="w-4 h-4 animate-bounce shrink-0" />
-          <span className="truncate">
-            Destaque em foco: <strong className="text-slate-900">{currentStepData.targetName}</strong>
-          </span>
-        </div>
-
-        {/* Barra de Progresso com 7 Pílulas Interativas */}
-        <div className="flex items-center gap-1.5">
-          {steps.map((s, idx) => (
-            <button
-              key={s.id}
-              type="button"
-              onClick={() => setCurrentStep(idx)}
-              className={`flex-1 h-1.5 rounded-full transition-all cursor-pointer ${
-                idx === currentStep
-                  ? 'bg-[#026CD6] ring-2 ring-blue-200'
-                  : idx < currentStep
-                  ? 'bg-emerald-400'
-                  : 'bg-slate-200 hover:bg-slate-300'
-              }`}
-              title={`Ir para o passo ${idx + 1}: ${s.title}`}
-            />
-          ))}
-        </div>
-
-        {/* Conteúdo do Passo */}
-        <div className="space-y-2.5 pt-0.5">
-          <div>
-            <span
-              className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md border tracking-wider inline-block mb-1 ${currentStepData.badgeColor}`}
-            >
-              {currentStepData.badge}
-            </span>
-            <h4 className="text-base sm:text-lg font-black text-slate-900 leading-snug">
-              {currentStepData.title}
-            </h4>
-          </div>
-
-          <p className="text-xs sm:text-sm font-bold text-slate-600 leading-relaxed">
-            {currentStepData.shortText}
-          </p>
-
-          {/* Mini Preview Ilustrado */}
-          <div className="pt-0.5">{currentStepData.preview}</div>
-
-          {/* Dica de Ouro */}
-          <div className="p-2 rounded-xl bg-blue-50/80 border border-blue-100 flex items-start gap-1.5 text-[11px] font-bold text-slate-700">
-            <Sparkles className="w-3.5 h-3.5 text-[#026CD6] shrink-0 mt-0.5" />
-            <span>{currentStepData.tip}</span>
-          </div>
-
-          {currentStepData.actionBtn && (
-            <div className="pt-0.5">
+            <div className="flex items-center gap-1.5 shrink-0">
+              {currentStep > 0 && (
+                <button
+                  type="button"
+                  onClick={handlePrev}
+                  className="p-1.5 rounded-xl text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors"
+                  title="Passo anterior"
+                >
+                  <ChevronLeft className="w-4 h-4 stroke-[2.5]" />
+                </button>
+              )}
               <button
                 type="button"
-                onClick={currentStepData.actionBtn.action}
-                className="w-full btn-duo btn-duo-blue text-xs py-2 flex items-center justify-center gap-2 shadow-xs"
+                onClick={handleNext}
+                className="p-1.5 rounded-xl text-white bg-[#58CC02] hover:bg-[#46A302] shadow-sm transition-colors flex items-center justify-center min-w-[34px]"
+                title="Próximo passo"
               >
-                <currentStepData.actionBtn.icon className="w-4 h-4 stroke-[2.5]" />
-                <span>{currentStepData.actionBtn.label}</span>
+                {currentStep === steps.length - 1 ? (
+                  <Check className="w-4 h-4 stroke-[3]" />
+                ) : (
+                  <ChevronRight className="w-4 h-4 stroke-[3]" />
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                title="Fechar guia"
+              >
+                <X className="w-4 h-4 stroke-[2.5]" />
               </button>
             </div>
-          )}
-        </div>
-
-        {/* Rodapé com Navegação */}
-        <div className="pt-2 border-t-2 border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-2.5">
-          <label className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500 cursor-pointer select-none order-2 sm:order-1">
-            <input
-              type="checkbox"
-              checked={dontShowAgain}
-              onChange={handleToggleDontShowAgain}
-              className="w-3.5 h-3.5 rounded text-[#026CD6] border-slate-300 focus:ring-blue-200 cursor-pointer"
-            />
-            <span>Não exibir ao entrar</span>
-          </label>
-
-          <div className="flex items-center gap-2 w-full sm:w-auto justify-end order-1 sm:order-2">
-            {currentStep > 0 && (
-              <button
-                type="button"
-                onClick={handlePrev}
-                className="btn-duo btn-duo-white text-xs px-3 py-1.5 flex items-center gap-1"
-              >
-                <ChevronLeft className="w-3.5 h-3.5 stroke-[2.5]" />
-                <span>Voltar</span>
-              </button>
+          </div>
+        ) : (
+          /* MODO EXPANDIDO / PADRÃO */
+          <div
+            className={`card-duo shadow-2xl border-2 border-slate-300 bg-white/98 backdrop-blur-md overflow-y-auto space-y-3 ${
+              isMobile
+                ? 'rounded-t-3xl sm:rounded-3xl p-4 sm:p-5 max-h-[62vh] sm:max-h-[70vh]'
+                : 'rounded-3xl p-4 sm:p-5 max-h-[88vh]'
+            }`}
+          >
+            {/* Pílula de Arraste/Minimizar tátil no topo para mobile */}
+            {isMobile && (
+              <div
+                className="w-12 h-1.5 rounded-full bg-slate-300 hover:bg-slate-400 mx-auto -mt-1 mb-1 cursor-pointer transition-colors"
+                onClick={() => setIsMinimized(true)}
+                title="Toque para minimizar"
+              />
             )}
 
-            <button
-              type="button"
-              onClick={handleNext}
-              className="btn-duo btn-duo-green text-xs px-4 py-1.5 flex items-center gap-1.5 shadow-sm"
-            >
-              <span>{currentStep === steps.length - 1 ? 'Concluir' : 'Próximo'}</span>
-              {currentStep === steps.length - 1 ? (
-                <Check className="w-3.5 h-3.5 stroke-[3]" />
-              ) : (
-                <ChevronRight className="w-3.5 h-3.5 stroke-[3]" />
+            {/* Cabeçalho do Card */}
+            <div className="flex items-center justify-between border-b-2 border-slate-100 pb-2.5">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-xl bg-amber-50 text-amber-600 border border-amber-200 shadow-2xs">
+                  <Compass className="w-4 h-4 stroke-[2.5]" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm sm:text-base font-black text-slate-800">
+                      Guia do App
+                    </h3>
+                    <span className="text-[11px] font-black px-2 py-0.5 rounded-full bg-blue-50 text-[#026CD6] border border-blue-200">
+                      {currentStep + 1} de {steps.length}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1">
+                {isMobile ? (
+                  <button
+                    type="button"
+                    onClick={() => setIsMinimized(true)}
+                    className="p-1.5 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors flex items-center gap-1 text-xs font-bold"
+                    title="Minimizar guia"
+                  >
+                    <ChevronDown className="w-4 h-4 stroke-[2.5]" />
+                    <span className="text-[11px] font-bold hidden sm:inline">Minimizar</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleToggleCornerManual}
+                    className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                    title="Mover card para o outro canto da tela"
+                  >
+                    <ArrowLeftRight className="w-3.5 h-3.5 stroke-[2.5]" />
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                  title="Fechar guia"
+                >
+                  <X className="w-4 h-4 stroke-[2.5]" />
+                </button>
+              </div>
+            </div>
+
+            {/* Indicador Chamativo de Foco Visual na Tela */}
+            <div className="p-2 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 flex items-center gap-2 text-xs font-black text-[#026CD6]">
+              <Eye className="w-4 h-4 animate-bounce shrink-0" />
+              <span className="truncate">
+                Destaque em foco: <strong className="text-slate-900">{currentStepData.targetName}</strong>
+              </span>
+            </div>
+
+            {/* Barra de Progresso com 7 Pílulas Interativas */}
+            <div className="flex items-center gap-1.5 py-0.5">
+              {steps.map((s, idx) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => setCurrentStep(idx)}
+                  className={`flex-1 h-2 rounded-full transition-all cursor-pointer ${
+                    idx === currentStep
+                      ? 'bg-[#026CD6] ring-2 ring-blue-200'
+                      : idx < currentStep
+                      ? 'bg-emerald-400'
+                      : 'bg-slate-200 hover:bg-slate-300'
+                  }`}
+                  title={`Ir para o passo ${idx + 1}: ${s.title}`}
+                />
+              ))}
+            </div>
+
+            {/* Conteúdo do Passo */}
+            <div className="space-y-2.5 pt-0.5">
+              <div>
+                <span
+                  className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md border tracking-wider inline-block mb-1 ${currentStepData.badgeColor}`}
+                >
+                  {currentStepData.badge}
+                </span>
+                <h4 className="text-base sm:text-lg font-black text-slate-900 leading-snug">
+                  {currentStepData.title}
+                </h4>
+              </div>
+
+              <p className="text-xs sm:text-sm font-bold text-slate-600 leading-relaxed">
+                {currentStepData.shortText}
+              </p>
+
+              {/* Mini Preview Ilustrado */}
+              <div className="pt-0.5">{currentStepData.preview}</div>
+
+              {/* Dica de Ouro */}
+              <div className="p-2 rounded-xl bg-blue-50/80 border border-blue-100 flex items-start gap-1.5 text-[11px] font-bold text-slate-700">
+                <Sparkles className="w-3.5 h-3.5 text-[#026CD6] shrink-0 mt-0.5" />
+                <span>{currentStepData.tip}</span>
+              </div>
+
+              {currentStepData.actionBtn && (
+                <div className="pt-0.5">
+                  <button
+                    type="button"
+                    onClick={currentStepData.actionBtn.action}
+                    className="w-full btn-duo btn-duo-blue text-xs py-2.5 flex items-center justify-center gap-2 shadow-xs min-h-[42px]"
+                  >
+                    <currentStepData.actionBtn.icon className="w-4 h-4 stroke-[2.5]" />
+                    <span>{currentStepData.actionBtn.label}</span>
+                  </button>
+                </div>
               )}
-            </button>
+            </div>
+
+            {/* Rodapé com Navegação */}
+            <div className="pt-2 border-t-2 border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-2.5">
+              <label className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500 cursor-pointer select-none order-2 sm:order-1">
+                <input
+                  type="checkbox"
+                  checked={dontShowAgain}
+                  onChange={handleToggleDontShowAgain}
+                  className="w-3.5 h-3.5 rounded text-[#026CD6] border-slate-300 focus:ring-blue-200 cursor-pointer"
+                />
+                <span>Não exibir ao entrar</span>
+              </label>
+
+              <div className="flex items-center gap-2 w-full sm:w-auto justify-end order-1 sm:order-2">
+                {currentStep > 0 && (
+                  <button
+                    type="button"
+                    onClick={handlePrev}
+                    className="btn-duo btn-duo-white text-xs px-3.5 py-2 flex items-center justify-center gap-1 flex-1 sm:flex-none min-h-[40px]"
+                  >
+                    <ChevronLeft className="w-3.5 h-3.5 stroke-[2.5]" />
+                    <span>Voltar</span>
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  className="btn-duo btn-duo-green text-xs px-5 py-2 flex items-center justify-center gap-1.5 shadow-sm flex-1 sm:flex-none min-h-[40px]"
+                >
+                  <span>{currentStep === steps.length - 1 ? 'Concluir' : 'Próximo'}</span>
+                  {currentStep === steps.length - 1 ? (
+                    <Check className="w-3.5 h-3.5 stroke-[3]" />
+                  ) : (
+                    <ChevronRight className="w-3.5 h-3.5 stroke-[3]" />
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
