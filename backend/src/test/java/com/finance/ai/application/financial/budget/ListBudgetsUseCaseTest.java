@@ -107,12 +107,12 @@ class ListBudgetsUseCaseTest {
     }
 
     @Test
-    @DisplayName("Deve herdar meta definida em outro mês para acompanhar gastos quando não houver orçamento explícito no mês consultado")
+    @DisplayName("Deve herdar meta definida em mês anterior para acompanhar gastos quando não houver orçamento explícito no mês consultado")
     void shouldInheritBudgetFromOtherMonthWhenNotExplicitlyConfigured() {
         UUID userId = UUID.randomUUID();
         UUID saudeCatId = UUID.randomUUID();
-        LocalDate configuredMonth = LocalDate.of(2026, 10, 1);
-        LocalDate consultedMonth = LocalDate.of(2026, 8, 1); // Consulta mês de agosto
+        LocalDate configuredMonth = LocalDate.of(2026, 8, 1); // Configurado em agosto
+        LocalDate consultedMonth = LocalDate.of(2026, 10, 1); // Consulta em outubro (mês posterior)
 
         Budget budget = Budget.create(userId, saudeCatId, configuredMonth, new BigDecimal("567.94"), 80);
         when(budgetRepository.findAllByUserId(userId)).thenReturn(List.of(budget));
@@ -120,10 +120,10 @@ class ListBudgetsUseCaseTest {
         Category catSaude = new Category(saudeCatId, userId, null, "Saúde", "heart", "#10B981", false, Instant.now(), null);
         when(categoryRepository.findAllByUserIdOrSystemDefault(userId)).thenReturn(List.of(catSaude));
 
-        // Transação em agosto: R$ 245,57
-        Transaction txAgosto = Transaction.create(userId, TransactionType.EXPENSE, new BigDecimal("245.57"), LocalDate.of(2026, 8, 17), LocalDate.of(2026, 8, 17), "Farmácia e Clínica", UUID.randomUUID(), null, saudeCatId, null);
-        when(transactionRepository.findAllByUserIdAndPeriod(eq(userId), eq(LocalDate.of(2026, 8, 1)), eq(LocalDate.of(2026, 8, 31))))
-                .thenReturn(List.of(txAgosto));
+        // Transação em outubro: R$ 245,57
+        Transaction txOutubro = Transaction.create(userId, TransactionType.EXPENSE, new BigDecimal("245.57"), LocalDate.of(2026, 10, 17), LocalDate.of(2026, 10, 17), "Farmácia e Clínica", UUID.randomUUID(), null, saudeCatId, null);
+        when(transactionRepository.findAllByUserIdAndPeriod(eq(userId), eq(LocalDate.of(2026, 10, 1)), eq(LocalDate.of(2026, 10, 31))))
+                .thenReturn(List.of(txOutubro));
 
         List<BudgetProgressDto> result = useCase.execute(userId, consultedMonth);
 
@@ -133,6 +133,25 @@ class ListBudgetsUseCaseTest {
         assertThat(dto.monthlyLimit()).isEqualByComparingTo(new BigDecimal("567.94"));
         assertThat(dto.spentAmount()).isEqualByComparingTo(new BigDecimal("245.57"));
         assertThat(dto.remainingAmount()).isEqualByComparingTo(new BigDecimal("322.37"));
+    }
+
+    @Test
+    @DisplayName("Não deve herdar meta de mês futuro quando o mês consultado for anterior à primeira definição histórica")
+    void shouldNotInheritBudgetFromFutureMonths() {
+        UUID userId = UUID.randomUUID();
+        UUID catId = UUID.randomUUID();
+        LocalDate configuredMonth = LocalDate.of(2026, 10, 1); // Configurado apenas em Outubro
+        LocalDate consultedMonth = LocalDate.of(2026, 8, 1);  // Consulta em Agosto anterior
+
+        Budget budget = Budget.create(userId, catId, configuredMonth, new BigDecimal("1000.00"), 80);
+        when(budgetRepository.findAllByUserId(userId)).thenReturn(List.of(budget));
+        when(categoryRepository.findAllByUserIdOrSystemDefault(userId)).thenReturn(List.of());
+        when(transactionRepository.findAllByUserIdAndPeriod(eq(userId), any(), any())).thenReturn(List.of());
+
+        List<BudgetProgressDto> result = useCase.execute(userId, consultedMonth);
+
+        // Agosto não possui meta porque foi definida apenas a partir de Outubro
+        assertThat(result).isEmpty();
     }
 
     @Test

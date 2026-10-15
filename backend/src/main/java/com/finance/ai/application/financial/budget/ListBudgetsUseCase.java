@@ -57,12 +57,8 @@ public class ListBudgetsUseCase {
                         .filter(b -> !b.getMonthReference().withDayOfMonth(1).isAfter(normalizedMonth))
                         .max(Comparator.comparing(Budget::getMonthReference));
 
-                // Se o mês consultado for anterior a qualquer meta registrada, usa a primeira meta histórica cadastrada
-                Budget referenceBudget = latestPast.orElseGet(() ->
-                        catBudgets.stream()
-                                .min(Comparator.comparing(Budget::getMonthReference))
-                                .orElse(null)
-                );
+                // Meses anteriores à primeira definição histórica não herdam valores futuros (preservam o histórico anterior)
+                Budget referenceBudget = latestPast.orElse(null);
 
                 if (referenceBudget != null) {
                     budgets.add(new Budget(

@@ -326,13 +326,17 @@ dist/assets/index-CVcJJLIG.js   305.65 kB │ gzip: 75.31 kB
 - **Otimização de Performance e Latência (Frontend & Backend):**
   - **Filtro Temporal no Extrato:** A listagem de movimentações (`fetchTransactionsApi`) agora passa `startDate` e `endDate` do mês ativo por padrão, evitando o download desnecessário de 100% do histórico e aliviando processamento no PostgreSQL e na rede.
   - **Eliminação de Refetch Redundante de Dados Estáticos:** A função `loadFinancialData` passou a utilizar referências para dados estáticos (`accounts`, `categories`, `creditCards`). Ao salvar uma movimentação ou alternar de mês, apenas as métricas dinâmicas do mês (transações, resumo financeiro, orçamentos e analytics) são requisitadas, reduzindo a concorrência no Tomcat e no banco de dados.
-  - **Keep-Alive e Resiliência no HikariCP:** Parametrização explícita de `keepalive-time: 30000` (ping a cada 30 segundos) no `application.yml`, mantendo conexões ativas e impedindo quedas silenciosas por timeout de inatividade em bancos serverless/nuvem.
+- **Herança Temporal Contábil nas Metas por Categoria (Budget Timeline Inheritance):**
+  - As metas de gastos por categoria definidas no backend e frontend seguem a linha do tempo cronológica histórica:
+    - Se um mês não possui orçamento explicitamente redefinido, ele herda a meta mais recente cadastrada até aquele mês (`monthReference <= targetMonth`).
+    - Meses anteriores à primeira definição histórica não herdam valores futuros (permanecem sem meta), protegendo a integridade dos relatórios passados.
+    - Quando o usuário ajusta um novo limite em um mês (ex: Março), os meses anteriores (Janeiro e Fevereiro) permanecem com seus limites históricos intactos, e os meses subsequentes (Abril, Maio...) passam a refletir o novo valor reajustado.
 
 ---
 
 ## 5. Próximo Passo Recomendado
 
-1. A plataforma conta agora com 141 testes automatizados no backend e build de frontend 100% íntegros.
-2. Otimizações de latência e consumo de rede aplicadas no frontend e backend.
+1. A plataforma conta agora com 142 testes automatizados no backend e build de frontend 100% íntegros.
+2. Linha do tempo contábil de orçamentos por categoria sincronizada com testes unitários.
 3. Deploy sincronizado no GitHub (`main`) e publicado na Vercel (`https://economia-real.ia.br`).
 
