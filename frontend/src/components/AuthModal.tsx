@@ -56,6 +56,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [slowServerNotice, setSlowServerNotice] = useState(false);
+
+  // Monitora cold start do servidor em nuvem (Render/Railway) após 2s de carregamento
+  useEffect(() => {
+    let timer: any;
+    if (loading) {
+      timer = setTimeout(() => {
+        setSlowServerNotice(true);
+      }, 2000);
+    } else {
+      setSlowServerNotice(false);
+    }
+    return () => clearTimeout(timer);
+  }, [loading]);
 
   // Estado do CAPTCHA visual com imagem: inicializado imediatamente com desafio gerado em 0ms
   const [captcha, setCaptcha] = useState<CaptchaChallenge>(() => generateInstantCaptcha());
@@ -394,6 +408,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           <div className="mb-4 p-3.5 rounded-2xl bg-blue-50 border-2 border-[#026CD6] flex items-center gap-2.5 text-xs sm:text-sm font-bold text-[#026CD6]">
             <CheckCircle2 className="h-5 w-5 shrink-0" />
             <span>{successMessage}</span>
+          </div>
+        )}
+
+        {/* Alerta contextual amigável se o servidor na nuvem estiver acordando de hibernação */}
+        {loading && slowServerNotice && (
+          <div className="mb-4 p-3.5 rounded-2xl bg-amber-50 border-2 border-amber-300 flex items-center gap-3 text-xs font-bold text-amber-900 animate-fadeIn">
+            <span className="h-4 w-4 border-2 border-amber-600 border-t-transparent rounded-full animate-spin shrink-0" />
+            <span>O servidor na nuvem está acordando após um tempo inativo... Aguarde só alguns segundos, já vai entrar!</span>
           </div>
         )}
 

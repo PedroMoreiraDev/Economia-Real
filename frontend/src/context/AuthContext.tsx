@@ -38,12 +38,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
       try {
-        const remoteUser = await getMeApi(storedToken);
+        const remoteUser = await getMeApi(storedToken, 8000);
         setUser(remoteUser);
         localStorage.setItem(USER_KEY, JSON.stringify(remoteUser));
-      } catch (err) {
-        console.warn('Sessão expirada ou token inválido:', err);
-        logout();
+      } catch (err: any) {
+        // Se a requisição foi abortada por timeout ou erro de rede enquanto o servidor acorda,
+        // preservamos os dados locais para não ejetar o usuário nem travar a tela
+        if (err?.name === 'AbortError' || err?.message?.includes('Failed to fetch') || err?.message?.includes('NetworkError')) {
+          console.warn('Backend em inicialização ou rede lenta. Mantendo sessão local cached.');
+        } else {
+          console.warn('Sessão expirada ou token inválido:', err);
+          logout();
+        }
       } finally {
         setIsLoading(false);
       }

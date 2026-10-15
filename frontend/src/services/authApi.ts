@@ -187,6 +187,8 @@ export function generateInstantCaptcha(): CaptchaChallenge {
   return { challengeId, imageBase64, token };
 }
 
+import { pingBackend } from './backendWarmup';
+
 let prefetchPromise: Promise<CaptchaChallenge> | null = null;
 
 /**
@@ -198,7 +200,7 @@ export function prefetchCaptcha(): Promise<CaptchaChallenge> {
     return prefetchPromise;
   }
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 8000);
+  const timeoutId = setTimeout(() => controller.abort(), 6000);
 
   prefetchPromise = fetch(`${API_BASE_URL}/auth/captcha`, {
     method: 'GET',
@@ -218,13 +220,14 @@ export function prefetchCaptcha(): Promise<CaptchaChallenge> {
 }
 
 /**
- * Acorda o backend no Render silenciosamente enquanto o usuário navega na landing page,
+ * Acorda o backend silenciosamente enquanto o usuário navega na aplicação,
  * eliminando a latência de cold start antes que o usuário decida fazer login ou cadastrar.
  */
 export function warmUpBackend(): void {
   try {
+    pingBackend('manual');
     prefetchCaptcha().catch(() => {
-      // Ignora erro silencioso no pre-warm
+      // Silencia prefetch de captcha se o backend estiver subindo
     });
   } catch {
     // Silencia qualquer exceção síncrona
@@ -248,7 +251,7 @@ export async function fetchCaptchaApi(forceRefresh = false): Promise<CaptchaChal
   }
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 2500);
+  const timeoutId = setTimeout(() => controller.abort(), 1800);
   try {
     const res = await fetch(`${API_BASE_URL}/auth/captcha`, {
       method: 'GET',
@@ -257,7 +260,7 @@ export async function fetchCaptchaApi(forceRefresh = false): Promise<CaptchaChal
     });
     return await handleResponse<CaptchaChallenge>(res);
   } catch {
-    // Resiliente: se a rede ou o servidor local/Render falhar, entrega o desafio instantâneo em 0ms
+    // Resiliente: se a rede ou o servidor remoto falhar/demorar, entrega o desafio instantâneo em 0ms
     return generateInstantCaptcha();
   } finally {
     clearTimeout(timeoutId);
@@ -319,13 +322,20 @@ export async function resetPasswordApi(payload: ResetPasswordPayload): Promise<{
   return handleResponse<{ message: string }>(res);
 }
 
-export async function getMeApi(token: string): Promise<User> {
-  const res = await fetch(`${API_BASE_URL}/auth/me`, {
-    method: 'GET',
-    headers: {
-      'Accept': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    },
-  });
-  return handleResponse<User>(res);
+export async function getMeApi(token: string, timeoutMs = 12000): Promise<User> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${API_BASE_URL}/auth/me`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      signal: controller.signal,
+    });
+    return await handleResponse<User>(res);
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
