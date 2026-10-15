@@ -334,9 +334,26 @@ dist/assets/index-CVcJJLIG.js   305.65 kB │ gzip: 75.31 kB
 
 ---
 
+## 4.10. Autenticação Instantânea e Eliminação de Latência de Acesso (Zero Demora ao Clicar em Entrar)
+
+- **Eliminação do Bloqueio de CAPTCHA no Login (`AuthModal.tsx`):**
+  - O fluxo de login para usuários existentes foi desacoplado de qualquer dependência visual de CAPTCHA.
+  - Ao clicar no botão "Entrar", o modal abre instantaneamente (0ms de atraso) exibindo diretamente os campos de E-mail e Senha prontos para digitação, eliminando o spinner bloqueante e as mensagens *"Carregando verificação de segurança... Aguardando resposta do servidor seguro"*.
+  - O backend (`LoginUserUseCase.java` e `AuthController.java`) já suportava de forma nativa e segura a autenticação direta de credenciais via `POST /api/v1/auth/login` com validação de senha hash BCrypt e rate limiting.
+- **Pré-aquecimento Assíncrono do Backend (Zero Cold-Start Lag):**
+  - Implementado mecanismo de prefetch e warm-up silencioso (`warmUpBackend()` e `prefetchCaptcha()` em `authApi.ts`).
+  - Ao carregar a Landing Page ou o App na área não-autenticada, uma requisição leve em segundo plano acorda a instância no Render antes que o usuário tome qualquer ação.
+  - Adicionado gatilho especulativo (`onMouseEnter` e `onTouchStart`) nos botões de "Entrar" e "Cadastrar" do cabeçalho e da Landing Page, garantindo que o servidor seguro já esteja aquecido antes do clique.
+- **Segurança Preservada no Registro de Novas Contas:**
+  - O CAPTCHA visual anti-bot permanece ativo no cadastro de novos usuários (`mode === 'register'`) e na solicitação de recuperação de senha (`mode === 'forgot'`), sendo alimentado pelo cache de prefetch em segundo plano para renderização imediata.
+  - No cadastro, caso a requisição ainda esteja completando, os campos de Nome Completo, E-mail e Senha permanecem totalmente editáveis, sem travar a digitação do usuário.
+
+---
+
 ## 5. Próximo Passo Recomendado
 
 1. A plataforma conta agora com 142 testes automatizados no backend e build de frontend 100% íntegros.
 2. Linha do tempo contábil de orçamentos por categoria sincronizada com testes unitários.
-3. Deploy sincronizado no GitHub (`main`) e publicado na Vercel (`https://economia-real.ia.br`).
+3. Login e abertura de modais com tempo de resposta imediato (0ms de espera).
+4. Deploy sincronizado no GitHub (`main`) e publicado na Vercel (`https://economia-real.ia.br`).
 
