@@ -71,9 +71,9 @@ public class CategoryController {
     }
 
     public record CreateCategoryRequest(
-            @NotBlank String name,
-            String icon,
-            String colorHex
+            @NotBlank @jakarta.validation.constraints.Size(min = 1, max = 50, message = "O nome da categoria deve ter no máximo 50 caracteres.") String name,
+            @jakarta.validation.constraints.Size(max = 30, message = "O identificador do ícone deve ter no máximo 30 caracteres.") String icon,
+            @jakarta.validation.constraints.Size(max = 7, message = "O código hexadecimal da cor deve ter no máximo 7 caracteres.") String colorHex
     ) {}
 
     public record CategoryResponse(

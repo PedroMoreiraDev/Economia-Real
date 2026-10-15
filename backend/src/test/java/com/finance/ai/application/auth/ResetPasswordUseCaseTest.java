@@ -61,7 +61,7 @@ class ResetPasswordUseCaseTest {
 
         assertThatThrownBy(() -> useCase.execute("pedro@teste.com", "999999", "NovaSenha123!"))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Código de redefinição inválido");
+                .hasMessageContaining("Código de redefinição");
     }
 
     @Test

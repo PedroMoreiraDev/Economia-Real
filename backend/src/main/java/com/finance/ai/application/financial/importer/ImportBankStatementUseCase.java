@@ -30,6 +30,8 @@ public class ImportBankStatementUseCase {
     private final MerchantCategoryClassifier merchantCategoryClassifier;
     private final OfxParser ofxParser = new OfxParser();
     private final CsvParser csvParser = new CsvParser();
+    private final ExcelParser excelParser = new ExcelParser();
+    private final InstallmentDetector installmentDetector = new InstallmentDetector();
 
     public ImportBankStatementUseCase(AccountRepository accountRepository,
                                      TransactionRepository transactionRepository,
@@ -63,13 +65,24 @@ public class ImportBankStatementUseCase {
         }
 
         String cleanName = (fileName != null ? fileName : "extrato.csv").toLowerCase().trim();
-        String fileType = cleanName.endsWith(".ofx") ? "OFX" : "CSV";
+        String fileType;
+        if (cleanName.endsWith(".ofx")) {
+            fileType = "OFX";
+        } else if (cleanName.endsWith(".xlsx") || cleanName.endsWith(".xls")) {
+            fileType = "EXCEL";
+        } else {
+            fileType = "CSV";
+        }
 
         boolean detectedCard = Boolean.TRUE.equals(isCreditCard) || (isCreditCard == null && isCardFileName(cleanName));
 
         List<ParsedTransactionItem> parsedItems;
         try (InputStream is = new ByteArrayInputStream(fileBytes)) {
-            parsedItems = fileType.equals("OFX") ? ofxParser.parse(is, detectedCard) : csvParser.parse(is, detectedCard);
+            parsedItems = switch (fileType) {
+                case "OFX" -> ofxParser.parse(is, detectedCard);
+                case "EXCEL" -> excelParser.parse(is, detectedCard);
+                default -> csvParser.parse(is, detectedCard);
+            };
         }
 
         if (parsedItems.isEmpty()) {
@@ -83,14 +96,25 @@ public class ImportBankStatementUseCase {
             );
         }
 
-        // Carrega transações existentes do usuário para deduplicação
+        // Carrega transações existentes do usuário para deduplicação inteligente e conciliação de parcelas
         var existingTransactions = transactionRepository.findAllByUserId(userId);
         Set<String> existingSignatures = new HashSet<>();
+        java.util.Map<String, Transaction> existingInstallmentMap = new java.util.HashMap<>();
+
         for (var tx : existingTransactions) {
             if (targetAccountId.equals(tx.getAccountId()) || tx.getAccountId() == null) {
-                // Assinatura: data|valor|descrição simplificada
+                // Assinatura exata: data|valor|descrição simplificada
                 String sig = tx.getAccrualDate() + "|" + tx.getAmount() + "|" + tx.getDescription().toLowerCase().trim();
                 existingSignatures.add(sig);
+
+                // Assinatura canônica de parcela: ano-mês|valor|cleanMerchant|parcela/total
+                var matchOpt = installmentDetector.detect(tx.getDescription());
+                if (matchOpt.isPresent()) {
+                    var m = matchOpt.get();
+                    var ym = java.time.YearMonth.from(tx.getAccrualDate());
+                    String canonicalSig = ym + "|" + tx.getAmount() + "|" + m.cleanMerchant() + "|" + m.current() + "/" + m.total();
+                    existingInstallmentMap.put(canonicalSig, tx);
+                }
             }
         }
 
@@ -100,12 +124,6 @@ public class ImportBankStatementUseCase {
 
         for (var item : parsedItems) {
             String itemSig = item.date() + "|" + item.amount() + "|" + item.description().toLowerCase().trim();
-
-            // Deduplicação inteligente
-            if (existingSignatures.contains(itemSig)) {
-                skippedCount++;
-                continue;
-            }
 
             TransactionType type;
             if (item.isExpense()) {
@@ -119,29 +137,117 @@ public class ImportBankStatementUseCase {
                 }
             }
 
-            var origin = fileType.equals("OFX") ? TransactionOrigin.OFX_IMPORT : TransactionOrigin.CSV_IMPORT;
+            var origin = switch (fileType) {
+                case "OFX" -> TransactionOrigin.OFX_IMPORT;
+                case "EXCEL" -> TransactionOrigin.EXCEL_IMPORT;
+                default -> TransactionOrigin.CSV_IMPORT;
+            };
+
             UUID categoryId = null;
             if (type == TransactionType.EXPENSE || type == TransactionType.INCOME) {
                 categoryId = merchantCategoryClassifier.resolveCategoryId(userId, item.description());
             }
 
-            var transaction = Transaction.create(
-                    userId,
-                    type,
-                    item.amount(),
-                    item.date(),
-                    item.date(),
-                    item.description(),
-                    targetAccountId,
-                    null,
-                    categoryId,
-                    origin,
-                    "Importado via " + fileType + (item.externalId() != null ? " [ID: " + item.externalId() + "]" : "")
-            );
+            // Identifica se este item é uma compra parcelada (ex: Havan 3/5)
+            var itemMatchOpt = (detectedCard || type == TransactionType.EXPENSE)
+                    ? installmentDetector.detect(item.description())
+                    : java.util.Optional.<InstallmentDetector.InstallmentMatch>empty();
 
-            transactionRepository.save(transaction);
-            existingSignatures.add(itemSig);
-            importedCount++;
+            String canonicalSig = null;
+            if (itemMatchOpt.isPresent()) {
+                var m = itemMatchOpt.get();
+                var ym = java.time.YearMonth.from(item.date());
+                canonicalSig = ym + "|" + item.amount() + "|" + m.cleanMerchant() + "|" + m.current() + "/" + m.total();
+            }
+
+            boolean isExactDuplicate = existingSignatures.contains(itemSig);
+            boolean isInstallmentDuplicate = canonicalSig != null && existingInstallmentMap.containsKey(canonicalSig);
+
+            if (isExactDuplicate || isInstallmentDuplicate) {
+                // Lançamento já existe no banco de dados para este mês!
+                skippedCount++;
+
+                // Se era uma projeção automática prévia do mês anterior, atualiza para lançamento oficial com a data exata da fatura
+                if (isInstallmentDuplicate) {
+                    var existingTx = existingInstallmentMap.get(canonicalSig);
+                    if (existingTx.getNotes() != null && existingTx.getNotes().contains("projetada automaticamente")) {
+                        var updated = existingTx.withUpdates(
+                                existingTx.getType(),
+                                existingTx.getAmount(),
+                                item.date(),
+                                item.date(),
+                                item.description(),
+                                existingTx.getAccountId(),
+                                existingTx.getDestinationAccountId(),
+                                existingTx.getCategoryId(),
+                                "Importado via " + fileType + (item.externalId() != null ? " [ID: " + item.externalId() + "]" : "") + " [Conciliado com fatura]"
+                        );
+                        transactionRepository.save(updated);
+                        existingInstallmentMap.put(canonicalSig, updated);
+                    }
+                }
+            } else {
+                // Cria o lançamento atual no mês da fatura
+                var transaction = Transaction.create(
+                        userId,
+                        type,
+                        item.amount(),
+                        item.date(),
+                        item.date(),
+                        item.description(),
+                        targetAccountId,
+                        null,
+                        categoryId,
+                        origin,
+                        "Importado via " + fileType + (item.externalId() != null ? " [ID: " + item.externalId() + "]" : "")
+                );
+
+                transactionRepository.save(transaction);
+                existingSignatures.add(itemSig);
+                if (canonicalSig != null) {
+                    existingInstallmentMap.put(canonicalSig, transaction);
+                }
+                importedCount++;
+            }
+
+            // PROJEÇÃO DE PARCELAS FUTURAS:
+            // Se for compra parcelada (ex: Havan 3/5), já lança nos meses seguintes as parcelas que faltam (4/5 e 5/5)
+            // se elas ainda não existirem no banco de dados!
+            if (itemMatchOpt.isPresent() && type == TransactionType.EXPENSE) {
+                var m = itemMatchOpt.get();
+                if (m.current() < m.total()) {
+                    for (int p = m.current() + 1; p <= m.total(); p++) {
+                        int monthsAhead = p - m.current();
+                        java.time.LocalDate futureDate = item.date().plusMonths(monthsAhead);
+                        String futureDesc = installmentDetector.generateNextInstallmentDescription(item.description(), m, p);
+                        var futureYm = java.time.YearMonth.from(futureDate);
+                        String futureCanonicalSig = futureYm + "|" + item.amount() + "|" + m.cleanMerchant() + "|" + p + "/" + m.total();
+                        String futureExactSig = futureDate + "|" + item.amount() + "|" + futureDesc.toLowerCase().trim();
+
+                        // Prevenção de duplicidade: só projeta se a parcela daquele mês futuro ainda NÃO existir!
+                        if (!existingInstallmentMap.containsKey(futureCanonicalSig) && !existingSignatures.contains(futureExactSig)) {
+                            var futureTx = Transaction.create(
+                                    userId,
+                                    TransactionType.EXPENSE,
+                                    item.amount(),
+                                    futureDate,
+                                    futureDate,
+                                    futureDesc,
+                                    targetAccountId,
+                                    null,
+                                    categoryId,
+                                    origin,
+                                    "Importado via " + fileType + " [Parcela futura " + p + "/" + m.total() + " projetada automaticamente]"
+                            );
+
+                            transactionRepository.save(futureTx);
+                            existingSignatures.add(futureExactSig);
+                            existingInstallmentMap.put(futureCanonicalSig, futureTx);
+                            importedCount++;
+                        }
+                    }
+                }
+            }
         }
 
         // Registra o lote para auditoria

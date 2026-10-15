@@ -22,13 +22,23 @@ public class CreateCreditCardPurchaseUseCase {
     private final CreditCardRepository creditCardRepository;
     private final CreditCardInvoiceRepository invoiceRepository;
     private final TransactionRepository transactionRepository;
+    private final com.finance.ai.domain.financial.CategoryRepository categoryRepository;
 
     public CreateCreditCardPurchaseUseCase(CreditCardRepository creditCardRepository,
                                            CreditCardInvoiceRepository invoiceRepository,
                                            TransactionRepository transactionRepository) {
+        this(creditCardRepository, invoiceRepository, transactionRepository, null);
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public CreateCreditCardPurchaseUseCase(CreditCardRepository creditCardRepository,
+                                           CreditCardInvoiceRepository invoiceRepository,
+                                           TransactionRepository transactionRepository,
+                                           @org.springframework.beans.factory.annotation.Autowired(required = false) com.finance.ai.domain.financial.CategoryRepository categoryRepository) {
         this.creditCardRepository = creditCardRepository;
         this.invoiceRepository = invoiceRepository;
         this.transactionRepository = transactionRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     @Transactional
@@ -41,6 +51,12 @@ public class CreateCreditCardPurchaseUseCase {
 
         if (!card.isActive()) {
             throw new IllegalStateException("O cartão de crédito está inativo.");
+        }
+
+        // Prevenção contra IDOR: validação de pertencimento da categoria ao usuário
+        if (categoryId != null && categoryRepository != null) {
+            categoryRepository.findByIdAndUserId(categoryId, userId)
+                    .orElseThrow(() -> new IllegalArgumentException("Categoria informada não existe ou não pertence ao usuário."));
         }
 
         var installmentAmounts = InstallmentSplitter.split(totalAmount, installmentsCount);

@@ -75,7 +75,7 @@ public class AccountController {
     }
 
     public record CreateAccountRequest(
-            @NotBlank String name,
+            @NotBlank @jakarta.validation.constraints.Size(min = 1, max = 100, message = "O nome da conta deve ter no máximo 100 caracteres.") String name,
             @NotNull AccountType type,
             BigDecimal initialBalance
     ) {}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Calendar, X, AlertCircle, CheckCircle2, CreditCard as CardIcon, Sparkles } from 'lucide-react';
 import { Category, Account } from '../types/financial';
 import { CreditCard } from '../types/card';
@@ -80,8 +81,8 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
       setAmount('');
       setFrequency('MONTHLY');
       setDayOfMonth('10');
-      setCategoryId(categories[0]?.id || '');
-      setCategoryName(categories[0]?.name || '');
+      setCategoryId('');
+      setCategoryName('');
       setActive(true);
       setPaymentSourceType('direct');
       setCreditCardId(creditCards[0]?.id || '');
@@ -183,9 +184,15 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-lg rounded-3xl bg-white border-2 border-slate-200 p-6 sm:p-8 shadow-2xl">
+  const modalContent = (
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-slate-900/40 backdrop-blur-sm animate-fade-in overflow-y-auto"
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full max-w-lg rounded-3xl bg-white border-2 border-slate-200 p-6 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
         <button
           onClick={onClose}
           className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
@@ -451,4 +458,6 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : modalContent;
 };

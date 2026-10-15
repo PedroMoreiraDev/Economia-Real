@@ -29,7 +29,7 @@ import java.util.*;
 public class GeminiAiService implements AiExtractionPort, AudioTranscriptionPort {
 
     private static final Logger log = LoggerFactory.getLogger(GeminiAiService.class);
-    private static final String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey}";
+    private static final String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent";
 
     private final String apiKey;
     private final String modelName;
@@ -152,7 +152,8 @@ public class GeminiAiService implements AiExtractionPort, AudioTranscriptionPort
         );
 
         String responseJson = restClient.post()
-                .uri(GEMINI_API_URL, modelName, apiKey)
+                .uri(GEMINI_API_URL, modelName)
+                .header("x-goog-api-key", apiKey)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(requestBody)
                 .retrieve()
@@ -219,7 +220,8 @@ public class GeminiAiService implements AiExtractionPort, AudioTranscriptionPort
         );
 
         String responseJson = restClient.post()
-                .uri(GEMINI_API_URL, modelName, apiKey)
+                .uri(GEMINI_API_URL, modelName)
+                .header("x-goog-api-key", apiKey)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(requestBody)
                 .retrieve()
@@ -245,7 +247,8 @@ public class GeminiAiService implements AiExtractionPort, AudioTranscriptionPort
         );
 
         String responseJson = restClient.post()
-                .uri(GEMINI_API_URL, modelName, apiKey)
+                .uri(GEMINI_API_URL, modelName)
+                .header("x-goog-api-key", apiKey)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(requestBody)
                 .retrieve()

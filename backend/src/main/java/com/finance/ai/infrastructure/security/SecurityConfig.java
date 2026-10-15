@@ -27,40 +27,56 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtFilter;
+    private final RateLimitingFilter rateLimitingFilter;
     private final String allowedOrigins;
 
     public SecurityConfig(
             JwtAuthenticationFilter jwtFilter,
+            @org.springframework.beans.factory.annotation.Autowired(required = false) RateLimitingFilter rateLimitingFilter,
             @Value("${cors.allowed-origins:*}") String allowedOrigins) {
         this.jwtFilter = jwtFilter;
+        this.rateLimitingFilter = rateLimitingFilter;
         this.allowedOrigins = allowedOrigins;
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        return http
+        var httpSecurity = http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.deny())
+                        .contentTypeOptions(content -> {})
+                        .xssProtection(xss -> {})
+                )
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // Preflight OPTIONS requests
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        // Endpoints públicos
+                        // Endpoints públicos de autenticação e documentação
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/captcha").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/verify-email", "/api/v1/auth/resend-code", "/api/v1/auth/forgot-password", "/api/v1/auth/reset-password").permitAll()
-                        .requestMatchers("/api/v1/health", "/actuator/**", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
-                        // Tudo mais requer autenticação
+                        .requestMatchers("/api/v1/health", "/actuator/health", "/actuator/info", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                        // Qualquer outro endpoint de gestão ou API requer autenticação
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                .build();
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
+        if (rateLimitingFilter != null) {
+            httpSecurity.addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class);
+        }
+
+        return httpSecurity.build();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        if ("*".equals(allowedOrigins.trim())) {
+        boolean isWildcard = "*".equals(allowedOrigins.trim());
+
+        if (isWildcard) {
             configuration.addAllowedOriginPattern("*");
+            configuration.setAllowCredentials(false);
         } else {
             for (String origin : allowedOrigins.split(",")) {
                 String trimmed = origin.trim();
@@ -68,10 +84,11 @@ public class SecurityConfig {
                     configuration.addAllowedOriginPattern(trimmed);
                 }
             }
+            configuration.setAllowCredentials(true);
         }
+
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

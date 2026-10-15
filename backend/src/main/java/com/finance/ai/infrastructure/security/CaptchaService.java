@@ -2,6 +2,7 @@ package com.finance.ai.infrastructure.security;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -46,9 +47,8 @@ public class CaptchaService {
     public CaptchaService() {
         this("default-captcha-secret-key-finance-2026-minimum-32-chars", "");
     }
-
-    public CaptchaService(
-            @Value("${app.security.jwt-secret:default-captcha-secret-key-finance-2026-minimum-32-chars}") String hmacSecret,
+    @Autowired
+    public CaptchaService(@Value("${app.security.jwt-secret:default-captcha-secret-key-finance-2026-minimum-32-chars}") String hmacSecret,
             @Value("${app.security.turnstile-secret:}") String turnstileSecret) {
         this.hmacSecret = hmacSecret;
         this.turnstileSecret = turnstileSecret;
@@ -86,17 +86,18 @@ public class CaptchaService {
         return new CaptchaChallenge(challengeId, imageBase64, token);
     }
 
+    private final java.util.concurrent.ConcurrentHashMap<String, Long> consumedChallengeIds = new java.util.concurrent.ConcurrentHashMap<>();
+
+    public static final String INSTANT_SALT = "economia-real-anti-bot-2026";
+
     /**
      * Valida a resposta do usuário contra o token criptográfico.
+     * Suporta tokens assinados pelo backend e tokens instantâneos para exibição imediata em 0ms no frontend.
+     * Implementa proteção anti-replay (queima de token de uso único) e comparação em tempo constante.
      */
     public void validateCaptcha(String token, String userAnswer) {
         if (token == null || token.isBlank()) {
             throw new IllegalArgumentException("Validação de segurança (CAPTCHA) é obrigatória.");
-        }
-
-        // Suporte opcional a Cloudflare Turnstile se configurado
-        if (turnstileSecret != null && !turnstileSecret.isBlank() && token.length() > 60 && !token.contains(":")) {
-            return;
         }
 
         if (userAnswer == null || userAnswer.isBlank()) {
@@ -107,6 +108,34 @@ public class CaptchaService {
             byte[] decoded = Base64.getUrlDecoder().decode(token);
             String payloadStr = new String(decoded, StandardCharsets.UTF_8);
             String[] parts = payloadStr.split(":");
+
+            long nowEpochSec = Instant.now().getEpochSecond();
+            String cleanInput = userAnswer.trim().replaceAll("\\s+", "").toUpperCase();
+
+            // 1. Suporte a Desafio Instantâneo (Exibição imediata em 0ms no cliente)
+            if (parts.length == 4 && "instant".equals(parts[0])) {
+                String challengeId = parts[1];
+                String expectedAnswerHash = parts[2];
+                long expiresAt = Long.parseLong(parts[3]);
+
+                if (nowEpochSec > expiresAt) {
+                    throw new IllegalArgumentException("O código da imagem expirou. Clique para gerar uma nova imagem.");
+                }
+
+                cleanupExpiredChallenges(nowEpochSec);
+                Long previouslyConsumed = consumedChallengeIds.putIfAbsent(challengeId, expiresAt);
+                if (previouslyConsumed != null) {
+                    throw new IllegalArgumentException("Este código de verificação já foi utilizado. Solicite uma nova imagem de segurança.");
+                }
+
+                String computedAnswerHash = hashInstantAnswer(challengeId, cleanInput);
+                if (!MessageDigest.isEqual(expectedAnswerHash.getBytes(StandardCharsets.UTF_8), computedAnswerHash.getBytes(StandardCharsets.UTF_8))) {
+                    throw new IllegalArgumentException("Código de segurança incorreto. Observe a imagem e tente novamente.");
+                }
+                return;
+            }
+
+            // 2. Desafio emitido pelo endpoint /auth/captcha do backend
             if (parts.length != 4) {
                 throw new IllegalArgumentException("Token de verificação inválido.");
             }
@@ -116,19 +145,24 @@ public class CaptchaService {
             long expiresAt = Long.parseLong(parts[2]);
             String providedSignature = parts[3];
 
-            if (Instant.now().getEpochSecond() > expiresAt) {
+            if (nowEpochSec > expiresAt) {
                 throw new IllegalArgumentException("O código da imagem expirou. Clique para gerar uma nova imagem.");
+            }
+
+            // Proteção Anti-Replay: cada challengeId só pode ser submetido uma única vez
+            cleanupExpiredChallenges(nowEpochSec);
+            Long previouslyConsumed = consumedChallengeIds.putIfAbsent(challengeId, expiresAt);
+            if (previouslyConsumed != null) {
+                throw new IllegalArgumentException("Este código de verificação já foi utilizado. Solicite uma nova imagem de segurança.");
             }
 
             String expectedPayload = challengeId + ":" + expectedAnswerHash + ":" + expiresAt;
             String computedSignature = sign(expectedPayload);
 
-            if (!computedSignature.equals(providedSignature)) {
+            if (!MessageDigest.isEqual(computedSignature.getBytes(StandardCharsets.UTF_8), providedSignature.getBytes(StandardCharsets.UTF_8))) {
                 throw new IllegalArgumentException("Token de verificação violado ou inválido.");
             }
 
-            // Normaliza a resposta digitada pelo usuário (maiúsculas, sem espaços)
-            String cleanInput = userAnswer.trim().replaceAll("\\s+", "").toUpperCase();
             String computedAnswerHash = hashAnswer(challengeId, cleanInput);
 
             if (!MessageDigest.isEqual(expectedAnswerHash.getBytes(StandardCharsets.UTF_8), computedAnswerHash.getBytes(StandardCharsets.UTF_8))) {
@@ -139,6 +173,23 @@ public class CaptchaService {
         } catch (Exception e) {
             log.error("Erro ao validar token de CAPTCHA: {}", e.getMessage());
             throw new IllegalArgumentException("Falha ao validar código de segurança. Recarregue a imagem.");
+        }
+    }
+
+    public String hashInstantAnswer(String challengeId, String answer) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            String combined = challengeId + ":" + answer.trim().toUpperCase() + ":" + INSTANT_SALT;
+            byte[] digest = md.digest(combined.getBytes(StandardCharsets.UTF_8));
+            return Base64.getUrlEncoder().withoutPadding().encodeToString(digest);
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao calcular hash de CAPTCHA instantâneo", e);
+        }
+    }
+
+    private void cleanupExpiredChallenges(long nowEpochSec) {
+        if (consumedChallengeIds.size() > 200) {
+            consumedChallengeIds.entrySet().removeIf(entry -> entry.getValue() < nowEpochSec);
         }
     }
 

@@ -34,7 +34,8 @@ import {
   X,
   Eye,
   EyeOff,
-  Compass
+  Compass,
+  Repeat
 } from 'lucide-react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AuthModal } from './components/AuthModal';
@@ -228,10 +229,12 @@ const MainDashboard: React.FC = () => {
     type: 'single' | 'batch';
     targetId?: string;
     loading: boolean;
+    deleteFutureRecurring?: boolean;
   }>({
     isOpen: false,
     type: 'single',
     loading: false,
+    deleteFutureRecurring: false,
   });
 
   // Sincroniza a linha do tempo histórica do teto de gastos para o usuário e mês ativo
@@ -397,11 +400,14 @@ const MainDashboard: React.FC = () => {
   };
 
   const handleRequestDeleteTransaction = (id: string) => {
+    const tx = transactions.find((t) => t.id === id);
+    const isRecurring = !!(tx?.notes && tx.notes.includes('RECURRING_INCOME:'));
     setDeleteConfirmState({
       isOpen: true,
       type: 'single',
       targetId: id,
       loading: false,
+      deleteFutureRecurring: isRecurring,
     });
   };
 
@@ -502,13 +508,14 @@ const MainDashboard: React.FC = () => {
     try {
       if (deleteConfirmState.type === 'single' && deleteConfirmState.targetId) {
         const id = deleteConfirmState.targetId;
-        await deleteTransactionApi(token, id);
+        const deleteFuture = !!deleteConfirmState.deleteFutureRecurring;
+        await deleteTransactionApi(token, id, deleteFuture);
         setSelectedTxIds((prev) => {
           const next = new Set(prev);
           next.delete(id);
           return next;
         });
-        showToast('Movimentação excluída com sucesso.');
+        showToast(deleteFuture ? 'Movimentações recorrentes excluídas com sucesso.' : 'Movimentação excluída com sucesso.');
       } else if (deleteConfirmState.type === 'batch') {
         const ids = Array.from(selectedTxIds);
         setDeletingBatch(true);
@@ -1824,12 +1831,21 @@ const MainDashboard: React.FC = () => {
                                 {/* Linha 2: Descrição e Valor */}
                                 <div className="flex items-start justify-between gap-2">
                                   <div className="min-w-0 flex-1">
-                                    <p className="font-black text-sm text-slate-800 truncate" title={tx.description}>
-                                      {tx.description}
-                                    </p>
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                      <p className="font-black text-sm text-slate-800 truncate" title={tx.description}>
+                                        {tx.description}
+                                      </p>
+                                      {tx.notes && tx.notes.includes('RECURRING_INCOME:') && (
+                                        <span className="inline-flex items-center gap-1 text-[10px] font-black text-emerald-700 bg-emerald-100 border border-emerald-300 px-1.5 py-0.2 rounded-md" title="Renda Recorrente Mensal">
+                                          <Repeat className="w-2.5 h-2.5 stroke-[2.5]" /> Recorrente
+                                        </span>
+                                      )}
+                                    </div>
                                     {tx.notes && (
                                       <span className="text-[11px] text-slate-400 font-normal truncate block mt-0.5" title={tx.notes}>
-                                        {tx.notes}
+                                        {tx.notes.includes('RECURRING_INCOME:')
+                                          ? (tx.notes.split('|')[1]?.trim() || 'Entrada recorrente projetada')
+                                          : tx.notes}
                                       </span>
                                     )}
                                   </div>
@@ -1946,12 +1962,21 @@ const MainDashboard: React.FC = () => {
                                       />
                                     </td>
                                     <td className="py-2 px-2 text-slate-800 min-w-0">
-                                      <div className="font-extrabold text-xs truncate max-w-[130px] sm:max-w-[160px] lg:max-w-[180px]" title={tx.description}>
-                                        {tx.description}
+                                      <div className="flex items-center gap-1.5 flex-wrap">
+                                        <span className="font-extrabold text-xs truncate max-w-[130px] sm:max-w-[160px] lg:max-w-[180px]" title={tx.description}>
+                                          {tx.description}
+                                        </span>
+                                        {tx.notes && tx.notes.includes('RECURRING_INCOME:') && (
+                                          <span className="inline-flex items-center gap-1 text-[9px] font-black text-emerald-700 bg-emerald-100 border border-emerald-300 px-1 py-0.2 rounded-md" title="Renda Recorrente Mensal">
+                                            <Repeat className="w-2.5 h-2.5 stroke-[2.5]" /> Recorrente
+                                          </span>
+                                        )}
                                       </div>
                                       {tx.notes && (
                                         <span className="text-[10px] text-slate-400 font-normal truncate block max-w-[130px] sm:max-w-[160px] lg:max-w-[180px]" title={tx.notes}>
-                                          {tx.notes}
+                                          {tx.notes.includes('RECURRING_INCOME:')
+                                            ? (tx.notes.split('|')[1]?.trim() || 'Entrada recorrente projetada')
+                                            : tx.notes}
                                         </span>
                                       )}
                                     </td>
@@ -2390,6 +2415,41 @@ const MainDashboard: React.FC = () => {
                 </div>
               </div>
             )}
+
+            {singleTx && singleTx.notes && singleTx.notes.includes('RECURRING_INCOME:') && (
+              <div className="p-3.5 bg-amber-50/90 border-2 border-amber-300 rounded-2xl space-y-2.5 text-left">
+                <div className="flex items-center gap-1.5 text-amber-900 text-xs font-black">
+                  <Repeat className="w-3.5 h-3.5 stroke-[2.5]" />
+                  <span>Renda Recorrente Detectada</span>
+                </div>
+                <div className="space-y-1.5 text-xs font-bold text-slate-700">
+                  <label className="flex items-center gap-2 cursor-pointer p-2 rounded-xl bg-white/60 hover:bg-white border border-amber-200/70 transition-colors">
+                    <input
+                      type="radio"
+                      name="deleteScope"
+                      checked={!deleteConfirmState.deleteFutureRecurring}
+                      onChange={() => setDeleteConfirmState((prev) => ({ ...prev, deleteFutureRecurring: false }))}
+                      className="text-[#026CD6] focus:ring-[#026CD6] accent-[#026CD6]"
+                    />
+                    <span>Excluir apenas o lançamento deste mês</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer p-2 rounded-xl bg-white/60 hover:bg-white border border-amber-200/70 transition-colors">
+                    <input
+                      type="radio"
+                      name="deleteScope"
+                      checked={!!deleteConfirmState.deleteFutureRecurring}
+                      onChange={() => setDeleteConfirmState((prev) => ({ ...prev, deleteFutureRecurring: true }))}
+                      className="text-rose-600 focus:ring-rose-500 accent-rose-600"
+                    />
+                    <span className="text-rose-700 font-extrabold">Excluir este e todos os meses futuros</span>
+                  </label>
+                </div>
+                <p className="text-[10px] text-slate-500 font-medium">
+                  Os lançamentos de meses passados serão preservados no histórico contábil.
+                </p>
+              </div>
+            )}
+
             <p className="text-[11px] font-bold text-rose-500">
               Essa ação não poderá ser desfeita.
             </p>

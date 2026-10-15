@@ -70,12 +70,17 @@ public class RegisterUserUseCase {
             String captchaToken,
             String captchaAnswer) {
 
-        // 1. Validação de CAPTCHA contra bots
-        if (captchaService != null && captchaToken != null && !captchaToken.isBlank()) {
+        // 1. Validação de Complexidade Mínima de Senha
+        if (rawPassword == null || rawPassword.trim().length() < 8) {
+            throw new IllegalArgumentException("A senha deve ter no mínimo 8 caracteres.");
+        }
+
+        // 2. Validação Obrigatória de CAPTCHA contra bots
+        if (captchaService != null) {
             captchaService.validateCaptcha(captchaToken, captchaAnswer);
         }
 
-        // 2. Validação Rigorosa de E-mail (Sintaxe + Provedores descartáveis + Registros DNS MX)
+        // 3. Validação Rigorosa de E-mail (Sintaxe + Provedores descartáveis + Registros DNS MX)
         if (emailValidationService != null) {
             emailValidationService.validate(email);
         }
@@ -141,6 +146,10 @@ public class RegisterUserUseCase {
      */
     @Transactional
     public AuthResult execute(String email, String fullName, String rawPassword) {
+        if (rawPassword == null || rawPassword.trim().length() < 8) {
+            throw new IllegalArgumentException("A senha deve ter no mínimo 8 caracteres.");
+        }
+
         if (userRepository.existsByEmail(email.toLowerCase().trim())) {
             throw new EmailAlreadyRegisteredException("E-mail já cadastrado: " + email);
         }

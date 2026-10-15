@@ -21,7 +21,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/imports")
-@Tag(name = "Importação de Extratos", description = "Upload e conciliação de arquivos OFX e CSV bancários")
+@Tag(name = "Importação de Extratos", description = "Upload e conciliação de arquivos OFX, CSV e planilhas Excel (XLSX/XLS) bancários")
 @SecurityRequirement(name = "bearerAuth")
 public class ImportStatementController {
 
@@ -35,7 +35,7 @@ public class ImportStatementController {
     }
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "Faz upload de extrato OFX ou CSV e importa lançamentos com deduplicação")
+    @Operation(summary = "Faz upload de extrato OFX, CSV ou Excel (.xlsx, .xls) e importa lançamentos com deduplicação")
     public ResponseEntity<ImportStatementResult> upload(
             @AuthenticationPrincipal AuthenticatedUser user,
             @RequestParam(value = "accountId", required = false) UUID accountId,
@@ -48,12 +48,17 @@ public class ImportStatementController {
             throw new IllegalArgumentException("O arquivo de extrato está vazio.");
         }
 
+        // Validação de limite máximo de 10MB para mitigar ataques de negação de serviço (DoS/OOM)
+        if (file.getSize() > 10 * 1024 * 1024) {
+            throw new IllegalArgumentException("O arquivo de extrato excede o limite máximo permitido de 10MB.");
+        }
+
         String originalFilename = file.getOriginalFilename();
         if (originalFilename == null) originalFilename = "extrato.csv";
 
         String lower = originalFilename.toLowerCase();
-        if (!lower.endsWith(".ofx") && !lower.endsWith(".csv")) {
-            throw new IllegalArgumentException("Formato não suportado. Envie apenas arquivos .ofx ou .csv.");
+        if (!lower.endsWith(".ofx") && !lower.endsWith(".csv") && !lower.endsWith(".xlsx") && !lower.endsWith(".xls")) {
+            throw new IllegalArgumentException("Formato não suportado. Envie apenas arquivos .ofx, .csv, .xlsx ou .xls.");
         }
 
         var result = (isCreditCard != null)

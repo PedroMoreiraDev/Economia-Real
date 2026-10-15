@@ -39,8 +39,8 @@ public class ForgotPasswordUseCase {
             throw new IllegalArgumentException("E-mail é obrigatório.");
         }
 
-        // Validação de CAPTCHA visual para impedir spam de disparos
-        if (captchaService != null && captchaToken != null && !captchaToken.isBlank()) {
+        // Validação obrigatória de CAPTCHA visual para impedir spam de disparos
+        if (captchaService != null) {
             captchaService.validateCaptcha(captchaToken, captchaAnswer);
         }
 

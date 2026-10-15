@@ -66,6 +66,12 @@ Este documento registra o estado real, factual e auditável do desenvolvimento d
 - [x] Interface completa no Frontend com aba dedicada `Categorias`, badges "Padrão" / "Personalizada", modal `CategoryModal` e atalho inline nos modais de transação e compra de cartão.
 - [x] `GetFinancialSummaryUseCase`: cálculo determinístico com `BigDecimal` e prevenção de dupla contagem.
 - [x] Endpoints REST `/api/v1/accounts`, `/api/v1/categories`, `/api/v1/transactions` e `/api/v1/transactions/summary`.
+- [x] **Rendas / Salários Recorrentes (`RECURRING_INCOME`):**
+  - Projeção determinística de receitas mensais com seletor de horizonte (6, 12 ou 24 meses; padrão de 1 ano / 12 meses).
+  - Vínculo por grupo de recorrência via metadado seguro `RECURRING_INCOME:<uuid>`.
+  - Edição propagada para meses futuros (`updateFutureRecurring`), garantindo que o histórico contábil de meses passados seja rigorosamente preservado.
+  - Exclusão flexível: exclusão do mês pontual ou de todos os meses futuros (`deleteFutureRecurring`).
+  - Identificação visual no frontend com badge `[🔁 Recorrente]` e sanitização de notas técnicas.
 
 ### 2.5. Fase 4 — Cartões de Crédito, Compras Parceladas e Faturas
 - [x] `CreditCard`, `CreditCardInvoice` e ciclo de vida de faturas.
@@ -152,6 +158,13 @@ Este documento registra o estado real, factual e auditável do desenvolvimento d
   - Implementação de `DeleteAccountUseCase` e endpoint `DELETE /api/v1/auth/me` para exclusão completa da conta do usuário e cascata relacional total no banco de dados (Direito ao Esquecimento).
   - Implementação de `CorrelationIdFilter` injetando `X-Correlation-ID` no MDC do SLF4J/Logback e nos cabeçalhos de resposta HTTP para rastreabilidade de requisições.
   - Hardening do Spring Security e Nginx com cabeçalhos contra Clickjacking (`X-Frame-Options: DENY`), MIME-sniffing (`X-Content-Type-Options: nosniff`) e XSS.
+  - **Auditoria Completa de Vulnerabilidades e Hardening Abrangente (Outubro/2026):**
+    - **Anti-IDOR em Categorias Privadas:** Validação obrigatória de ownership de `categoryId` com `findByIdAndUserId` em `CreateTransactionUseCase`, `UpdateTransactionUseCase` e `CreateCreditCardPurchaseUseCase`, prevenindo vinculação cruzada a categorias de terceiros.
+    - **Mitigação de DoS por Replicação Ilimitada:** Parâmetro `replicateMonths` limitado a no máximo 60 meses (`@Min(1) @Max(60)` e validação no core) em transações e despesas fixas recorrentes.
+    - **Mitigação de DoS em Operações em Lote:** Limite estrito de 200 IDs para exclusão em lote de transações (`DeleteTransactionUseCase`) e teto de 50 categorias para criação em lote de orçamentos (`BatchCreateBudgetsUseCase`).
+    - **Proteção contra Upload DoS / OOM:** Restrição estrita de 10MB no controller de extratos (`ImportStatementController`) e configuração de limites de multipart no Spring Boot (`max-file-size: 15MB`, `max-request-size: 20MB`).
+    - **Aprimoramento de Rate Limiting:** Proteção de rotas sensíveis de Inteligência Artificial (`/api/v1/ai/*` com 20 req/min), validação de regex e sanitização de headers de IP para evitar spoofing (`X-Forwarded-For`), e teto de 5.000 entradas no mapa de rastreamento para contenção de memória.
+    - **Proteção contra Estouro de Tipos e Colunas:** Validações com `@Size` nos campos descritivos e nomes de categorias, contas e transações para evitar HTTP 500 decorrentes de estouro de colunas SQL.
 - [x] **Containerização Multi-Stage Otimizada para Produção:**
   - `backend/Dockerfile`: Multi-stage com `maven:3.9.6-eclipse-temurin-21-alpine` e `eclipse-temurin:21-jre-alpine`, usuário não privilegiado (`appuser`), JVM otimizada para containers (`-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0`), e healthcheck com `wget` em `/actuator/health`.
   - `frontend/Dockerfile`: Multi-stage com `node:20-alpine` e `nginx:1.25-alpine`, compressão gzip, cache de 1 ano para arquivos estáticos com hash e proxy reverso transparente para `/api/` e `/actuator/`.
@@ -365,10 +378,94 @@ dist/assets/index-CVcJJLIG.js   305.65 kB │ gzip: 75.31 kB
 
 ---
 
+## 4.11. Importação de Extratos Bancários em Planilhas Excel (.xlsx e .xls) (Implementado)
+
+- **Suporte Multiformato no Importador de Extratos:**
+  - Além dos arquivos `.ofx` e `.csv`, o sistema agora aceita nativamente planilhas do Microsoft Excel nos formatos moderno (`.xlsx`, OOXML) e legado (`.xls`, Excel 97-2003 / BIFF8).
+- **Parser Determinístico com Apache POI (`ExcelParser.java`):**
+  - Utilização da biblioteca Apache POI 5.3.0 (`WorkbookFactory.create`) para leitura resiliente e unificada de ambos os formatos em memória.
+  - Detecção automática da linha de cabeçalho através de varredura inteligente dos termos (`data`, `date`, `dt`, `valor`, `amount`, `descrição`, `histórico`, `estabelecimento`, `id`, `fitid`).
+  - Fallback automático para colunas padrão (0: Data, 1: Descrição, 2: Valor) quando não houver cabeçalhos explícitos.
+  - Suporte a células de data numéricas nativas formatadas (`DateUtil.isCellDateFormatted`), seriais Excel e strings de data formatadas em padrão brasileiro (`dd/MM/yyyy`) ou ISO (`yyyy-MM-dd`).
+  - Suporte a células de valor numéricas e textuais em padrão brasileiro (`R$ 1.250,50`) e com sufixos contábeis bancários (`D` para débito/negativo e `C` para crédito/positivo).
+- **Integridade Contábil e Financeira:**
+  - Preservação estrita da precisão com `BigDecimal` escala 2 e `RoundingMode.HALF_EVEN`.
+  - Tratamento determinístico para faturas de cartão de crédito importadas via Excel: compras com valores positivos entram como despesa (`EXPENSE`), enquanto pagamentos de fatura ou estornos são classificados como crédito / liquidação (`INVOICE_PAYMENT`).
+  - Deduplicação inteligente de lançamentos idênticos já existentes na conta para evitar duplicações.
+- **Segurança da Informação e Formula Injection:**
+  - Sanitização de descrições contra CSV/Excel Formula Injection, removendo prefixos executáveis perigosos (`=`, `+`, `-`, `@`).
+- **Banco de Dados & Migração Flyway (`V6__allow_excel_import.sql`):**
+  - Atualização das restrições de verificação (CHECK constraints) em `import_batches` (`file_type IN ('CSV', 'OFX', 'EXCEL')`) e `transactions` (`origin IN (..., 'EXCEL_IMPORT')`).
+  - Adição do valor `EXCEL_IMPORT` no enum `TransactionOrigin` e aceitação de `EXCEL` em `ImportBatch`.
+- **Interface e Experiência do Usuário (`ImportModal.tsx`):**
+  - Input com `accept=".ofx,.csv,.xlsx,.xls"`, validação de extensão antes do envio e mensagens explicativas atualizadas para o usuário.
+- **Qualidade e Cobertura de Testes Automatizados:**
+  - 100% dos testes aprovados: `ExcelParserTest` (5 testes), `ImportBankStatementUseCaseTest` (3 testes) e `ImportStatementControllerTest` (4 testes), além de build estático do frontend validado com TypeScript.
+
+---
+
+## 4.12. Exibição Completa de Categorias no Seletor e Novo Campo de Busca (`CategoryCombobox.tsx`)
+
+- **Causa Raiz Identificada:**
+  - O componente `CategoryCombobox` utilizava o próprio valor preenchido do input (`categoryName`) como termo de busca para filtrar o array de categorias existentes.
+  - Ao abrir o modal com "Receita" pré-selecionando "Salário & Renda" (ou qualquer outra categoria previamente escolhida), o dropdown filtrava apenas termos que contivessem "Salário & Renda", ocultando todas as demais categorias cadastradas ("Alimentação", "Transporte", "Moradia", etc.) a menos que o usuário apagasse manualmente o texto do campo.
+- **Solução Arquitetural Implementada:**
+  - **Separação entre Valor Selecionado e Filtro de Busca:** O gatilho principal agora atua como um seletor visual limpo, exibindo o nome, a cor (`colorHex`) da categoria ativa e um botão `X` para remoção rápida.
+  - **Exibição Universal de Categorias:** Ao clicar no campo ou na seta expansora (`ChevronDown`), o menu suspenso abre listando **todas as categorias disponíveis** no sistema, mantendo a categoria selecionada marcada com check (✓).
+  - **Barra de Pesquisa Interna com Foco Automático:** Foi incluído um campo de pesquisa dedicado no topo do popover com ícone de lupa, permitindo filtrar em tempo real conforme o usuário digita.
+  - **Criação Rápida de Novas Categorias:** Se o usuário digitar um nome de categoria que ainda não existe, uma opção destacada em verde (`+ Criar categoria: "nome"`) surge no topo para criação imediata.
+  - **Alternância Inteligente de Abas em `TransactionModal.tsx`:** Ao alternar de Receita para Despesa, a categoria "Salário & Renda" é desmarcada automaticamente para não induzir a erro.
+
+---
+
+## 4.13. Detecção Inteligente de Compras Parceladas e Projeção Futura Anti-Duplicação em Faturas de Cartão (Implementado)
+
+- **Objetivo e Contexto de Negócio:**
+  - Ao importar faturas de cartão de crédito (OFX, CSV ou Excel) contendo compras parceladas (exemplo: `Havan 3/5`), o usuário necessitava que a parcela do mês corrente (`3/5`) fosse registrada na fatura do mês atual e as parcelas restantes (`4/5` e `5/5`) fossem projetadas automaticamente nos meses subsequentes (+1 mês e +2 meses).
+  - Além disso, era crucial garantir que, ao importar a fatura do mês seguinte contendo a linha real de `Havan 4/5`, o sistema **não gerasse duplicidade** da parcela `4/5` nem relançasse `5/5` em duplicidade.
+
+- **Componente Especializado de Domínio (`InstallmentDetector.java`):**
+  - Implementado em `com.finance.ai.domain.financial.importer.InstallmentDetector`:
+    - Expressão regular flexível e resiliente a múltiplos padrões de instituições bancárias e adquirentes brasileiras:
+      - `(\d{1,2})\s*(?:/|de)\s*(\d{1,2})` (ex: `Havan 3/5`, `HAVAN 03/05`, `MAGALU 2 de 4`, `Renner (2/10)`, `Parc. 01/03`).
+    - Proteção contra falsos positivos:
+      - Ignora datas com ano (ex: `15/10/2026` não é confundido com parcelamento).
+      - Rejeita inconsistências lógicas (`current > total`, `total <= 1` ou valores anômalos acima de 99).
+    - Métodos utilitários:
+      - `extractCleanMerchant()`: higieniza termos removendo prefixos de adquirentes (`PAG*`, `CIELO*`, `REDE*`), sufixos de parcelas e pontuações para obter o identificador canônico do lojista (ex: `"havan"`).
+      - `formatNextInstallmentDescription()`: gera a descrição da parcela subsequente preservando o estilo original da fatura (zeros à esquerda, parênteses, separador `/` ou `de`).
+
+- **Algoritmo de Projeção e Deduplicação Canônica Cross-Month (`ImportBankStatementUseCase.java`):**
+  - **Assinatura Canônica de Parcela:**
+    - `YearMonth.from(date) + "|" + amount + "|" + cleanMerchant + "|" + current + "/" + total`
+    - Essa assinatura canônica supera variações comuns entre faturas de meses distintos, como pequenas oscilações na data de fechamento (1 a 3 dias) ou diferenças de formatação do banco (`HAVAN 04/05` vs `Havan 4/5`).
+  - **Mapeamento em Memória por Fatura:**
+    - O caso de uso carrega as transações já existentes na conta para o período e indexa tanto a assinatura temporal exata (`date|amount|description`) quanto a assinatura canônica de parcelas (`existingInstallmentMap`).
+  - **Reconciliação e Prevenção de Duplicidade:**
+    - Ao processar uma parcela que já foi projetada em uma importação anterior (ex: `Havan 4/5` no mês seguinte):
+      - O sistema reconhece que a parcela já existe no mês de competência e incrementa o contador de ignorados (`skippedCount++`).
+      - Atualiza o registro existente para remover o status de "projeção automática" e confirmar os dados oficiais da fatura.
+  - **Geração Futura Controlada:**
+    - Quando uma compra parcelada é nova (`p = current + 1` até `total`):
+      - Cada parcela futura é projetada com `date.plusMonths(offset)`.
+      - Antes de criar cada parcela futura, o sistema consulta `existingInstallmentMap` para a competência de destino. Se já existir uma projeção ou lançamento para aquela parcela, ela **não é duplicada**.
+      - Registra a nota de auditoria identificando o parcelamento (ex: `[Parcela 4/5 gerada automaticamente a partir da importação de fatura]`).
+
+- **Qualidade e Cobertura de Testes Automatizados:**
+  - `InstallmentDetectorTest.java`: 9 cenários de teste cobrindo detecção em `Havan 3/5`, `03/05`, `2 de 4`, `Parc. 01/03`, proteção de datas com ano, formatação preservada e identificação de merchant.
+  - `ImportBankStatementInstallmentsTest.java`: 3 testes de integração do caso de uso validando:
+    1. Importação de `Havan 3/5` registrando a parcela atual e projetando `4/5` e `5/5` nos meses seguintes.
+    2. Importação subsequente no mês seguinte com `HAVAN 04/05` sem duplicar a parcela 4/5 nem a parcela 5/5 já projetada.
+    3. Reimportação da mesma fatura sem qualquer duplicação.
+  - 100% de sucesso em toda a suíte de importações (`InstallmentDetectorTest`, `ImportBankStatementInstallmentsTest`, `ImportBankStatementUseCaseTest`, `ImportStatementControllerTest`, `ExcelParserTest`).
+
+---
+
 ## 5. Próximo Passo Recomendado
 
-1. A plataforma conta agora com 142 testes automatizados no backend e build de frontend 100% íntegros.
-2. Linha do tempo contábil de orçamentos por categoria sincronizada com testes unitários.
-3. Login e abertura de modais com tempo de resposta imediato (0ms de espera).
-4. Deploy sincronizado no GitHub (`main`) e publicado na Vercel (`https://economia-real.ia.br`).
+1. A plataforma conta com suíte de testes unitários e de integração de ponta a ponta no backend com 100% de aprovação.
+2. Importação unificada de extratos e faturas em OFX, CSV, XLSX e XLS com detecção e projeção automática de parcelas futuras.
+3. Deduplicação canônica inteligente entre faturas subsequentes sem risco de entradas duplicadas.
+4. Deploy e validações contínuas prontas para utilização em ambiente de produção.
+
 

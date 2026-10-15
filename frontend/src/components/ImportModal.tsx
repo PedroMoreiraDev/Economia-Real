@@ -31,8 +31,8 @@ export const ImportModal: React.FC<ImportModalProps> = ({
     if (e.target.files && e.target.files[0]) {
       const selected = e.target.files[0];
       const lower = selected.name.toLowerCase();
-      if (!lower.endsWith('.ofx') && !lower.endsWith('.csv')) {
-        setError('Por favor, selecione apenas arquivos bancários com extensão .ofx ou .csv.');
+      if (!lower.endsWith('.ofx') && !lower.endsWith('.csv') && !lower.endsWith('.xlsx') && !lower.endsWith('.xls')) {
+        setError('Por favor, selecione apenas arquivos bancários com extensão .ofx, .csv, .xlsx ou .xls.');
         setFile(null);
         return;
       }
@@ -105,7 +105,7 @@ export const ImportModal: React.FC<ImportModalProps> = ({
           </div>
           <div>
             <h2 className="text-xl sm:text-2xl font-black text-slate-800">Importar Extrato</h2>
-            <p className="text-xs sm:text-sm font-bold text-slate-400">Extratos OFX e CSV com conciliação automática</p>
+            <p className="text-xs sm:text-sm font-bold text-slate-400">Extratos OFX, CSV e planilhas Excel com conciliação automática</p>
           </div>
         </div>
 
@@ -172,12 +172,12 @@ export const ImportModal: React.FC<ImportModalProps> = ({
           <form onSubmit={handleSubmit} className="space-y-4">
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-black uppercase tracking-wider text-slate-500">Arquivo do Extrato (.OFX ou .CSV)</label>
+              <label className="block text-xs font-black uppercase tracking-wider text-slate-500">Arquivo do Extrato (.OFX, .CSV ou Excel)</label>
               <div className="border-2 border-dashed border-blue-300 hover:border-[#026CD6] rounded-3xl p-6 text-center cursor-pointer transition-colors relative bg-blue-50/40">
                 <input
                   type="file"
                   required
-                  accept=".ofx,.csv"
+                  accept=".ofx,.csv,.xlsx,.xls"
                   onChange={handleFileChange}
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 />
@@ -193,7 +193,7 @@ export const ImportModal: React.FC<ImportModalProps> = ({
                   ) : (
                     <div>
                       <p className="text-xs sm:text-sm font-black text-slate-700">Arraste ou clique para selecionar</p>
-                      <p className="text-xs font-bold text-slate-400">Formatos aceitos: extrato bancário .ofx ou planilha .csv</p>
+                      <p className="text-xs font-bold text-slate-400">Formatos aceitos: extrato bancário .ofx ou planilhas .csv, .xlsx, .xls</p>
                     </div>
                   )}
                 </div>

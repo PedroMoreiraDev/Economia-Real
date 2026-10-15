@@ -28,6 +28,9 @@ public class BatchCreateBudgetsUseCase {
         if (requests == null || requests.isEmpty()) {
             return results;
         }
+        if (requests.size() > 50) {
+            throw new IllegalArgumentException("O lote de orçamentos não pode conter mais de 50 categorias por operação.");
+        }
 
         for (var req : requests) {
             Budget budget = createOrUpdateBudgetUseCase.execute(

@@ -63,4 +63,55 @@ class CaptchaServiceTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Digite o código exibido");
     }
+
+    @Test
+    @DisplayName("Deve validar com sucesso desafio instantâneo do frontend")
+    void shouldAcceptValidInstantCaptcha() {
+        String challengeId = "instant-test-123";
+        String answer = "A9B2C";
+        long expiresAt = java.time.Instant.now().plusSeconds(180).getEpochSecond();
+        String hash = captchaService.hashInstantAnswer(challengeId, answer);
+
+        String rawToken = "instant:" + challengeId + ":" + hash + ":" + expiresAt;
+        String token = java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(rawToken.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+
+        // Não deve lançar exceção para resposta correta (mesmo em minúsculas)
+        captchaService.validateCaptcha(token, "a9b2c");
+    }
+
+    @Test
+    @DisplayName("Deve rejeitar desafio instantâneo com resposta incorreta")
+    void shouldRejectIncorrectInstantCaptcha() {
+        String challengeId = "instant-test-456";
+        String answer = "A9B2C";
+        long expiresAt = java.time.Instant.now().plusSeconds(180).getEpochSecond();
+        String hash = captchaService.hashInstantAnswer(challengeId, answer);
+
+        String rawToken = "instant:" + challengeId + ":" + hash + ":" + expiresAt;
+        String token = java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(rawToken.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+
+        assertThatThrownBy(() -> captchaService.validateCaptcha(token, "ERRADO"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Código de segurança incorreto");
+    }
+
+    @Test
+    @DisplayName("Deve impedir reutilização (anti-replay) de desafio instantâneo")
+    void shouldPreventReplayOfInstantCaptcha() {
+        String challengeId = "instant-replay-789";
+        String answer = "XYZ88";
+        long expiresAt = java.time.Instant.now().plusSeconds(180).getEpochSecond();
+        String hash = captchaService.hashInstantAnswer(challengeId, answer);
+
+        String rawToken = "instant:" + challengeId + ":" + hash + ":" + expiresAt;
+        String token = java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(rawToken.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+
+        // Primeira validação passa
+        captchaService.validateCaptcha(token, answer);
+
+        // Segunda tentativa com o mesmo token deve ser rejeitada imediatamente
+        assertThatThrownBy(() -> captchaService.validateCaptcha(token, answer))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("já foi utilizado");
+    }
 }

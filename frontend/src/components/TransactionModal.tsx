@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowDownLeft, ArrowUpRight, ArrowLeftRight, X, AlertCircle } from 'lucide-react';
+import { ArrowDownLeft, ArrowUpRight, ArrowLeftRight, X, AlertCircle, Repeat } from 'lucide-react';
 import { Account, Category, CreateTransactionPayload, UpdateTransactionPayload, Transaction, TransactionType } from '../types/financial';
 import { createTransactionApi, updateTransactionApi, createCategoryApi } from '../services/financialApi';
 import { CategoryCombobox } from './CategoryCombobox';
@@ -16,6 +16,13 @@ interface TransactionModalProps {
   initialType?: TransactionType;
   defaultDate?: string;
 }
+
+const extractCleanNotes = (rawNotes?: string) => {
+  if (!rawNotes) return '';
+  if (!rawNotes.includes('RECURRING_INCOME:')) return rawNotes;
+  const pipeIdx = rawNotes.indexOf('|');
+  return pipeIdx >= 0 ? rawNotes.substring(pipeIdx + 1).trim() : '';
+};
 
 export const TransactionModal: React.FC<TransactionModalProps> = ({
   isOpen,
@@ -37,6 +44,9 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   const [categoryId, setCategoryId] = useState('');
   const [categoryName, setCategoryName] = useState('');
   const [notes, setNotes] = useState('');
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [replicateMonths, setReplicateMonths] = useState(12);
+  const [updateFutureRecurring, setUpdateFutureRecurring] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -55,7 +65,10 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       } else {
         setCategoryName('');
       }
-      setNotes(transactionToEdit.notes || '');
+      setNotes(extractCleanNotes(transactionToEdit.notes));
+      const isRec = !!(transactionToEdit.notes && transactionToEdit.notes.includes('RECURRING_INCOME:'));
+      setIsRecurring(isRec);
+      setUpdateFutureRecurring(true);
     } else {
       const startType = initialType || 'INCOME';
       setType(startType);
@@ -64,6 +77,9 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       setAccrualDate(defaultDate || new Date().toISOString().split('T')[0]);
       setAccountId(accounts.length > 0 ? accounts[0].id : '');
       setDestinationAccountId('');
+      setIsRecurring(false);
+      setReplicateMonths(12);
+      setUpdateFutureRecurring(true);
       
       if (startType === 'INCOME') {
         const incomeCat = categories.find(c => 
@@ -123,10 +139,16 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         destinationAccountId: type === 'TRANSFER' ? (destinationAccountId || undefined) : undefined,
         categoryId: finalCategoryId || undefined,
         notes: notes.trim() || undefined,
+        replicateMonths: (type === 'INCOME' && !transactionToEdit && isRecurring) ? replicateMonths : undefined,
       };
 
       if (transactionToEdit) {
-        await updateTransactionApi(token, transactionToEdit.id, payload as UpdateTransactionPayload);
+        const isRec = !!(transactionToEdit.notes && transactionToEdit.notes.includes('RECURRING_INCOME:'));
+        const updatePayload: UpdateTransactionPayload = {
+          ...payload,
+          updateFutureRecurring: isRec ? updateFutureRecurring : undefined,
+        };
+        await updateTransactionApi(token, transactionToEdit.id, updatePayload);
       } else {
         await createTransactionApi(token, payload);
       }
@@ -136,6 +158,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       setCategoryId('');
       setCategoryName('');
       setNotes('');
+      setIsRecurring(false);
       onTransactionCreated();
       onClose();
     } catch (err: unknown) {
@@ -176,7 +199,20 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         <div className="flex bg-slate-100 p-1.5 rounded-2xl mb-6 border-2 border-slate-200/80 gap-1.5">
           <button
             type="button"
-            onClick={() => { setType('INCOME'); setError(null); }}
+            onClick={() => {
+              setType('INCOME');
+              setError(null);
+              if (!categoryId && !categoryName) {
+                const incomeCat = categories.find(c =>
+                  c.name.toLowerCase().includes('salário') ||
+                  c.name.toLowerCase().includes('renda')
+                );
+                if (incomeCat) {
+                  setCategoryId(incomeCat.id);
+                  setCategoryName(incomeCat.name);
+                }
+              }
+            }}
             className={`flex-1 py-2 text-xs font-black rounded-xl flex items-center justify-center gap-1.5 transition-all ${
               type === 'INCOME'
                 ? 'bg-[#58CC02] text-white shadow-[0_3px_0_0_#46A302]'
@@ -188,7 +224,14 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           </button>
           <button
             type="button"
-            onClick={() => { setType('EXPENSE'); setError(null); }}
+            onClick={() => {
+              setType('EXPENSE');
+              setError(null);
+              if (categoryName.toLowerCase().includes('salário') || categoryName.toLowerCase().includes('renda')) {
+                setCategoryId('');
+                setCategoryName('');
+              }
+            }}
             className={`flex-1 py-2 text-xs font-black rounded-xl flex items-center justify-center gap-1.5 transition-all ${
               type === 'EXPENSE'
                 ? 'bg-[#FF4B4B] text-white shadow-[0_3px_0_0_#EA2B2B]'
@@ -257,6 +300,91 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               className="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#58CC02] focus:bg-white transition-all"
             />
           </div>
+
+          {/* Seletor de Renda Recorrente ao Adicionar nova Entrada */}
+          {type === 'INCOME' && !transactionToEdit && (
+            <div className="p-3.5 bg-emerald-50/80 border-2 border-emerald-200/90 rounded-2xl transition-all space-y-2.5">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 rounded-xl bg-emerald-100 text-emerald-700 shrink-0">
+                    <Repeat className="h-4 w-4 stroke-[2.5]" />
+                  </div>
+                  <div>
+                    <span className="text-xs sm:text-sm font-black text-slate-800 block">Renda Recorrente</span>
+                    <span className="text-[11px] font-bold text-slate-500 block">
+                      Repetir automaticamente nos meses seguintes (salário, aluguel, pró-labore)
+                    </span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsRecurring(!isRecurring)}
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                    isRecurring ? 'bg-[#58CC02]' : 'bg-slate-300'
+                  }`}
+                  role="switch"
+                  aria-checked={isRecurring}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                      isRecurring ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+              </div>
+
+              {isRecurring && (
+                <div className="pt-2.5 border-t border-emerald-200/60 flex items-center justify-between gap-2 flex-wrap">
+                  <span className="text-xs font-black text-emerald-900">
+                    Projeção nos próximos meses:
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    {[6, 12, 24].map((m) => (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() => setReplicateMonths(m)}
+                        className={`px-2.5 py-1 text-xs font-black rounded-xl border transition-all ${
+                          replicateMonths === m
+                            ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                            : 'bg-white text-slate-600 border-slate-200 hover:bg-emerald-100/50'
+                        }`}
+                      >
+                        {m} meses {m === 12 ? '(1 ano)' : ''}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Opção ao Editar Renda Recorrente */}
+          {transactionToEdit && transactionToEdit.notes && transactionToEdit.notes.includes('RECURRING_INCOME:') && (
+            <div className="p-3.5 bg-amber-50/90 border-2 border-amber-300 rounded-2xl space-y-2">
+              <div className="flex items-center gap-2 text-amber-800">
+                <Repeat className="h-4 w-4 shrink-0 stroke-[2.5]" />
+                <span className="text-xs font-black uppercase tracking-wider">Renda Recorrente Vinculada</span>
+              </div>
+              <p className="text-xs font-bold text-slate-600">
+                Este lançamento pertence a uma receita recorrente projetada nos meses futuros.
+              </p>
+              <label className="flex items-start gap-2.5 cursor-pointer pt-1 bg-white/70 p-2.5 rounded-xl border border-amber-200/80">
+                <input
+                  type="checkbox"
+                  checked={updateFutureRecurring}
+                  onChange={(e) => setUpdateFutureRecurring(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 accent-emerald-600"
+                />
+                <span className="text-xs font-bold text-slate-800 leading-tight">
+                  Atualizar <strong>esta e todas as receitas futuras</strong> deste grupo
+                  <span className="block text-[11px] font-medium text-slate-500 mt-0.5">
+                    O histórico dos meses passados será mantido intacto.
+                  </span>
+                </span>
+              </label>
+            </div>
+          )}
 
           {type === 'TRANSFER' ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

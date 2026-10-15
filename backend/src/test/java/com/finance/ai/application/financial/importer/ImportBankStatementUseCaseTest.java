@@ -135,4 +135,50 @@ class ImportBankStatementUseCaseTest {
         assertThat(payment.getType()).isEqualTo(TransactionType.INVOICE_PAYMENT);
         assertThat(payment.getOrigin()).isEqualTo(TransactionOrigin.CSV_IMPORT);
     }
+
+    @Test
+    @DisplayName("Deve importar lançamentos de planilha Excel (.xlsx) atribuindo EXCEL_IMPORT e calculando mês de referência")
+    void shouldImportTransactionsFromExcelFile() throws IOException {
+        UUID userId = UUID.randomUUID();
+        UUID accountId = UUID.randomUUID();
+
+        var account = Account.create(userId, "Banco Inter", AccountType.CHECKING, BigDecimal.ZERO);
+        when(accountRepository.findByIdAndUserId(accountId, userId)).thenReturn(Optional.of(account));
+        when(transactionRepository.findAllByUserId(userId)).thenReturn(List.of());
+        when(importBatchRepository.save(any(ImportBatch.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        byte[] xlsxBytes;
+        try (var workbook = new org.apache.poi.xssf.usermodel.XSSFWorkbook();
+             var out = new java.io.ByteArrayOutputStream()) {
+            var sheet = workbook.createSheet("Extrato");
+            var header = sheet.createRow(0);
+            header.createCell(0).setCellValue("Data");
+            header.createCell(1).setCellValue("Descrição");
+            header.createCell(2).setCellValue("Valor");
+
+            var row1 = sheet.createRow(1);
+            row1.createCell(0).setCellValue("2026-10-15");
+            row1.createCell(1).setCellValue("Rendimento Aplicação");
+            row1.createCell(2).setCellValue(350.00);
+
+            workbook.write(out);
+            xlsxBytes = out.toByteArray();
+        }
+
+        var result = importUseCase.execute(userId, accountId, "extrato_outubro.xlsx", xlsxBytes);
+
+        assertThat(result.importedCount()).isEqualTo(1);
+        assertThat(result.skippedCount()).isEqualTo(0);
+        assertThat(result.fileType()).isEqualTo("EXCEL");
+        assertThat(result.referenceMonth()).isEqualTo("2026-10");
+
+        org.mockito.ArgumentCaptor<Transaction> txCaptor = org.mockito.ArgumentCaptor.forClass(Transaction.class);
+        verify(transactionRepository).save(txCaptor.capture());
+
+        var savedTx = txCaptor.getValue();
+        assertThat(savedTx.getDescription()).isEqualTo("Rendimento Aplicação");
+        assertThat(savedTx.getAmount()).isEqualByComparingTo(new BigDecimal("350.00"));
+        assertThat(savedTx.getType()).isEqualTo(TransactionType.INCOME);
+        assertThat(savedTx.getOrigin()).isEqualTo(TransactionOrigin.EXCEL_IMPORT);
+    }
 }

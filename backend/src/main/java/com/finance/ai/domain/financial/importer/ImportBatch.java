@@ -59,7 +59,7 @@ public class ImportBatch {
     private static String validateFileType(String fileType) {
         if (fileType == null) throw new IllegalArgumentException("Tipo de arquivo é obrigatório.");
         var upper = fileType.toUpperCase().trim();
-        if (!upper.equals("CSV") && !upper.equals("OFX")) {
+        if (!upper.equals("CSV") && !upper.equals("OFX") && !upper.equals("EXCEL")) {
             throw new IllegalArgumentException("Tipo de arquivo não suportado: " + fileType);
         }
         return upper;

@@ -47,6 +47,10 @@ public class PayRecurringBillUseCase {
                 ? cmd.replicateMonths()
                 : 1;
 
+        if (monthsToLaunch > 60) {
+            throw new IllegalArgumentException("O período máximo de replicação de despesas é de 60 meses.");
+        }
+
         String notes = "RECURRING_BILL:" + bill.getId() + " - Lançamento da despesa fixa: " + bill.getDescription();
 
         for (int i = 0; i < monthsToLaunch; i++) {

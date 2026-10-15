@@ -20,8 +20,8 @@ public class PiiSanitizer {
     // Expressão regular para emails
     private static final Pattern EMAIL_PATTERN = Pattern.compile("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}");
 
-    // Expressão regular para telefones com DDD brasileiro (ex: (11) 98765-4321 ou 11987654321)
-    private static final Pattern PHONE_PATTERN = Pattern.compile("(?:\\(?\\d{2}\\)?\\s?)?(?:9\\d{4}|[2-8]\\d{3})[- ]?\\d{4}");
+    // Expressão regular para telefones fixos e celulares brasileiros (com ou sem DDD)
+    private static final Pattern PHONE_PATTERN = Pattern.compile("(?:\\(\\d{2}\\)\\s*(?:9\\d{4}|[2-9]\\d{3})[- ]?\\d{4}|\\b\\d{2}\\s+(?:9\\d{4}|[2-9]\\d{3})[- ]\\d{4}\\b|\\b(?:9\\d{4}|[2-9]\\d{3})[- ]\\d{4}\\b)");
 
     public String sanitize(String input) {
         if (input == null || input.isBlank()) {
@@ -32,6 +32,7 @@ public class PiiSanitizer {
         result = EMAIL_PATTERN.matcher(result).replaceAll("[EMAIL_REMOVIDO]");
         result = CPF_PATTERN.matcher(result).replaceAll("[CPF_REMOVIDO]");
         result = CREDIT_CARD_PATTERN.matcher(result).replaceAll("[CARTAO_REMOVIDO]");
+        result = PHONE_PATTERN.matcher(result).replaceAll("[TELEFONE_REMOVIDO]");
 
         return result.trim();
     }

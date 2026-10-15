@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   Calendar, 
   Plus, 
@@ -154,7 +155,7 @@ export const RecurringBillsSection: React.FC<RecurringBillsSectionProps> = ({
   const paidThisMonthCount = bills.filter((b) => b.isPaidThisMonth).length;
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6">
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
@@ -411,9 +412,15 @@ export const RecurringBillsSection: React.FC<RecurringBillsSectionProps> = ({
       )}
 
       {/* Modal de Confirmação de Lançamento com Replicação */}
-      {billToLaunch && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-          <div className="relative w-full max-w-md rounded-3xl bg-white border-2 border-slate-200 p-6 sm:p-7 shadow-2xl">
+      {billToLaunch && typeof document !== 'undefined' && createPortal(
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-slate-900/40 backdrop-blur-sm animate-fade-in overflow-y-auto"
+          onClick={() => setBillToLaunch(null)}
+        >
+          <div
+            className="relative w-full max-w-md rounded-3xl bg-white border-2 border-slate-200 p-6 sm:p-7 shadow-2xl max-h-[92vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               onClick={() => setBillToLaunch(null)}
               className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
@@ -512,7 +519,8 @@ export const RecurringBillsSection: React.FC<RecurringBillsSectionProps> = ({
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Modal */}

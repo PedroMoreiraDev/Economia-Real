@@ -6,6 +6,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -28,9 +29,21 @@ public class JwtTokenProvider implements TokenProvider {
 
     private final SecretKey signingKey;
 
-    public JwtTokenProvider(@Value("${app.security.jwt-secret:super-secret-jwt-key-finance-ai-2026-minimum-32-chars-long!}") String jwtSecret) {
+    public JwtTokenProvider(String jwtSecret) {
+        this(jwtSecret, "local");
+    }
+    @Autowired
+    public JwtTokenProvider(@Value("${app.security.jwt-secret:super-secret-jwt-key-finance-ai-2026-minimum-32-chars-long!}") String jwtSecret,
+            @Value("${spring.profiles.active:local}") String activeProfile) {
         if (jwtSecret.length() < 32) {
             throw new IllegalStateException("JWT secret deve ter ao menos 32 caracteres.");
+        }
+        boolean isProduction = "prod".equalsIgnoreCase(activeProfile) || "production".equalsIgnoreCase(activeProfile);
+        if (isProduction && "super-secret-jwt-key-finance-ai-2026-minimum-32-chars-long!".equals(jwtSecret)) {
+            throw new IllegalStateException("CRÍTICO DE SEGURANÇA: A chave JWT padrão não pode ser utilizada em ambiente de produção! Configure a variável de ambiente JWT_SECRET com um segredo aleatório e seguro.");
+        }
+        if ("super-secret-jwt-key-finance-ai-2026-minimum-32-chars-long!".equals(jwtSecret)) {
+            log.warn("ATENÇÃO: Utilizando chave JWT padrão de desenvolvimento. Certifique-se de configurar JWT_SECRET para ambientes públicos.");
         }
         this.signingKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }

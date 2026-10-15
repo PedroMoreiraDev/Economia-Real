@@ -61,6 +61,7 @@ export interface CreateTransactionPayload {
   destinationAccountId?: string;
   categoryId?: string;
   notes?: string;
+  replicateMonths?: number;
 }
 
 export interface UpdateTransactionPayload {
@@ -73,6 +74,7 @@ export interface UpdateTransactionPayload {
   destinationAccountId?: string;
   categoryId?: string;
   notes?: string;
+  updateFutureRecurring?: boolean;
 }
 
 export interface FinancialSummary {

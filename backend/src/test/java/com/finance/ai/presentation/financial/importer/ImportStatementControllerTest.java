@@ -102,6 +102,48 @@ class ImportStatementControllerTest {
     }
 
     @Test
+    @DisplayName("POST /api/v1/imports/upload - deve processar arquivo Excel XLSX com sucesso (201)")
+    void shouldUploadExcelFileSuccessfully() throws Exception {
+        UUID userId = UUID.randomUUID();
+        UUID accountId = UUID.randomUUID();
+        String token = "valid.jwt.token";
+        User user = new User(userId, "pedro@teste.com", "Pedro", "$2a$12$hash", Instant.now());
+
+        when(jwtTokenProvider.isTokenValid(token)).thenReturn(true);
+        when(jwtTokenProvider.extractUserId(token)).thenReturn(userId);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "extrato_bancario.xlsx",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "dummy-xlsx-content".getBytes()
+        );
+
+        var result = new ImportStatementResult(
+                UUID.randomUUID(),
+                "extrato_bancario.xlsx",
+                "EXCEL",
+                8,
+                2,
+                "Importação concluída com sucesso."
+        );
+
+        when(importUseCase.execute(eq(userId), eq(accountId), eq("extrato_bancario.xlsx"), any())).thenReturn(result);
+
+        mockMvc.perform(multipart("/api/v1/imports/upload")
+                        .file(file)
+                        .param("accountId", accountId.toString())
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.importedCount").value(8))
+                .andExpect(jsonPath("$.skippedCount").value(2))
+                .andExpect(jsonPath("$.fileType").value("EXCEL"));
+
+        verify(importUseCase).execute(eq(userId), eq(accountId), eq("extrato_bancario.xlsx"), any());
+    }
+
+    @Test
     @DisplayName("POST /api/v1/imports/upload - deve rejeitar extensão inválida (400)")
     void shouldRejectUnsupportedFileExtension() throws Exception {
         UUID userId = UUID.randomUUID();
@@ -125,6 +167,6 @@ class ImportStatementControllerTest {
                         .param("accountId", accountId.toString())
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Formato não suportado. Envie apenas arquivos .ofx ou .csv."));
+                .andExpect(jsonPath("$.message").value("Formato não suportado. Envie apenas arquivos .ofx, .csv, .xlsx ou .xls."));
     }
 }

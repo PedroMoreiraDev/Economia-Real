@@ -99,8 +99,15 @@ export async function updateTransactionApi(token: string, id: string, payload: U
   return handleResponse<Transaction>(res);
 }
 
-export async function deleteTransactionApi(token: string, id: string): Promise<void> {
-  const res = await fetch(`${API_BASE_URL}/transactions/${id}`, {
+export async function deleteTransactionApi(
+  token: string,
+  id: string,
+  deleteFutureRecurring: boolean = false
+): Promise<void> {
+  const url = deleteFutureRecurring
+    ? `${API_BASE_URL}/transactions/${id}?deleteFutureRecurring=true`
+    : `${API_BASE_URL}/transactions/${id}`;
+  const res = await fetch(url, {
     method: 'DELETE',
     headers: authHeaders(token),
   });

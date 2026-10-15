@@ -13,9 +13,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -69,7 +72,8 @@ public class TransactionController {
                 request.accountId(),
                 request.destinationAccountId(),
                 request.categoryId(),
-                request.notes()
+                request.notes(),
+                request.replicateMonths()
         );
 
         return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(transaction));
@@ -122,7 +126,8 @@ public class TransactionController {
                 request.accountId(),
                 request.destinationAccountId(),
                 request.categoryId(),
-                request.notes()
+                request.notes(),
+                request.updateFutureRecurring() != null && request.updateFutureRecurring()
         );
 
         return ResponseEntity.ok(toResponse(updated));
@@ -132,11 +137,12 @@ public class TransactionController {
     @Operation(summary = "Exclui uma movimentação financeira do usuário")
     public ResponseEntity<Void> delete(
             @AuthenticationPrincipal AuthenticatedUser user,
-            @PathVariable UUID id) {
+            @PathVariable UUID id,
+            @RequestParam(defaultValue = "false") boolean deleteFutureRecurring) {
 
         if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
-        deleteTransactionUseCase.execute(user.userId(), id);
+        deleteTransactionUseCase.execute(user.userId(), id, deleteFutureRecurring);
         return ResponseEntity.noContent().build();
     }
 
@@ -144,7 +150,7 @@ public class TransactionController {
     @Operation(summary = "Exclui múltiplas movimentações financeiras do usuário em lote")
     public ResponseEntity<Void> deleteBatch(
             @AuthenticationPrincipal AuthenticatedUser user,
-            @RequestBody List<UUID> transactionIds) {
+            @Valid @NotNull @Size(min = 1, max = 200, message = "O lote de exclusão deve conter entre 1 e 200 itens.") @RequestBody List<UUID> transactionIds) {
 
         if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
@@ -175,11 +181,14 @@ public class TransactionController {
             @NotNull @Positive BigDecimal amount,
             @NotNull LocalDate accrualDate,
             LocalDate settlementDate,
-            @NotBlank String description,
+            @NotBlank @Size(max = 255, message = "A descrição não pode exceder 255 caracteres.") String description,
             UUID accountId,
             UUID destinationAccountId,
             UUID categoryId,
-            String notes
+            @Size(max = 1000, message = "As observações não podem exceder 1000 caracteres.") String notes,
+            @Min(value = 1, message = "O período de replicação deve ser no mínimo 1 mês.")
+            @Max(value = 60, message = "O período de replicação não pode exceder 60 meses.")
+            Integer replicateMonths
     ) {}
 
     public record UpdateTransactionRequest(
@@ -187,11 +196,12 @@ public class TransactionController {
             @NotNull @Positive BigDecimal amount,
             @NotNull LocalDate accrualDate,
             LocalDate settlementDate,
-            @NotBlank String description,
+            @NotBlank @Size(max = 255, message = "A descrição não pode exceder 255 caracteres.") String description,
             UUID accountId,
             UUID destinationAccountId,
             UUID categoryId,
-            String notes
+            @Size(max = 1000, message = "As observações não podem exceder 1000 caracteres.") String notes,
+            Boolean updateFutureRecurring
     ) {}
 
     public record TransactionResponse(

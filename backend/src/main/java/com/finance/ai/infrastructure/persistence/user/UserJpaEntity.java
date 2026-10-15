@@ -35,11 +35,17 @@ public class UserJpaEntity {
     @Column(name = "verification_code_expires_at")
     private Instant verificationCodeExpiresAt;
 
+    @Column(name = "verification_attempts", nullable = false)
+    private int verificationAttempts = 0;
+
     @Column(name = "password_reset_code", length = 6)
     private String passwordResetCode;
 
     @Column(name = "password_reset_expires_at")
     private Instant passwordResetExpiresAt;
+
+    @Column(name = "password_reset_attempts", nullable = false)
+    private int passwordResetAttempts = 0;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -51,7 +57,9 @@ public class UserJpaEntity {
 
     public UserJpaEntity(UUID id, String email, String passwordHash, String fullName,
                          boolean emailVerified, String verificationCode, Instant verificationCodeExpiresAt,
+                         int verificationAttempts,
                          String passwordResetCode, Instant passwordResetExpiresAt,
+                         int passwordResetAttempts,
                          Instant createdAt, Instant updatedAt) {
         this.id = id;
         this.email = email;
@@ -60,8 +68,10 @@ public class UserJpaEntity {
         this.emailVerified = emailVerified;
         this.verificationCode = verificationCode;
         this.verificationCodeExpiresAt = verificationCodeExpiresAt;
+        this.verificationAttempts = verificationAttempts;
         this.passwordResetCode = passwordResetCode;
         this.passwordResetExpiresAt = passwordResetExpiresAt;
+        this.passwordResetAttempts = passwordResetAttempts;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -73,8 +83,10 @@ public class UserJpaEntity {
     public boolean isEmailVerified() { return emailVerified; }
     public String getVerificationCode() { return verificationCode; }
     public Instant getVerificationCodeExpiresAt() { return verificationCodeExpiresAt; }
+    public int getVerificationAttempts() { return verificationAttempts; }
     public String getPasswordResetCode() { return passwordResetCode; }
     public Instant getPasswordResetExpiresAt() { return passwordResetExpiresAt; }
+    public int getPasswordResetAttempts() { return passwordResetAttempts; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
 }

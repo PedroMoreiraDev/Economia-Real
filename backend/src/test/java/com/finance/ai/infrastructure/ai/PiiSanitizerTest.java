@@ -38,6 +38,22 @@ class PiiSanitizerTest {
     }
 
     @Test
+    @DisplayName("Deve mascarar números de telefone preservando texto financeiro normal")
+    void shouldSanitizePhoneNumber() {
+        String input1 = "Fiz pix para o telefone (11) 98765-4321 no valor de 80 reais";
+        String output1 = sanitizer.sanitize(input1);
+        assertThat(output1).contains("[TELEFONE_REMOVIDO]");
+        assertThat(output1).doesNotContain("98765-4321");
+        assertThat(output1).contains("80");
+
+        String input2 = "Contato 9988-7766 pagamento de 250";
+        String output2 = sanitizer.sanitize(input2);
+        assertThat(output2).contains("[TELEFONE_REMOVIDO]");
+        assertThat(output2).doesNotContain("9988-7766");
+        assertThat(output2).contains("250");
+    }
+
+    @Test
     @DisplayName("Deve manter texto puro inalterado quando não há dados sensíveis")
     void shouldKeepNormalTextIntact() {
         String input = "Almoço executivo 45 reais hoje no débito";

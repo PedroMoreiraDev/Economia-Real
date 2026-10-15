@@ -23,6 +23,7 @@ import {
   forgotPasswordApi,
   resetPasswordApi,
   fetchCaptchaApi,
+  generateInstantCaptcha,
   AuthApiException,
 } from '../services/authApi';
 import { useAuth } from '../context/AuthContext';
@@ -56,24 +57,28 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Estado do CAPTCHA visual com imagem (Base64 PNG ou SVG)
-  const [captcha, setCaptcha] = useState<CaptchaChallenge | null>(null);
+  // Estado do CAPTCHA visual com imagem: inicializado imediatamente com desafio gerado em 0ms
+  const [captcha, setCaptcha] = useState<CaptchaChallenge>(() => generateInstantCaptcha());
   const [captchaAnswer, setCaptchaAnswer] = useState('');
   const [loadingCaptcha, setLoadingCaptcha] = useState(false);
-  const [captchaLoadError, setCaptchaLoadError] = useState<string | null>(null);
 
   const { login } = useAuth();
 
   const loadCaptcha = useCallback(async () => {
+    // 1. Gera de imediato (0ms) um novo desafio para o usuário nunca esperar
+    const instant = generateInstantCaptcha();
+    setCaptcha(instant);
+    setCaptchaAnswer('');
+
+    // 2. Tenta buscar em segundo plano desafio do backend sem travar a interface
     setLoadingCaptcha(true);
-    setCaptchaLoadError(null);
     try {
-      const challenge = await fetchCaptchaApi();
-      setCaptcha(challenge);
-      setCaptchaAnswer('');
-    } catch (err) {
-      console.error('Falha ao carregar captcha:', err);
-      setCaptchaLoadError('Falha ao conectar com o servidor para carregar a segurança.');
+      const challenge = await fetchCaptchaApi(true);
+      if (challenge) {
+        setCaptcha(challenge);
+      }
+    } catch {
+      // Silencioso: o desafio instantâneo já está perfeitamente funcional
     } finally {
       setLoadingCaptcha(false);
     }
@@ -255,41 +260,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
-  // Renderiza o componente do CAPTCHA visual com imagem
+  // Renderiza o componente do CAPTCHA visual com imagem (exibido de imediato, em 0ms)
   const renderCaptchaWidget = () => {
-    if (loadingCaptcha && !captcha) {
-      return (
-        <div className="p-3.5 bg-slate-50 border-2 border-slate-200 rounded-2xl min-h-[96px] flex flex-col items-center justify-center text-center gap-1.5 animate-pulse">
-          <div className="flex items-center gap-2.5 text-xs font-bold text-slate-600">
-            <span className="h-4 w-4 border-2 border-[#026CD6] border-t-transparent rounded-full animate-spin shrink-0" />
-            <span>Carregando verificação de segurança...</span>
-          </div>
-          <span className="text-[11px] font-semibold text-slate-400">
-            Aguardando resposta do servidor seguro
-          </span>
-        </div>
-      );
-    }
-
-    if (captchaLoadError && !captcha) {
-      return (
-        <div className="p-3 bg-rose-50/70 border-2 border-rose-200 rounded-2xl min-h-[96px] flex flex-col items-center justify-center text-center gap-2">
-          <p className="text-xs font-bold text-rose-600">
-            Não foi possível carregar a imagem de segurança (o servidor pode estar acordando).
-          </p>
-          <button
-            type="button"
-            onClick={loadCaptcha}
-            disabled={loadingCaptcha}
-            className="px-3 py-1.5 bg-white border border-rose-300 rounded-xl text-xs font-black text-rose-700 hover:bg-rose-50 shadow-sm flex items-center gap-1.5 transition-all cursor-pointer"
-          >
-            <RefreshCw className={`h-3 w-3 ${loadingCaptcha ? 'animate-spin' : ''}`} />
-            Tentar carregar novamente
-          </button>
-        </div>
-      );
-    }
-
     if (!captcha) return null;
 
     return (
@@ -303,26 +275,22 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             type="button"
             onClick={loadCaptcha}
             disabled={loadingCaptcha}
-            className="flex items-center gap-1 text-[11px] font-bold text-slate-500 hover:text-slate-800 transition-colors"
+            className="flex items-center gap-1 text-[11px] font-bold text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
             title="Trocar imagem"
           >
-            <RefreshCw className={`h-3 w-3 ${loadingCaptcha ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-3 w-3 ${loadingCaptcha ? 'animate-spin text-[#026CD6]' : ''}`} />
             Trocar
           </button>
         </div>
 
         <div className="flex items-center gap-2.5">
-          {/* Imagem do CAPTCHA renderizada diretamente do Base64 do backend */}
+          {/* Imagem do CAPTCHA renderizada diretamente do Base64 (SVG ou PNG) */}
           <div className="relative shrink-0 overflow-hidden rounded-xl border-2 border-slate-200 bg-white shadow-inner flex items-center justify-center min-w-[130px] h-[44px]">
-            {loadingCaptcha ? (
-              <span className="h-4 w-4 border-2 border-[#026CD6] border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <img
-                src={captcha.imageBase64}
-                alt="Código de segurança"
-                className="w-full h-full object-cover select-none pointer-events-none"
-              />
-            )}
+            <img
+              src={captcha.imageBase64}
+              alt="Código de segurança"
+              className="w-full h-full object-cover select-none pointer-events-none"
+            />
           </div>
 
           <input

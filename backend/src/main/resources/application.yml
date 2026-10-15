@@ -15,6 +15,11 @@ spring:
     exclude:
       - org.springframework.boot.actuate.autoconfigure.mail.MailHealthContributorAutoConfiguration
 
+  servlet:
+    multipart:
+      max-file-size: 15MB
+      max-request-size: 20MB
+
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:finance_db}}
     username: ${SPRING_DATASOURCE_USERNAME:${POSTGRES_USER:finance_user}}
@@ -62,10 +67,10 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        include: health,info
   endpoint:
     health:
-      show-details: always
+      show-details: when-authorized
   health:
     mail:
       enabled: false

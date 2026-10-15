@@ -86,8 +86,17 @@ public class ExportTransactionsCsvUseCase {
 
     private String escapeCsv(String val) {
         if (val == null) return "";
-        String s = val.replace("\"", "\"\"");
-        if (s.contains(";") || s.contains("\n") || s.contains("\"")) {
+        String s = val.trim();
+        // Prevenção contra CSV Formula Injection (CWE-1236):
+        // Se a célula começar com '=', '+', '-', '@', '\t' ou '\r', prefixamos com apóstrofo (')
+        if (!s.isEmpty()) {
+            char first = s.charAt(0);
+            if (first == '=' || first == '+' || first == '-' || first == '@' || first == '\t' || first == '\r') {
+                s = "'" + s;
+            }
+        }
+        s = s.replace("\"", "\"\"");
+        if (s.contains(";") || s.contains("\n") || s.contains("\"") || s.contains(",")) {
             return "\"" + s + "\"";
         }
         return s;

@@ -95,13 +95,13 @@ class TransactionControllerTest {
                 LocalDate.now(),
                 null,
                 "Freelance",
-                null, null, null, "Projeto de software"
+                null, null, null, "Projeto de software", null
         );
 
         var created = Transaction.create(userId, TransactionType.INCOME, new BigDecimal("2500.00"),
                 LocalDate.now(), null, "Freelance", null, null, null, "Projeto de software");
 
-        when(createTransactionUseCase.execute(eq(userId), eq(TransactionType.INCOME), any(), any(), any(), eq("Freelance"), any(), any(), any(), any()))
+        when(createTransactionUseCase.execute(eq(userId), eq(TransactionType.INCOME), any(), any(), any(), eq("Freelance"), any(), any(), any(), any(), any()))
                 .thenReturn(created);
 
         mockMvc.perform(post("/api/v1/transactions")
@@ -114,7 +114,7 @@ class TransactionControllerTest {
                 .andExpect(jsonPath("$.description").value("Freelance"));
 
         // Verificação anti-IDOR: o use case recebeu OBRIGATORIAMENTE o userId do token
-        verify(createTransactionUseCase).execute(eq(userId), any(), any(), any(), any(), any(), any(), any(), any(), any());
+        verify(createTransactionUseCase).execute(eq(userId), any(), any(), any(), any(), any(), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -177,7 +177,7 @@ class TransactionControllerTest {
         when(updateTransactionUseCase.execute(
                 eq(userId), eq(transactionId), eq(TransactionType.EXPENSE), eq(new BigDecimal("250.00")),
                 eq(LocalDate.of(2026, 10, 6)), isNull(), eq("Mercado Atualizado"),
-                isNull(), isNull(), isNull(), eq("Nota atualizada")
+                isNull(), isNull(), isNull(), eq("Nota atualizada"), eq(false)
         )).thenReturn(updated);
 
         var requestBody = new TransactionController.UpdateTransactionRequest(
@@ -189,7 +189,8 @@ class TransactionControllerTest {
                 null,
                 null,
                 null,
-                "Nota atualizada"
+                "Nota atualizada",
+                null
         );
 
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/api/v1/transactions/" + transactionId)
@@ -203,7 +204,7 @@ class TransactionControllerTest {
         verify(updateTransactionUseCase).execute(
                 eq(userId), eq(transactionId), eq(TransactionType.EXPENSE), eq(new BigDecimal("250.00")),
                 eq(LocalDate.of(2026, 10, 6)), isNull(), eq("Mercado Atualizado"),
-                isNull(), isNull(), isNull(), eq("Nota atualizada")
+                isNull(), isNull(), isNull(), eq("Nota atualizada"), eq(false)
         );
     }
 
@@ -223,7 +224,7 @@ class TransactionControllerTest {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isNoContent());
 
-        verify(deleteTransactionUseCase).execute(eq(userId), eq(transactionId));
+        verify(deleteTransactionUseCase).execute(eq(userId), eq(transactionId), eq(false));
     }
 
     @Test
