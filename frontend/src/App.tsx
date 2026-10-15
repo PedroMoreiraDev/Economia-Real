@@ -57,6 +57,7 @@ import { ConfirmModal } from './components/ConfirmModal';
 import { OnboardingTourModal } from './components/OnboardingTourModal';
 import { CurrencyInput, InlineCurrencyInput } from './components/CurrencyInput';
 import { exportTransactionsCsvApi } from './services/goalApi';
+import { warmUpBackend } from './services/authApi';
 import {
   Account,
   Category,
@@ -198,6 +199,14 @@ const MainDashboard: React.FC = () => {
       setIsTourOpen(false);
     }
   }, [isAuthenticated, user?.id]);
+
+  // Pré-aquecimento silencioso do backend em segundo plano para acordar a instância no Render
+  // antes mesmo do usuário interagir, eliminando qualquer espera de inicialização do servidor
+  useEffect(() => {
+    if (!isAuthenticated) {
+      warmUpBackend();
+    }
+  }, [isAuthenticated]);
 
   // Meta global de gastos (Teto Mensal) - Linha do tempo histórica contábil por usuário
   const [, setSpendingTimeline] = useState<Record<string, number>>({});
@@ -822,6 +831,8 @@ const MainDashboard: React.FC = () => {
                     setAuthModalMode('login');
                     setAuthModalOpen(true);
                   }}
+                  onMouseEnter={warmUpBackend}
+                  onTouchStart={warmUpBackend}
                   className="btn-duo btn-duo-white text-xs px-4 py-2"
                 >
                   <LogIn className="h-4 w-4 mr-1 text-slate-500" />
@@ -832,6 +843,8 @@ const MainDashboard: React.FC = () => {
                     setAuthModalMode('register');
                     setAuthModalOpen(true);
                   }}
+                  onMouseEnter={warmUpBackend}
+                  onTouchStart={warmUpBackend}
                   className="btn-duo btn-duo-green text-xs px-4 py-2"
                 >
                   Cadastrar Grátis

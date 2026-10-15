@@ -15,6 +15,7 @@ import {
   Check,
   AlertTriangle
 } from 'lucide-react';
+import { warmUpBackend } from '../services/authApi';
 
 interface LandingPageProps {
   onOpenLogin: () => void;
@@ -76,6 +77,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin, onOpenReg
             <div className="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
               <button
                 onClick={onOpenRegister}
+                onMouseEnter={warmUpBackend}
+                onTouchStart={warmUpBackend}
                 className="btn-duo btn-duo-green w-full sm:w-auto text-base sm:text-lg px-8 py-4 flex items-center justify-center gap-3 shadow-xl shadow-emerald-600/30 border-b-4 border-emerald-700 hover:scale-[1.02] transition-transform"
               >
                 <Zap className="h-5 w-5 fill-white stroke-[2.5]" />
@@ -85,6 +88,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin, onOpenReg
 
               <button
                 onClick={onOpenLogin}
+                onMouseEnter={warmUpBackend}
+                onTouchStart={warmUpBackend}
                 className="btn-duo btn-duo-white w-full sm:w-auto text-base px-6 py-4 flex items-center justify-center gap-2 border-slate-300 text-slate-800 hover:bg-slate-100"
               >
                 Já tenho conta cadastrada
@@ -877,6 +882,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin, onOpenReg
           <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
               onClick={onOpenRegister}
+              onMouseEnter={warmUpBackend}
+              onTouchStart={warmUpBackend}
               className="btn-duo btn-duo-green w-full sm:w-auto text-base sm:text-lg px-8 py-4 flex items-center justify-center gap-3 shadow-2xl shadow-emerald-950/40 border-b-4 border-emerald-800 hover:scale-[1.02] transition-transform"
             >
               <Zap className="h-5 w-5 fill-white stroke-[2.5]" />
@@ -885,6 +892,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin, onOpenReg
             </button>
             <button
               onClick={onOpenLogin}
+              onMouseEnter={warmUpBackend}
+              onTouchStart={warmUpBackend}
               className="btn-duo btn-duo-white w-full sm:w-auto text-base px-6 py-4 flex items-center justify-center gap-2 text-slate-800"
             >
               Já tenho conta cadastrada

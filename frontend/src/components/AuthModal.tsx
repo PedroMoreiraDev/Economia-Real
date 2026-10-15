@@ -79,9 +79,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   }, []);
 
-  // Sempre que o modal abrir ou mudar para login, register ou forgot, carrega o CAPTCHA
+  // Carrega o CAPTCHA apenas para cadastro (register) ou recuperação (forgot)
+  // O modo de login não exige CAPTCHA, permitindo entrada imediata sem bloqueios ou telas de espera
   useEffect(() => {
-    if (isOpen && (mode === 'login' || mode === 'register' || mode === 'forgot')) {
+    if (isOpen && (mode === 'register' || mode === 'forgot')) {
       loadCaptcha();
     }
   }, [isOpen, mode, loadCaptcha]);
@@ -118,7 +119,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setLoading(true);
 
     try {
-      if ((mode === 'login' || mode === 'register' || mode === 'forgot') && !captcha) {
+      // Bloqueio de segurança apenas para cadastro de nova conta ou recuperação de senha
+      if ((mode === 'register' || mode === 'forgot') && !captcha) {
         setErrorMessage('Aguarde o carregamento do código de segurança antes de prosseguir.');
         setLoading(false);
         return;
@@ -128,8 +130,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         const response = await loginApi({
           email: email.trim(),
           password,
-          captchaToken: captcha?.token,
-          captchaAnswer: captchaAnswer.trim(),
         });
         login(response.accessToken, {
           id: response.userId,
@@ -139,7 +139,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         setSuccessMessage('Login efetuado com sucesso!');
         setTimeout(() => {
           onClose();
-        }, 600);
+        }, 500);
+        return;
       } else if (mode === 'register') {
         const response = await registerApi({
           email: email.trim(),
@@ -732,8 +733,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               )}
             </div>
 
-            {/* WIDGET DE CAPTCHA VISUAL COM IMAGEM */}
-            {renderCaptchaWidget()}
+            {/* WIDGET DE CAPTCHA VISUAL - Exclusivo para cadastro de novos usuários contra robôs */}
+            {mode === 'register' && renderCaptchaWidget()}
 
             <button
               type="submit"
