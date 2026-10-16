@@ -1917,19 +1917,22 @@ const MainDashboard: React.FC = () => {
 
                                         return (
                                           <span
-                                            className={`inline-flex items-center gap-1 text-[10px] font-black px-1.5 py-0.5 rounded-md ${
+                                            className={`inline-flex items-center gap-1 text-[10px] font-black px-1.5 py-0.5 rounded-md whitespace-nowrap shrink-0 leading-none ${
                                               isIncome
-                                                ? 'text-emerald-700 bg-emerald-100 border border-emerald-300'
-                                                : 'text-rose-700 bg-rose-100 border border-rose-300'
+                                                ? 'text-emerald-700 bg-emerald-100/90 border border-emerald-300'
+                                                : 'text-rose-700 bg-rose-100/90 border border-rose-300'
                                             }`}
                                             title={progress ? progress.tooltip : (isIncome ? 'Renda Recorrente' : 'Despesa Recorrente')}
                                           >
-                                            <Repeat className="w-2.5 h-2.5 stroke-[2.5]" />
-                                            <span>Recorrente</span>
+                                            <Repeat className="w-2.5 h-2.5 stroke-[2.5] shrink-0" />
+                                            <span className="whitespace-nowrap">Recorrente</span>
                                             {progress && (
-                                              <span className="font-extrabold opacity-95 pl-1 border-l border-current/25 ml-0.5">
-                                                {progress.badgeLabel}
-                                              </span>
+                                              <>
+                                                <span className="opacity-40 font-normal select-none">•</span>
+                                                <span className="font-extrabold whitespace-nowrap">
+                                                  {progress.badgeLabel}
+                                                </span>
+                                              </>
                                             )}
                                           </span>
                                         );
@@ -2079,19 +2082,22 @@ const MainDashboard: React.FC = () => {
 
                                           return (
                                             <span
-                                              className={`inline-flex items-center gap-1 text-[9px] font-black px-1.5 py-0.5 rounded-md ${
+                                              className={`inline-flex items-center gap-1 text-[9px] font-black px-1.5 py-0.5 rounded-md whitespace-nowrap shrink-0 leading-none ${
                                                 isIncome
-                                                  ? 'text-emerald-700 bg-emerald-100 border border-emerald-300'
-                                                  : 'text-rose-700 bg-rose-100 border border-rose-300'
+                                                  ? 'text-emerald-700 bg-emerald-100/90 border border-emerald-300'
+                                                  : 'text-rose-700 bg-rose-100/90 border border-rose-300'
                                               }`}
                                               title={progress ? progress.tooltip : (isIncome ? 'Renda Recorrente' : 'Despesa Recorrente')}
                                             >
-                                              <Repeat className="w-2.5 h-2.5 stroke-[2.5]" />
-                                              <span>Recorrente</span>
+                                              <Repeat className="w-2.5 h-2.5 stroke-[2.5] shrink-0" />
+                                              <span className="whitespace-nowrap">Recorrente</span>
                                               {progress && (
-                                                <span className="font-extrabold opacity-95 pl-1 border-l border-current/25 ml-0.5">
-                                                  {progress.badgeLabel}
-                                                </span>
+                                                <>
+                                                  <span className="opacity-40 font-normal select-none">•</span>
+                                                  <span className="font-extrabold whitespace-nowrap">
+                                                    {progress.badgeLabel}
+                                                  </span>
+                                                </>
                                               )}
                                             </span>
                                           );
