@@ -113,11 +113,12 @@ class ImportStatementControllerTest {
         when(jwtTokenProvider.extractUserId(token)).thenReturn(userId);
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
+        byte[] validXlsxHeader = new byte[] { 0x50, 0x4B, 0x03, 0x04, 0x14, 0x00, 0x06, 0x00 };
         MockMultipartFile file = new MockMultipartFile(
                 "file",
                 "extrato_bancario.xlsx",
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                "dummy-xlsx-content".getBytes()
+                validXlsxHeader
         );
 
         var result = new ImportStatementResult(
@@ -168,5 +169,34 @@ class ImportStatementControllerTest {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Formato não suportado. Envie apenas arquivos .ofx, .csv, .xlsx ou .xls."));
+    }
+
+    @Test
+    @DisplayName("POST /api/v1/imports/upload - deve rejeitar arquivo binário executável disfarçado de planilha (400)")
+    void shouldRejectExecutableFileDisguisedAsStatement() throws Exception {
+        UUID userId = UUID.randomUUID();
+        UUID accountId = UUID.randomUUID();
+        String token = "valid.jwt.token";
+        User user = new User(userId, "pedro@teste.com", "Pedro", "$2a$12$hash", Instant.now());
+
+        when(jwtTokenProvider.isTokenValid(token)).thenReturn(true);
+        when(jwtTokenProvider.extractUserId(token)).thenReturn(userId);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        // Cabeçalho de executável PE/MZ do Windows disfarçado com extensão .xlsx
+        byte[] fakeExe = new byte[] { 'M', 'Z', (byte) 0x90, 0x00, 0x03, 0x00 };
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "extrato_malicioso.xlsx",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                fakeExe
+        );
+
+        mockMvc.perform(multipart("/api/v1/imports/upload")
+                        .file(file)
+                        .param("accountId", accountId.toString())
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Arquivo inválido: binários executáveis não são permitidos."));
     }
 }

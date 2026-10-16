@@ -1,5 +1,6 @@
 package com.finance.ai.domain.financial.importer;
 
+import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.apache.poi.ss.usermodel.*;
 
 import java.io.IOException;
@@ -21,6 +22,12 @@ import java.util.List;
  * e implementa proteção contra fórmula injection e detecção automática de colunas.
  */
 public class ExcelParser {
+
+    static {
+        // Mitigação contra ataques de Zip Bomb e consumo descontrolado de memória ao descompactar planilhas OOXML
+        ZipSecureFile.setMinInflateRatio(0.005);
+        ZipSecureFile.setMaxEntrySize(50L * 1024 * 1024); // Limite de 50MB por stream descompactado
+    }
 
     private final DataFormatter dataFormatter = new DataFormatter();
 

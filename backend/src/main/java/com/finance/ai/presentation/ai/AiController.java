@@ -72,7 +72,52 @@ public class AiController {
             contentType = "audio/webm";
         }
 
-        var result = transcribeAudioUseCase.execute(user.userId(), file.getBytes(), contentType);
+        byte[] audioBytes = file.getBytes();
+        validateAudioIntegrity(audioBytes, contentType);
+
+        var result = transcribeAudioUseCase.execute(user.userId(), audioBytes, contentType);
         return ResponseEntity.ok(AiExtractionResponse.from(result.transaction(), result.transcribedText()));
+    }
+
+    private void validateAudioIntegrity(byte[] bytes, String declaredContentType) {
+        if (bytes == null || bytes.length < 16) {
+            throw new IllegalArgumentException("O arquivo de áudio enviado é muito curto ou inválido.");
+        }
+
+        // Bloqueio imediato de binários executáveis e scripts (MZ, ELF, Java bytecode, Shell script)
+        if (bytes[0] == 0x4D && bytes[1] == 0x5A) { // MZ
+            throw new IllegalArgumentException("Arquivo inválido: binários executáveis não são permitidos.");
+        }
+        if (bytes.length >= 4 && bytes[0] == 0x7F && bytes[1] == 0x45 && bytes[2] == 0x4C && bytes[3] == 0x46) { // ELF
+            throw new IllegalArgumentException("Arquivo inválido: binários executáveis não são permitidos.");
+        }
+        if (bytes.length >= 4 && (bytes[0] & 0xFF) == 0xCA && (bytes[1] & 0xFF) == 0xFE && (bytes[2] & 0xFF) == 0xBA && (bytes[3] & 0xFF) == 0xBE) { // CAFEBABE
+            throw new IllegalArgumentException("Arquivo inválido: binários compilados não são permitidos.");
+        }
+        if (bytes[0] == 0x23 && bytes[1] == 0x21) { // #!
+            throw new IllegalArgumentException("Arquivo inválido: scripts de comando não são permitidos.");
+        }
+
+        // Verifica se é um dos formatos comuns de áudio:
+        // WAV: RIFF...WAVE
+        boolean isWav = bytes.length >= 12 && bytes[0] == 'R' && bytes[1] == 'I' && bytes[2] == 'F' && bytes[3] == 'F';
+        // WebM / Matroska: 1A 45 DF A3
+        boolean isWebm = (bytes[0] & 0xFF) == 0x1A && (bytes[1] & 0xFF) == 0x45 && (bytes[2] & 0xFF) == 0xDF && (bytes[3] & 0xFF) == 0xA3;
+        // MP3 ID3v2 ou MPEG Frame Sync
+        boolean isMp3 = (bytes[0] == 'I' && bytes[1] == 'D' && bytes[2] == '3') ||
+                ((bytes[0] & 0xFF) == 0xFF && ((bytes[1] & 0xFF) & 0xE0) == 0xE0);
+        // OggS
+        boolean isOgg = bytes.length >= 4 && bytes[0] == 'O' && bytes[1] == 'g' && bytes[2] == 'g' && bytes[3] == 'S';
+        // MP4 / M4A (ftyp a partir do offset 4)
+        boolean isM4a = bytes.length >= 8 && bytes[4] == 'f' && bytes[5] == 't' && bytes[6] == 'y' && bytes[7] == 'p';
+        // FLAC: fLaC
+        boolean isFlac = bytes.length >= 4 && bytes[0] == 'f' && bytes[1] == 'L' && bytes[2] == 'a' && bytes[3] == 'C';
+
+        if (!isWav && !isWebm && !isMp3 && !isOgg && !isM4a && !isFlac) {
+            // Se não bateu nenhum cabeçalho padrão, valida se o content type pelo menos é audio/
+            if (!declaredContentType.toLowerCase().startsWith("audio/")) {
+                throw new IllegalArgumentException("O arquivo enviado não possui assinatura válida de áudio suportado.");
+            }
+        }
     }
 }

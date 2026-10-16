@@ -157,4 +157,24 @@ class AiControllerTest {
                 .andExpect(jsonPath("$.origin").value("AI_AUDIO"))
                 .andExpect(jsonPath("$.transcribedText").value("Gasolina 100 reais no crédito"));
     }
+
+    @Test
+    @DisplayName("POST /api/v1/ai/extract-audio - deve rejeitar arquivo executável disfarçado de áudio (400)")
+    void shouldRejectExecutableDisguisedAsAudio() throws Exception {
+        mockAuthentication();
+
+        byte[] fakeExe = new byte[] { 'M', 'Z', (byte) 0x90, 0x00, 0x03, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, (byte) 0xFF, (byte) 0xFF, 0x00, 0x00 };
+        MockMultipartFile fakeAudio = new MockMultipartFile(
+                "file",
+                "audio.webm",
+                "audio/webm",
+                fakeExe
+        );
+
+        mockMvc.perform(multipart("/api/v1/ai/extract-audio")
+                        .file(fakeAudio)
+                        .header("Authorization", "Bearer " + validToken))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Arquivo inválido: binários executáveis não são permitidos."));
+    }
 }

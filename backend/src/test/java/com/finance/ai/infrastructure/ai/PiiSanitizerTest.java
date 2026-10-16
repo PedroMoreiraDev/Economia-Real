@@ -60,4 +60,19 @@ class PiiSanitizerTest {
         String output = sanitizer.sanitize(input);
         assertThat(output).isEqualTo(input);
     }
+
+    @Test
+    @DisplayName("Deve mascarar chaves PIX aleatórias (UUID) e dados de agência/conta")
+    void shouldSanitizePixRandomKeyAndBankDetails() {
+        String input = "Fiz pix de 350 para chave a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d na agencia 1234 conta 98765-4";
+        String output = sanitizer.sanitize(input);
+
+        assertThat(output).contains("[PIX_CHAVE_REMOVIDA]");
+        assertThat(output).contains("[AGENCIA_REMOVIDA]");
+        assertThat(output).contains("[CONTA_REMOVIDA]");
+        assertThat(output).doesNotContain("a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d");
+        assertThat(output).doesNotContain("1234");
+        assertThat(output).doesNotContain("98765-4");
+        assertThat(output).contains("350");
+    }
 }

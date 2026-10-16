@@ -61,9 +61,12 @@ public class ImportStatementController {
             throw new IllegalArgumentException("Formato não suportado. Envie apenas arquivos .ofx, .csv, .xlsx ou .xls.");
         }
 
+        byte[] fileBytes = file.getBytes();
+        validateFileIntegrity(originalFilename, fileBytes);
+
         var result = (isCreditCard != null)
-                ? importUseCase.execute(user.userId(), accountId, originalFilename, file.getBytes(), isCreditCard)
-                : importUseCase.execute(user.userId(), accountId, originalFilename, file.getBytes());
+                ? importUseCase.execute(user.userId(), accountId, originalFilename, fileBytes, isCreditCard)
+                : importUseCase.execute(user.userId(), accountId, originalFilename, fileBytes);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
@@ -101,4 +104,42 @@ public class ImportStatementController {
             String status,
             String createdAt
     ) {}
+
+    private void validateFileIntegrity(String filename, byte[] bytes) {
+        if (bytes == null || bytes.length == 0) {
+            throw new IllegalArgumentException("O arquivo de extrato está vazio.");
+        }
+
+        // Bloqueio imediato de executáveis comuns (Windows PE/MZ, Linux ELF, Java Bytecode)
+        if (bytes.length >= 2 && bytes[0] == 0x4D && bytes[1] == 0x5A) { // MZ
+            throw new IllegalArgumentException("Arquivo inválido: binários executáveis não são permitidos.");
+        }
+        if (bytes.length >= 4 && bytes[0] == 0x7F && bytes[1] == 0x45 && bytes[2] == 0x4C && bytes[3] == 0x46) { // ELF
+            throw new IllegalArgumentException("Arquivo inválido: binários executáveis não são permitidos.");
+        }
+        if (bytes.length >= 4 && (bytes[0] & 0xFF) == 0xCA && (bytes[1] & 0xFF) == 0xFE && (bytes[2] & 0xFF) == 0xBA && (bytes[3] & 0xFF) == 0xBE) { // CAFEBABE
+            throw new IllegalArgumentException("Arquivo inválido: binários compilados não são permitidos.");
+        }
+
+        String lower = filename.toLowerCase();
+        if (lower.endsWith(".xlsx")) {
+            // XLSX é um container ZIP (PK\x03\x04 ou PK\x05\x06)
+            if (bytes.length < 4 || !(bytes[0] == 0x50 && bytes[1] == 0x4B && (bytes[2] == 0x03 || bytes[2] == 0x05))) {
+                throw new IllegalArgumentException("O arquivo informado não possui a estrutura válida de uma planilha XLSX.");
+            }
+        } else if (lower.endsWith(".xls")) {
+            // XLS legado é OLE2 Compound Document (D0 CF 11 E0)
+            if (bytes.length < 4 || !((bytes[0] & 0xFF) == 0xD0 && (bytes[1] & 0xFF) == 0xCF && (bytes[2] & 0xFF) == 0x11 && (bytes[3] & 0xFF) == 0xE0)) {
+                throw new IllegalArgumentException("O arquivo informado não possui a estrutura válida de uma planilha XLS legada.");
+            }
+        } else if (lower.endsWith(".ofx") || lower.endsWith(".csv")) {
+            // Arquivos de texto não devem conter caracteres nulos binários nos primeiros 512 bytes
+            int checkLen = Math.min(bytes.length, 512);
+            for (int i = 0; i < checkLen; i++) {
+                if (bytes[i] == 0) {
+                    throw new IllegalArgumentException("O arquivo de extrato contém dados binários corrompidos ou inválidos.");
+                }
+            }
+        }
+    }
 }

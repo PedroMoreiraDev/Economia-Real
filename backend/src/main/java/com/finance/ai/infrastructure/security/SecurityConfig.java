@@ -29,14 +29,18 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtFilter;
     private final RateLimitingFilter rateLimitingFilter;
     private final String allowedOrigins;
+    private final String activeProfile;
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SecurityConfig.class);
 
     public SecurityConfig(
             JwtAuthenticationFilter jwtFilter,
             @org.springframework.beans.factory.annotation.Autowired(required = false) RateLimitingFilter rateLimitingFilter,
-            @Value("${cors.allowed-origins:*}") String allowedOrigins) {
+            @Value("${cors.allowed-origins:*}") String allowedOrigins,
+            @Value("${spring.profiles.active:local}") String activeProfile) {
         this.jwtFilter = jwtFilter;
         this.rateLimitingFilter = rateLimitingFilter;
         this.allowedOrigins = allowedOrigins;
+        this.activeProfile = activeProfile;
     }
 
     @Bean
@@ -48,6 +52,9 @@ public class SecurityConfig {
                         .frameOptions(frame -> frame.deny())
                         .contentTypeOptions(content -> {})
                         .xssProtection(xss -> {})
+                        .httpStrictTransportSecurity(hsts -> hsts
+                                .includeSubDomains(true)
+                                .maxAgeInSeconds(31536000))
                 )
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
@@ -75,6 +82,10 @@ public class SecurityConfig {
         boolean isWildcard = "*".equals(allowedOrigins.trim());
 
         if (isWildcard) {
+            boolean isSafeLocal = "local".equalsIgnoreCase(activeProfile) || "test".equalsIgnoreCase(activeProfile) || "dev".equalsIgnoreCase(activeProfile);
+            if (!isSafeLocal) {
+                log.warn("ALERTA DE SEGURANÇA: CORS com origem wildcard '*' ativo em ambiente de produção/não-local ({})! Configure cors.allowed-origins.", activeProfile);
+            }
             configuration.addAllowedOriginPattern("*");
             configuration.setAllowCredentials(false);
         } else {

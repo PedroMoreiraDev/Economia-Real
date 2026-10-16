@@ -112,29 +112,56 @@ public class RateLimitingFilter extends OncePerRequestFilter {
                 return queue.isEmpty() || queue.peekLast() <= windowStart;
             });
 
-            // Evita estouro de memória sob ataque DDoS distribuído
+            // Evita estouro de memória sem resetar bloqueios de atacantes (remove os mais antigos sem zerar tudo)
             if (requestCounts.size() > MAX_TRACKED_ENTRIES) {
-                requestCounts.clear();
+                var iterator = requestCounts.entrySet().iterator();
+                int toRemove = MAX_TRACKED_ENTRIES / 5; // Remove 20% das entradas
+                while (iterator.hasNext() && toRemove > 0) {
+                    iterator.next();
+                    iterator.remove();
+                    toRemove--;
+                }
             }
         }
     }
 
     private String extractClientIp(HttpServletRequest request) {
-        String xForwardedFor = request.getHeader("X-Forwarded-For");
-        if (xForwardedFor != null && !xForwardedFor.isBlank()) {
-            String firstIp = xForwardedFor.split(",")[0].trim();
-            if (firstIp.length() <= 45 && IP_PATTERN.matcher(firstIp).matches()) {
-                return firstIp;
-            }
-        }
-        String xRealIp = request.getHeader("X-Real-IP");
-        if (xRealIp != null && !xRealIp.isBlank()) {
-            String clean = xRealIp.trim();
-            if (clean.length() <= 45 && IP_PATTERN.matcher(clean).matches()) {
-                return clean;
-            }
-        }
         String remoteAddr = request.getRemoteAddr();
-        return (remoteAddr != null && !remoteAddr.isBlank()) ? remoteAddr.trim() : "unknown";
+        String cleanRemote = (remoteAddr != null && !remoteAddr.isBlank()) ? remoteAddr.trim() : "unknown";
+
+        // Só confia nos cabeçalhos X-Forwarded-For e X-Real-IP se a requisição provier de um proxy confiável
+        // (localhost / loopback ou rede local privada de container Docker)
+        boolean isFromTrustedProxy = isTrustedProxy(cleanRemote);
+
+        if (isFromTrustedProxy) {
+            String xForwardedFor = request.getHeader("X-Forwarded-For");
+            if (xForwardedFor != null && !xForwardedFor.isBlank()) {
+                String firstIp = xForwardedFor.split(",")[0].trim();
+                if (firstIp.length() <= 45 && IP_PATTERN.matcher(firstIp).matches()) {
+                    return firstIp;
+                }
+            }
+            String xRealIp = request.getHeader("X-Real-IP");
+            if (xRealIp != null && !xRealIp.isBlank()) {
+                String clean = xRealIp.trim();
+                if (clean.length() <= 45 && IP_PATTERN.matcher(clean).matches()) {
+                    return clean;
+                }
+            }
+        }
+
+        return cleanRemote;
+    }
+
+    private boolean isTrustedProxy(String ip) {
+        if (ip == null || ip.isBlank() || "unknown".equalsIgnoreCase(ip)) {
+            return false;
+        }
+        // Loopback IPv4 e IPv6
+        if ("127.0.0.1".equals(ip) || "0:0:0:0:0:0:0:1".equals(ip) || "::1".equals(ip)) {
+            return true;
+        }
+        // Redes privadas locais comuns para Docker/Kubernetes e Proxies reversos Nginx
+        return ip.startsWith("10.") || ip.startsWith("172.") || ip.startsWith("192.168.");
     }
 }

@@ -38,9 +38,9 @@ public class JwtTokenProvider implements TokenProvider {
         if (jwtSecret.length() < 32) {
             throw new IllegalStateException("JWT secret deve ter ao menos 32 caracteres.");
         }
-        boolean isProduction = "prod".equalsIgnoreCase(activeProfile) || "production".equalsIgnoreCase(activeProfile);
-        if (isProduction && "super-secret-jwt-key-finance-ai-2026-minimum-32-chars-long!".equals(jwtSecret)) {
-            throw new IllegalStateException("CRÍTICO DE SEGURANÇA: A chave JWT padrão não pode ser utilizada em ambiente de produção! Configure a variável de ambiente JWT_SECRET com um segredo aleatório e seguro.");
+        boolean isSafeLocalDev = "local".equalsIgnoreCase(activeProfile) || "test".equalsIgnoreCase(activeProfile) || "dev".equalsIgnoreCase(activeProfile);
+        if (!isSafeLocalDev && "super-secret-jwt-key-finance-ai-2026-minimum-32-chars-long!".equals(jwtSecret)) {
+            throw new IllegalStateException("CRÍTICO DE SEGURANÇA: A chave JWT padrão não pode ser utilizada fora de desenvolvimento local! Configure a variável de ambiente JWT_SECRET com um segredo aleatório e seguro.");
         }
         if ("super-secret-jwt-key-finance-ai-2026-minimum-32-chars-long!".equals(jwtSecret)) {
             log.warn("ATENÇÃO: Utilizando chave JWT padrão de desenvolvimento. Certifique-se de configurar JWT_SECRET para ambientes públicos.");
