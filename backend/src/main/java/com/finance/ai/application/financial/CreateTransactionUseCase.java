@@ -62,16 +62,20 @@ public class CreateTransactionUseCase {
 
         // Prevenção contra DoS / Exaustão de Recursos
         if (replicateMonths != null && replicateMonths > 60) {
-            throw new IllegalArgumentException("O período máximo de replicação de entradas é de 60 meses.");
+            throw new IllegalArgumentException("O período máximo de replicação de movimentações é de 60 meses.");
         }
 
-        int months = (replicateMonths != null && replicateMonths > 1) ? replicateMonths : 1;
+        boolean canReplicate = (type == TransactionType.INCOME || type == TransactionType.EXPENSE);
+        int months = (replicateMonths != null && replicateMonths > 1 && canReplicate) ? replicateMonths : 1;
         UUID recurringGroupId = months > 1 ? UUID.randomUUID() : null;
 
-        String finalNotes = notes;
-        if (recurringGroupId != null && type == TransactionType.INCOME) {
+        String firstNotes = notes;
+        if (recurringGroupId != null) {
+            String prefixTag = type == TransactionType.INCOME ? "RECURRING_INCOME:" : "RECURRING_EXPENSE:";
+            String typeLabel = type == TransactionType.INCOME ? "Entrada recorrente: " : "Despesa recorrente: ";
             String userNotes = (notes != null && !notes.isBlank()) ? " | " + notes.trim() : "";
-            finalNotes = "RECURRING_INCOME:" + recurringGroupId + " - Entrada recorrente: " + description.trim() + userNotes;
+            String counter = " (1/" + months + ")";
+            firstNotes = prefixTag + recurringGroupId + " - " + typeLabel + description.trim() + counter + userNotes;
         }
 
         var firstTransaction = Transaction.create(
@@ -84,15 +88,19 @@ public class CreateTransactionUseCase {
                 accountId,
                 destinationAccountId,
                 categoryId,
-                finalNotes
+                firstNotes
         );
 
         var savedFirst = transactionRepository.save(firstTransaction);
 
-        // Se for receita recorrente para múltiplos meses, projeta os meses subsequentes
-        if (months > 1 && type == TransactionType.INCOME) {
+        // Se for receita ou despesa recorrente para múltiplos meses, projeta os meses subsequentes
+        if (months > 1) {
             int originalDay = accrualDate.getDayOfMonth();
             Integer originalSettlementDay = settlementDate != null ? settlementDate.getDayOfMonth() : null;
+
+            String prefixTag = type == TransactionType.INCOME ? "RECURRING_INCOME:" : "RECURRING_EXPENSE:";
+            String typeLabel = type == TransactionType.INCOME ? "Entrada recorrente: " : "Despesa recorrente: ";
+            String userNotes = (notes != null && !notes.isBlank()) ? " | " + notes.trim() : "";
 
             for (int i = 1; i < months; i++) {
                 LocalDate targetAccrualMonth = accrualDate.plusMonths(i);
@@ -106,6 +114,8 @@ public class CreateTransactionUseCase {
                     futureSettlementDate = targetSettlementMonth.withDayOfMonth(Math.min(originalSettlementDay, maxSettlementDay));
                 }
 
+                String futureNotes = prefixTag + recurringGroupId + " - " + typeLabel + description.trim() + " (" + (i + 1) + "/" + months + ")" + userNotes;
+
                 var futureTx = Transaction.create(
                         userId,
                         type,
@@ -116,7 +126,7 @@ public class CreateTransactionUseCase {
                         accountId,
                         destinationAccountId,
                         categoryId,
-                        finalNotes
+                        futureNotes
                 );
                 transactionRepository.save(futureTx);
             }

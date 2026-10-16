@@ -171,4 +171,52 @@ class ImportBankStatementInstallmentsTest {
 
         verify(transactionRepository, times(1)).save(any(Transaction.class));
     }
+
+    @Test
+    @DisplayName("Quando a fatura contiver 'Parcela 5/6', deve vincular como recorrente e projetar a parcela restante 6/6 para o próximo mês")
+    void shouldImportInstallmentWithParcelaFormatAndLinkAsRecurringWithRemainingCount() throws IOException {
+        UUID userId = UUID.randomUUID();
+        UUID accountId = UUID.randomUUID();
+
+        var account = Account.create(userId, "Nubank Cartão", AccountType.CHECKING, BigDecimal.ZERO);
+        when(accountRepository.findByIdAndUserId(accountId, userId)).thenReturn(Optional.of(account));
+        when(transactionRepository.findAllByUserId(userId)).thenReturn(List.of());
+        when(importBatchRepository.save(any(ImportBatch.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        String csvContent = """
+                date,title,amount
+                2026-10-15,Magazine Luiza Parcela 5/6,150.00
+                """;
+
+        var result = importUseCase.execute(userId, accountId, "fatura_outubro.csv", csvContent.getBytes(StandardCharsets.UTF_8), true);
+
+        // Deve importar 2 transações: a 5/6 e a 6/6
+        assertThat(result.importedCount()).isEqualTo(2);
+        assertThat(result.skippedCount()).isEqualTo(0);
+
+        org.mockito.ArgumentCaptor<Transaction> txCaptor = org.mockito.ArgumentCaptor.forClass(Transaction.class);
+        verify(transactionRepository, times(2)).save(txCaptor.capture());
+
+        var savedList = txCaptor.getAllValues();
+        var p5 = savedList.get(0);
+        var p6 = savedList.get(1);
+
+        assertThat(p5.getDescription()).isEqualTo("Magazine Luiza Parcela 5/6");
+        assertThat(p5.getAccrualDate()).isEqualTo(LocalDate.of(2026, 10, 15));
+        assertThat(p5.getNotes()).contains("RECURRING_EXPENSE:");
+        assertThat(p5.getNotes()).contains("(5/6)");
+
+        assertThat(p6.getDescription()).isEqualTo("Magazine Luiza Parcela 6/6");
+        assertThat(p6.getAccrualDate()).isEqualTo(LocalDate.of(2026, 11, 15));
+        assertThat(p6.getNotes()).contains("RECURRING_EXPENSE:");
+        assertThat(p6.getNotes()).contains("(6/6)");
+        assertThat(p6.getNotes()).contains("projetada automaticamente");
+
+        // O prefixo do grupo de recorrência deve ser idêntico para vincular as parcelas
+        String prefix5 = com.finance.ai.application.financial.UpdateTransactionUseCase.extractRecurringPrefix(p5.getNotes());
+        String prefix6 = com.finance.ai.application.financial.UpdateTransactionUseCase.extractRecurringPrefix(p6.getNotes());
+        assertThat(prefix5).isNotNull();
+        assertThat(prefix6).isNotNull();
+        assertThat(prefix5).isEqualTo(prefix6);
+    }
 }

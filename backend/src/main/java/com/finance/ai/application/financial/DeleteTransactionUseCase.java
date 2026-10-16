@@ -28,7 +28,10 @@ public class DeleteTransactionUseCase {
         com.finance.ai.domain.financial.Transaction current = transactionRepository.findByIdAndUserId(transactionId, userId)
                 .orElseThrow(() -> new IllegalArgumentException("Transação não encontrada ou não pertence ao usuário."));
 
-        if (deleteFutureRecurring && current.getNotes() != null && current.getNotes().contains("RECURRING_INCOME:")) {
+        boolean hasRecurringNotes = current.getNotes() != null && 
+                (current.getNotes().contains("RECURRING_INCOME:") || current.getNotes().contains("RECURRING_EXPENSE:"));
+
+        if (deleteFutureRecurring && hasRecurringNotes) {
             String recurringPrefix = UpdateTransactionUseCase.extractRecurringPrefix(current.getNotes());
             if (recurringPrefix != null) {
                 java.util.List<com.finance.ai.domain.financial.Transaction> all = transactionRepository.findAllByUserIdAndNotesStartingWith(userId, recurringPrefix);

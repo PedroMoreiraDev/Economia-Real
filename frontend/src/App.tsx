@@ -59,6 +59,7 @@ import { OnboardingTourModal } from './components/OnboardingTourModal';
 import { CurrencyInput, InlineCurrencyInput } from './components/CurrencyInput';
 import { exportTransactionsCsvApi } from './services/goalApi';
 import { warmUpBackend } from './services/authApi';
+import { cleanTransactionNotes } from './utils/recurringNotes';
 import {
   Account,
   Category,
@@ -124,6 +125,70 @@ function getCurrentMonthStr(): string {
   const y = now.getFullYear();
   const m = String(now.getMonth() + 1).padStart(2, '0');
   return `${y}-${m}`;
+}
+
+interface RecurringProgressInfo {
+  current: number;
+  total: number;
+  remaining: number;
+  badgeLabel: string;
+  tooltip: string;
+}
+
+function getRecurringProgressInfo(tx: Transaction): RecurringProgressInfo | null {
+  let current = tx.recurringCurrent;
+  let total = tx.recurringTotal;
+  let remaining = tx.recurringRemaining;
+
+  // Fallback 1: se não veio preenchido do backend, tenta extrair da descrição (ex: "Parcela 5/6", "5/6", "Havan 3/5")
+  if ((!total || total <= 1) && tx.description) {
+    const descMatch = tx.description.match(/(?:\b(?:parcela|parc\.?)\s*)?\(?(\d{1,2})\s*(?:\/|\s+de\s+)\s*(\d{1,2})\)?/i);
+    if (descMatch) {
+      const c = parseInt(descMatch[1], 10);
+      const t = parseInt(descMatch[2], 10);
+      if (!isNaN(c) && !isNaN(t) && t > 1 && c >= 1 && c <= t && t <= 99) {
+        current = c;
+        total = t;
+        remaining = Math.max(0, t - c);
+      }
+    }
+  }
+
+  // Fallback 2: se não vier preenchido do backend, tenta extrair das notas se contiver "(X/Y)"
+  if ((!total || total <= 1) && tx.notes) {
+    const match = tx.notes.match(/\((\d+)\/(\d+)\)/);
+    if (match) {
+      const c = parseInt(match[1], 10);
+      const t = parseInt(match[2], 10);
+      if (!isNaN(c) && !isNaN(t) && t > 1 && c >= 1 && c <= t) {
+        current = c;
+        total = t;
+        remaining = Math.max(0, t - c);
+      }
+    }
+  }
+
+  if (!total || total <= 1) {
+    return null;
+  }
+
+  const c = current || 1;
+  const rem = remaining !== undefined ? remaining : Math.max(0, total - c);
+
+  let badgeLabel = '';
+  if (rem === 0) {
+    badgeLabel = 'Última';
+  } else if (rem === 1) {
+    badgeLabel = tx.type === 'INCOME' ? 'Resta 1' : 'Falta 1';
+  } else {
+    badgeLabel = tx.type === 'INCOME' ? `Restam ${rem}` : `Faltam ${rem}`;
+  }
+
+  const tooltip = tx.type === 'INCOME'
+    ? `Entrada ${c} de ${total} • Restam ${rem} para concluir`
+    : `Parcela ${c} de ${total} • Faltam ${rem} para pagar por completo`;
+
+  return { current: c, total, remaining: rem, badgeLabel, tooltip };
 }
 
 const CATEGORY_COLORS = [
@@ -401,7 +466,7 @@ const MainDashboard: React.FC = () => {
 
   const handleRequestDeleteTransaction = (id: string) => {
     const tx = transactions.find((t) => t.id === id);
-    const isRecurring = !!(tx?.notes && tx.notes.includes('RECURRING_INCOME:'));
+    const isRecurring = !!(tx?.notes && (tx.notes.includes('RECURRING_INCOME:') || tx.notes.includes('RECURRING_EXPENSE:') || tx.notes.includes('RECURRING_BILL:')));
     setDeleteConfirmState({
       isOpen: true,
       type: 'single',
@@ -1835,19 +1900,50 @@ const MainDashboard: React.FC = () => {
                                       <p className="font-black text-sm text-slate-800 truncate" title={tx.description}>
                                         {tx.description}
                                       </p>
-                                      {tx.notes && tx.notes.includes('RECURRING_INCOME:') && (
-                                        <span className="inline-flex items-center gap-1 text-[10px] font-black text-emerald-700 bg-emerald-100 border border-emerald-300 px-1.5 py-0.2 rounded-md" title="Renda Recorrente Mensal">
-                                          <Repeat className="w-2.5 h-2.5 stroke-[2.5]" /> Recorrente
-                                        </span>
-                                      )}
+                                      {(() => {
+                                        const progress = getRecurringProgressInfo(tx);
+                                        const isRec = Boolean(
+                                          progress !== null ||
+                                          (tx.notes && (
+                                            tx.notes.includes('RECURRING_INCOME:') ||
+                                            tx.notes.includes('RECURRING_EXPENSE:') ||
+                                            tx.notes.includes('RECURRING_BILL:') ||
+                                            tx.notes.includes('projetada automaticamente')
+                                          )) ||
+                                          (tx.recurringTotal && tx.recurringTotal > 1)
+                                        );
+                                        if (!isRec) return null;
+                                        const isIncome = tx.type === 'INCOME';
+
+                                        return (
+                                          <span
+                                            className={`inline-flex items-center gap-1 text-[10px] font-black px-1.5 py-0.5 rounded-md ${
+                                              isIncome
+                                                ? 'text-emerald-700 bg-emerald-100 border border-emerald-300'
+                                                : 'text-rose-700 bg-rose-100 border border-rose-300'
+                                            }`}
+                                            title={progress ? progress.tooltip : (isIncome ? 'Renda Recorrente' : 'Despesa Recorrente')}
+                                          >
+                                            <Repeat className="w-2.5 h-2.5 stroke-[2.5]" />
+                                            <span>Recorrente</span>
+                                            {progress && (
+                                              <span className="font-extrabold opacity-95 pl-1 border-l border-current/25 ml-0.5">
+                                                {progress.badgeLabel}
+                                              </span>
+                                            )}
+                                          </span>
+                                        );
+                                      })()}
                                     </div>
-                                    {tx.notes && (
-                                      <span className="text-[11px] text-slate-400 font-normal truncate block mt-0.5" title={tx.notes}>
-                                        {tx.notes.includes('RECURRING_INCOME:')
-                                          ? (tx.notes.split('|')[1]?.trim() || 'Entrada recorrente projetada')
-                                          : tx.notes}
-                                      </span>
-                                    )}
+                                    {(() => {
+                                      const displayNotes = cleanTransactionNotes(tx.notes, tx.description);
+                                      if (!displayNotes) return null;
+                                      return (
+                                        <span className="text-[11px] text-slate-400 font-normal truncate block mt-0.5" title={displayNotes}>
+                                          {displayNotes}
+                                        </span>
+                                      );
+                                    })()}
                                   </div>
 
                                   <div className="shrink-0 text-right">
@@ -1966,19 +2062,50 @@ const MainDashboard: React.FC = () => {
                                         <span className="font-extrabold text-xs truncate max-w-[130px] sm:max-w-[160px] lg:max-w-[180px]" title={tx.description}>
                                           {tx.description}
                                         </span>
-                                        {tx.notes && tx.notes.includes('RECURRING_INCOME:') && (
-                                          <span className="inline-flex items-center gap-1 text-[9px] font-black text-emerald-700 bg-emerald-100 border border-emerald-300 px-1 py-0.2 rounded-md" title="Renda Recorrente Mensal">
-                                            <Repeat className="w-2.5 h-2.5 stroke-[2.5]" /> Recorrente
-                                          </span>
-                                        )}
+                                        {(() => {
+                                          const progress = getRecurringProgressInfo(tx);
+                                          const isRec = Boolean(
+                                            progress !== null ||
+                                            (tx.notes && (
+                                              tx.notes.includes('RECURRING_INCOME:') ||
+                                              tx.notes.includes('RECURRING_EXPENSE:') ||
+                                              tx.notes.includes('RECURRING_BILL:') ||
+                                              tx.notes.includes('projetada automaticamente')
+                                            )) ||
+                                            (tx.recurringTotal && tx.recurringTotal > 1)
+                                          );
+                                          if (!isRec) return null;
+                                          const isIncome = tx.type === 'INCOME';
+
+                                          return (
+                                            <span
+                                              className={`inline-flex items-center gap-1 text-[9px] font-black px-1.5 py-0.5 rounded-md ${
+                                                isIncome
+                                                  ? 'text-emerald-700 bg-emerald-100 border border-emerald-300'
+                                                  : 'text-rose-700 bg-rose-100 border border-rose-300'
+                                              }`}
+                                              title={progress ? progress.tooltip : (isIncome ? 'Renda Recorrente' : 'Despesa Recorrente')}
+                                            >
+                                              <Repeat className="w-2.5 h-2.5 stroke-[2.5]" />
+                                              <span>Recorrente</span>
+                                              {progress && (
+                                                <span className="font-extrabold opacity-95 pl-1 border-l border-current/25 ml-0.5">
+                                                  {progress.badgeLabel}
+                                                </span>
+                                              )}
+                                            </span>
+                                          );
+                                        })()}
                                       </div>
-                                      {tx.notes && (
-                                        <span className="text-[10px] text-slate-400 font-normal truncate block max-w-[130px] sm:max-w-[160px] lg:max-w-[180px]" title={tx.notes}>
-                                          {tx.notes.includes('RECURRING_INCOME:')
-                                            ? (tx.notes.split('|')[1]?.trim() || 'Entrada recorrente projetada')
-                                            : tx.notes}
-                                        </span>
-                                      )}
+                                      {(() => {
+                                        const displayNotes = cleanTransactionNotes(tx.notes, tx.description);
+                                        if (!displayNotes) return null;
+                                        return (
+                                          <span className="text-[10px] text-slate-400 font-normal truncate block max-w-[130px] sm:max-w-[160px] lg:max-w-[180px]" title={displayNotes}>
+                                            {displayNotes}
+                                          </span>
+                                        );
+                                      })()}
                                     </td>
                                     <td className="py-2 px-1.5 whitespace-nowrap">
                                       <InlineCategorySelect
@@ -2416,11 +2543,13 @@ const MainDashboard: React.FC = () => {
               </div>
             )}
 
-            {singleTx && singleTx.notes && singleTx.notes.includes('RECURRING_INCOME:') && (
+            {singleTx && singleTx.notes && (singleTx.notes.includes('RECURRING_INCOME:') || singleTx.notes.includes('RECURRING_EXPENSE:') || singleTx.notes.includes('RECURRING_BILL:')) && (
               <div className="p-3.5 bg-amber-50/90 border-2 border-amber-300 rounded-2xl space-y-2.5 text-left">
                 <div className="flex items-center gap-1.5 text-amber-900 text-xs font-black">
                   <Repeat className="w-3.5 h-3.5 stroke-[2.5]" />
-                  <span>Renda Recorrente Detectada</span>
+                  <span>
+                    {singleTx.notes.includes('RECURRING_INCOME:') ? 'Renda Recorrente Detectada' : (singleTx.notes.includes('RECURRING_BILL:') ? 'Custo Fixo Recorrente Detectado' : 'Despesa Recorrente Detectada')}
+                  </span>
                 </div>
                 <div className="space-y-1.5 text-xs font-bold text-slate-700">
                   <label className="flex items-center gap-2 cursor-pointer p-2 rounded-xl bg-white/60 hover:bg-white border border-amber-200/70 transition-colors">

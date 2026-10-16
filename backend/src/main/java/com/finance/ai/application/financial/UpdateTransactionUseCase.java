@@ -113,7 +113,8 @@ public class UpdateTransactionUseCase {
                         }
 
                         // Preserva a chave da recorrência nas notas
-                        String futureNotes = prefix + " - Entrada recorrente: " + description.trim();
+                        String typeLabel = prefix.startsWith("RECURRING_EXPENSE:") ? "Despesa recorrente: " : "Entrada recorrente: ";
+                        String futureNotes = prefix + " - " + typeLabel + description.trim();
 
                         var updatedFuture = linkedTx.withUpdates(
                                 type,
@@ -140,6 +141,12 @@ public class UpdateTransactionUseCase {
             return null;
         }
         int idx = notes.indexOf("RECURRING_INCOME:");
+        if (idx < 0) {
+            idx = notes.indexOf("RECURRING_EXPENSE:");
+        }
+        if (idx < 0) {
+            idx = notes.indexOf("RECURRING_BILL:");
+        }
         if (idx < 0) {
             return null;
         }

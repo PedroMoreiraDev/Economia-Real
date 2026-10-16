@@ -121,6 +121,7 @@ public class ImportBankStatementUseCase {
         int importedCount = 0;
         int skippedCount = 0;
         var batchId = UUID.randomUUID();
+        java.util.Map<String, UUID> batchRecurringGroupIds = new java.util.HashMap<>();
 
         for (var item : parsedItems) {
             String itemSig = item.date() + "|" + item.amount() + "|" + item.description().toLowerCase().trim();
@@ -148,16 +149,24 @@ public class ImportBankStatementUseCase {
                 categoryId = merchantCategoryClassifier.resolveCategoryId(userId, item.description());
             }
 
-            // Identifica se este item é uma compra parcelada (ex: Havan 3/5)
+            // Identifica se este item é uma compra parcelada (ex: Havan 3/5 ou Parcela 5/6)
             var itemMatchOpt = (detectedCard || type == TransactionType.EXPENSE)
                     ? installmentDetector.detect(item.description())
                     : java.util.Optional.<InstallmentDetector.InstallmentMatch>empty();
 
             String canonicalSig = null;
+            UUID recurringGroupId = null;
             if (itemMatchOpt.isPresent()) {
                 var m = itemMatchOpt.get();
                 var ym = java.time.YearMonth.from(item.date());
                 canonicalSig = ym + "|" + item.amount() + "|" + m.cleanMerchant() + "|" + m.current() + "/" + m.total();
+                if (m.total() > 1 && type == TransactionType.EXPENSE) {
+                    String groupKey = m.cleanMerchant() + "|" + m.total() + "|" + item.amount();
+                    recurringGroupId = batchRecurringGroupIds.computeIfAbsent(
+                            groupKey,
+                            k -> resolveRecurringGroupId(existingTransactions, m, item.amount(), UUID.randomUUID())
+                    );
+                }
             }
 
             boolean isExactDuplicate = existingSignatures.contains(itemSig);
@@ -171,6 +180,9 @@ public class ImportBankStatementUseCase {
                 if (isInstallmentDuplicate) {
                     var existingTx = existingInstallmentMap.get(canonicalSig);
                     if (existingTx.getNotes() != null && existingTx.getNotes().contains("projetada automaticamente")) {
+                        String notesPrefix = (recurringGroupId != null)
+                                ? "RECURRING_EXPENSE:" + recurringGroupId + " (" + itemMatchOpt.get().current() + "/" + itemMatchOpt.get().total() + ") | "
+                                : "";
                         var updated = existingTx.withUpdates(
                                 existingTx.getType(),
                                 existingTx.getAmount(),
@@ -180,7 +192,7 @@ public class ImportBankStatementUseCase {
                                 existingTx.getAccountId(),
                                 existingTx.getDestinationAccountId(),
                                 existingTx.getCategoryId(),
-                                "Importado via " + fileType + (item.externalId() != null ? " [ID: " + item.externalId() + "]" : "") + " [Conciliado com fatura]"
+                                notesPrefix + "Importado via " + fileType + (item.externalId() != null ? " [ID: " + item.externalId() + "]" : "") + " [Conciliado com fatura]"
                         );
                         transactionRepository.save(updated);
                         existingInstallmentMap.put(canonicalSig, updated);
@@ -188,6 +200,10 @@ public class ImportBankStatementUseCase {
                 }
             } else {
                 // Cria o lançamento atual no mês da fatura
+                String notesPrefix = (recurringGroupId != null)
+                        ? "RECURRING_EXPENSE:" + recurringGroupId + " (" + itemMatchOpt.get().current() + "/" + itemMatchOpt.get().total() + ") | "
+                        : "";
+
                 var transaction = Transaction.create(
                         userId,
                         type,
@@ -199,7 +215,7 @@ public class ImportBankStatementUseCase {
                         null,
                         categoryId,
                         origin,
-                        "Importado via " + fileType + (item.externalId() != null ? " [ID: " + item.externalId() + "]" : "")
+                        notesPrefix + "Importado via " + fileType + (item.externalId() != null ? " [ID: " + item.externalId() + "]" : "")
                 );
 
                 transactionRepository.save(transaction);
@@ -211,8 +227,8 @@ public class ImportBankStatementUseCase {
             }
 
             // PROJEÇÃO DE PARCELAS FUTURAS:
-            // Se for compra parcelada (ex: Havan 3/5), já lança nos meses seguintes as parcelas que faltam (4/5 e 5/5)
-            // se elas ainda não existirem no banco de dados!
+            // Se for compra parcelada (ex: Havan 3/5 ou Parcela 5/6), já lança nos meses seguintes como recorrente
+            // as parcelas que faltam para pagar por completo se elas ainda não existirem no banco de dados!
             if (itemMatchOpt.isPresent() && type == TransactionType.EXPENSE) {
                 var m = itemMatchOpt.get();
                 if (m.current() < m.total()) {
@@ -226,6 +242,10 @@ public class ImportBankStatementUseCase {
 
                         // Prevenção de duplicidade: só projeta se a parcela daquele mês futuro ainda NÃO existir!
                         if (!existingInstallmentMap.containsKey(futureCanonicalSig) && !existingSignatures.contains(futureExactSig)) {
+                            String futureNotesPrefix = (recurringGroupId != null)
+                                    ? "RECURRING_EXPENSE:" + recurringGroupId + " (" + p + "/" + m.total() + ") | "
+                                    : "";
+
                             var futureTx = Transaction.create(
                                     userId,
                                     TransactionType.EXPENSE,
@@ -237,7 +257,7 @@ public class ImportBankStatementUseCase {
                                     null,
                                     categoryId,
                                     origin,
-                                    "Importado via " + fileType + " [Parcela futura " + p + "/" + m.total() + " projetada automaticamente]"
+                                    futureNotesPrefix + "Importado via " + fileType + " [Parcela futura " + p + "/" + m.total() + " projetada automaticamente]"
                             );
 
                             transactionRepository.save(futureTx);
@@ -338,5 +358,33 @@ public class ImportBankStatementUseCase {
                 || lower.contains("pagamento efetuado")
                 || lower.contains("pgto fatura")
                 || lower.contains("fatura paga");
+    }
+
+    private UUID resolveRecurringGroupId(
+            List<Transaction> existingTransactions,
+            InstallmentDetector.InstallmentMatch match,
+            BigDecimal amount,
+            UUID fallbackId) {
+        if (existingTransactions == null || existingTransactions.isEmpty()) {
+            return fallbackId;
+        }
+        for (Transaction tx : existingTransactions) {
+            if (tx.getNotes() != null && tx.getNotes().contains("RECURRING_EXPENSE:")) {
+                var existingMatch = installmentDetector.detect(tx.getDescription());
+                if (existingMatch.isPresent()) {
+                    var em = existingMatch.get();
+                    if (em.cleanMerchant().equalsIgnoreCase(match.cleanMerchant()) && em.total() == match.total()) {
+                        String prefix = com.finance.ai.application.financial.UpdateTransactionUseCase.extractRecurringPrefix(tx.getNotes());
+                        if (prefix != null && prefix.startsWith("RECURRING_EXPENSE:")) {
+                            try {
+                                String idStr = prefix.substring("RECURRING_EXPENSE:".length()).trim();
+                                return UUID.fromString(idStr);
+                            } catch (Exception ignored) {}
+                        }
+                    }
+                }
+            }
+        }
+        return fallbackId;
     }
 }

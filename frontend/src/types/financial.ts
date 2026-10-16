@@ -49,6 +49,9 @@ export interface Transaction {
   origin: TransactionOrigin;
   notes?: string;
   createdAt: string;
+  recurringCurrent?: number;
+  recurringTotal?: number;
+  recurringRemaining?: number;
 }
 
 export interface CreateTransactionPayload {

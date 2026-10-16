@@ -4,7 +4,9 @@ import { Account, Category, CreateTransactionPayload, UpdateTransactionPayload, 
 import { createTransactionApi, updateTransactionApi, createCategoryApi } from '../services/financialApi';
 import { CategoryCombobox } from './CategoryCombobox';
 import { CurrencyInput } from './CurrencyInput';
+import { RecurringMonthsPicker } from './RecurringMonthsPicker';
 import { useAuth } from '../context/AuthContext';
+import { cleanTransactionNotes } from '../utils/recurringNotes';
 
 interface TransactionModalProps {
   isOpen: boolean;
@@ -17,11 +19,8 @@ interface TransactionModalProps {
   defaultDate?: string;
 }
 
-const extractCleanNotes = (rawNotes?: string) => {
-  if (!rawNotes) return '';
-  if (!rawNotes.includes('RECURRING_INCOME:')) return rawNotes;
-  const pipeIdx = rawNotes.indexOf('|');
-  return pipeIdx >= 0 ? rawNotes.substring(pipeIdx + 1).trim() : '';
+const extractCleanNotes = (rawNotes?: string, description?: string) => {
+  return cleanTransactionNotes(rawNotes, description);
 };
 
 export const TransactionModal: React.FC<TransactionModalProps> = ({
@@ -65,8 +64,12 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       } else {
         setCategoryName('');
       }
-      setNotes(extractCleanNotes(transactionToEdit.notes));
-      const isRec = !!(transactionToEdit.notes && transactionToEdit.notes.includes('RECURRING_INCOME:'));
+      setNotes(extractCleanNotes(transactionToEdit.notes, transactionToEdit.description));
+      const isRec = !!(transactionToEdit.notes && (
+        transactionToEdit.notes.includes('RECURRING_INCOME:') ||
+        transactionToEdit.notes.includes('RECURRING_EXPENSE:') ||
+        transactionToEdit.notes.includes('RECURRING_BILL:')
+      ));
       setIsRecurring(isRec);
       setUpdateFutureRecurring(true);
     } else {
@@ -139,11 +142,15 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         destinationAccountId: type === 'TRANSFER' ? (destinationAccountId || undefined) : undefined,
         categoryId: finalCategoryId || undefined,
         notes: notes.trim() || undefined,
-        replicateMonths: (type === 'INCOME' && !transactionToEdit && isRecurring) ? replicateMonths : undefined,
+        replicateMonths: (!transactionToEdit && isRecurring && (type === 'INCOME' || type === 'EXPENSE')) ? replicateMonths : undefined,
       };
 
       if (transactionToEdit) {
-        const isRec = !!(transactionToEdit.notes && transactionToEdit.notes.includes('RECURRING_INCOME:'));
+        const isRec = !!(transactionToEdit.notes && (
+          transactionToEdit.notes.includes('RECURRING_INCOME:') ||
+          transactionToEdit.notes.includes('RECURRING_EXPENSE:') ||
+          transactionToEdit.notes.includes('RECURRING_BILL:')
+        ));
         const updatePayload: UpdateTransactionPayload = {
           ...payload,
           updateFutureRecurring: isRec ? updateFutureRecurring : undefined,
@@ -278,7 +285,13 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-black uppercase tracking-wider text-slate-500">Data de Competência</label>
+              <label className="block text-xs font-black uppercase tracking-wider text-slate-500">
+                {type === 'INCOME'
+                  ? 'Data do Recebimento'
+                  : type === 'EXPENSE'
+                  ? 'Data da Compra ou Pagamento'
+                  : 'Data da Transferência'}
+              </label>
               <input
                 type="date"
                 required
@@ -286,6 +299,9 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 onChange={(e) => setAccrualDate(e.target.value)}
                 className="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-800 focus:outline-none focus:border-[#58CC02] focus:bg-white transition-all"
               />
+              <span className="block text-[11px] font-bold text-slate-400">
+                Data em que o valor realmente entrou ou saiu da sua conta.
+              </span>
             </div>
           </div>
 
@@ -301,18 +317,28 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
             />
           </div>
 
-          {/* Seletor de Renda Recorrente ao Adicionar nova Entrada */}
-          {type === 'INCOME' && !transactionToEdit && (
-            <div className="p-3.5 bg-emerald-50/80 border-2 border-emerald-200/90 rounded-2xl transition-all space-y-2.5">
+          {/* Seletor de Recorrência (Receitas e Despesas) ao Adicionar */}
+          {(type === 'INCOME' || type === 'EXPENSE') && !transactionToEdit && (
+            <div className={`p-3.5 rounded-2xl transition-all space-y-3 ${
+              type === 'INCOME'
+                ? 'bg-emerald-50/80 border-2 border-emerald-200/90'
+                : 'bg-rose-50/80 border-2 border-rose-200/90'
+            }`}>
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5">
-                  <div className="p-2 rounded-xl bg-emerald-100 text-emerald-700 shrink-0">
+                  <div className={`p-2 rounded-xl shrink-0 ${
+                    type === 'INCOME' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
+                  }`}>
                     <Repeat className="h-4 w-4 stroke-[2.5]" />
                   </div>
                   <div>
-                    <span className="text-xs sm:text-sm font-black text-slate-800 block">Renda Recorrente</span>
+                    <span className="text-xs sm:text-sm font-black text-slate-800 block">
+                      {type === 'INCOME' ? 'Renda Recorrente' : 'Despesa Recorrente'}
+                    </span>
                     <span className="text-[11px] font-bold text-slate-500 block">
-                      Repetir automaticamente nos meses seguintes (salário, aluguel, pró-labore)
+                      {type === 'INCOME'
+                        ? 'Repetir automaticamente nos meses seguintes (salário, aluguel, pró-labore)'
+                        : 'Repetir automaticamente nos meses seguintes (mensalidade, condomínio, internet)'}
                     </span>
                   </div>
                 </div>
@@ -320,7 +346,9 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   type="button"
                   onClick={() => setIsRecurring(!isRecurring)}
                   className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                    isRecurring ? 'bg-[#58CC02]' : 'bg-slate-300'
+                    isRecurring
+                      ? (type === 'INCOME' ? 'bg-[#58CC02]' : 'bg-[#FF4B4B]')
+                      : 'bg-slate-300'
                   }`}
                   role="switch"
                   aria-checked={isRecurring}
@@ -334,40 +362,36 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               </div>
 
               {isRecurring && (
-                <div className="pt-2.5 border-t border-emerald-200/60 flex items-center justify-between gap-2 flex-wrap">
-                  <span className="text-xs font-black text-emerald-900">
-                    Projeção nos próximos meses:
-                  </span>
-                  <div className="flex items-center gap-1.5">
-                    {[6, 12, 24].map((m) => (
-                      <button
-                        key={m}
-                        type="button"
-                        onClick={() => setReplicateMonths(m)}
-                        className={`px-2.5 py-1 text-xs font-black rounded-xl border transition-all ${
-                          replicateMonths === m
-                            ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
-                            : 'bg-white text-slate-600 border-slate-200 hover:bg-emerald-100/50'
-                        }`}
-                      >
-                        {m} meses {m === 12 ? '(1 ano)' : ''}
-                      </button>
-                    ))}
-                  </div>
+                <div className="pt-2 border-t border-slate-200/70">
+                  <RecurringMonthsPicker
+                    months={replicateMonths}
+                    onChangeMonths={setReplicateMonths}
+                    startDateStr={accrualDate}
+                    theme={type === 'INCOME' ? 'income' : 'expense'}
+                    label={`Quantidade de meses a projetar esta ${type === 'INCOME' ? 'receita' : 'despesa'}`}
+                  />
                 </div>
               )}
             </div>
           )}
 
-          {/* Opção ao Editar Renda Recorrente */}
-          {transactionToEdit && transactionToEdit.notes && transactionToEdit.notes.includes('RECURRING_INCOME:') && (
+          {/* Opção ao Editar Transação Recorrente (Receita ou Despesa) */}
+          {transactionToEdit && transactionToEdit.notes && (
+            transactionToEdit.notes.includes('RECURRING_INCOME:') ||
+            transactionToEdit.notes.includes('RECURRING_EXPENSE:') ||
+            transactionToEdit.notes.includes('RECURRING_BILL:')
+          ) && (
             <div className="p-3.5 bg-amber-50/90 border-2 border-amber-300 rounded-2xl space-y-2">
               <div className="flex items-center gap-2 text-amber-800">
                 <Repeat className="h-4 w-4 shrink-0 stroke-[2.5]" />
-                <span className="text-xs font-black uppercase tracking-wider">Renda Recorrente Vinculada</span>
+                <span className="text-xs font-black uppercase tracking-wider">
+                  {transactionToEdit.notes.includes('RECURRING_INCOME:')
+                    ? 'Renda Recorrente Vinculada'
+                    : (transactionToEdit.notes.includes('RECURRING_BILL:') ? 'Custo Fixo Recorrente Vinculado' : 'Despesa Recorrente Vinculada')}
+                </span>
               </div>
               <p className="text-xs font-bold text-slate-600">
-                Este lançamento pertence a uma receita recorrente projetada nos meses futuros.
+                Este lançamento pertence a uma {transactionToEdit.notes.includes('RECURRING_INCOME:') ? 'receita' : 'despesa'} recorrente projetada nos meses futuros.
               </p>
               <label className="flex items-start gap-2.5 cursor-pointer pt-1 bg-white/70 p-2.5 rounded-xl border border-amber-200/80">
                 <input
@@ -377,7 +401,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 accent-emerald-600"
                 />
                 <span className="text-xs font-bold text-slate-800 leading-tight">
-                  Atualizar <strong>esta e todas as receitas futuras</strong> deste grupo
+                  Atualizar <strong>esta e todas as {transactionToEdit.notes.includes('RECURRING_INCOME:') ? 'receitas' : 'despesas'} futuras</strong> deste grupo
                   <span className="block text-[11px] font-medium text-slate-500 mt-0.5">
                     O histórico dos meses passados será mantido intacto.
                   </span>

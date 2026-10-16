@@ -83,7 +83,7 @@ public class UpdateRecurringBillUseCase {
 
             LocalDate newSettlementDate = tx.getSettlementDate() != null ? newAccrualDate : null;
             UUID targetAccountId = cmd.creditCardId() != null ? null : cmd.accountId();
-            String newNotes = "RECURRING_BILL:" + existing.getId() + " - Lançamento da despesa fixa: " + cmd.description().trim();
+            String newNotes = "RECURRING_BILL:" + existing.getId() + " | Lançamento do custo fixo: " + cmd.description().trim();
 
             Transaction updatedTx = tx.withUpdates(
                     tx.getType(),

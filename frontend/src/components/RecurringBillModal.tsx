@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Calendar, X, AlertCircle, CheckCircle2, CreditCard as CardIcon, Sparkles } from 'lucide-react';
+import { Calendar, X, AlertCircle, CheckCircle2, CreditCard as CardIcon, Sparkles, Repeat } from 'lucide-react';
 import { Category, Account } from '../types/financial';
 import { CreditCard } from '../types/card';
 import { RecurringBill, RecurringFrequency, CreateRecurringBillPayload, UpdateRecurringBillPayload } from '../types/recurring';
@@ -8,6 +8,7 @@ import { createRecurringBillApi, updateRecurringBillApi, payRecurringBillApi } f
 import { createCategoryApi } from '../services/financialApi';
 import { CategoryCombobox } from './CategoryCombobox';
 import { CurrencyInput } from './CurrencyInput';
+import { RecurringMonthsPicker } from './RecurringMonthsPicker';
 import { useAuth } from '../context/AuthContext';
 
 function getCurrentMonthStr(): string {
@@ -356,60 +357,66 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
           </div>
 
           {!billToEdit && (
-            <div className="p-4 rounded-2xl bg-slate-50 border-2 border-slate-200 space-y-3">
-              <div className="flex items-center space-x-2.5">
-                <input
-                  type="checkbox"
-                  id="autoLaunchCheck"
-                  checked={autoLaunch}
-                  onChange={(e) => setAutoLaunch(e.target.checked)}
-                  className="w-4 h-4 rounded-lg accent-[#58CC02] cursor-pointer"
-                />
-                <label htmlFor="autoLaunchCheck" className="text-xs sm:text-sm font-black text-slate-700 cursor-pointer flex items-center space-x-1.5">
-                  <Sparkles className="w-4 h-4 text-[#58CC02]" />
-                  <span>Já lançar no extrato financeiro agora</span>
-                </label>
+            <div className={`p-3.5 rounded-2xl transition-all space-y-3 ${
+              autoLaunch
+                ? 'bg-blue-50/80 border-2 border-blue-200/90'
+                : 'bg-slate-50 border-2 border-slate-200'
+            }`}>
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className={`p-2 rounded-xl shrink-0 transition-colors ${
+                    autoLaunch ? 'bg-blue-100 text-[#026CD6]' : 'bg-slate-200 text-slate-500'
+                  }`}>
+                    <Repeat className="h-4 w-4 stroke-[2.5]" />
+                  </div>
+                  <div>
+                    <span className="text-xs sm:text-sm font-black text-slate-800 block">
+                      Custo Fixo Recorrente
+                    </span>
+                    <span className="text-[11px] font-bold text-slate-500 block">
+                      Repetir automaticamente nos meses seguintes (assinatura, mensalidade, conta fixa)
+                    </span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setAutoLaunch(!autoLaunch)}
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                    autoLaunch ? 'bg-[#026CD6]' : 'bg-slate-300'
+                  }`}
+                  role="switch"
+                  aria-checked={autoLaunch}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                      autoLaunch ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
               </div>
 
               {autoLaunch && (
-                <div className="space-y-3 pt-2 border-t border-slate-200 animate-fade-in">
+                <div className="space-y-3 pt-3 border-t border-blue-200/70 animate-fade-in">
                   <div>
                     <label className="block text-xs font-black uppercase tracking-wider text-slate-500 mb-1">
-                      Mês de Lançamento
+                      Mês de Início da Repetição
                     </label>
                     <input
                       type="month"
                       value={launchMonth}
                       onChange={(e) => setLaunchMonth(e.target.value)}
-                      className="w-full px-3.5 py-2 rounded-xl bg-white border-2 border-slate-200 text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:border-[#58CC02]"
+                      className="w-full px-3.5 py-2 rounded-xl bg-white border-2 border-slate-200 text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:border-[#026CD6]"
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-black uppercase tracking-wider text-slate-500 mb-1.5">
-                      Replicar para os meses seguintes?
-                    </label>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                      {[
-                        { label: 'Apenas 1 mês', value: 1 },
-                        { label: '3 meses', value: 3 },
-                        { label: '6 meses', value: 6 },
-                        { label: '12 meses', value: 12 },
-                      ].map((opt) => (
-                        <button
-                          key={opt.value}
-                          type="button"
-                          onClick={() => setReplicateMonths(opt.value)}
-                          className={`py-2 px-1 rounded-xl border-2 text-[11px] font-black transition-all text-center ${
-                            replicateMonths === opt.value
-                              ? 'bg-[#E8F8E8] border-[#58CC02] text-[#46A302] shadow-[0_2px_0_0_#58CC02]'
-                              : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-100'
-                          }`}
-                        >
-                          {opt.label}
-                        </button>
-                      ))}
-                    </div>
+                  <div className="pt-1">
+                    <RecurringMonthsPicker
+                      months={replicateMonths}
+                      onChangeMonths={setReplicateMonths}
+                      startDateStr={`${launchMonth}-01`}
+                      theme="bill"
+                      label="Quantidade de meses a projetar este custo fixo"
+                    />
                   </div>
                 </div>
               )}
@@ -417,17 +424,30 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
           )}
 
           {billToEdit && (
-            <div className="flex items-center space-x-2 pt-1">
-              <input
-                type="checkbox"
-                id="activeBill"
-                checked={active}
-                onChange={(e) => setActive(e.target.checked)}
-                className="w-4 h-4 rounded-lg accent-[#58CC02] cursor-pointer"
-              />
-              <label htmlFor="activeBill" className="text-sm font-bold text-slate-600 cursor-pointer">
-                Assinatura ativa e computada nas previsões
-              </label>
+            <div className="p-3.5 rounded-2xl bg-slate-50 border-2 border-slate-200 flex items-center justify-between gap-3">
+              <div>
+                <span className="text-xs sm:text-sm font-black text-slate-800 block">
+                  Status da Assinatura
+                </span>
+                <span className="text-[11px] font-bold text-slate-500 block">
+                  {active ? 'Assinatura ativa e computada nas previsões' : 'Assinatura pausada / inativa'}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActive(!active)}
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                  active ? 'bg-[#58CC02]' : 'bg-slate-300'
+                }`}
+                role="switch"
+                aria-checked={active}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                    active ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
             </div>
           )}
 

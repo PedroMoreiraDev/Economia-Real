@@ -89,7 +89,8 @@ public class TransactionController {
         if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
         var transactions = listTransactionsUseCase.execute(user.userId(), startDate, endDate);
-        var response = transactions.stream().map(this::toResponse).toList();
+        var progressMap = listTransactionsUseCase.getRecurringProgressMap(user.userId(), transactions);
+        var response = transactions.stream().map(t -> toResponse(t, progressMap)).toList();
         return ResponseEntity.ok(response);
     }
 
@@ -159,6 +160,11 @@ public class TransactionController {
     }
 
     private TransactionResponse toResponse(Transaction t) {
+        return toResponse(t, null);
+    }
+
+    private TransactionResponse toResponse(Transaction t, java.util.Map<UUID, ListTransactionsUseCase.RecurringProgress> progressMap) {
+        ListTransactionsUseCase.RecurringProgress prog = progressMap != null ? progressMap.get(t.getId()) : null;
         return new TransactionResponse(
                 t.getId().toString(),
                 t.getType().name(),
@@ -172,7 +178,10 @@ public class TransactionController {
                 t.getStatus().name(),
                 t.getOrigin().name(),
                 t.getNotes(),
-                t.getCreatedAt().toString()
+                t.getCreatedAt().toString(),
+                prog != null ? prog.current() : null,
+                prog != null ? prog.total() : null,
+                prog != null ? prog.remaining() : null
         );
     }
 
@@ -217,6 +226,9 @@ public class TransactionController {
             String status,
             String origin,
             String notes,
-            String createdAt
+            String createdAt,
+            Integer recurringCurrent,
+            Integer recurringTotal,
+            Integer recurringRemaining
     ) {}
 }
