@@ -316,8 +316,11 @@ public class GeminiAiService implements AiExtractionPort, AudioTranscriptionPort
 
     private String executePostWithModelFallback(Map<String, Object> requestBody) {
         List<String> modelsToTry = new ArrayList<>();
-        modelsToTry.add(this.modelName);
-        for (String candidate : List.of("gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash-latest")) {
+        // Se o modelo configurado não for o obsoleto 'gemini-1.5-flash', tenta ele primeiro
+        if (this.modelName != null && !this.modelName.isBlank() && !this.modelName.equals("gemini-1.5-flash")) {
+            modelsToTry.add(this.modelName);
+        }
+        for (String candidate : List.of("gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-1.5-flash-latest", "gemini-1.5-pro")) {
             if (!modelsToTry.contains(candidate)) {
                 modelsToTry.add(candidate);
             }
