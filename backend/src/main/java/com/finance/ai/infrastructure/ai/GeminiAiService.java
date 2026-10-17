@@ -29,7 +29,6 @@ import java.util.*;
 public class GeminiAiService implements AiExtractionPort, AudioTranscriptionPort {
 
     private static final Logger log = LoggerFactory.getLogger(GeminiAiService.class);
-    private static final String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent";
 
     private final String apiKey;
     private final String modelName;
@@ -316,11 +315,10 @@ public class GeminiAiService implements AiExtractionPort, AudioTranscriptionPort
 
     private String executePostWithModelFallback(Map<String, Object> requestBody) {
         List<String> modelsToTry = new ArrayList<>();
-        // Se o modelo configurado não for o obsoleto 'gemini-1.5-flash', tenta ele primeiro
-        if (this.modelName != null && !this.modelName.isBlank() && !this.modelName.equals("gemini-1.5-flash")) {
+        if (this.modelName != null && !this.modelName.isBlank()) {
             modelsToTry.add(this.modelName);
         }
-        for (String candidate : List.of("gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-1.5-flash-latest", "gemini-1.5-pro")) {
+        for (String candidate : List.of("gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.0-flash-lite", "gemini-1.5-pro")) {
             if (!modelsToTry.contains(candidate)) {
                 modelsToTry.add(candidate);
             }
@@ -328,22 +326,29 @@ public class GeminiAiService implements AiExtractionPort, AudioTranscriptionPort
 
         org.springframework.web.client.HttpClientErrorException lastHttpException = null;
 
-        for (String model : modelsToTry) {
-            try {
-                return restClient.post()
-                        .uri(GEMINI_API_URL, model)
-                        .header("x-goog-api-key", apiKey)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .body(requestBody)
-                        .retrieve()
-                        .body(String.class);
-            } catch (org.springframework.web.client.HttpClientErrorException ex) {
-                lastHttpException = ex;
-                if (ex.getStatusCode().value() == 404) {
-                    log.warn("Modelo '{}' não encontrado (404) na API Gemini. Tentando próximo modelo disponível...", model);
-                    continue;
+        // Testa em v1beta e fallback em v1 caso a versão da API seja estrita
+        for (String apiVersion : List.of("v1beta", "v1")) {
+            for (String model : modelsToTry) {
+                try {
+                    // Construção explícita de java.net.URI para evitar que o Spring interprete o ':' de ':generateContent' como template regex
+                    String urlString = "https://generativelanguage.googleapis.com/" + apiVersion + "/models/" + model + ":generateContent?key=" + apiKey;
+                    java.net.URI targetUri = java.net.URI.create(urlString);
+
+                    return restClient.post()
+                            .uri(targetUri)
+                            .header("x-goog-api-key", apiKey)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .body(requestBody)
+                            .retrieve()
+                            .body(String.class);
+                } catch (org.springframework.web.client.HttpClientErrorException ex) {
+                    lastHttpException = ex;
+                    if (ex.getStatusCode().value() == 404) {
+                        log.warn("Modelo '{}' na versão '{}' retornou 404 na API Gemini. Tentando próximo modelo...", model, apiVersion);
+                        continue;
+                    }
+                    throw ex;
                 }
-                throw ex;
             }
         }
 
