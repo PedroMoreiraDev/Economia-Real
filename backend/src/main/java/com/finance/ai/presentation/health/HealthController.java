@@ -13,9 +13,17 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Health Check", description = "Verificação de disponibilidade e saúde do backend")
 public class HealthController {
 
+    private final String activeModel;
+
+    public HealthController(
+            @org.springframework.beans.factory.annotation.Value("${ai.gemini.model:gemini-2.5-flash}") String activeModel
+    ) {
+        this.activeModel = activeModel;
+    }
+
     @GetMapping
     @Operation(summary = "Verifica se a API está operacional")
     public ResponseEntity<HealthResponse> checkHealth() {
-        return ResponseEntity.ok(HealthResponse.ok());
+        return ResponseEntity.ok(HealthResponse.of(activeModel));
     }
 }

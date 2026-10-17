@@ -5,7 +5,8 @@ FROM maven:3.9.6-eclipse-temurin-21-alpine AS builder
 
 WORKDIR /build
 
-# Cache de dependências do Maven
+# Cache de dependências do Maven com limite de memória seguro para nuvem gratuita (512MB RAM)
+ENV MAVEN_OPTS="-Xmx384m -Dfile.encoding=UTF-8"
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
 

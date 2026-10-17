@@ -40,7 +40,8 @@ class HealthControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value("UP"))
                 .andExpect(jsonPath("$.service").value("finance-backend"))
-                .andExpect(jsonPath("$.version").value("0.1.0"))
+                .andExpect(jsonPath("$.version").value("0.1.0-gemini-2.5"))
+                .andExpect(jsonPath("$.activeModel").isNotEmpty())
                 .andExpect(jsonPath("$.timestamp").isNotEmpty());
     }
 }
