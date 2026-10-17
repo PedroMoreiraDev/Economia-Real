@@ -90,6 +90,16 @@ public class GeminiAiService implements AiExtractionPort, AudioTranscriptionPort
 
         try {
             return callGeminiApiForAudioTranscription(audioBytes, contentType);
+        } catch (org.springframework.web.client.HttpClientErrorException ex) {
+            String responseErr = ex.getResponseBodyAsString();
+            log.warn("Erro retornado pela API do Gemini ({}) ao transcrever áudio: {}", ex.getStatusCode(), responseErr);
+            if (responseErr.contains("API_KEY_INVALID") || responseErr.contains("key is invalid")) {
+                throw new IllegalStateException("A chave GEMINI_API_KEY informada é inválida. Verifique a chave no Google AI Studio.");
+            }
+            if (responseErr.contains("RESOURCE_EXHAUSTED") || ex.getStatusCode().value() == 429) {
+                throw new IllegalStateException("Limite de requisições temporariamente excedido na API Gemini. Tente novamente em instantes.");
+            }
+            throw new IllegalStateException("Erro ao processar áudio na API Gemini (" + ex.getStatusCode() + "): " + responseErr);
         } catch (Exception ex) {
             log.warn("Falha na transcrição de áudio via API Gemini ({}).", ex.getMessage());
             throw new RuntimeException("Não foi possível transcrever o áudio: " + ex.getMessage(), ex);
@@ -232,12 +242,17 @@ public class GeminiAiService implements AiExtractionPort, AudioTranscriptionPort
 
     private String callGeminiApiForAudioTranscription(byte[] audioBytes, String contentType) throws Exception {
         String base64Audio = Base64.getEncoder().encodeToString(audioBytes);
-        String mime = (contentType != null && !contentType.isBlank()) ? contentType : "audio/webm";
+        String rawMime = (contentType != null && !contentType.isBlank()) ? contentType : "audio/webm";
+        String cleanMime = rawMime.contains(";") ? rawMime.split(";")[0].trim() : rawMime.trim();
+
+        if (cleanMime.equalsIgnoreCase("audio/x-m4a") || cleanMime.equalsIgnoreCase("audio/m4a")) {
+            cleanMime = "audio/mp4";
+        }
 
         Map<String, Object> requestBody = Map.of(
                 "contents", List.of(
                         Map.of("role", "user", "parts", List.of(
-                                Map.of("inline_data", Map.of("mime_type", mime, "data", base64Audio)),
+                                Map.of("inlineData", Map.of("mimeType", cleanMime, "data", base64Audio)),
                                 Map.of("text", "Transcreva EXATAMENTE em português o áudio fornecido. Retorne apenas o texto transcrito, sem aspas e sem comentários.")
                         ))
                 ),

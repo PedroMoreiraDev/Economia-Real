@@ -184,7 +184,28 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
+
+      // Detecta formato suportado nativamente pelo navegador (Safari iOS grava audio/mp4, Android/Chrome grava audio/webm)
+      let selectedMime = '';
+      if (typeof MediaRecorder !== 'undefined' && typeof MediaRecorder.isTypeSupported === 'function') {
+        const candidates = [
+          'audio/webm;codecs=opus',
+          'audio/webm',
+          'audio/mp4',
+          'audio/aac',
+          'audio/ogg'
+        ];
+        for (const candidate of candidates) {
+          if (MediaRecorder.isTypeSupported(candidate)) {
+            selectedMime = candidate;
+            break;
+          }
+        }
+      }
+
+      const recorder = selectedMime
+        ? new MediaRecorder(stream, { mimeType: selectedMime })
+        : new MediaRecorder(stream);
       mediaRecorderRef.current = recorder;
 
       recorder.ondataavailable = (e) => {
@@ -201,9 +222,12 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
           // Processa diretamente o texto falado e capturado com fidelidade total
           await processRecognizedText(capturedText);
         } else {
-          // Fallback para envio do áudio ao backend
-          const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-          await processAudioBlob(audioBlob);
+          // Fallback para envio do áudio gravado ao backend
+          const actualMime = recorder.mimeType || selectedMime || 'audio/webm';
+          const cleanMime = actualMime.split(';')[0].trim();
+          const ext = cleanMime.includes('mp4') ? 'mp4' : cleanMime.includes('aac') ? 'aac' : cleanMime.includes('ogg') ? 'ogg' : 'webm';
+          const audioBlob = new Blob(audioChunksRef.current, { type: cleanMime });
+          await processAudioBlob(audioBlob, `gravacao.${ext}`);
         }
       };
 
@@ -239,13 +263,13 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
   };
 
   // Processar áudio (Blob ou File) via backend
-  const processAudioBlob = async (blob: Blob) => {
+  const processAudioBlob = async (blob: Blob, filename = 'gravacao.webm') => {
     if (!token) return;
     setError(null);
     setIsProcessingAi(true);
 
     try {
-      const response = await extractFromAudioApi(token, blob, 'gravacao.webm');
+      const response = await extractFromAudioApi(token, blob, filename);
       handleAiSuccess(response);
     } catch (err: any) {
       setError(err.message || 'Falha ao transcrever e processar o áudio.');
