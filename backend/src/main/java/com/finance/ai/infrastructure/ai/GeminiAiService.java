@@ -40,13 +40,13 @@ public class GeminiAiService implements AiExtractionPort, AudioTranscriptionPort
 
     public GeminiAiService(
             @Value("${ai.gemini.api-key:}") String apiKey,
-            @Value("${ai.gemini.model:gemini-1.5-flash}") String modelName,
+            @Value("${ai.gemini.model:gemini-2.5-flash}") String modelName,
             ObjectMapper objectMapper,
             NaturalLanguageRuleParser ruleParser,
             PiiSanitizer piiSanitizer
     ) {
         this.apiKey = apiKey != null ? apiKey.trim() : "";
-        this.modelName = (modelName != null && !modelName.isBlank()) ? modelName.trim() : "gemini-1.5-flash";
+        this.modelName = (modelName != null && !modelName.isBlank()) ? modelName.trim() : "gemini-2.5-flash";
         this.objectMapper = objectMapper;
         this.ruleParser = ruleParser;
         this.piiSanitizer = piiSanitizer;
@@ -161,13 +161,7 @@ public class GeminiAiService implements AiExtractionPort, AudioTranscriptionPort
                 )
         );
 
-        String responseJson = restClient.post()
-                .uri(GEMINI_API_URL, modelName)
-                .header("x-goog-api-key", apiKey)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(requestBody)
-                .retrieve()
-                .body(String.class);
+        String responseJson = executePostWithModelFallback(requestBody);
 
         JsonNode root = objectMapper.readTree(responseJson);
         JsonNode candidates = root.path("candidates");
@@ -229,14 +223,7 @@ public class GeminiAiService implements AiExtractionPort, AudioTranscriptionPort
                 )
         );
 
-        String responseJson = restClient.post()
-                .uri(GEMINI_API_URL, modelName)
-                .header("x-goog-api-key", apiKey)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(requestBody)
-                .retrieve()
-                .body(String.class);
-
+        String responseJson = executePostWithModelFallback(requestBody);
         return parseGeminiResponse(responseJson, text, TransactionOrigin.AI_TEXT);
     }
 
@@ -261,13 +248,7 @@ public class GeminiAiService implements AiExtractionPort, AudioTranscriptionPort
                 )
         );
 
-        String responseJson = restClient.post()
-                .uri(GEMINI_API_URL, modelName)
-                .header("x-goog-api-key", apiKey)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(requestBody)
-                .retrieve()
-                .body(String.class);
+        String responseJson = executePostWithModelFallback(requestBody);
 
         JsonNode root = objectMapper.readTree(responseJson);
         JsonNode textNode = root.path("candidates").path(0).path("content").path("parts").path(0).path("text");
@@ -331,5 +312,41 @@ public class GeminiAiService implements AiExtractionPort, AudioTranscriptionPort
                 origin,
                 originalText
         );
+    }
+
+    private String executePostWithModelFallback(Map<String, Object> requestBody) {
+        List<String> modelsToTry = new ArrayList<>();
+        modelsToTry.add(this.modelName);
+        for (String candidate : List.of("gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash-latest")) {
+            if (!modelsToTry.contains(candidate)) {
+                modelsToTry.add(candidate);
+            }
+        }
+
+        org.springframework.web.client.HttpClientErrorException lastHttpException = null;
+
+        for (String model : modelsToTry) {
+            try {
+                return restClient.post()
+                        .uri(GEMINI_API_URL, model)
+                        .header("x-goog-api-key", apiKey)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(requestBody)
+                        .retrieve()
+                        .body(String.class);
+            } catch (org.springframework.web.client.HttpClientErrorException ex) {
+                lastHttpException = ex;
+                if (ex.getStatusCode().value() == 404) {
+                    log.warn("Modelo '{}' não encontrado (404) na API Gemini. Tentando próximo modelo disponível...", model);
+                    continue;
+                }
+                throw ex;
+            }
+        }
+
+        if (lastHttpException != null) {
+            throw lastHttpException;
+        }
+        throw new IllegalStateException("Nenhum modelo Gemini compatível encontrado.");
     }
 }
