@@ -313,16 +313,100 @@ public class GeminiAiService implements AiExtractionPort, AudioTranscriptionPort
         );
     }
 
-    private String executePostWithModelFallback(Map<String, Object> requestBody) {
-        List<String> modelsToTry = new ArrayList<>();
-        if (this.modelName != null && !this.modelName.isBlank()) {
-            modelsToTry.add(this.modelName);
+    private volatile List<String> cachedAvailableModels = null;
+
+    public List<String> getAvailableModels() {
+        if (cachedAvailableModels != null && !cachedAvailableModels.isEmpty()) {
+            return cachedAvailableModels;
         }
-        for (String candidate : List.of("gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.0-flash-lite", "gemini-1.5-pro")) {
-            if (!modelsToTry.contains(candidate)) {
-                modelsToTry.add(candidate);
+        cachedAvailableModels = fetchAvailableModelsFromGoogle();
+        return cachedAvailableModels;
+    }
+
+    private List<String> fetchAvailableModelsFromGoogle() {
+        if (apiKey.isBlank()) {
+            log.warn("GEMINI_API_KEY não configurada. Não é possível listar modelos disponíveis.");
+            return Collections.emptyList();
+        }
+
+        for (String apiVersion : List.of("v1beta", "v1")) {
+            try {
+                String listUrl = "https://generativelanguage.googleapis.com/" + apiVersion + "/models?key=" + apiKey;
+                java.net.URI uri = java.net.URI.create(listUrl);
+
+                String response = restClient.get()
+                        .uri(uri)
+                        .header("x-goog-api-key", apiKey)
+                        .retrieve()
+                        .body(String.class);
+
+                if (response != null && !response.isBlank()) {
+                    JsonNode root = objectMapper.readTree(response);
+                    JsonNode modelsNode = root.path("models");
+                    if (modelsNode.isArray() && !modelsNode.isEmpty()) {
+                        List<String> validModels = new ArrayList<>();
+                        for (JsonNode m : modelsNode) {
+                            String name = m.path("name").asText("");
+                            JsonNode methods = m.path("supportedGenerationMethods");
+                            boolean canGenerate = false;
+                            if (methods.isArray()) {
+                                for (JsonNode method : methods) {
+                                    if ("generateContent".equalsIgnoreCase(method.asText())) {
+                                        canGenerate = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (canGenerate && !name.isBlank()) {
+                                String cleanName = name.startsWith("models/") ? name.substring(7) : name;
+                                validModels.add(cleanName);
+                            }
+                        }
+                        log.info("Modelos Google AI descobertos dinamicamente ({}) com suporte a generateContent: {}", apiVersion, validModels);
+                        if (!validModels.isEmpty()) {
+                            return validModels;
+                        }
+                    }
+                }
+            } catch (Exception ex) {
+                log.warn("Tentativa de consultar ModelService.ListModels ({}) falhou: {}", apiVersion, ex.getMessage());
             }
         }
+        return Collections.emptyList();
+    }
+
+    private String executePostWithModelFallback(Map<String, Object> requestBody) {
+        List<String> discovered = getAvailableModels();
+
+        List<String> modelsToTry = new ArrayList<>();
+
+        // Se descobriu modelos reais da chave da conta, prioriza eles
+        if (!discovered.isEmpty()) {
+            for (String pref : List.of("gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash-002", "gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-flash-8b", "gemini-2.0-flash-exp", "gemini-1.5-pro", "gemini-1.5-pro-002")) {
+                if (discovered.contains(pref)) {
+                    modelsToTry.add(pref);
+                }
+            }
+            for (String disc : discovered) {
+                if (!modelsToTry.contains(disc)) {
+                    modelsToTry.add(disc);
+                }
+            }
+        }
+
+        // Se não conseguiu descobrir ou a lista veio vazia, usa lista manual
+        if (modelsToTry.isEmpty()) {
+            if (this.modelName != null && !this.modelName.isBlank()) {
+                modelsToTry.add(this.modelName);
+            }
+            for (String fallback : List.of("gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash-002", "gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-pro", "gemini-2.0-flash-lite")) {
+                if (!modelsToTry.contains(fallback)) {
+                    modelsToTry.add(fallback);
+                }
+            }
+        }
+
+        log.info("Modelos candidatos para requisição Gemini: {}", modelsToTry);
 
         org.springframework.web.client.HttpClientErrorException lastHttpException = null;
 
@@ -330,7 +414,6 @@ public class GeminiAiService implements AiExtractionPort, AudioTranscriptionPort
         for (String apiVersion : List.of("v1beta", "v1")) {
             for (String model : modelsToTry) {
                 try {
-                    // Construção explícita de java.net.URI para evitar que o Spring interprete o ':' de ':generateContent' como template regex
                     String urlString = "https://generativelanguage.googleapis.com/" + apiVersion + "/models/" + model + ":generateContent?key=" + apiKey;
                     java.net.URI targetUri = java.net.URI.create(urlString);
 
