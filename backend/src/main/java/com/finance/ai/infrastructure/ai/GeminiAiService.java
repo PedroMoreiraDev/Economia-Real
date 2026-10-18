@@ -89,7 +89,7 @@ public class GeminiAiService implements AiExtractionPort, AudioTranscriptionPort
 
         try {
             return callGeminiApiForAudioTranscription(audioBytes, contentType);
-        } catch (org.springframework.web.client.HttpClientErrorException ex) {
+        } catch (org.springframework.web.client.HttpStatusCodeException ex) {
             String responseErr = ex.getResponseBodyAsString();
             log.warn("Erro retornado pela API do Gemini ({}) ao transcrever áudio: {}", ex.getStatusCode(), responseErr);
             if (responseErr.contains("API_KEY_INVALID") || responseErr.contains("key is invalid")) {
@@ -97,6 +97,9 @@ public class GeminiAiService implements AiExtractionPort, AudioTranscriptionPort
             }
             if (responseErr.contains("RESOURCE_EXHAUSTED") || ex.getStatusCode().value() == 429) {
                 throw new IllegalStateException("Limite de requisições temporariamente excedido na API Gemini. Tente novamente em instantes.");
+            }
+            if (ex.getStatusCode().value() == 503) {
+                throw new IllegalStateException("Os servidores da IA Gemini estão temporariamente sobrecarregados. Por favor, tente novamente em alguns segundos.");
             }
             throw new IllegalStateException("Erro ao processar áudio na API Gemini (" + ex.getStatusCode() + "): " + responseErr);
         } catch (Exception ex) {
@@ -360,8 +363,21 @@ public class GeminiAiService implements AiExtractionPort, AudioTranscriptionPort
                             if (canGenerate && !name.isBlank()) {
                                 String cleanName = name.startsWith("models/") ? name.substring(7) : name;
                                 String lower = cleanName.toLowerCase();
-                                // Filtra modelos especializados que não aceitam entrada de áudio (ex: Text-to-Speech, embeddings, imagens)
-                                if (!lower.contains("tts") && !lower.contains("embed") && !lower.contains("imagen") && !lower.contains("aqa")) {
+                                // Filtra modelos especializados que não aceitam entrada de áudio
+                                boolean isAudioCandidate = !lower.contains("tts") &&
+                                        !lower.contains("embed") &&
+                                        !lower.contains("imagen") &&
+                                        !lower.contains("aqa") &&
+                                        !lower.contains("gemma") &&
+                                        !lower.contains("image") &&
+                                        !lower.contains("clip") &&
+                                        !lower.contains("lyria") &&
+                                        !lower.contains("robotics") &&
+                                        !lower.contains("computer-use") &&
+                                        !lower.contains("deep-research") &&
+                                        !lower.contains("antigravity");
+
+                                if (isAudioCandidate) {
                                     validModels.add(cleanName);
                                 }
                             }
@@ -384,9 +400,31 @@ public class GeminiAiService implements AiExtractionPort, AudioTranscriptionPort
 
         List<String> modelsToTry = new ArrayList<>();
 
-        // Se descobriu modelos reais da chave da conta, prioriza os multimodais conhecidos
+        // Lista de modelos multimodais de áudio e fala ordenados por especialidade e estabilidade
+        List<String> preferredAudioModels = List.of(
+                "gemini-3.5-transcribe",
+                "gemini-3.5-flash",
+                "gemini-flash-latest",
+                "gemini-3.8-flash",
+                "gemini-3.6-flash",
+                "gemini-3.7-flash",
+                "gemini-flash-lite-latest",
+                "gemini-3.1-flash-lite",
+                "gemini-omni-flash-preview",
+                "gemini-omni-1.1-flash",
+                "gemini-pro-latest",
+                "gemini-3.1-pro-preview",
+                "gemini-2.0-flash",
+                "gemini-2.0-flash-exp",
+                "gemini-1.5-flash-002",
+                "gemini-1.5-flash",
+                "gemini-1.5-flash-latest",
+                "gemini-2.5-flash"
+        );
+
+        // Se descobriu modelos reais da chave da conta, prioriza os modelos de áudio comprovados
         if (!discovered.isEmpty()) {
-            for (String pref : List.of("gemini-2.0-flash", "gemini-2.0-flash-exp", "gemini-1.5-flash-002", "gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-flash-8b", "gemini-2.5-flash", "gemini-1.5-pro-002", "gemini-1.5-pro")) {
+            for (String pref : preferredAudioModels) {
                 if (discovered.contains(pref)) {
                     modelsToTry.add(pref);
                 }
@@ -400,10 +438,7 @@ public class GeminiAiService implements AiExtractionPort, AudioTranscriptionPort
 
         // Se não conseguiu descobrir ou a lista veio vazia, usa lista manual
         if (modelsToTry.isEmpty()) {
-            if (this.modelName != null && !this.modelName.isBlank() && !this.modelName.contains("tts")) {
-                modelsToTry.add(this.modelName);
-            }
-            for (String fallback : List.of("gemini-2.0-flash", "gemini-2.0-flash-exp", "gemini-1.5-flash-002", "gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-2.5-flash", "gemini-1.5-pro")) {
+            for (String fallback : preferredAudioModels) {
                 if (!modelsToTry.contains(fallback)) {
                     modelsToTry.add(fallback);
                 }
@@ -412,7 +447,7 @@ public class GeminiAiService implements AiExtractionPort, AudioTranscriptionPort
 
         log.info("Modelos candidatos para requisição Gemini: {}", modelsToTry);
 
-        org.springframework.web.client.HttpClientErrorException lastHttpException = null;
+        org.springframework.web.client.HttpStatusCodeException lastHttpException = null;
 
         // Testa em v1beta e fallback em v1 caso a versão da API seja estrita
         for (String apiVersion : List.of("v1beta", "v1")) {
@@ -428,14 +463,20 @@ public class GeminiAiService implements AiExtractionPort, AudioTranscriptionPort
                             .body(requestBody)
                             .retrieve()
                             .body(String.class);
-                } catch (org.springframework.web.client.HttpClientErrorException ex) {
+                } catch (org.springframework.web.client.HttpStatusCodeException ex) {
                     lastHttpException = ex;
+                    int statusCode = ex.getStatusCode().value();
                     String respBody = ex.getResponseBodyAsString();
-                    boolean isNotSupportedOrNotFound = ex.getStatusCode().value() == 404 ||
-                            (ex.getStatusCode().value() == 400 && respBody.toLowerCase().contains("modality is not enabled"));
 
-                    if (isNotSupportedOrNotFound) {
-                        log.warn("Modelo '{}' na versão '{}' não suporta a operação (status {}). Tentando próximo modelo...", model, apiVersion, ex.getStatusCode());
+                    // Se o modelo estiver sobrecarregado (503), não encontrado (404), sem cota (429) ou modalidade não habilitada (400), tenta o próximo!
+                    boolean shouldRetryNextModel = statusCode == 404 ||
+                            statusCode == 503 ||
+                            statusCode == 429 ||
+                            statusCode == 500 ||
+                            (statusCode == 400 && (respBody.toLowerCase().contains("modality") || respBody.toLowerCase().contains("not supported") || respBody.toLowerCase().contains("audio")));
+
+                    if (shouldRetryNextModel) {
+                        log.warn("Modelo '{}' na versão '{}' retornou status {}. Tentando próximo modelo...", model, apiVersion, statusCode);
                         continue;
                     }
                     throw ex;
