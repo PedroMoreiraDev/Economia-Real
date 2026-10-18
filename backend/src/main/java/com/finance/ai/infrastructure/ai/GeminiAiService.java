@@ -359,10 +359,14 @@ public class GeminiAiService implements AiExtractionPort, AudioTranscriptionPort
                             }
                             if (canGenerate && !name.isBlank()) {
                                 String cleanName = name.startsWith("models/") ? name.substring(7) : name;
-                                validModels.add(cleanName);
+                                String lower = cleanName.toLowerCase();
+                                // Filtra modelos especializados que não aceitam entrada de áudio (ex: Text-to-Speech, embeddings, imagens)
+                                if (!lower.contains("tts") && !lower.contains("embed") && !lower.contains("imagen") && !lower.contains("aqa")) {
+                                    validModels.add(cleanName);
+                                }
                             }
                         }
-                        log.info("Modelos Google AI descobertos dinamicamente ({}) com suporte a generateContent: {}", apiVersion, validModels);
+                        log.info("Modelos Google AI descobertos dinamicamente ({}) com suporte a áudio/generateContent: {}", apiVersion, validModels);
                         if (!validModels.isEmpty()) {
                             return validModels;
                         }
@@ -380,9 +384,9 @@ public class GeminiAiService implements AiExtractionPort, AudioTranscriptionPort
 
         List<String> modelsToTry = new ArrayList<>();
 
-        // Se descobriu modelos reais da chave da conta, prioriza eles
+        // Se descobriu modelos reais da chave da conta, prioriza os multimodais conhecidos
         if (!discovered.isEmpty()) {
-            for (String pref : List.of("gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash-002", "gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-flash-8b", "gemini-2.0-flash-exp", "gemini-1.5-pro", "gemini-1.5-pro-002")) {
+            for (String pref : List.of("gemini-2.0-flash", "gemini-2.0-flash-exp", "gemini-1.5-flash-002", "gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-flash-8b", "gemini-2.5-flash", "gemini-1.5-pro-002", "gemini-1.5-pro")) {
                 if (discovered.contains(pref)) {
                     modelsToTry.add(pref);
                 }
@@ -396,10 +400,10 @@ public class GeminiAiService implements AiExtractionPort, AudioTranscriptionPort
 
         // Se não conseguiu descobrir ou a lista veio vazia, usa lista manual
         if (modelsToTry.isEmpty()) {
-            if (this.modelName != null && !this.modelName.isBlank()) {
+            if (this.modelName != null && !this.modelName.isBlank() && !this.modelName.contains("tts")) {
                 modelsToTry.add(this.modelName);
             }
-            for (String fallback : List.of("gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash-002", "gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-pro", "gemini-2.0-flash-lite")) {
+            for (String fallback : List.of("gemini-2.0-flash", "gemini-2.0-flash-exp", "gemini-1.5-flash-002", "gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-2.5-flash", "gemini-1.5-pro")) {
                 if (!modelsToTry.contains(fallback)) {
                     modelsToTry.add(fallback);
                 }
@@ -426,8 +430,12 @@ public class GeminiAiService implements AiExtractionPort, AudioTranscriptionPort
                             .body(String.class);
                 } catch (org.springframework.web.client.HttpClientErrorException ex) {
                     lastHttpException = ex;
-                    if (ex.getStatusCode().value() == 404) {
-                        log.warn("Modelo '{}' na versão '{}' retornou 404 na API Gemini. Tentando próximo modelo...", model, apiVersion);
+                    String respBody = ex.getResponseBodyAsString();
+                    boolean isNotSupportedOrNotFound = ex.getStatusCode().value() == 404 ||
+                            (ex.getStatusCode().value() == 400 && respBody.toLowerCase().contains("modality is not enabled"));
+
+                    if (isNotSupportedOrNotFound) {
+                        log.warn("Modelo '{}' na versão '{}' não suporta a operação (status {}). Tentando próximo modelo...", model, apiVersion, ex.getStatusCode());
                         continue;
                     }
                     throw ex;
