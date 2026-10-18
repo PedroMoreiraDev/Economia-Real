@@ -90,7 +90,15 @@ Este documento registra o estado real, factual e auditável do desenvolvimento d
 - [x] Contratos e Domínio de IA: `ExtractedTransaction`, `AiExtractionPort`, `AudioTranscriptionPort`.
 - [x] Privacidade e Governança (LGPD): Sanitização de CPFs, cartões e emails via `PiiSanitizer`.
 - [x] Adaptador Gemini com fallback determinístico offline (`NaturalLanguageRuleParser`) aprimorado para valores falados compostos (reais e centavos) e marcas brasileiras populares (iFood, Uber, etc.).
-- [x] Modal `AiTransactionModal` com entrada por texto e gravação de voz: integração com a **Web Speech API nativa** do navegador em tempo real (transcrição instantânea em pt-BR e envio ao extrator estruturado), remoção de mocks fixos de áudio no backend e confirmação humana obrigatória sem alucinações.
+- [x] Modal `AiTransactionModal` com entrada por texto e gravação de voz:
+  - No desktop: integração com a **Web Speech API nativa** do navegador em tempo real (transcrição instantânea em pt-BR e envio ao extrator estruturado).
+  - No mobile: gravação e envio de arquivo de áudio (`POST /api/v1/ai/extract-audio`) com transcrição via Google Gemini no backend.
+  - **Descoberta Dinâmica e Fallback Resiliente de Modelos Google AI (`GeminiAiService`):**
+    - Descoberta automática de modelos ativos na chave da conta via `ModelService.ListModels`.
+    - Priorização do modelo especialista em fala **`gemini-3.5-transcribe`**, seguido por `gemini-3.5-flash`, `gemini-flash-latest`, `gemini-3.8-flash`, etc.
+    - Filtro de exclusão para modelos que não suportam áudio (text-to-speech, embeddings, imagens, gemma, lyria, clip).
+    - Tratamento abrangente de exceções HTTP (`HttpStatusCodeException`) garantindo fallback contínuo para o próximo modelo candidato em caso de sobrecarga temporária do Google (503 Service Unavailable), limite de cota (429 Rate Limit) ou modelo inexistente (404 Not Found), prevenindo travamentos no mobile.
+  - Confirmação humana obrigatória sem alucinações.
 
 ### 2.8. Fase 7 — Dashboard Analítico Avançado, Gráficos Reativos & Orçamentos
 - [x] **Domínio de Orçamentos:**
