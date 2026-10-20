@@ -93,11 +93,11 @@ Este documento registra o estado real, factual e auditável do desenvolvimento d
 - [x] Modal `AiTransactionModal` com entrada por texto e gravação de voz:
   - No desktop: integração com a **Web Speech API nativa** do navegador em tempo real (transcrição instantânea em pt-BR e envio ao extrator estruturado).
   - No mobile: gravação e envio de arquivo de áudio (`POST /api/v1/ai/extract-audio`) com transcrição via Google Gemini no backend.
-  - **Descoberta Dinâmica e Fallback Resiliente de Modelos Google AI (`GeminiAiService`):**
-    - Descoberta automática de modelos ativos na chave da conta via `ModelService.ListModels`.
-    - Priorização do modelo especialista em fala **`gemini-3.5-transcribe`**, seguido por `gemini-3.5-flash`, `gemini-flash-latest`, `gemini-3.8-flash`, etc.
-    - Filtro de exclusão para modelos que não suportam áudio (text-to-speech, embeddings, imagens, gemma, lyria, clip).
-    - Tratamento abrangente de exceções HTTP (`HttpStatusCodeException`) garantindo fallback contínuo para o próximo modelo candidato em caso de sobrecarga temporária do Google (503 Service Unavailable), limite de cota (429 Rate Limit) ou modelo inexistente (404 Not Found), prevenindo travamentos no mobile.
+    - **Otimizações para Áudio Mobile & Confiabilidade de Fala:**
+      - **Inspeção de Magic Bytes:** O backend agora inspeciona a assinatura binária real do arquivo recebido (WebM `1A 45 DF A3`, MP4/M4A `ftyp`, WAV `RIFF`, OGG `OggS`, MP3, AAC), evitando rejeição por MIME types genéricos enviados por navegadores móveis (`application/octet-stream`).
+      - **Streaming com Timeslice no Mobile:** No frontend (`AiTransactionModal.tsx`), o gravador dispara chunks contínuos a cada 250ms com `echoCancellation`, `noiseSuppression` e `requestData()`, garantindo empacotamento completo de áudio sem cortes finais em navegadores móveis (Safari iOS e Chrome Android).
+      - **Extração Resiliente de Partes Múltiplas:** Suporte a parsing completo de `candidates[*].content.parts[*]`, ignorando blocos de raciocínio interno (`thought: true`) e concatenando todas as partes de texto.
+      - **Cascata Ativa Contra Transcrições Vazias:** Se um modelo responder HTTP 200 mas com transcrição vazia, o backend loga o evento e avança automaticamente para o próximo modelo candidato de alta disponibilidade (`gemini-flash-latest`, `gemini-3.5-flash`, etc.).
   - Confirmação humana obrigatória sem alucinações.
 
 ### 2.8. Fase 7 — Dashboard Analítico Avançado, Gráficos Reativos & Orçamentos
