@@ -183,7 +183,13 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
     }
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        }
+      });
 
       // Detecta formato suportado nativamente pelo navegador (Safari iOS grava audio/mp4, Android/Chrome grava audio/webm)
       let selectedMime = '';
@@ -209,7 +215,7 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
       mediaRecorderRef.current = recorder;
 
       recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) {
+        if (e.data && e.data.size > 0) {
           audioChunksRef.current.push(e.data);
         }
       };
@@ -227,11 +233,18 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
           const cleanMime = actualMime.split(';')[0].trim();
           const ext = cleanMime.includes('mp4') ? 'mp4' : cleanMime.includes('aac') ? 'aac' : cleanMime.includes('ogg') ? 'ogg' : 'webm';
           const audioBlob = new Blob(audioChunksRef.current, { type: cleanMime });
+
+          if (audioBlob.size < 500) {
+            setError('A gravação foi muito curta ou o microfone não captou som. Por favor, tente falar novamente mais próximo ao microfone.');
+            return;
+          }
+
           await processAudioBlob(audioBlob, `gravacao.${ext}`);
         }
       };
 
-      recorder.start();
+      // Dispara timeslice a cada 250ms para garantir streaming de dados contínuo em celulares
+      recorder.start(250);
       setIsRecording(true);
       setRecordingSeconds(0);
 
@@ -258,6 +271,11 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
       }
     }
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+      try {
+        mediaRecorderRef.current.requestData();
+      } catch (e) {
+        // ignora
+      }
       mediaRecorderRef.current.stop();
     }
   };

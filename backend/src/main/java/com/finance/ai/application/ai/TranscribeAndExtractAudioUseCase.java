@@ -29,7 +29,7 @@ public class TranscribeAndExtractAudioUseCase {
 
         String transcribedText = audioTranscriptionPort.transcribeAudio(audioBytes, contentType);
         if (transcribedText == null || transcribedText.isBlank()) {
-            transcribedText = "Áudio não compreendido";
+            throw new IllegalArgumentException("Não foi possível identificar a fala no áudio gravado. Por favor, fale claramente próximo ao microfone ou digite o texto.");
         }
 
         ExtractedTransaction extracted = extractTextUseCase.execute(userId, transcribedText);

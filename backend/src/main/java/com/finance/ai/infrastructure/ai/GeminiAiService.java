@@ -227,22 +227,108 @@ public class GeminiAiService implements AiExtractionPort, AudioTranscriptionPort
 
         String responseJson = executePostWithModelFallback(requestBody);
         return parseGeminiResponse(responseJson, text, TransactionOrigin.AI_TEXT);
+    private String detectAudioMimeType(byte[] bytes, String declaredMime) {
+        if (bytes != null && bytes.length >= 4) {
+            // WebM / Matroska (1A 45 DF A3)
+            if ((bytes[0] & 0xFF) == 0x1A && (bytes[1] & 0xFF) == 0x45 && (bytes[2] & 0xFF) == 0xDF && (bytes[3] & 0xFF) == 0xA3) {
+                return "audio/webm";
+            }
+            // WAV (RIFF....WAVE)
+            if (bytes.length >= 12 && bytes[0] == 'R' && bytes[1] == 'I' && bytes[2] == 'F' && bytes[3] == 'F') {
+                return "audio/wav";
+            }
+            // MP4 / M4A (offset 4 'ftyp')
+            if (bytes.length >= 8 && bytes[4] == 'f' && bytes[5] == 't' && bytes[6] == 'y' && bytes[7] == 'p') {
+                return "audio/mp4";
+            }
+            // Ogg (OggS)
+            if (bytes[0] == 'O' && bytes[1] == 'g' && bytes[2] == 'g' && bytes[3] == 'S') {
+                return "audio/ogg";
+            }
+            // MP3 (ID3 ou frame sync 0xFF 0xFB/0xF3)
+            if ((bytes[0] == 'I' && bytes[1] == 'D' && bytes[2] == '3') ||
+                    ((bytes[0] & 0xFF) == 0xFF && ((bytes[1] & 0xFF) & 0xE0) == 0xE0)) {
+                return "audio/mp3";
+            }
+            // FLAC
+            if (bytes[0] == 'f' && bytes[1] == 'L' && bytes[2] == 'a' && bytes[3] == 'C') {
+                return "audio/flac";
+            }
+            // AAC ADTS (0xFF 0xF1 ou 0xFF 0xF9)
+            if ((bytes[0] & 0xFF) == 0xFF && ((bytes[1] & 0xF6) == 0xF0)) {
+                return "audio/aac";
+            }
+        }
+        if (declaredMime != null && !declaredMime.isBlank()) {
+            String clean = declaredMime.split(";")[0].trim().toLowerCase();
+            if (clean.equals("audio/m4a") || clean.equals("audio/x-m4a")) return "audio/mp4";
+            if (clean.startsWith("audio/")) return clean;
+        }
+        return "audio/webm";
+    }
+
+    private String extractTextFromGeminiResponse(String responseJson) {
+        if (responseJson == null || responseJson.isBlank()) {
+            return "";
+        }
+        try {
+            JsonNode root = objectMapper.readTree(responseJson);
+
+            // 1. Itera por candidates -> content -> parts
+            JsonNode candidates = root.path("candidates");
+            if (candidates.isArray() && !candidates.isEmpty()) {
+                for (JsonNode candidate : candidates) {
+                    JsonNode parts = candidate.path("content").path("parts");
+                    if (parts.isArray()) {
+                        StringBuilder sb = new StringBuilder();
+                        for (JsonNode part : parts) {
+                            // Ignora partes de pensamento/reasoning interno (thought: true)
+                            if (part.has("thought") && part.get("thought").asBoolean()) {
+                                continue;
+                            }
+                            if (part.has("text")) {
+                                String t = part.get("text").asText("").trim();
+                                if (!t.isBlank()) {
+                                    if (!sb.isEmpty()) sb.append(" ");
+                                    sb.append(t);
+                                }
+                            }
+                        }
+                        String candidateText = sb.toString().trim();
+                        if (!candidateText.isBlank()) {
+                            return candidateText;
+                        }
+                    }
+
+                    if (candidate.has("text") && !candidate.get("text").asText("").isBlank()) {
+                        return candidate.get("text").asText("").trim();
+                    }
+                }
+            }
+
+            // 2. Caso a resposta tenha "text" na raiz
+            if (root.has("text") && !root.get("text").asText("").isBlank()) {
+                return root.get("text").asText("").trim();
+            }
+        } catch (Exception ex) {
+            log.warn("Erro ao fazer parse da resposta do Gemini: {}", ex.getMessage());
+        }
+        return "";
     }
 
     private String callGeminiApiForAudioTranscription(byte[] audioBytes, String contentType) throws Exception {
         String base64Audio = Base64.getEncoder().encodeToString(audioBytes);
-        String rawMime = (contentType != null && !contentType.isBlank()) ? contentType : "audio/webm";
-        String cleanMime = rawMime.contains(";") ? rawMime.split(";")[0].trim() : rawMime.trim();
+        String detectedMime = detectAudioMimeType(audioBytes, contentType);
+        log.info("Iniciando transcrição de áudio: tamanho={} bytes, mimeDeclarado='{}', mimeDetectado='{}'",
+                audioBytes.length, contentType, detectedMime);
 
-        if (cleanMime.equalsIgnoreCase("audio/x-m4a") || cleanMime.equalsIgnoreCase("audio/m4a")) {
-            cleanMime = "audio/mp4";
-        }
+        String prompt = "Transcreva EXATAMENTE em português o que foi dito no áudio gravado. Retorne estritamente o texto falado, sem aspas, sem introdução e sem explicações.";
 
         Map<String, Object> requestBody = Map.of(
                 "contents", List.of(
                         Map.of("role", "user", "parts", List.of(
-                                Map.of("inlineData", Map.of("mimeType", cleanMime, "data", base64Audio)),
-                                Map.of("text", "Transcreva EXATAMENTE em português o áudio fornecido. Retorne apenas o texto transcrito, sem aspas e sem comentários.")
+                                Map.of("inlineData", Map.of("mimeType", detectedMime, "data", base64Audio)),
+                                Map.of("text", prompt)
                         ))
                 ),
                 "generationConfig", Map.of(
@@ -250,17 +336,112 @@ public class GeminiAiService implements AiExtractionPort, AudioTranscriptionPort
                 )
         );
 
-        String responseJson = executePostWithModelFallback(requestBody);
+        List<String> discovered = getAvailableModels();
+        List<String> modelsToTry = new ArrayList<>();
 
-        JsonNode root = objectMapper.readTree(responseJson);
-        JsonNode textNode = root.path("candidates").path(0).path("content").path("parts").path(0).path("text");
-        return textNode.asText("").trim();
+        // Lista ordenada por robustez comprovada para áudio multimodal na API Gemini
+        List<String> preferredAudioModels = List.of(
+                "gemini-flash-latest",
+                "gemini-3.5-flash",
+                "gemini-3.8-flash",
+                "gemini-3.6-flash",
+                "gemini-3.7-flash",
+                "gemini-3.5-transcribe",
+                "gemini-flash-lite-latest",
+                "gemini-3.1-flash-lite",
+                "gemini-omni-flash-preview",
+                "gemini-omni-1.1-flash",
+                "gemini-pro-latest",
+                "gemini-3.1-pro-preview",
+                "gemini-2.0-flash",
+                "gemini-2.0-flash-exp",
+                "gemini-1.5-flash-002",
+                "gemini-1.5-flash",
+                "gemini-1.5-flash-latest",
+                "gemini-2.5-flash"
+        );
+
+        if (!discovered.isEmpty()) {
+            for (String pref : preferredAudioModels) {
+                if (discovered.contains(pref)) {
+                    modelsToTry.add(pref);
+                }
+            }
+            for (String disc : discovered) {
+                if (!modelsToTry.contains(disc)) {
+                    modelsToTry.add(disc);
+                }
+            }
+        }
+
+        if (modelsToTry.isEmpty()) {
+            for (String fallback : preferredAudioModels) {
+                if (!modelsToTry.contains(fallback)) {
+                    modelsToTry.add(fallback);
+                }
+            }
+        }
+
+        log.info("Modelos candidatos para transcrição de áudio Gemini: {}", modelsToTry);
+
+        org.springframework.web.client.HttpStatusCodeException lastHttpException = null;
+
+        for (String apiVersion : List.of("v1beta", "v1")) {
+            for (String model : modelsToTry) {
+                try {
+                    String urlString = "https://generativelanguage.googleapis.com/" + apiVersion + "/models/" + model + ":generateContent?key=" + apiKey;
+                    java.net.URI targetUri = java.net.URI.create(urlString);
+
+                    String responseJson = restClient.post()
+                            .uri(targetUri)
+                            .header("x-goog-api-key", apiKey)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .body(requestBody)
+                            .retrieve()
+                            .body(String.class);
+
+                    String transcription = extractTextFromGeminiResponse(responseJson);
+
+                    if (!transcription.isBlank()) {
+                        log.info("Transcrição de áudio concluída com sucesso pelo modelo '{}' ({}): \"{}\"",
+                                model, apiVersion, transcription);
+                        return transcription;
+                    }
+
+                    log.warn("Modelo '{}' ({}) respondeu status 200, mas a transcrição veio vazia. Tentando próximo modelo...",
+                            model, apiVersion);
+
+                } catch (org.springframework.web.client.HttpStatusCodeException ex) {
+                    lastHttpException = ex;
+                    int statusCode = ex.getStatusCode().value();
+                    String respBody = ex.getResponseBodyAsString();
+
+                    boolean shouldRetryNextModel = statusCode == 404 ||
+                            statusCode == 503 ||
+                            statusCode == 429 ||
+                            statusCode == 500 ||
+                            (statusCode == 400 && (respBody.toLowerCase().contains("modality") || respBody.toLowerCase().contains("not supported") || respBody.toLowerCase().contains("audio")));
+
+                    if (shouldRetryNextModel) {
+                        log.warn("Modelo '{}' ({}) retornou status {}. Tentando próximo modelo...", model, apiVersion, statusCode);
+                        continue;
+                    }
+                    throw ex;
+                }
+            }
+        }
+
+        if (lastHttpException != null) {
+            throw lastHttpException;
+        }
+        return "";
     }
 
     private ExtractedTransaction parseGeminiResponse(String responseJson, String originalText, TransactionOrigin origin) throws Exception {
-        JsonNode root = objectMapper.readTree(responseJson);
-        JsonNode textNode = root.path("candidates").path(0).path("content").path("parts").path(0).path("text");
-        String jsonContent = textNode.asText("{}").trim();
+        String jsonContent = extractTextFromGeminiResponse(responseJson);
+        if (jsonContent.isBlank()) {
+            jsonContent = "{}";
+        }
 
         // Limpeza de potenciais markdown fences
         if (jsonContent.startsWith("```json")) {
@@ -402,12 +583,12 @@ public class GeminiAiService implements AiExtractionPort, AudioTranscriptionPort
 
         // Lista de modelos multimodais de áudio e fala ordenados por especialidade e estabilidade
         List<String> preferredAudioModels = List.of(
-                "gemini-3.5-transcribe",
-                "gemini-3.5-flash",
                 "gemini-flash-latest",
+                "gemini-3.5-flash",
                 "gemini-3.8-flash",
                 "gemini-3.6-flash",
                 "gemini-3.7-flash",
+                "gemini-3.5-transcribe",
                 "gemini-flash-lite-latest",
                 "gemini-3.1-flash-lite",
                 "gemini-omni-flash-preview",
