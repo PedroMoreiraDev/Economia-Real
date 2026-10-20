@@ -477,6 +477,15 @@ dist/assets/index-CVcJJLIG.js   305.65 kB │ gzip: 75.31 kB
   - Alerta preventivo contra restrições de segurança de microfone em conexões HTTP via rede local (exigência de HTTPS no mobile).
   - Validação completa do bundle frontend com Vite (`npm run build` concluído com sucesso).
 
+### 2.13. Painel de Categorias e Criação Rápida no Lançamento por Voz
+- **Causa Raiz Identificada:** A tela de revisão do comando por voz utilizava um `<select>` HTML nativo não estilizado, sem suporte a busca, sem exibição das cores das categorias e sem opção de criar uma categoria nova diretamente no fluxo de IA.
+- **Solução Implementada:**
+  - Substituição do `<select>` pelo `CategoryCombobox` redesenhado com touch targets confortáveis para celular (44px+), feedback visual Duolingo e busca em tempo real.
+  - Suporte à criação automática de categorias sugeridas pela IA ou digitadas livremente pelo usuário via `createCategoryApi`.
+  - Inclusão de modal rápido com paleta de 8 cores harmoniosas para cadastrar categorias personalizadas sem sair da tela de confirmação por voz.
+  - Sincronização em tempo real do estado de categorias no `App.tsx` via callback `onCategoryCreated`.
+  - Validação completa com TypeScript estrito e Vite (`npm run build`).
+
 ---
 
 ## 5. Próximo Passo Recomendado
@@ -484,7 +493,8 @@ dist/assets/index-CVcJJLIG.js   305.65 kB │ gzip: 75.31 kB
 1. A plataforma conta com suíte de testes unitários e de integração de ponta a ponta no backend com 100% de aprovação.
 2. Importação unificada de extratos e faturas em OFX, CSV, XLSX e XLS com detecção e projeção automática de parcelas futuras.
 3. Deduplicação canônica inteligente entre faturas subsequentes sem risco de entradas duplicadas.
-4. Reconhecimento de voz em tempo real otimizado para celulares e desktop.
+4. Reconhecimento de voz em tempo real otimizado para celulares e desktop com gestão visual de categorias.
 5. Deploy e validações contínuas prontas para utilização em ambiente de produção.
+
 
 

@@ -7,17 +7,31 @@ import {
   X, 
   AlertCircle, 
   CheckCircle2, 
-  HelpCircle,
-  RefreshCw,
-  Tag,
-  Calendar
+  HelpCircle, 
+  RefreshCw, 
+  Tag, 
+  Calendar,
+  Plus,
+  CreditCard
 } from 'lucide-react';
 import { Account, Category, CreateTransactionPayload, TransactionType } from '../types/financial';
 import { AiExtractionResponse } from '../types/ai';
 import { extractFromTextApi, extractFromAudioApi } from '../services/aiApi';
-import { createTransactionApi } from '../services/financialApi';
+import { createTransactionApi, createCategoryApi } from '../services/financialApi';
 import { useAuth } from '../context/AuthContext';
 import { CurrencyInput } from './CurrencyInput';
+import { CategoryCombobox } from './CategoryCombobox';
+
+const CATEGORY_COLORS = [
+  '#026CD6', // Azul Principal
+  '#10B981', // Verde Esmeralda
+  '#8B5CF6', // Roxo Moderno
+  '#EC4899', // Rosa
+  '#F59E0B', // Âmbar / Dourado
+  '#EF4444', // Coral / Vermelho
+  '#06B6D4', // Ciano
+  '#64748B', // Ardósia Neutro
+];
 
 interface AiTransactionModalProps {
   isOpen: boolean;
@@ -25,6 +39,7 @@ interface AiTransactionModalProps {
   accounts?: Account[];
   categories: Category[];
   onTransactionCreated: () => void;
+  onCategoryCreated?: (newCategory: Category) => void;
 }
 
 export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
@@ -32,6 +47,7 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
   onClose,
   categories,
   onTransactionCreated,
+  onCategoryCreated,
 }) => {
   const { token } = useAuth();
 
@@ -65,6 +81,14 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
   const [confirmAmount, setConfirmAmount] = useState('');
   const [confirmDate, setConfirmDate] = useState('');
   const [confirmCategoryId, setConfirmCategoryId] = useState('');
+  const [confirmCategoryName, setConfirmCategoryName] = useState('');
+
+  // Modal de Criação Rápida de Categoria no Fluxo de IA
+  const [showQuickCategoryModal, setShowQuickCategoryModal] = useState(false);
+  const [newCatName, setNewCatName] = useState('');
+  const [newCatColor, setNewCatColor] = useState(CATEGORY_COLORS[1]);
+  const [creatingCat, setCreatingCat] = useState(false);
+  const [quickCatError, setQuickCatError] = useState<string | null>(null);
 
   // Limpeza de timers, gravador e speech recognition
   useEffect(() => {
@@ -96,6 +120,11 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
       setExtractedData(null);
       setInputText('');
       setLiveTranscript('');
+      setConfirmCategoryId('');
+      setConfirmCategoryName('');
+      setShowQuickCategoryModal(false);
+      setNewCatName('');
+      setQuickCatError(null);
     }
   }, [isOpen]);
 
@@ -112,11 +141,49 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
     // Sugere categoria casando por ID ou nome
     if (data.suggestedCategoryId) {
       setConfirmCategoryId(data.suggestedCategoryId);
+      const matched = categories.find(c => c.id === data.suggestedCategoryId);
+      setConfirmCategoryName(matched ? matched.name : (data.suggestedCategoryName || ''));
     } else if (data.suggestedCategoryName) {
       const matched = categories.find(
         c => c.name.toLowerCase() === data.suggestedCategoryName?.toLowerCase()
       );
-      if (matched) setConfirmCategoryId(matched.id);
+      if (matched) {
+        setConfirmCategoryId(matched.id);
+        setConfirmCategoryName(matched.name);
+      } else {
+        // Categoria sugerida pela IA que ainda não existe no cadastro
+        setConfirmCategoryId('');
+        setConfirmCategoryName(data.suggestedCategoryName);
+      }
+    } else {
+      setConfirmCategoryId('');
+      setConfirmCategoryName('');
+    }
+  };
+
+  // Criação rápida de categoria no fluxo do modal
+  const handleCreateQuickCategory = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!token || !newCatName.trim()) return;
+
+    setCreatingCat(true);
+    setQuickCatError(null);
+    try {
+      const created = await createCategoryApi(token, {
+        name: newCatName.trim(),
+        icon: 'tag',
+        colorHex: newCatColor,
+      });
+
+      setConfirmCategoryId(created.id);
+      setConfirmCategoryName(created.name);
+      onCategoryCreated?.(created);
+      setShowQuickCategoryModal(false);
+      setNewCatName('');
+    } catch (err: any) {
+      setQuickCatError(err.message || 'Falha ao criar categoria.');
+    } finally {
+      setCreatingCat(false);
     }
   };
 
@@ -440,8 +507,22 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
       if (isNaN(val) || val <= 0) {
         throw new Error('Informe um valor monetário válido e maior que zero.');
       }
-      if (!confirmDescription.trim()) {
-        throw new Error('Informe a descrição da transação.');
+      let finalCategoryId = confirmCategoryId;
+      if (!finalCategoryId && confirmCategoryName.trim()) {
+        const matched = categories.find(
+          (c) => c.name.toLowerCase() === confirmCategoryName.trim().toLowerCase()
+        );
+        if (matched) {
+          finalCategoryId = matched.id;
+        } else {
+          const newCategory = await createCategoryApi(token, {
+            name: confirmCategoryName.trim(),
+            icon: 'tag',
+            colorHex: newCatColor || '#10B981',
+          });
+          finalCategoryId = newCategory.id;
+          onCategoryCreated?.(newCategory);
+        }
       }
 
       const payload: CreateTransactionPayload = {
@@ -449,7 +530,7 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
         amount: val,
         accrualDate: confirmDate,
         description: confirmDescription.trim(),
-        categoryId: confirmCategoryId || undefined,
+        categoryId: finalCategoryId || undefined,
         notes: `Criado via IA (${extractedData?.origin || 'AI'}) - "${extractedData?.rawInput || ''}"`,
       };
 
@@ -461,6 +542,8 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
       setExtractedData(null);
       setInputText('');
       setLiveTranscript('');
+      setConfirmCategoryId('');
+      setConfirmCategoryName('');
       speechTranscriptRef.current = '';
       audioChunksRef.current = [];
       setActiveTab('voice');
@@ -796,12 +879,13 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              {/* Data e Meio de Pagamento */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* Data de Competência */}
                 <div>
                   <label className="block text-xs font-black uppercase tracking-wider text-slate-500 mb-1 flex items-center gap-1">
                     <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                    Data
+                    Data da Transação
                   </label>
                   <input
                     type="date"
@@ -812,25 +896,76 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
                   />
                 </div>
 
-                {/* Categoria Sugerida */}
-                <div>
-                  <label className="block text-xs font-black uppercase tracking-wider text-slate-500 mb-1 flex items-center gap-1">
+                {/* Meio de Pagamento Identificado pela IA se houver */}
+                {extractedData.suggestedPaymentMethod && (
+                  <div>
+                    <label className="block text-xs font-black uppercase tracking-wider text-slate-500 mb-1 flex items-center gap-1">
+                      <CreditCard className="w-3.5 h-3.5 text-slate-400" />
+                      Meio de Pagamento
+                    </label>
+                    <div className="px-3.5 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-xs sm:text-sm font-bold text-slate-700 flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-[#58CC02]" />
+                      <span>
+                        {extractedData.suggestedPaymentMethod === 'CREDIT_CARD'
+                          ? 'Cartão de Crédito'
+                          : extractedData.suggestedPaymentMethod === 'DEBIT_CARD'
+                          ? 'Cartão de Débito'
+                          : extractedData.suggestedPaymentMethod === 'PIX'
+                          ? 'PIX'
+                          : extractedData.suggestedPaymentMethod === 'CASH'
+                          ? 'Dinheiro em Espécie'
+                          : extractedData.suggestedPaymentMethod}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Seção de Categoria com Seletor Moderno e Opção de Nova Categoria */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-black uppercase tracking-wider text-slate-500 flex items-center gap-1">
                     <Tag className="w-3.5 h-3.5 text-slate-400" />
                     Categoria
                   </label>
-                  <select
-                    value={confirmCategoryId}
-                    onChange={(e) => setConfirmCategoryId(e.target.value)}
-                    className="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-3.5 py-2.5 text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:border-[#58CC02] focus:bg-white transition-all"
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNewCatName(confirmCategoryName && !confirmCategoryId ? confirmCategoryName : '');
+                      setQuickCatError(null);
+                      setShowQuickCategoryModal(true);
+                    }}
+                    className="text-xs font-black text-[#58CC02] hover:text-[#46A302] flex items-center gap-1 transition-colors px-2 py-0.5 rounded-lg hover:bg-[#E8F8E8] active:scale-95"
                   >
-                    <option value="">Sem categoria</option>
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </option>
-                    ))}
-                  </select>
+                    <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                    Nova Categoria
+                  </button>
                 </div>
+
+                <CategoryCombobox
+                  value={confirmCategoryId}
+                  categoryName={confirmCategoryName}
+                  onChange={(selectedId, selectedName) => {
+                    setConfirmCategoryId(selectedId);
+                    setConfirmCategoryName(selectedName);
+                  }}
+                  categories={categories}
+                  placeholder="Selecione ou digite para criar..."
+                  onOpenCreateCategory={() => {
+                    setNewCatName(confirmCategoryName && !confirmCategoryId ? confirmCategoryName : '');
+                    setQuickCatError(null);
+                    setShowQuickCategoryModal(true);
+                  }}
+                />
+
+                {confirmCategoryName && !confirmCategoryId && (
+                  <p className="text-[11px] font-bold text-[#46A302] flex items-center gap-1.5 bg-[#E8F8E8] p-2.5 rounded-xl border border-[#D7FFB8]">
+                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0 stroke-[2.5]" />
+                    <span>
+                      A categoria <strong>"{confirmCategoryName}"</strong> será cadastrada automaticamente ao confirmar.
+                    </span>
+                  </p>
+                )}
               </div>
 
               {/* Ações: Descartar / Confirmar */}
@@ -869,6 +1004,91 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
 
         </div>
       </div>
+
+      {/* Modal de Criação Rápida de Categoria */}
+      {showQuickCategoryModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white border-2 border-slate-200 rounded-3xl w-full max-w-sm p-5 shadow-2xl space-y-4 animate-scale-up">
+            <div className="flex items-center justify-between pb-3 border-b-2 border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-[#58CC02] text-white shadow-[0_2px_0_0_#46A302]">
+                  <Tag className="w-4 h-4 stroke-[2.5]" />
+                </div>
+                <h4 className="text-sm font-black text-slate-800">Nova Categoria</h4>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowQuickCategoryModal(false)}
+                className="text-slate-400 hover:text-slate-600 p-1.5 rounded-xl hover:bg-slate-100 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {quickCatError && (
+              <div className="p-2.5 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs font-bold">
+                {quickCatError}
+              </div>
+            )}
+
+            <form onSubmit={handleCreateQuickCategory} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-black uppercase tracking-wider text-slate-500 block">
+                  Nome da Categoria
+                </label>
+                <input
+                  type="text"
+                  required
+                  autoFocus
+                  placeholder="Ex: Farmácia, Pet Shop, Lazer..."
+                  value={newCatName}
+                  onChange={(e) => setNewCatName(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:border-[#58CC02] focus:bg-white transition-all"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-black uppercase tracking-wider text-slate-500 block">
+                  Cor Visual da Categoria
+                </label>
+                <div className="flex items-center gap-2 flex-wrap pt-0.5">
+                  {CATEGORY_COLORS.map((color) => (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => setNewCatColor(color)}
+                      className={`w-7 h-7 rounded-xl transition-all cursor-pointer ${
+                        newCatColor === color
+                          ? 'scale-115 ring-2 ring-offset-2 ring-slate-800 shadow-sm'
+                          : 'hover:scale-105 opacity-85 hover:opacity-100'
+                      }`}
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setShowQuickCategoryModal(false)}
+                  className="btn-duo btn-duo-white text-xs px-3.5 py-2 font-black"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={creatingCat || !newCatName.trim()}
+                  className="btn-duo btn-duo-green text-xs px-4 py-2 font-black flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5 stroke-[2.5]" />
+                  <span>{creatingCat ? 'Criando...' : 'Criar e Selecionar'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

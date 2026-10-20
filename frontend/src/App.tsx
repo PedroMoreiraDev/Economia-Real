@@ -2385,6 +2385,7 @@ const MainDashboard: React.FC = () => {
         accounts={accounts}
         categories={categories}
         onTransactionCreated={loadFinancialData}
+        onCategoryCreated={(newCat) => setCategories((prev) => [...prev, newCat])}
       />
 
       <BudgetModal
