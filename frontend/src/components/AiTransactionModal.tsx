@@ -43,6 +43,9 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
   const [isRecording, setIsRecording] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [liveTranscript, setLiveTranscript] = useState('');
+  const isRecordingRef = useRef(false);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const accumulatedTranscriptRef = useRef<string>('');
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<number | null>(null);
@@ -66,12 +69,18 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
   // Limpeza de timers, gravador e speech recognition
   useEffect(() => {
     return () => {
+      isRecordingRef.current = false;
       if (timerRef.current) clearInterval(timerRef.current);
       if (speechRecognitionRef.current) {
         try { speechRecognitionRef.current.stop(); } catch {}
+        speechRecognitionRef.current = null;
       }
       if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-        mediaRecorderRef.current.stop();
+        try { mediaRecorderRef.current.stop(); } catch {}
+      }
+      if (mediaStreamRef.current) {
+        mediaStreamRef.current.getTracks().forEach(track => track.stop());
+        mediaStreamRef.current = null;
       }
     };
   }, []);
@@ -79,6 +88,9 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
   // Reseta estados quando o modal é aberto ou fechado
   useEffect(() => {
     if (!isOpen) {
+      if (isRecordingRef.current) {
+        stopRecording();
+      }
       setSuccessFeedback(null);
       setError(null);
       setExtractedData(null);
@@ -148,50 +160,126 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
     }
   };
 
-  // Iniciar gravação de voz e reconhecimento simultâneo
+  // Iniciar gravação de voz com detecção inteligente por dispositivo
   const startRecording = async () => {
+    // 1. Verificação de contexto seguro (HTTPS é obrigatório no celular para uso de microfone)
+    if (
+      typeof window !== 'undefined' &&
+      !window.isSecureContext &&
+      window.location.hostname !== 'localhost' &&
+      window.location.hostname !== '127.0.0.1'
+    ) {
+      setError(
+        'O reconhecimento de voz no celular exige conexão segura (HTTPS). Em conexões HTTP locais (via IP), os navegadores mobile bloqueiam o microfone por segurança.'
+      );
+      return;
+    }
+
     setError(null);
     setSuccessFeedback(null);
     audioChunksRef.current = [];
     speechTranscriptRef.current = '';
+    accumulatedTranscriptRef.current = '';
     setLiveTranscript('');
+    isRecordingRef.current = true;
 
-    // Inicia reconhecimento de fala nativo do navegador (Web Speech API)
-    const SpeechRecognitionClass = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    // 2. Prioridade 1: Web Speech API nativa (Chrome Android, Safari iOS, Edge)
+    // NÃO executamos getUserMedia simultaneamente pois no mobile isso bloqueia o hardware do microfone
+    const SpeechRecognitionClass =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
     if (SpeechRecognitionClass) {
       try {
         const recognition = new SpeechRecognitionClass();
         recognition.lang = 'pt-BR';
-        recognition.continuous = true;
         recognition.interimResults = true;
+        // continuous = false é mais resiliente em celulares Android (evita encerramento silencioso)
+        recognition.continuous = false;
+
         recognition.onresult = (event: any) => {
-          let current = '';
-          for (let i = 0; i < event.results.length; i++) {
-            current += event.results[i][0].transcript;
+          let interim = '';
+          let finalChunk = '';
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+              finalChunk += transcript + ' ';
+            } else {
+              interim += transcript;
+            }
           }
-          speechTranscriptRef.current = current;
-          setLiveTranscript(current);
+          if (finalChunk) {
+            accumulatedTranscriptRef.current = (
+              accumulatedTranscriptRef.current + ' ' + finalChunk
+            ).trim();
+          }
+          const fullDisplay = (
+            accumulatedTranscriptRef.current + (interim ? ' ' + interim : '')
+          ).trim();
+          speechTranscriptRef.current = fullDisplay;
+          setLiveTranscript(fullDisplay);
         };
-        recognition.onerror = (e: any) => {
-          console.warn('SpeechRecognition erro ou cancelamento:', e);
+
+        recognition.onerror = (event: any) => {
+          console.warn('SpeechRecognition status/erro:', event.error);
+          if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+            isRecordingRef.current = false;
+            setIsRecording(false);
+            if (timerRef.current) clearInterval(timerRef.current);
+            setError('Permissão do microfone negada. Permita o uso do microfone nas configurações do seu navegador.');
+          } else if (event.error === 'audio-capture') {
+            isRecordingRef.current = false;
+            setIsRecording(false);
+            if (timerRef.current) clearInterval(timerRef.current);
+            setError('Nenhum microfone encontrado ou o microfone está ocupado por outro app.');
+          } else if (event.error === 'network') {
+            isRecordingRef.current = false;
+            setIsRecording(false);
+            if (timerRef.current) clearInterval(timerRef.current);
+            setError('Erro de conexão ao serviço de voz. Verifique sua conexão com a internet.');
+          }
+          // 'no-speech' e pausas naturais são tratadas sem abortar a interface
         };
+
+        recognition.onend = () => {
+          // Se o usuário ainda não clicou em parar, reinicia a escuta para permitir pausas naturais na fala
+          if (isRecordingRef.current) {
+            try {
+              recognition.start();
+            } catch {
+              // Já iniciado ou em processo de parada
+            }
+          }
+        };
+
         recognition.start();
         speechRecognitionRef.current = recognition;
+        setIsRecording(true);
+        setRecordingSeconds(0);
+
+        timerRef.current = window.setInterval(() => {
+          setRecordingSeconds(prev => prev + 1);
+        }, 1000);
+        return;
       } catch (err) {
-        console.warn('Não foi possível iniciar SpeechRecognition nativo:', err);
+        console.warn('Falha ao iniciar SpeechRecognition nativo, caindo para MediaRecorder:', err);
       }
     }
 
+    // 3. Prioridade 2: Fallback para MediaRecorder (para navegadores sem Web Speech API nativa)
     try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('Gravação de microfone não suportada pelo seu navegador atual.');
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
           autoGainControl: true,
-        }
+        },
       });
+      mediaStreamRef.current = stream;
 
-      // Detecta formato suportado nativamente pelo navegador (Safari iOS grava audio/mp4, Android/Chrome grava audio/webm)
       let selectedMime = '';
       if (typeof MediaRecorder !== 'undefined' && typeof MediaRecorder.isTypeSupported === 'function') {
         const candidates = [
@@ -199,7 +287,7 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
           'audio/webm',
           'audio/mp4',
           'audio/aac',
-          'audio/ogg'
+          'audio/ogg',
         ];
         for (const candidate of candidates) {
           if (MediaRecorder.isTypeSupported(candidate)) {
@@ -222,28 +310,29 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
 
       recorder.onstop = async () => {
         stream.getTracks().forEach(track => track.stop());
+        mediaStreamRef.current = null;
 
-        const capturedText = speechTranscriptRef.current.trim();
-        if (capturedText) {
-          // Processa diretamente o texto falado e capturado com fidelidade total
-          await processRecognizedText(capturedText);
-        } else {
-          // Fallback para envio do áudio gravado ao backend
-          const actualMime = recorder.mimeType || selectedMime || 'audio/webm';
-          const cleanMime = actualMime.split(';')[0].trim();
-          const ext = cleanMime.includes('mp4') ? 'mp4' : cleanMime.includes('aac') ? 'aac' : cleanMime.includes('ogg') ? 'ogg' : 'webm';
-          const audioBlob = new Blob(audioChunksRef.current, { type: cleanMime });
+        const actualMime = recorder.mimeType || selectedMime || 'audio/webm';
+        const cleanMime = actualMime.split(';')[0].trim();
+        const ext = cleanMime.includes('mp4')
+          ? 'mp4'
+          : cleanMime.includes('aac')
+          ? 'aac'
+          : cleanMime.includes('ogg')
+          ? 'ogg'
+          : 'webm';
+        const audioBlob = new Blob(audioChunksRef.current, { type: cleanMime });
 
-          if (audioBlob.size < 500) {
-            setError('A gravação foi muito curta ou o microfone não captou som. Por favor, tente falar novamente mais próximo ao microfone.');
-            return;
-          }
-
-          await processAudioBlob(audioBlob, `gravacao.${ext}`);
+        if (audioBlob.size < 500) {
+          setError(
+            'A gravação foi muito curta ou o microfone não captou som. Por favor, tente falar novamente mais próximo ao microfone.'
+          );
+          return;
         }
+
+        await processAudioBlob(audioBlob, `gravacao.${ext}`);
       };
 
-      // Dispara timeslice a cada 250ms para garantir streaming de dados contínuo em celulares
       recorder.start(250);
       setIsRecording(true);
       setRecordingSeconds(0);
@@ -252,24 +341,44 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
         setRecordingSeconds(prev => prev + 1);
       }, 1000);
     } catch (err: any) {
-      setError('Não foi possível acessar o microfone. Verifique as permissões do navegador.');
-      if (speechRecognitionRef.current) {
-        try { speechRecognitionRef.current.stop(); } catch {}
-      }
+      isRecordingRef.current = false;
+      setIsRecording(false);
+      setError(
+        err.message || 'Não foi possível acessar o microfone. Verifique as permissões do navegador.'
+      );
     }
   };
 
   // Parar gravação de voz
   const stopRecording = () => {
     if (timerRef.current) clearInterval(timerRef.current);
+    isRecordingRef.current = false;
     setIsRecording(false);
+
+    // Se estava utilizando Web Speech API
     if (speechRecognitionRef.current) {
       try {
         speechRecognitionRef.current.stop();
       } catch (e) {
         // ignora
       }
+      speechRecognitionRef.current = null;
+
+      // Aguarda pequeno intervalo para consolidação do último trecho da transcrição
+      setTimeout(() => {
+        const capturedText = speechTranscriptRef.current.trim();
+        if (capturedText) {
+          processRecognizedText(capturedText);
+        } else {
+          setError(
+            'Não foi possível identificar o que foi dito. Fale claramente próximo ao microfone e tente novamente.'
+          );
+        }
+      }, 150);
+      return;
     }
+
+    // Se estava utilizando MediaRecorder
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
       try {
         mediaRecorderRef.current.requestData();
@@ -277,6 +386,10 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
         // ignora
       }
       mediaRecorderRef.current.stop();
+    }
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach(track => track.stop());
+      mediaStreamRef.current = null;
     }
   };
 

@@ -469,6 +469,14 @@ dist/assets/index-CVcJJLIG.js   305.65 kB │ gzip: 75.31 kB
     3. Reimportação da mesma fatura sem qualquer duplicação.
   - 100% de sucesso em toda a suíte de importações (`InstallmentDetectorTest`, `ImportBankStatementInstallmentsTest`, `ImportBankStatementUseCaseTest`, `ImportStatementControllerTest`, `ExcelParserTest`).
 
+### 2.12. Correção de Reconhecimento de Voz Mobile (Web Speech API vs MediaRecorder)
+- **Causa Raiz Identificada:** No celular (Android/iOS), a execução simultânea de `getUserMedia` e `SpeechRecognition` bloqueava o canal de áudio do microfone por concorrência de hardware, gerando transcrição em branco e falha na identificação por voz.
+- **Solução Implementada:**
+  - Isolamento estrito dos fluxos: uso prioritário da Web Speech API nativa sem ativação concomitante de `getUserMedia`.
+  - Tratamento de pausas na fala com reinicialização resiliente (`onend`) e acumulação de transcrições parciais e finais em tempo real.
+  - Alerta preventivo contra restrições de segurança de microfone em conexões HTTP via rede local (exigência de HTTPS no mobile).
+  - Validação completa do bundle frontend com Vite (`npm run build` concluído com sucesso).
+
 ---
 
 ## 5. Próximo Passo Recomendado
@@ -476,6 +484,7 @@ dist/assets/index-CVcJJLIG.js   305.65 kB │ gzip: 75.31 kB
 1. A plataforma conta com suíte de testes unitários e de integração de ponta a ponta no backend com 100% de aprovação.
 2. Importação unificada de extratos e faturas em OFX, CSV, XLSX e XLS com detecção e projeção automática de parcelas futuras.
 3. Deduplicação canônica inteligente entre faturas subsequentes sem risco de entradas duplicadas.
-4. Deploy e validações contínuas prontas para utilização em ambiente de produção.
+4. Reconhecimento de voz em tempo real otimizado para celulares e desktop.
+5. Deploy e validações contínuas prontas para utilização em ambiente de produção.
 
 
