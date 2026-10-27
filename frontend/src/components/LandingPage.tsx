@@ -16,6 +16,7 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { warmUpBackend } from '../services/authApi';
+import { trackCtaClick } from '../services/telemetryService';
 
 interface LandingPageProps {
   onOpenLogin: () => void;
@@ -76,7 +77,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin, onOpenReg
             {/* Botões de Ação Imediata (CTAs Táteis com Relevo 3D) */}
             <div className="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
               <button
-                onClick={onOpenRegister}
+                onClick={() => {
+                  trackCtaClick('hero_register_btn', 'landing_hero');
+                  onOpenRegister();
+                }}
                 onMouseEnter={warmUpBackend}
                 onTouchStart={warmUpBackend}
                 className="btn-duo btn-duo-green w-full sm:w-auto text-base sm:text-lg px-8 py-4 flex items-center justify-center gap-3 shadow-xl shadow-emerald-600/30 border-b-4 border-emerald-700 hover:scale-[1.02] transition-transform"
@@ -87,7 +91,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin, onOpenReg
               </button>
 
               <button
-                onClick={onOpenLogin}
+                onClick={() => {
+                  trackCtaClick('hero_login_btn', 'landing_hero');
+                  onOpenLogin();
+                }}
                 onMouseEnter={warmUpBackend}
                 onTouchStart={warmUpBackend}
                 className="btn-duo btn-duo-white w-full sm:w-auto text-base px-6 py-4 flex items-center justify-center gap-2 border-slate-300 text-slate-800 hover:bg-slate-100"
@@ -881,7 +888,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin, onOpenReg
 
           <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
-              onClick={onOpenRegister}
+              onClick={() => {
+                trackCtaClick('bottom_register_btn', 'landing_cta_section');
+                onOpenRegister();
+              }}
               onMouseEnter={warmUpBackend}
               onTouchStart={warmUpBackend}
               className="btn-duo btn-duo-green w-full sm:w-auto text-base sm:text-lg px-8 py-4 flex items-center justify-center gap-3 shadow-2xl shadow-emerald-950/40 border-b-4 border-emerald-800 hover:scale-[1.02] transition-transform"
@@ -891,7 +901,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin, onOpenReg
               <ArrowRight className="h-5 w-5 stroke-[3]" />
             </button>
             <button
-              onClick={onOpenLogin}
+              onClick={() => {
+                trackCtaClick('bottom_login_btn', 'landing_cta_section');
+                onOpenLogin();
+              }}
               onMouseEnter={warmUpBackend}
               onTouchStart={warmUpBackend}
               className="btn-duo btn-duo-white w-full sm:w-auto text-base px-6 py-4 flex items-center justify-center gap-2 text-slate-800"

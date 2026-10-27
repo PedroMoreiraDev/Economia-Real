@@ -488,6 +488,29 @@ dist/assets/index-CVcJJLIG.js   305.65 kB │ gzip: 75.31 kB
 
 ---
 
+## 4.14. Telemetria de Crescimento, Google Analytics 4, Funil de Ativação e Retenção D7 (Implementado)
+
+- **Objetivo e Contexto de Negócio:**
+  - Capacitar a plataforma com medição rigorosa de tráfego, conversão e retenção para o lançamento do produto no mercado.
+  - Implementar o acompanhamento semanal das 5 métricas essenciais: Visitas Qualificadas, Taxa de Cadastro, Ativação do Usuário, Retenção em 7 dias (D7) e Origem dos Usuários Ativos (Canais & UTMs).
+- **Integração com Google Analytics 4 e Google Search Console:**
+  - Inserção da tag oficial `gtag.js` com o ID de medição `G-68CZ3WHEMB` no `<head>` de `index.html`.
+  - Suporte à variável `VITE_GA_MEASUREMENT_ID` e meta tag de validação do Google Search Console (`VITE_GSC_VERIFICATION_CODE`).
+  - Prevenção contra carregamento duplo e tratamento tolerante a bloqueadores de anúncios.
+- **Motor de Telemetria e Atribuição de Primeiro Toque (`telemetryService.ts`):**
+  - Captura e persistência automática de `utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content` e `document.referrer` em `localStorage`.
+  - Classificação de canais em tempo real (*Instagram, TikTok, WhatsApp, YouTube, Reddit, Google Orgânico, Acesso Direto*).
+  - Regra de Visita Qualificada (`qualified_visit`): disparada para visitantes com mais de 15 segundos de permanência ou rolagem acima de 40% da Landing Page.
+  - Marco Canônico de Ativação do Usuário (`user_activated`): registrado quando o usuário cadastrado realiza pelo menos uma movimentação (voz, manual ou importação de fatura) e visualiza as análises no dashboard.
+  - Marco de Retenção D7 (`retention_7d`): registrado uma única vez quando o usuário retorna com 7 dias ou mais de conta.
+  - Estrita conformidade com a LGPD: nenhum dado financeiro (valores monetários, descrições de compras, saldos ou CPFs) é transmitido ao Google Analytics.
+- **Central de Métricas e Telemetria Integrada (`TelemetryModal.tsx`):**
+  - Acesso direto via botão `Métricas` no cabeçalho e rodapé da aplicação.
+  - Painel com diagnóstico ao vivo das ferramentas conectadas, status de ativação da conta atual e histórico dos últimos 50 eventos capturados.
+  - Gerador embutido de links de divulgação com UTMs para Instagram Bio, Reels, TikTok, WhatsApp e campanhas.
+
+---
+
 ## 5. Próximo Passo Recomendado
 
 1. A plataforma conta com suíte de testes unitários e de integração de ponta a ponta no backend com 100% de aprovação.

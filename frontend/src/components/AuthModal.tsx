@@ -28,6 +28,11 @@ import {
 } from '../services/authApi';
 import { useAuth } from '../context/AuthContext';
 import { CaptchaChallenge } from '../types/auth';
+import {
+  trackAuthModalOpen,
+  trackSignUpCompleted,
+  trackLoginCompleted
+} from '../services/telemetryService';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -118,6 +123,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       setVerificationCode('');
       setResetCode('');
       setCaptchaAnswer('');
+      trackAuthModalOpen(defaultMode);
     } else {
       setErrorMessage(null);
       setFieldErrors({});
@@ -150,6 +156,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           email: email.trim(),
           password,
         });
+        trackLoginCompleted(response.userId);
         login(response.accessToken, {
           id: response.userId,
           email: response.email,
@@ -175,6 +182,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           );
           setMode('verify');
         } else {
+          trackSignUpCompleted(response.userId || 'registered_user');
           setSuccessMessage('Conta cadastrada com sucesso!');
           setTimeout(() => {
             onClose();
@@ -185,6 +193,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           email: email.trim(),
           code: verificationCode.trim(),
         });
+        trackSignUpCompleted(response.userId);
         login(response.accessToken, {
           id: response.userId,
           email: response.email,

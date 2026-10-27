@@ -35,7 +35,8 @@ import {
   Eye,
   EyeOff,
   Compass,
-  Repeat
+  Repeat,
+  Activity
 } from 'lucide-react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AuthModal } from './components/AuthModal';
@@ -57,9 +58,16 @@ import { LandingPage } from './components/LandingPage';
 import { ConfirmModal } from './components/ConfirmModal';
 import { OnboardingTourModal } from './components/OnboardingTourModal';
 import { CurrencyInput, InlineCurrencyInput } from './components/CurrencyInput';
+import { TelemetryModal } from './components/TelemetryModal';
 import { exportTransactionsCsvApi } from './services/goalApi';
 import { warmUpBackend } from './services/authApi';
 import { cleanTransactionNotes } from './utils/recurringNotes';
+import {
+  trackTransactionCreated,
+  trackStatementImported,
+  trackUserActivation,
+  checkAndTrackRetention7d
+} from './services/telemetryService';
 import {
   Account,
   Category,
@@ -247,6 +255,7 @@ const MainDashboard: React.FC = () => {
   const [budgetModalOpen, setBudgetModalOpen] = useState<boolean>(false);
   const [initialTransactionType, setInitialTransactionType] = useState<TransactionType>('INCOME');
   const [aiBudgetModalOpen, setAiBudgetModalOpen] = useState<boolean>(false);
+  const [telemetryModalOpen, setTelemetryModalOpen] = useState<boolean>(false);
 
   // Tutorial Guiado / Onboarding Interativo
   const [isTourOpen, setIsTourOpen] = useState<boolean>(false);
@@ -386,6 +395,11 @@ const MainDashboard: React.FC = () => {
         setSummary(sum);
         setBudgets(bgs);
         setAnalytics(anls);
+      }
+
+      // Rastreamento de Crescimento: Retenção em 7 dias e Ativação do Usuário
+      if (user?.id) {
+        checkAndTrackRetention7d(user.id, (user as any).createdAt);
       }
     } catch (err) {
       console.warn('Erro ao carregar dados financeiros:', err);
@@ -836,6 +850,17 @@ const MainDashboard: React.FC = () => {
 
           {/* Área Direita: Controles, Perfil e Autenticação */}
           <div className="flex items-center gap-2.5">
+            {/* Botão da Central de Métricas e Telemetria */}
+            <button
+              type="button"
+              onClick={() => setTelemetryModalOpen(true)}
+              className="btn-duo btn-duo-white text-xs px-3 py-2 flex items-center gap-1.5 text-slate-700 hover:text-[#026CD6] transition-colors"
+              title="Abrir Central de Métricas, Funil e Telemetria"
+            >
+              <Activity className="h-4 w-4 stroke-[2.5] text-[#026CD6]" />
+              <span className="hidden sm:inline">Métricas</span>
+            </button>
+
             {/* Botão do Guia / Tutorial do App */}
             {isAuthenticated && (
               <button
@@ -2321,6 +2346,15 @@ const MainDashboard: React.FC = () => {
               Pedro Moreira
             </a>
           </p>
+          <button
+            type="button"
+            onClick={() => setTelemetryModalOpen(true)}
+            className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-[#026CD6] transition-colors py-1 px-2.5 rounded-lg hover:bg-slate-100 font-bold"
+            title="Abrir Central de Métricas e Telemetria"
+          >
+            <Activity className="h-3.5 w-3.5 text-[#026CD6]" />
+            <span>Métricas & Telemetria</span>
+          </button>
         </div>
       </footer>
 
@@ -2345,7 +2379,13 @@ const MainDashboard: React.FC = () => {
         }}
         accounts={accounts}
         categories={categories}
-        onTransactionCreated={loadFinancialData}
+        onTransactionCreated={() => {
+          if (user?.id) {
+            trackTransactionCreated({ type: 'EXPENSE', inputMethod: 'MANUAL' });
+            trackUserActivation(user.id, 'TRANSACTION');
+          }
+          loadFinancialData();
+        }}
         transactionToEdit={editingTransaction}
         initialType={initialTransactionType}
         defaultDate={defaultTxDate}
@@ -2362,10 +2402,14 @@ const MainDashboard: React.FC = () => {
         onClose={() => setPurchaseModalOpen(false)}
         cards={creditCards}
         categories={categories}
-        onPurchaseCreated={loadFinancialData}
+        onPurchaseCreated={() => {
+          if (user?.id) {
+            trackTransactionCreated({ type: 'EXPENSE', inputMethod: 'MANUAL' });
+            trackUserActivation(user.id, 'TRANSACTION');
+          }
+          loadFinancialData();
+        }}
       />
-
-
 
       <ImportModal
         isOpen={importModalOpen}
@@ -2374,6 +2418,10 @@ const MainDashboard: React.FC = () => {
         onImportCompleted={(importedMonth?: string) => {
           if (importedMonth) {
             setSelectedMonth(importedMonth);
+          }
+          if (user?.id) {
+            trackStatementImported('EXCEL', 1);
+            trackUserActivation(user.id, 'STATEMENT_IMPORT');
           }
           loadFinancialData({ reloadStatic: true });
         }}
@@ -2384,7 +2432,13 @@ const MainDashboard: React.FC = () => {
         onClose={() => setAiModalOpen(false)}
         accounts={accounts}
         categories={categories}
-        onTransactionCreated={loadFinancialData}
+        onTransactionCreated={() => {
+          if (user?.id) {
+            trackTransactionCreated({ type: 'EXPENSE', inputMethod: 'VOICE_AI' });
+            trackUserActivation(user.id, 'TRANSACTION');
+          }
+          loadFinancialData();
+        }}
         onCategoryCreated={(newCat) => setCategories((prev) => [...prev, newCat])}
       />
 
@@ -2625,6 +2679,12 @@ const MainDashboard: React.FC = () => {
         }}
         onOpenAiModal={() => setAiModalOpen(true)}
         onOpenAiBudgetModal={() => setAiBudgetModalOpen(true)}
+      />
+
+      {/* Central de Métricas, Funil e Telemetria */}
+      <TelemetryModal
+        isOpen={telemetryModalOpen}
+        onClose={() => setTelemetryModalOpen(false)}
       />
 
       {toastMessage && (

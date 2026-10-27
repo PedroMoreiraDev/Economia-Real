@@ -227,6 +227,8 @@ public class GeminiAiService implements AiExtractionPort, AudioTranscriptionPort
 
         String responseJson = executePostWithModelFallback(requestBody);
         return parseGeminiResponse(responseJson, text, TransactionOrigin.AI_TEXT);
+    }
+
     private String detectAudioMimeType(byte[] bytes, String declaredMime) {
         if (bytes != null && bytes.length >= 4) {
             // WebM / Matroska (1A 45 DF A3)
