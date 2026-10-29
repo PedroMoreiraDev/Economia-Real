@@ -873,17 +873,6 @@ const MainDashboard: React.FC = () => {
 
           {/* Área Direita: Controles, Perfil e Autenticação */}
           <div className="flex items-center gap-2.5">
-            {/* Botão da Central de Métricas e Telemetria */}
-            <button
-              type="button"
-              onClick={() => setTelemetryModalOpen(true)}
-              className="btn-duo btn-duo-white text-xs px-3 py-2 flex items-center gap-1.5 text-slate-700 hover:text-[#026CD6] transition-colors"
-              title="Abrir Central de Métricas, Funil e Telemetria"
-            >
-              <Activity className="h-4 w-4 stroke-[2.5] text-[#026CD6]" />
-              <span className="hidden sm:inline">Métricas</span>
-            </button>
-
             {/* Botão do Guia / Tutorial do App */}
             {isAuthenticated && (
               <button
