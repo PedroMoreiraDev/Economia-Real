@@ -37,6 +37,16 @@ public class GeminiAiService implements AiExtractionPort, AudioTranscriptionPort
     private final NaturalLanguageRuleParser ruleParser;
     private final PiiSanitizer piiSanitizer;
 
+    // Cache LRU em memória para evitar requisições redundantes de IA para frases ou termos repetidos
+    private final Map<String, ExtractedTransaction> extractionCache = Collections.synchronizedMap(
+            new LinkedHashMap<>(128, 0.75f, true) {
+                @Override
+                protected boolean removeEldestEntry(Map.Entry<String, ExtractedTransaction> eldest) {
+                    return size() > 500;
+                }
+            }
+    );
+
     public GeminiAiService(
             @Value("${ai.gemini.api-key:}") String apiKey,
             @Value("${ai.gemini.model:gemini-2.5-flash}") String modelName,
@@ -62,18 +72,32 @@ public class GeminiAiService implements AiExtractionPort, AudioTranscriptionPort
     @Override
     public ExtractedTransaction extractFromText(String naturalText, List<String> availableCategories) {
         String sanitizedText = piiSanitizer.sanitize(naturalText);
+        String cacheKey = (sanitizedText != null ? sanitizedText.toLowerCase().trim() : "") + "|" +
+                String.join(",", availableCategories != null ? availableCategories : List.of());
 
+        ExtractedTransaction cached = extractionCache.get(cacheKey);
+        if (cached != null) {
+            log.debug("ExtractedTransaction obtido do cache em memória para '{}'", sanitizedText);
+            return cached;
+        }
+
+        ExtractedTransaction result;
         if (apiKey.isBlank()) {
             log.debug("GEMINI_API_KEY não configurada. Utilizando motor determinístico de regras de linguagem natural.");
-            return ruleParser.parse(sanitizedText, availableCategories, TransactionOrigin.AI_TEXT);
+            result = ruleParser.parse(sanitizedText, availableCategories, TransactionOrigin.AI_TEXT);
+        } else {
+            try {
+                result = callGeminiApiForText(sanitizedText, availableCategories);
+            } catch (Exception ex) {
+                log.warn("Falha ou indisponibilidade na chamada da API Gemini ({}). Acionando fallback determinístico seguro.", ex.getMessage());
+                result = ruleParser.parse(sanitizedText, availableCategories, TransactionOrigin.AI_TEXT);
+            }
         }
 
-        try {
-            return callGeminiApiForText(sanitizedText, availableCategories);
-        } catch (Exception ex) {
-            log.warn("Falha ou indisponibilidade na chamada da API Gemini ({}). Acionando fallback determinístico seguro.", ex.getMessage());
-            return ruleParser.parse(sanitizedText, availableCategories, TransactionOrigin.AI_TEXT);
+        if (result != null) {
+            extractionCache.put(cacheKey, result);
         }
+        return result;
     }
 
     @Override

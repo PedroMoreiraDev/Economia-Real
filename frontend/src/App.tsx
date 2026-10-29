@@ -10,9 +10,7 @@ import {
   ArrowUpRight,
   ArrowDownLeft,
   ArrowLeftRight,
-  Wallet,
   DollarSign,
-  TrendingUp,
   Receipt,
   UploadCloud,
   Mic,
@@ -36,7 +34,9 @@ import {
   EyeOff,
   Compass,
   Repeat,
-  Activity
+  Activity,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AuthModal } from './components/AuthModal';
@@ -60,6 +60,7 @@ import { OnboardingTourModal } from './components/OnboardingTourModal';
 import { CurrencyInput, InlineCurrencyInput } from './components/CurrencyInput';
 import { TelemetryModal } from './components/TelemetryModal';
 import { LegalModal, LegalTab } from './components/LegalModal';
+import { KpiSummaryCards } from './components/dashboard/KpiSummaryCards';
 import { exportTransactionsCsvApi } from './services/goalApi';
 import { warmUpBackend } from './services/authApi';
 import { cleanTransactionNotes } from './utils/recurringNotes';
@@ -88,6 +89,7 @@ import {
   fetchSummaryApi,
   deleteTransactionApi,
   deleteBatchTransactionsApi,
+  updateBatchTransactionCategoryApi,
   updateTransactionApi,
   createCategoryApi
 } from './services/financialApi';
@@ -239,6 +241,24 @@ const MainDashboard: React.FC = () => {
   // Navegação de Mês e Filtros Temporais Globais
   const [selectedMonth, setSelectedMonth] = useState<string>(() => getCurrentMonthStr());
   const [txFilterMode, setTxFilterMode] = useState<'month' | 'all'>('month');
+
+  // Modo Escuro (Dark Mode)
+  const [darkMode, setDarkMode] = useState<boolean>(() => {
+    return localStorage.getItem('economia_real_dark_mode') === 'true';
+  });
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('economia_real_dark_mode', String(darkMode));
+  }, [darkMode]);
+
+  const toggleDarkMode = () => {
+    setDarkMode((prev) => !prev);
+  };
 
   // Modo Privacidade (ocultar valores na tela)
   const [privacyMode, setPrivacyMode] = useState<boolean>(() => {
@@ -588,6 +608,34 @@ const MainDashboard: React.FC = () => {
     });
   };
 
+  const [batchUpdatingCategory, setBatchUpdatingCategory] = useState<boolean>(false);
+
+  const handleBatchChangeCategory = async (newCategoryId: string) => {
+    if (!token || !newCategoryId || selectedTxIds.size === 0) return;
+    try {
+      setBatchUpdatingCategory(true);
+      const ids = Array.from(selectedTxIds);
+      const catObj = categories.find((c) => c.id === newCategoryId);
+      const catName = catObj?.name || 'categoria selecionada';
+
+      // Atualização otimista
+      setTransactions((prev) =>
+        prev.map((item) => (selectedTxIds.has(item.id) ? { ...item, categoryId: newCategoryId } : item))
+      );
+
+      await updateBatchTransactionCategoryApi(token, ids, newCategoryId);
+      showToast(`${ids.length} movimentação(ões) categorizada(s) como "${catName}".`);
+      setSelectedTxIds(new Set());
+      await loadFinancialData();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erro ao atualizar categorias em lote.';
+      showToast(msg);
+      await loadFinancialData();
+    } finally {
+      setBatchUpdatingCategory(false);
+    }
+  };
+
   // Estados para atualização inline e feedback na tabela
   const [inlineUpdatingTxId, setInlineUpdatingTxId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -911,6 +959,26 @@ const MainDashboard: React.FC = () => {
               </button>
             )}
 
+            {/* Alternador de Modo Escuro / Claro */}
+            <button
+              type="button"
+              onClick={toggleDarkMode}
+              className="btn-duo btn-duo-white text-xs px-3 py-2 flex items-center gap-1.5 text-slate-700 hover:text-blue-600 transition-colors"
+              title={darkMode ? "Alternar para Modo Claro" : "Alternar para Modo Escuro"}
+            >
+              {darkMode ? (
+                <>
+                  <Sun className="h-4 w-4 stroke-[2.5] text-amber-500" />
+                  <span className="hidden sm:inline">Claro</span>
+                </>
+              ) : (
+                <>
+                  <Moon className="h-4 w-4 stroke-[2.5] text-indigo-500" />
+                  <span className="hidden sm:inline">Escuro</span>
+                </>
+              )}
+            </button>
+
             {/* Autenticação / Perfil do Usuário */}
             {isAuthenticated && user ? (
               <div className="flex items-center gap-2">
@@ -1134,140 +1202,13 @@ const MainDashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* 4 Cards de Métricas Principais (KPIs com Relevo Tátil - Grid 2x2 no mobile, 4 colunas no desktop) */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 lg:gap-5">
-
-              {/* Receitas Totais */}
-              <div className="card-duo card-duo-interactive p-3.5 sm:p-5 space-y-1.5 sm:space-y-2.5 hover:border-emerald-400 group">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] sm:text-[11px] font-black uppercase text-slate-500 tracking-wider">
-                    Entradas
-                  </span>
-                  <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl sm:rounded-2xl bg-[#E8F8E8] border-2 border-[#D7FFB8] text-[#10B981] flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform shrink-0">
-                    <ArrowUpRight className="h-4 w-4 sm:h-5 sm:w-5 stroke-[3]" />
-                  </div>
-                </div>
-                <p className="text-lg sm:text-2xl lg:text-3xl font-black text-[#059669] tracking-tight font-numeric truncate">
-                  {formatValue(summary.totalIncome)}
-                </p>
-                <div className="flex items-center justify-between text-xs font-bold text-slate-400">
-                  <span className="hidden sm:inline">Recebido</span>
-                  <span className="text-[9px] sm:text-[10px] font-black px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    +{incomeTransactions.length} entrada(s)
-                  </span>
-                </div>
-              </div>
-
-              {/* Despesas de Consumo */}
-              <div className="card-duo card-duo-interactive p-3.5 sm:p-5 space-y-1.5 sm:space-y-2.5 hover:border-rose-400 group">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] sm:text-[11px] font-black uppercase text-slate-500 tracking-wider">
-                    Despesas
-                  </span>
-                  <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl sm:rounded-2xl bg-[#FFEAEA] border-2 border-[#FFDFDF] text-[#EF4444] flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform shrink-0">
-                    <ArrowDownLeft className="h-4 w-4 sm:h-5 sm:w-5 stroke-[3]" />
-                  </div>
-                </div>
-                <p className="text-lg sm:text-2xl lg:text-3xl font-black text-[#DC2626] tracking-tight font-numeric truncate">
-                  {formatValue(summary.totalExpense)}
-                </p>
-                <div className="flex items-center justify-between text-xs font-bold text-slate-400">
-                  <span className="hidden sm:inline">Consumo</span>
-                  {summary.totalIncome > 0 ? (
-                    <span className="text-[9px] sm:text-[10px] font-black px-1.5 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-200">
-                      {Math.round((summary.totalExpense / summary.totalIncome) * 100)}% da receita
-                    </span>
-                  ) : (
-                    <span className="text-[9px] sm:text-[10px] font-bold text-slate-400">No período</span>
-                  )}
-                </div>
-              </div>
-
-              {/* Disponível para Gastar / Meta de Gastos (substitui Economia conforme meta) */}
-              <div className="card-duo card-duo-interactive p-3.5 sm:p-5 space-y-1.5 sm:space-y-2.5 hover:border-[#026CD6] group">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] sm:text-[11px] font-black uppercase text-slate-500 tracking-wider truncate mr-1">
-                    {effectiveGlobalLimit > 0 ? 'Disponível' : 'Economia'}
-                  </span>
-                  <div className={`h-8 w-8 sm:h-10 sm:w-10 rounded-xl sm:rounded-2xl border-2 flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform shrink-0 ${effectiveGlobalLimit > 0
-                    ? effectiveGlobalLimit - summary.totalExpense >= 0
-                      ? 'bg-[#EBF5FF] border-[#BAE0FD] text-[#026CD6]'
-                      : 'bg-[#FFEAEA] border-[#FFDFDF] text-[#EF4444]'
-                    : 'bg-[#EBF5FF] border-[#BAE0FD] text-[#026CD6]'
-                    }`}>
-                    {effectiveGlobalLimit > 0 ? (
-                      <Target className="h-4 w-4 sm:h-5 sm:w-5 stroke-[3]" />
-                    ) : (
-                      <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 stroke-[3]" />
-                    )}
-                  </div>
-                </div>
-                {effectiveGlobalLimit > 0 ? (
-                  <>
-                    <p className={`text-lg sm:text-2xl lg:text-3xl font-black tracking-tight font-numeric truncate ${effectiveGlobalLimit - summary.totalExpense >= 0 ? 'text-[#026CD6]' : 'text-[#DC2626]'
-                      }`}>
-                      {formatValue(effectiveGlobalLimit - summary.totalExpense)}
-                    </p>
-                    <div className="space-y-1">
-                      <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200">
-                        <div
-                          className={`h-full rounded-full transition-all ${summary.totalExpense >= effectiveGlobalLimit
-                            ? 'bg-rose-500'
-                            : summary.totalExpense >= effectiveGlobalLimit * 0.85
-                              ? 'bg-amber-500'
-                              : 'bg-[#026CD6]'
-                            }`}
-                          style={{ width: `${Math.min(100, Math.round((summary.totalExpense / effectiveGlobalLimit) * 100))}%` }}
-                        />
-                      </div>
-                      <p className="text-[10px] sm:text-[11px] font-bold text-slate-400 truncate">
-                        {effectiveGlobalLimit - summary.totalExpense >= 0
-                          ? `De ${formatValue(effectiveGlobalLimit)}`
-                          : `⚠️ Excedeu em ${formatValue(Math.abs(effectiveGlobalLimit - summary.totalExpense))}`}
-                      </p>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <p className={`text-lg sm:text-2xl lg:text-3xl font-black tracking-tight font-numeric truncate ${(summary.totalIncome - summary.totalExpense) >= 0 ? 'text-[#026CD6]' : 'text-amber-600'
-                      }`}>
-                      {formatValue(summary.totalIncome - summary.totalExpense)}
-                    </p>
-                    <p className="text-[10px] sm:text-xs font-bold text-slate-400 truncate">
-                      Saldo livre
-                    </p>
-                  </>
-                )}
-              </div>
-
-              {/* Saldo Total: Entradas menos Despesas */}
-              <div className="card-duo card-duo-interactive p-3.5 sm:p-5 space-y-1.5 sm:space-y-2.5 hover:border-amber-400 group">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] sm:text-[11px] font-black uppercase text-slate-500 tracking-wider">
-                    Saldo Total
-                  </span>
-                  <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl sm:rounded-2xl bg-[#FFF8E6] border-2 border-[#FDE68A] text-[#D97706] flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform shrink-0">
-                    <Wallet className="h-4 w-4 sm:h-5 sm:w-5 stroke-[3]" />
-                  </div>
-                </div>
-                <p className={`text-lg sm:text-2xl lg:text-3xl font-black tracking-tight font-numeric truncate ${(summary.totalIncome - summary.totalExpense) >= 0 ? 'text-slate-900' : 'text-[#DC2626]'
-                  }`}>
-                  {formatValue(summary.totalIncome - summary.totalExpense)}
-                </p>
-                <div className="flex items-center justify-between text-xs font-bold text-slate-400">
-                  <span className="hidden sm:inline">Resultado</span>
-                  {(summary.totalIncome - summary.totalExpense) >= 0 ? (
-                    <span className="text-[9px] sm:text-[10px] font-black px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
-                      Superávit ✨
-                    </span>
-                  ) : (
-                    <span className="text-[9px] sm:text-[10px] font-black px-1.5 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-200">
-                      Déficit ⚠️
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
+            {/* 4 Cards de Métricas Principais (Modularizado) */}
+            <KpiSummaryCards
+              summary={summary}
+              incomeCount={incomeTransactions.length}
+              effectiveGlobalLimit={effectiveGlobalLimit}
+              formatValue={formatValue}
+            />
 
             {/* Abas de Navegação Estilo Duolingo (Pílulas Táteis 3D com Rolagem Fluida) */}
             <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none snap-x touch-pan-x">
@@ -1789,15 +1730,42 @@ const MainDashboard: React.FC = () => {
                         </button>
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={handleRequestDeleteSelected}
-                        disabled={deletingBatch}
-                        className="btn-duo btn-duo-white text-xs px-3.5 py-1.5 flex items-center gap-1.5 text-rose-600 hover:text-rose-700 border-rose-300 bg-rose-50 hover:bg-rose-100 shadow-sm disabled:opacity-50"
-                      >
-                        <Trash2 className="w-3.5 h-3.5 stroke-[2.5]" />
-                        <span>{deletingBatch ? 'Excluindo...' : `Excluir selecionados (${selectedTxIds.size})`}</span>
-                      </button>
+                      <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
+                        {/* Seletor Rápido de Categoria em Lote */}
+                        <div className="flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-xl border-2 border-blue-200 shadow-sm">
+                          <Tag className="w-3.5 h-3.5 text-[#026CD6] shrink-0" />
+                          <select
+                            disabled={batchUpdatingCategory}
+                            onChange={(e) => {
+                              if (e.target.value) {
+                                handleBatchChangeCategory(e.target.value);
+                                e.target.value = '';
+                              }
+                            }}
+                            defaultValue=""
+                            className="bg-transparent text-xs font-bold text-slate-700 outline-none cursor-pointer pr-1"
+                          >
+                            <option value="" disabled>
+                              {batchUpdatingCategory ? 'Alterando...' : 'Mudar Categoria...'}
+                            </option>
+                            {categories.map((cat) => (
+                              <option key={cat.id} value={cat.id}>
+                                {cat.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={handleRequestDeleteSelected}
+                          disabled={deletingBatch || batchUpdatingCategory}
+                          className="btn-duo btn-duo-white text-xs px-3.5 py-1.5 flex items-center gap-1.5 text-rose-600 hover:text-rose-700 border-rose-300 bg-rose-50 hover:bg-rose-100 shadow-sm disabled:opacity-50"
+                        >
+                          <Trash2 className="w-3.5 h-3.5 stroke-[2.5]" />
+                          <span>{deletingBatch ? 'Excluindo...' : `Excluir (${selectedTxIds.size})`}</span>
+                        </button>
+                      </div>
                     </div>
                   )}
 

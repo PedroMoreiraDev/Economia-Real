@@ -211,6 +211,24 @@ Este documento registra o estado real, factual e auditável do desenvolvimento d
   - **Extrato com Cards Móveis Táteis:** Visualização dedicada em **Cards Mobile (`block md:hidden`)** com edição inline de valor, categoria e data, mantendo a tabela contábil tabular apenas em telas médias e grandes (`hidden md:block`).
   - **Modais com Scroll Seguro (`max-h-[92vh] overflow-y-auto`):** `TransactionModal`, `CreditCardPurchaseModal`, `ImportModal` e `AuthModal` protegidos contra corte de tela ou quebra com teclados virtuais abertos.
 
+### 2.14. Otimizações de Performance, UX e Novas Funcionalidades (Frentes 1 a 6)
+- [x] **Frente 1 (IA & Backend): Cache em Memória no GeminiAiService:**
+  - Implementado cache LRU sincronizado (`ConcurrentHashMap` com limpeza automática ao exceder 500 entradas) para extração estruturada de movimentações via linguagem natural.
+  - Elimina requisições redundantes de rede e custos de token para descrições repetidas.
+- [x] **Frente 2 (Backend & Frontend): Categorização em Lote de Transações:**
+  - Novo caso de uso `BatchUpdateTransactionCategoryUseCase` com validação estrita anti-IDOR e transacionalidade atômica.
+  - Endpoint `PUT /api/v1/transactions/batch-category` e teste unitário no `TransactionControllerTest`.
+  - Integração no frontend (`financialApi.ts`) com seletor instantâneo de categoria na barra flutuante de ações em massa do extrato.
+- [x] **Frente 3 (UX / Cold-Start): Feedback Visual Amigável em AuthModal:**
+  - Alerta com animação e mensagem clara ativado caso o servidor na nuvem (Render) demore mais de 2 segundos para responder, reduzindo abandono.
+- [x] **Frente 4 (PWA & Mobile): Service Worker e Suporte Offline:**
+  - Criação de `public/sw.js` com estratégia Network First e cache de contingência offline para assets estáticos e manifesto PWA.
+  - Registro automático do Service Worker em `main.tsx`.
+- [x] **Frente 5 (Arquitetura Frontend): Modularização de Componentes:**
+  - Extração dos 4 cards superiores de métricas para `components/dashboard/KpiSummaryCards.tsx`, reduzindo a extensão e complexidade de `App.tsx`.
+- [x] **Frente 6 (UI / Tema): Dark Mode Completo com Alternância e Persistência:**
+  - Alternador tátil no cabeçalho com ícones de Sol/Lua, persistência em `localStorage` e estilos dedicados no `index.css`.
+
 ---
 
 ## 3. Evidências de Testes Executados Factualmente

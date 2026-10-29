@@ -161,3 +161,23 @@ export async function deleteBatchTransactionsApi(token: string, ids: string[]): 
   }
 }
 
+// Alteração de categoria em lote
+export async function updateBatchTransactionCategoryApi(
+  token: string, 
+  transactionIds: string[], 
+  categoryId: string
+): Promise<{ updatedCount: number; message: string }> {
+  if (transactionIds.length === 0) return { updatedCount: 0, message: 'Nenhuma transação selecionada.' };
+  const res = await fetch(`${API_BASE_URL}/transactions/batch-category`, {
+    method: 'PUT',
+    headers: {
+      ...authHeaders(token),
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ transactionIds, categoryId }),
+  });
+
+  return handleResponse<{ updatedCount: number; message: string }>(res);
+}
+
+

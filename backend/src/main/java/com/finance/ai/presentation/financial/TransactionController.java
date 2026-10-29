@@ -6,6 +6,7 @@ import com.finance.ai.application.financial.DeleteTransactionUseCase;
 import com.finance.ai.application.financial.FinancialSummaryResult;
 import com.finance.ai.application.financial.GetFinancialSummaryUseCase;
 import com.finance.ai.application.financial.ListTransactionsUseCase;
+import com.finance.ai.application.financial.BatchUpdateTransactionCategoryUseCase;
 import com.finance.ai.domain.financial.Transaction;
 import com.finance.ai.domain.financial.TransactionType;
 import com.finance.ai.infrastructure.security.AuthenticatedUser;
@@ -41,17 +42,20 @@ public class TransactionController {
     private final DeleteTransactionUseCase deleteTransactionUseCase;
     private final ListTransactionsUseCase listTransactionsUseCase;
     private final GetFinancialSummaryUseCase getFinancialSummaryUseCase;
+    private final BatchUpdateTransactionCategoryUseCase batchUpdateTransactionCategoryUseCase;
 
     public TransactionController(CreateTransactionUseCase createTransactionUseCase,
                                  UpdateTransactionUseCase updateTransactionUseCase,
                                  DeleteTransactionUseCase deleteTransactionUseCase,
                                  ListTransactionsUseCase listTransactionsUseCase,
-                                 GetFinancialSummaryUseCase getFinancialSummaryUseCase) {
+                                 GetFinancialSummaryUseCase getFinancialSummaryUseCase,
+                                 BatchUpdateTransactionCategoryUseCase batchUpdateTransactionCategoryUseCase) {
         this.createTransactionUseCase = createTransactionUseCase;
         this.updateTransactionUseCase = updateTransactionUseCase;
         this.deleteTransactionUseCase = deleteTransactionUseCase;
         this.listTransactionsUseCase = listTransactionsUseCase;
         this.getFinancialSummaryUseCase = getFinancialSummaryUseCase;
+        this.batchUpdateTransactionCategoryUseCase = batchUpdateTransactionCategoryUseCase;
     }
 
     @PostMapping
@@ -159,6 +163,18 @@ public class TransactionController {
         return ResponseEntity.noContent().build();
     }
 
+    @PutMapping("/batch-category")
+    @Operation(summary = "Atualiza a categoria de múltiplas movimentações do usuário em lote")
+    public ResponseEntity<BatchCategoryUpdateResponse> updateBatchCategory(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @Valid @RequestBody BatchUpdateCategoryRequest request) {
+
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        int updatedCount = batchUpdateTransactionCategoryUseCase.execute(user.userId(), request.transactionIds(), request.categoryId());
+        return ResponseEntity.ok(new BatchCategoryUpdateResponse(updatedCount, "Categorias atualizadas com sucesso."));
+    }
+
     private TransactionResponse toResponse(Transaction t) {
         return toResponse(t, null);
     }
@@ -230,5 +246,15 @@ public class TransactionController {
             Integer recurringCurrent,
             Integer recurringTotal,
             Integer recurringRemaining
+    ) {}
+
+    public record BatchUpdateCategoryRequest(
+            @NotNull @Size(min = 1, max = 200, message = "O lote deve conter entre 1 e 200 itens.") List<UUID> transactionIds,
+            @NotNull(message = "Categoria de destino é obrigatória.") UUID categoryId
+    ) {}
+
+    public record BatchCategoryUpdateResponse(
+            int updatedCount,
+            String message
     ) {}
 }

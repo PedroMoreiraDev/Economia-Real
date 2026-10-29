@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.finance.ai.application.financial.CreateTransactionUseCase;
 import com.finance.ai.application.financial.UpdateTransactionUseCase;
 import com.finance.ai.application.financial.DeleteTransactionUseCase;
+import com.finance.ai.application.financial.BatchUpdateTransactionCategoryUseCase;
 import com.finance.ai.application.financial.FinancialSummaryResult;
 import com.finance.ai.application.financial.GetFinancialSummaryUseCase;
 import com.finance.ai.application.financial.ListTransactionsUseCase;
@@ -64,6 +65,9 @@ class TransactionControllerTest {
 
     @MockBean
     private GetFinancialSummaryUseCase getFinancialSummaryUseCase;
+
+    @MockBean
+    private BatchUpdateTransactionCategoryUseCase batchUpdateTransactionCategoryUseCase;
 
     @MockBean
     private UserRepository userRepository;
@@ -248,5 +252,34 @@ class TransactionControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(deleteTransactionUseCase).executeBatch(eq(userId), eq(ids));
+    }
+
+    @Test
+    @DisplayName("PUT /api/v1/transactions/batch-category - deve atualizar categoria em lote com sucesso (200)")
+    void shouldUpdateBatchCategorySuccessfully() throws Exception {
+        UUID userId = UUID.randomUUID();
+        UUID tx1 = UUID.randomUUID();
+        UUID tx2 = UUID.randomUUID();
+        UUID categoryId = UUID.randomUUID();
+        List<UUID> ids = List.of(tx1, tx2);
+        String token = "valid.jwt.token";
+        User user = new User(userId, "pedro@teste.com", "Pedro", "$2a$12$hash", Instant.now());
+
+        when(jwtTokenProvider.isTokenValid(token)).thenReturn(true);
+        when(jwtTokenProvider.extractUserId(token)).thenReturn(userId);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(batchUpdateTransactionCategoryUseCase.execute(eq(userId), eq(ids), eq(categoryId))).thenReturn(2);
+
+        var request = new TransactionController.BatchUpdateCategoryRequest(ids, categoryId);
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/api/v1/transactions/batch-category")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.updatedCount").value(2))
+                .andExpect(jsonPath("$.message").value("Categorias atualizadas com sucesso."));
+
+        verify(batchUpdateTransactionCategoryUseCase).execute(eq(userId), eq(ids), eq(categoryId));
     }
 }

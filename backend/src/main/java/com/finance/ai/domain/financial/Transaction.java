@@ -109,6 +109,27 @@ public class Transaction {
         );
     }
 
+    public Transaction withCategory(UUID newCategoryId) {
+        return new Transaction(
+                this.id,
+                this.userId,
+                this.type,
+                this.amount,
+                this.accrualDate,
+                this.settlementDate,
+                this.description,
+                this.accountId,
+                this.destinationAccountId,
+                newCategoryId,
+                this.status,
+                this.origin,
+                this.notes,
+                this.createdAt,
+                Instant.now()
+        );
+    }
+
+
     private static BigDecimal validateAndNormalizeAmount(BigDecimal amount) {
         if (amount == null) {
             throw new IllegalArgumentException("Valor da transação não pode ser nulo.");

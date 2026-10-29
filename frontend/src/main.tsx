@@ -11,8 +11,18 @@ initBackendKeepAlive();
 // Inicializa telemetria de tráfego, UTMs e métricas de crescimento (GA4 / Funil)
 initTelemetry();
 
+// Registra o Service Worker para suporte a PWA e cache offline
+if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {
+      // Falha silenciosa em ambientes locais restritos
+    });
+  });
+}
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <App />
   </React.StrictMode>,
 );
+
