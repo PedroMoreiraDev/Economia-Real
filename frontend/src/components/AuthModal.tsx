@@ -352,7 +352,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         <div className="text-center space-y-1 mb-5">
           <img
             src="/logo-economia-real.png"
-            alt="Economia Real"
+            alt="Economia Real - Mascote Oficial"
+            width={64}
+            height={64}
+            loading="lazy"
             className="inline-block h-16 w-16 rounded-3xl object-cover border-2 border-blue-200 shadow-[0_4px_0_0_#BFDBFE] mb-2"
           />
           <h2 className="text-2xl font-black tracking-tight text-slate-800">

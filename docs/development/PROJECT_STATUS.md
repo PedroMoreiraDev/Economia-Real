@@ -264,6 +264,23 @@ dist/assets/index-CVcJJLIG.js   305.65 kB │ gzip: 75.31 kB
   - Classificador inteligente de estabelecimentos comerciais (`MerchantCategoryClassifier`) com remoção de ruídos de adquirentes e parcelamento, categorizando especificamente `iFood`, `Rappi`, `Zé Delivery`, `Ai que fome` como **Delivery**, e `Uber`, `99`, `Log Urbano`, `Rapidocar` como **Aplicativo de Transporte**, além de compras (`Magalu`, `Amazon`), transporte geral (postos, combustível), alimentação e contas.
   - Inclusão das categorias canônicas do sistema **Delivery** (vermelho) e **Aplicativo de Transporte** (amarelo/táxi) com semeadura automática e retroativa para novos e antigos usuários via `DefaultCategorySeeder`.
   - Coluna de Categoria com destaque visual e botão de atalho de edição rápida em casos de categoria "Outros" ou lançamentos com dúvidas.
+- **Otimização Completa de SEO, E-E-A-T e Performance (Fases 1, 2 e 3 Concluídas):**
+  - **Fase 1 (SEO Técnico & Redes Sociais):** Meta tags em `frontend/index.html` (title, meta description com 155 caracteres, keywords), Open Graph completo, Twitter Cards, tag canônica, `robots.txt`, `sitemap.xml`, `manifest.json` e Schemas JSON-LD (`WebApplication`, `Organization` e `FAQPage` para Rich Snippets na SERP).
+  - **Fase 2 (Confiabilidade & E-E-A-T / YMYL):**
+    - Criação do componente institucional `LegalModal.tsx` com três abas completas: Política de Privacidade aderente à LGPD (Lei 13.709/2018 com direitos de portabilidade e exclusão), Termos de Uso do Serviço e Segurança Bancária / I.A Determinística.
+    - Seção de rodapé enriquecida em `LandingPage.tsx` com selos de confiança (100% Conforme LGPD, Zero Senha Bancária, Precisão Decimal Rigorosa), canais de suporte oficiais (`contato@economia-real.ia.br`) e links para as abas institucionais.
+    - Footer global da aplicação em `App.tsx` enriquecido com botões de acesso a Privacidade (LGPD), Termos de Uso e Segurança.
+  - **Fase 3 (Performance & Core Web Vitals):**
+    - Prevenção ativa de Layout Shift (CLS) com dimensões explícitas (`width` e `height`) no logotipo do cabeçalho e no modal de autenticação (`AuthModal.tsx`).
+    - Atributos `fetchPriority="high"` e `loading="eager"` no logo do topo para acelerar o LCP (*Largest Contentful Paint*).
+    - Validação de build do frontend com 0 erros (`tsc && vite build`).
+  - **Fase 4 (Otimizações Avançadas, GEO & Code-Splitting):**
+    - **Code-Splitting no Vite (`manualChunks`):** Separação de `vendor-react` e `vendor-icons` em arquivos modulares com cache imutável de 1 ano, eliminando warnings de chunks pesados e reduzindo o tempo de compilação para 9.33s.
+    - **GEO (Generative Engine Optimization):** Permissão expressa em `frontend/public/robots.txt` para rastreadores de inteligência artificial (`GPTBot`, `ChatGPT-User`, `PerplexityBot`, `Claude-Web`, `Applebot-Extended`, `Googlebot`) citarem o produto como autoridade em finanças pessoais.
+    - **Hardening de CSP compatível no Nginx:** Ajuste em `frontend/nginx.conf` liberando `googletagmanager` e `google-analytics` em `script-src`, `connect-src` e `img-src` para garantir telemetria e análise de tráfego orgânico real.
+    - **Esqueleto Semântico Pré-Renderizado no HTML:** Injeção de marcação semântica inicial com `<h1>`, subtítulo e diferenciais dentro de `#root` no `index.html` para indexação em 0ms por robôs de busca.
+    - **Otimização de Fontes:** Enxugamento dos pesos carregados do Google Fonts para eliminar atrasos de FOUT/FOIT.
+    - **Governança & Restrição da Central de Telemetria:** Remoção do botão de telemetria do rodapé público para todos os visitantes e usuários comuns. O acesso e a montagem do modal foram restritos estritamente à conta de administração (`pedrodev2020@gmail.com`), com atalho de teclado exclusivo `Ctrl + Shift + T` e selo discreto de admin.
 
 ---
 

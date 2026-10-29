@@ -13,7 +13,11 @@ import {
   Volume2,
   FileSpreadsheet,
   Check,
-  AlertTriangle
+  AlertTriangle,
+  ShieldCheck,
+  Lock,
+  FileText,
+  Mail
 } from 'lucide-react';
 import { warmUpBackend } from '../services/authApi';
 import { trackCtaClick } from '../services/telemetryService';
@@ -21,9 +25,18 @@ import { trackCtaClick } from '../services/telemetryService';
 interface LandingPageProps {
   onOpenLogin: () => void;
   onOpenRegister: () => void;
+  onOpenPrivacy?: () => void;
+  onOpenTerms?: () => void;
+  onOpenSecurity?: () => void;
 }
 
-export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin, onOpenRegister }) => {
+export const LandingPage: React.FC<LandingPageProps> = ({
+  onOpenLogin,
+  onOpenRegister,
+  onOpenPrivacy,
+  onOpenTerms,
+  onOpenSecurity
+}) => {
   // Estado para a aba ativa no Mockup interativo da Hero
   const [activeHeroTab, setActiveHeroTab] = useState<'voice' | 'statement' | 'goals'>('voice');
 
@@ -918,6 +931,120 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin, onOpenReg
           </p>
         </div>
       </section>
+
+      {/* =========================================================================
+          8. RODAPÉ INSTITUCIONAL COM SELOS E-E-A-T & CONFIABILIDADE (YMYL)
+          ========================================================================= */}
+      <footer className="pt-10 border-t-2 border-slate-200/80 space-y-8">
+        {/* Faixa de Selos de Confiança */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pb-6 border-b border-slate-200">
+          <div className="flex items-center gap-3 p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <div className="h-10 w-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+              <ShieldCheck className="h-5 w-5 stroke-[2.5]" />
+            </div>
+            <div>
+              <p className="text-xs font-black text-slate-900">100% Conforme LGPD</p>
+              <p className="text-[11px] font-bold text-slate-500">Seus dados financeiros nunca são vendidos.</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <div className="h-10 w-10 rounded-xl bg-blue-100 text-[#026CD6] flex items-center justify-center shrink-0">
+              <Lock className="h-5 w-5 stroke-[2.5]" />
+            </div>
+            <div>
+              <p className="text-xs font-black text-slate-900">Zero Senha Bancária</p>
+              <p className="text-[11px] font-bold text-slate-500">Importação por arquivo OFX ou comando de voz.</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <div className="h-10 w-10 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
+              <Sparkles className="h-5 w-5 stroke-[2.5]" />
+            </div>
+            <div>
+              <p className="text-xs font-black text-slate-900">Precisão Decimal Rigorosa</p>
+              <p className="text-[11px] font-bold text-slate-500">Cálculos no backend sem alucinação da I.A.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Links Institucionais e Navegação */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start text-xs font-bold text-slate-600">
+          {/* Apresentação da Marca */}
+          <div className="md:col-span-5 space-y-3">
+            <div className="flex items-center gap-2">
+              <img
+                src="/logo-economia-real.png"
+                alt="Logotipo Oficial do Economia Real"
+                width={36}
+                height={36}
+                className="h-9 w-9 rounded-xl object-cover border border-blue-200 shadow-sm"
+              />
+              <span className="text-lg font-black text-slate-900">
+                Economia<span className="text-[#026CD6]">Real</span>
+              </span>
+            </div>
+            <p className="text-slate-500 leading-relaxed text-xs">
+              Plataforma de inteligência financeira pessoal projetada para eliminar o atrito de planilhas. Lance movimentações por voz, previna a duplicidade de faturas e economize com clareza.
+            </p>
+            <p className="text-[11px] text-slate-400 font-bold">
+              © 2026 Economia Real. Todos os direitos reservados.
+            </p>
+          </div>
+
+          {/* Coluna 1: Recursos */}
+          <div className="md:col-span-3 space-y-2.5">
+            <h4 className="text-xs font-black uppercase tracking-wider text-slate-900">
+              Recursos
+            </h4>
+            <ul className="space-y-1.5 text-slate-500">
+              <li>• Lançamento de Gastos por Voz</li>
+              <li>• Importador de Faturas (OFX/CSV)</li>
+              <li>• Prevenção de Dupla Contagem</li>
+              <li>• Alertas Preventivos de Metas</li>
+              <li>• Orçamentos com Inteligência Artificial</li>
+            </ul>
+          </div>
+
+          {/* Coluna 2: Confiança & Legal */}
+          <div className="md:col-span-4 space-y-2.5">
+            <h4 className="text-xs font-black uppercase tracking-wider text-slate-900">
+              Segurança & Governança (LGPD)
+            </h4>
+            <div className="flex flex-col space-y-2 items-start">
+              <button
+                type="button"
+                onClick={onOpenPrivacy}
+                className="text-slate-600 hover:text-[#026CD6] hover:underline flex items-center gap-1.5 transition-colors"
+              >
+                <Lock className="h-3.5 w-3.5 text-emerald-600" />
+                Política de Privacidade & Direitos LGPD
+              </button>
+              <button
+                type="button"
+                onClick={onOpenTerms}
+                className="text-slate-600 hover:text-[#026CD6] hover:underline flex items-center gap-1.5 transition-colors"
+              >
+                <FileText className="h-3.5 w-3.5 text-blue-600" />
+                Termos de Uso do Serviço
+              </button>
+              <button
+                type="button"
+                onClick={onOpenSecurity}
+                className="text-slate-600 hover:text-[#026CD6] hover:underline flex items-center gap-1.5 transition-colors"
+              >
+                <ShieldCheck className="h-3.5 w-3.5 text-purple-600" />
+                Segurança Bancária & I.A Determinística
+              </button>
+              <div className="pt-2 text-[11px] text-slate-500 flex items-center gap-1.5">
+                <Mail className="h-3.5 w-3.5 text-[#026CD6]" />
+                <span>Contato: <strong className="text-slate-700">contato@economia-real.ia.br</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
 
     </div>
   );

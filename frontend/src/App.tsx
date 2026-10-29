@@ -59,6 +59,7 @@ import { ConfirmModal } from './components/ConfirmModal';
 import { OnboardingTourModal } from './components/OnboardingTourModal';
 import { CurrencyInput, InlineCurrencyInput } from './components/CurrencyInput';
 import { TelemetryModal } from './components/TelemetryModal';
+import { LegalModal, LegalTab } from './components/LegalModal';
 import { exportTransactionsCsvApi } from './services/goalApi';
 import { warmUpBackend } from './services/authApi';
 import { cleanTransactionNotes } from './utils/recurringNotes';
@@ -215,6 +216,22 @@ type TabType = 'overview' | 'analytics' | 'recurring' | 'goals';
 const MainDashboard: React.FC = () => {
   const { user, token, isAuthenticated, logout } = useAuth();
   const firstName = user?.fullName?.trim().split(' ')[0] || '';
+  const isAdminUser = Boolean(user?.email && user.email.toLowerCase().trim() === 'pedrodev2020@gmail.com');
+
+  // Atalho de teclado secreto para Telemetria (Ctrl + Shift + T) exclusivo para a conta admin
+  useEffect(() => {
+    if (!isAdminUser) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'T' || e.key === 't')) {
+        e.preventDefault();
+        setTelemetryModalOpen((prev) => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isAdminUser]);
 
   // Abas de navegação estilo Duolingo
   const [activeTab, setActiveTab] = useState<TabType>('overview');
@@ -256,6 +273,8 @@ const MainDashboard: React.FC = () => {
   const [initialTransactionType, setInitialTransactionType] = useState<TransactionType>('INCOME');
   const [aiBudgetModalOpen, setAiBudgetModalOpen] = useState<boolean>(false);
   const [telemetryModalOpen, setTelemetryModalOpen] = useState<boolean>(false);
+  const [legalModalOpen, setLegalModalOpen] = useState<boolean>(false);
+  const [legalModalTab, setLegalModalTab] = useState<LegalTab>('privacy');
 
   // Tutorial Guiado / Onboarding Interativo
   const [isTourOpen, setIsTourOpen] = useState<boolean>(false);
@@ -827,7 +846,11 @@ const MainDashboard: React.FC = () => {
             <div className="relative group shrink-0">
               <img
                 src="/logo-economia-real.png"
-                alt="Economia Real Logo"
+                alt="Economia Real - Controle Financeiro Inteligente"
+                width={48}
+                height={48}
+                loading="eager"
+                fetchPriority="high"
                 className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl sm:rounded-2xl object-cover border-2 border-blue-200 shadow-md group-hover:scale-105 transition-transform"
               />
               <span className="absolute -bottom-1 -right-1 w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-emerald-500 border-2 border-white animate-pulse" title="Sistema online e conectado" />
@@ -2325,36 +2348,88 @@ const MainDashboard: React.FC = () => {
             setAuthModalMode('register');
             setAuthModalOpen(true);
           }}
+          onOpenPrivacy={() => {
+            setLegalModalTab('privacy');
+            setLegalModalOpen(true);
+          }}
+          onOpenTerms={() => {
+            setLegalModalTab('terms');
+            setLegalModalOpen(true);
+          }}
+          onOpenSecurity={() => {
+            setLegalModalTab('security');
+            setLegalModalOpen(true);
+          }}
         />
       )}
       </main>
 
       {/* Footer Limpo e Amigável */}
-      <footer className="border-t-2 border-slate-200 bg-white py-8 mt-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-bold text-slate-400">
+      <footer className="border-t-2 border-slate-200 bg-white py-6 mt-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-bold text-slate-400">
           <p className="flex items-center gap-1.5 text-slate-500">
             <span className="text-slate-800 font-black">💼 Economia Real</span> • <span>© 2026 Economia Real. Todos os direitos reservados.</span>
           </p>
-          <p className="flex items-center gap-1.5 text-slate-500">
-            <span>Developed by:</span>
-            <a
-              href="https://www.linkedin.com/in/moreirapedroh/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#026CD6] hover:text-[#0A7DEF] hover:underline font-black transition-colors"
+
+          <div className="flex items-center gap-3 text-slate-500">
+            <button
+              type="button"
+              onClick={() => {
+                setLegalModalTab('privacy');
+                setLegalModalOpen(true);
+              }}
+              className="hover:text-[#026CD6] transition-colors"
             >
-              Pedro Moreira
-            </a>
-          </p>
-          <button
-            type="button"
-            onClick={() => setTelemetryModalOpen(true)}
-            className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-[#026CD6] transition-colors py-1 px-2.5 rounded-lg hover:bg-slate-100 font-bold"
-            title="Abrir Central de Métricas e Telemetria"
-          >
-            <Activity className="h-3.5 w-3.5 text-[#026CD6]" />
-            <span>Métricas & Telemetria</span>
-          </button>
+              Privacidade (LGPD)
+            </button>
+            <span>•</span>
+            <button
+              type="button"
+              onClick={() => {
+                setLegalModalTab('terms');
+                setLegalModalOpen(true);
+              }}
+              className="hover:text-[#026CD6] transition-colors"
+            >
+              Termos de Uso
+            </button>
+            <span>•</span>
+            <button
+              type="button"
+              onClick={() => {
+                setLegalModalTab('security');
+                setLegalModalOpen(true);
+              }}
+              className="hover:text-[#026CD6] transition-colors"
+            >
+              Segurança
+            </button>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <p className="flex items-center gap-1 text-slate-500">
+              <span>Dev:</span>
+              <a
+                href="https://www.linkedin.com/in/moreirapedroh/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#026CD6] hover:text-[#0A7DEF] hover:underline font-black transition-colors"
+              >
+                Pedro Moreira
+              </a>
+            </p>
+            {isAdminUser && (
+              <button
+                type="button"
+                onClick={() => setTelemetryModalOpen(true)}
+                className="flex items-center gap-1.5 text-xs text-amber-800 bg-amber-50 border border-amber-200 hover:bg-amber-100 transition-colors py-1 px-2.5 rounded-lg font-bold shadow-xs"
+                title="Painel Interno de Métricas e Telemetria (Acesso restrito: pedrodev2020@gmail.com • Atalho: Ctrl+Shift+T)"
+              >
+                <Activity className="h-3.5 w-3.5 text-amber-600" />
+                <span className="hidden sm:inline">Telemetria (Admin)</span>
+              </button>
+            )}
+          </div>
         </div>
       </footer>
 
@@ -2681,10 +2756,19 @@ const MainDashboard: React.FC = () => {
         onOpenAiBudgetModal={() => setAiBudgetModalOpen(true)}
       />
 
-      {/* Central de Métricas, Funil e Telemetria */}
-      <TelemetryModal
-        isOpen={telemetryModalOpen}
-        onClose={() => setTelemetryModalOpen(false)}
+      {/* Central de Métricas, Funil e Telemetria (Exclusivo Administrador: pedrodev2020@gmail.com) */}
+      {isAdminUser && (
+        <TelemetryModal
+          isOpen={telemetryModalOpen}
+          onClose={() => setTelemetryModalOpen(false)}
+        />
+      )}
+
+      {/* Modal Institucional de Privacidade, LGPD e Termos de Uso */}
+      <LegalModal
+        isOpen={legalModalOpen}
+        onClose={() => setLegalModalOpen(false)}
+        initialTab={legalModalTab}
       />
 
       {toastMessage && (

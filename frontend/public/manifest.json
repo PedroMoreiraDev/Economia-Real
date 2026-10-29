@@ -1,0 +1,17 @@
+{
+  "name": "Economia Real — Controle Financeiro Inteligente",
+  "short_name": "Economia Real",
+  "description": "App de controle financeiro pessoal com Inteligência Artificial, comando de voz e importação de faturas.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F8FAFC",
+  "theme_color": "#026CD6",
+  "icons": [
+    {
+      "src": "/logo-economia-real.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
