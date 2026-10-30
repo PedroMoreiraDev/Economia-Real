@@ -43,7 +43,8 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
               className="h-9 w-9 sm:h-12 sm:w-12 rounded-xl sm:rounded-2xl object-cover border-2 border-blue-200 shadow-md group-hover:scale-105 transition-transform"
             />
             <span
-              className="absolute -bottom-1 -right-1 w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 rounded-full bg-emerald-500 border-2 border-white animate-pulse"
+              className="absolute -bottom-1 -right-1 w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 rounded-full !bg-[#10B981] border-2 border-white dark:border-slate-900 animate-pulse shadow-sm"
+              style={{ backgroundColor: '#10B981' }}
               title="Sistema online e conectado"
             />
           </div>
