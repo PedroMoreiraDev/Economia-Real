@@ -88,29 +88,29 @@ export const ImportModal: React.FC<ImportModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
       <div
-        className="w-full max-w-lg rounded-3xl bg-white border-2 border-slate-200 shadow-2xl p-5 sm:p-8 relative max-h-[92vh] overflow-y-auto"
+        className="w-full max-w-lg rounded-3xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 shadow-2xl p-5 sm:p-8 relative max-h-[92vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+          className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
           title="Fechar"
         >
           <X className="h-5 w-5 stroke-[2.5]" />
         </button>
 
         <div className="flex items-center gap-3.5 mb-6">
-          <div className="h-12 w-12 rounded-2xl bg-blue-50 border-2 border-blue-200 text-[#026CD6] flex items-center justify-center shadow-[0_3px_0_0_#BFDBFE]">
+          <div className="h-12 w-12 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border-2 border-blue-200 dark:border-blue-800/80 text-[#026CD6] dark:text-blue-400 flex items-center justify-center shadow-[0_3px_0_0_#BFDBFE] dark:shadow-none">
             <UploadCloud className="h-6 w-6 stroke-[2.5]" />
           </div>
           <div>
-            <h2 className="text-xl sm:text-2xl font-black text-slate-800">Importar Extrato</h2>
+            <h2 className="text-xl sm:text-2xl font-black text-slate-800 dark:text-white">Importar Extrato</h2>
             <p className="text-xs sm:text-sm font-bold text-slate-400">Extratos OFX, CSV e planilhas Excel com conciliação automática</p>
           </div>
         </div>
 
         {error && (
-          <div className="mb-5 p-3.5 rounded-2xl bg-rose-50 border-2 border-[#FF4B4B] flex items-center gap-2 text-xs sm:text-sm font-bold text-[#EA2B2B]">
+          <div className="mb-5 p-3.5 rounded-2xl bg-rose-50 dark:!bg-rose-950/50 border-2 border-[#FF4B4B] dark:!border-rose-800 flex items-center gap-2 text-xs sm:text-sm font-bold text-[#EA2B2B] dark:!text-rose-300">
             <AlertCircle className="h-5 w-5 shrink-0" />
             <span>{error}</span>
           </div>
@@ -118,35 +118,35 @@ export const ImportModal: React.FC<ImportModalProps> = ({
 
         {result ? (
           <div className="space-y-4 py-2 animate-fade-in">
-            <div className="p-4 rounded-2xl bg-blue-50 border-2 border-blue-200 text-blue-900 space-y-2.5">
-              <div className="flex items-center gap-2 text-sm font-black text-[#026CD6]">
+            <div className="p-4 rounded-2xl bg-blue-50 dark:!bg-blue-950/40 border-2 border-blue-200 dark:!border-blue-800/80 text-blue-900 dark:text-blue-200 space-y-2.5">
+              <div className="flex items-center gap-2 text-sm font-black text-[#026CD6] dark:text-blue-400">
                 <CheckCircle2 className="h-5 w-5 stroke-[2.5]" />
                 <span>Importação Concluída com Sucesso!</span>
               </div>
-              <p className="text-xs font-bold text-slate-600">{result.message}</p>
+              <p className="text-xs font-bold text-slate-600 dark:text-slate-300">{result.message}</p>
 
               {result.referenceMonthDisplay && (
                 <div className="flex items-center gap-2 pt-1">
-                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white border-2 border-blue-200 text-xs font-black text-[#026CD6] shadow-sm">
-                    <Calendar className="h-4 w-4 text-[#026CD6] stroke-[2.5]" />
-                    <span>Mês dos registros importados: <strong className="text-slate-900 underline decoration-blue-400 decoration-2">{result.referenceMonthDisplay}</strong></span>
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white dark:!bg-[#0F172A] border-2 border-blue-200 dark:!border-blue-800 text-xs font-black text-[#026CD6] dark:text-blue-300 shadow-sm">
+                    <Calendar className="h-4 w-4 text-[#026CD6] dark:text-blue-400 stroke-[2.5]" />
+                    <span>Mês dos registros importados: <strong className="text-slate-900 dark:text-white underline decoration-blue-400 decoration-2">{result.referenceMonthDisplay}</strong></span>
                   </div>
                 </div>
               )}
             </div>
 
             <div className="grid grid-cols-2 gap-3 text-center">
-              <div className="p-4 rounded-2xl bg-white border-2 border-slate-200 shadow-[0_3px_0_0_#E2E8F0]">
+              <div className="p-4 rounded-2xl bg-white dark:!bg-[#0F172A] border-2 border-slate-200 dark:!border-slate-800 shadow-[0_3px_0_0_#E2E8F0] dark:shadow-none">
                 <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Novos Lançamentos</span>
-                <p className="text-2xl font-black text-[#026CD6] mt-1">{result.importedCount}</p>
+                <p className="text-2xl font-black text-[#026CD6] dark:text-blue-400 mt-1">{result.importedCount}</p>
               </div>
-              <div className="p-4 rounded-2xl bg-white border-2 border-slate-200 shadow-[0_3px_0_0_#E2E8F0]">
+              <div className="p-4 rounded-2xl bg-white dark:!bg-[#0F172A] border-2 border-slate-200 dark:!border-slate-800 shadow-[0_3px_0_0_#E2E8F0] dark:shadow-none">
                 <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Duplicados Ignorados</span>
-                <p className="text-2xl font-black text-[#FF9600] mt-1">{result.skippedCount}</p>
+                <p className="text-2xl font-black text-[#FF9600] dark:text-amber-400 mt-1">{result.skippedCount}</p>
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 pt-3 border-t-2 border-slate-100">
+            <div className="flex justify-end gap-3 pt-3 border-t-2 border-slate-100 dark:border-slate-800">
               <button
                 type="button"
                 onClick={handleReset}
@@ -173,7 +173,7 @@ export const ImportModal: React.FC<ImportModalProps> = ({
 
             <div className="space-y-1.5">
               <label className="block text-xs font-black uppercase tracking-wider text-slate-500">Arquivo do Extrato (.OFX, .CSV ou Excel)</label>
-              <div className="border-2 border-dashed border-blue-300 hover:border-[#026CD6] rounded-3xl p-6 text-center cursor-pointer transition-colors relative bg-blue-50/40">
+              <div className="border-2 border-dashed border-blue-300 dark:border-blue-700/60 hover:border-[#026CD6] dark:hover:border-blue-500 rounded-3xl p-6 text-center cursor-pointer transition-colors relative bg-blue-50/40 dark:bg-blue-950/20">
                 <input
                   type="file"
                   required
@@ -182,17 +182,17 @@ export const ImportModal: React.FC<ImportModalProps> = ({
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 />
                 <div className="space-y-2 pointer-events-none">
-                  <div className="inline-flex items-center justify-center h-12 w-12 rounded-2xl bg-blue-50 text-[#026CD6] border-2 border-blue-200">
+                  <div className="inline-flex items-center justify-center h-12 w-12 rounded-2xl bg-blue-50 dark:bg-blue-950/50 text-[#026CD6] dark:text-blue-400 border-2 border-blue-200 dark:border-blue-800/80">
                     <FileText className="h-6 w-6 stroke-[2.5]" />
                   </div>
                   {file ? (
                     <div>
-                      <p className="text-xs sm:text-sm font-black text-[#46A302]">{file.name}</p>
+                      <p className="text-xs sm:text-sm font-black text-[#46A302] dark:text-emerald-400">{file.name}</p>
                       <p className="text-[11px] font-bold text-slate-400">{(file.size / 1024).toFixed(1)} KB • Pronto para upload</p>
                     </div>
                   ) : (
                     <div>
-                      <p className="text-xs sm:text-sm font-black text-slate-700">Arraste ou clique para selecionar</p>
+                      <p className="text-xs sm:text-sm font-black text-slate-700 dark:text-slate-200">Arraste ou clique para selecionar</p>
                       <p className="text-xs font-bold text-slate-400">Formatos aceitos: extrato bancário .ofx ou planilhas .csv, .xlsx, .xls</p>
                     </div>
                   )}
@@ -201,7 +201,13 @@ export const ImportModal: React.FC<ImportModalProps> = ({
             </div>
 
             {/* Opção de Fatura de Cartão de Crédito */}
-            <div className={`p-4 rounded-2xl border-2 transition-all ${isCreditCard ? 'bg-blue-50/70 border-[#026CD6] shadow-sm' : 'bg-slate-50 border-slate-200 hover:border-slate-300'}`}>
+            <div
+              className={`p-4 rounded-2xl border-2 transition-all ${
+                isCreditCard
+                  ? 'bg-blue-50 dark:!bg-[#0f172a] border-[#026CD6] dark:!border-blue-500 shadow-sm'
+                  : 'bg-slate-50 dark:!bg-[#1e293b]/70 border-slate-200 dark:!border-slate-700 hover:border-slate-300 dark:hover:!border-slate-600'
+              }`}
+            >
               <label className="flex items-start gap-3 cursor-pointer select-none">
                 <input
                   type="checkbox"
@@ -209,20 +215,48 @@ export const ImportModal: React.FC<ImportModalProps> = ({
                   onChange={(e) => setIsCreditCard(e.target.checked)}
                   className="mt-1 h-4 w-4 rounded border-slate-300 text-[#026CD6] focus:ring-[#026CD6]"
                 />
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <CreditCard className={`h-4 w-4 ${isCreditCard ? 'text-[#026CD6]' : 'text-slate-500'}`} />
-                    <span className="text-xs sm:text-sm font-black text-slate-800">
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <CreditCard
+                      className={`h-4 w-4 shrink-0 ${
+                        isCreditCard
+                          ? 'text-[#026CD6] dark:!text-blue-400'
+                          : 'text-slate-500 dark:!text-slate-400'
+                      }`}
+                    />
+                    <span
+                      className={`text-xs sm:text-sm font-black ${
+                        isCreditCard
+                          ? 'text-slate-900 dark:!text-white'
+                          : 'text-slate-800 dark:!text-slate-200'
+                      }`}
+                    >
                       É uma fatura de cartão de crédito
                     </span>
                     {isCreditCard && (
-                      <span className="px-2 py-0.5 text-[10px] font-black uppercase rounded-full bg-blue-100 text-[#026CD6]">
+                      <span className="px-2 py-0.5 text-[10px] font-black uppercase rounded-full bg-blue-100 dark:!bg-blue-900/60 text-[#026CD6] dark:!text-blue-300 border border-blue-200 dark:!border-blue-700/60 font-black">
                         Compras como Despesa
                       </span>
                     )}
                   </div>
-                  <p className="text-[11px] sm:text-xs font-bold text-slate-500 leading-relaxed">
-                    Faturas de cartão costumam listar compras com valor positivo. Ao ativar esta opção, as compras entrarão corretamente como <strong>despesas (saídas)</strong> no seu fluxo, evitando saldo positivo indevido.
+                  <p
+                    className={`text-[11px] sm:text-xs leading-relaxed ${
+                      isCreditCard
+                        ? 'text-slate-700 dark:!text-slate-300 font-bold'
+                        : 'text-slate-500 dark:!text-slate-400 font-bold'
+                    }`}
+                  >
+                    Faturas de cartão costumam listar compras com valor positivo. Ao ativar esta opção, as compras entrarão corretamente como{' '}
+                    <strong
+                      className={
+                        isCreditCard
+                          ? 'text-slate-900 dark:!text-white font-black'
+                          : 'text-slate-700 dark:!text-slate-200 font-black'
+                      }
+                    >
+                      despesas (saídas)
+                    </strong>{' '}
+                    no seu fluxo, evitando saldo positivo indevido.
                   </p>
                 </div>
               </label>

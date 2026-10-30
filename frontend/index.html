@@ -132,8 +132,21 @@
       ]
     }
     </script>
+    <!-- Script Inline para evitar Flash de Tema Claro (FOUC) no Dark Mode -->
+    <script>
+      (function() {
+        try {
+          const isDark = localStorage.getItem('economia_real_dark_mode') === 'true';
+          if (isDark) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (_) {}
+      })();
+    </script>
   </head>
-  <body class="bg-[#F8FAFC] text-slate-800 min-h-screen font-sans antialiased selection:bg-[#026CD6] selection:text-white">
+  <body class="min-h-screen font-sans antialiased selection:bg-[#026CD6] selection:text-white transition-colors duration-200">
     <noscript>
       <div style="padding: 2rem; font-family: sans-serif; text-align: center; max-width: 600px; margin: 0 auto;">
         <h1>Economia Real — Controle Financeiro Inteligente com IA</h1>

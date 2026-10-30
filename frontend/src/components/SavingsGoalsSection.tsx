@@ -125,7 +125,7 @@ export const SavingsGoalsSection: React.FC<SavingsGoalsSectionProps> = ({
 
         {/* 3 Cards de Resumo Gamificados */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-          <div className="p-5 rounded-3xl bg-[#F4FBF4] border-2 border-emerald-200 shadow-[0_3px_0_0_#D1FAE5]">
+          <div className="p-5 rounded-3xl bg-[#F4FBF4] dark:bg-emerald-950/20 border-2 border-emerald-200 dark:border-emerald-800/40 shadow-[0_3px_0_0_#D1FAE5] dark:shadow-[0_3px_0_0_#064E3B]">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">
                 Total Poupado
@@ -183,12 +183,12 @@ export const SavingsGoalsSection: React.FC<SavingsGoalsSectionProps> = ({
         {loading ? (
           <div className="p-12 text-center text-slate-400 text-sm font-bold">Carregando metas...</div>
         ) : goals.length === 0 ? (
-          <div className="p-10 rounded-3xl border-2 border-dashed border-slate-200 text-center space-y-3">
-            <div className="w-16 h-16 rounded-3xl bg-[#D7FFB8] text-3xl flex items-center justify-center mx-auto shadow-sm">
+          <div className="p-10 rounded-3xl border-2 border-dashed border-slate-200 dark:!border-slate-800 dark:!bg-[#070C14] text-center space-y-3">
+            <div className="w-16 h-16 rounded-3xl bg-[#D7FFB8] dark:!bg-[#0F1E36] text-3xl flex items-center justify-center mx-auto shadow-sm border-2 border-transparent dark:!border-emerald-800/80">
               ✨
             </div>
-            <h3 className="text-base font-black text-slate-800">Nenhuma meta criada ainda</h3>
-            <p className="text-xs font-bold text-slate-400 max-w-sm mx-auto">
+            <h3 className="text-base font-black text-slate-800 dark:!text-white">Nenhuma meta criada ainda</h3>
+            <p className="text-xs font-bold text-slate-400 dark:!text-slate-200 max-w-sm mx-auto">
               Defina uma meta para reserva de emergência, uma viagem de férias ou um sonho que queira realizar!
             </p>
             <button
@@ -208,10 +208,10 @@ export const SavingsGoalsSection: React.FC<SavingsGoalsSectionProps> = ({
               return (
                 <div
                   key={goal.id}
-                  className={`rounded-3xl border-2 p-6 transition-all flex flex-col justify-between relative overflow-hidden shadow-[0_4px_0_0_#E2E8F0] ${
+                  className={`rounded-3xl border-2 p-6 transition-all flex flex-col justify-between relative overflow-hidden shadow-[0_4px_0_0_#E2E8F0] dark:shadow-[0_4px_0_0_#020617] ${
                     goal.isReached
-                      ? 'bg-gradient-to-br from-[#F4FBF4] to-[#E8F8E8] border-[#58CC02] shadow-[0_4px_0_0_#A7F3D0]'
-                      : 'bg-white border-slate-200/90 hover:border-emerald-300'
+                      ? 'bg-gradient-to-br from-[#F4FBF4] to-[#E8F8E8] dark:from-emerald-950/40 dark:to-slate-900 border-[#58CC02] dark:border-emerald-600 shadow-[0_4px_0_0_#A7F3D0] dark:shadow-[0_4px_0_0_#064E3B]'
+                      : 'bg-white dark:bg-slate-900 border-slate-200/90 dark:border-slate-800 hover:border-emerald-300'
                   }`}
                 >
                   {goal.isReached && (
@@ -255,16 +255,16 @@ export const SavingsGoalsSection: React.FC<SavingsGoalsSectionProps> = ({
                     </div>
 
                     {/* Valores Numéricos */}
-                    <div className="grid grid-cols-2 gap-2 p-3.5 rounded-2xl bg-slate-50 border-2 border-slate-100 text-xs mb-4">
+                    <div className="grid grid-cols-2 gap-2 p-3.5 rounded-2xl bg-slate-50 dark:!bg-[#0F172A] border-2 border-slate-100 dark:!border-slate-800 text-xs mb-4">
                       <div>
-                        <span className="text-[10px] uppercase font-black text-slate-400 block tracking-wider">Acumulado</span>
-                        <span className="font-black text-[#46A302] text-sm sm:text-base">
+                        <span className="text-[10px] uppercase font-black text-slate-400 dark:!text-slate-400 block tracking-wider">Acumulado</span>
+                        <span className="font-black text-[#46A302] dark:!text-emerald-400 text-sm sm:text-base">
                           {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(goal.currentAmount)}
                         </span>
                       </div>
                       <div className="text-right">
-                        <span className="text-[10px] uppercase font-black text-slate-400 block tracking-wider">Objetivo</span>
-                        <span className="font-black text-slate-900 text-sm sm:text-base">
+                        <span className="text-[10px] uppercase font-black text-slate-400 dark:!text-slate-400 block tracking-wider">Objetivo</span>
+                        <span className="font-black text-slate-900 dark:!text-white text-sm sm:text-base">
                           {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(goal.targetAmount)}
                         </span>
                       </div>

@@ -2,8 +2,6 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   Sparkles,
   RefreshCw,
-  LogOut,
-  LogIn,
   CheckCircle2,
   Layers,
   Plus,
@@ -12,9 +10,7 @@ import {
   ArrowLeftRight,
   DollarSign,
   Receipt,
-  UploadCloud,
   Mic,
-  Download,
   PieChart,
   CalendarDays,
   Target,
@@ -25,18 +21,11 @@ import {
   AlertCircle,
   FileSpreadsheet,
   FileText,
-  ChevronLeft,
-  ChevronRight,
   Calendar,
   Search,
   X,
-  Eye,
-  EyeOff,
-  Compass,
   Repeat,
   Activity,
-  Sun,
-  Moon
 } from 'lucide-react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AuthModal } from './components/AuthModal';
@@ -60,7 +49,13 @@ import { OnboardingTourModal } from './components/OnboardingTourModal';
 import { CurrencyInput, InlineCurrencyInput } from './components/CurrencyInput';
 import { TelemetryModal } from './components/TelemetryModal';
 import { LegalModal, LegalTab } from './components/LegalModal';
-import { KpiSummaryCards } from './components/dashboard/KpiSummaryCards';
+import { useTheme } from './context/ThemeContext';
+import {
+  KpiSummaryCards,
+  TopNavigation,
+  DashboardHeroBanner,
+  MonthSelector,
+} from './components/dashboard';
 import { exportTransactionsCsvApi } from './services/goalApi';
 import { warmUpBackend } from './services/authApi';
 import { cleanTransactionNotes } from './utils/recurringNotes';
@@ -242,23 +237,9 @@ const MainDashboard: React.FC = () => {
   const [selectedMonth, setSelectedMonth] = useState<string>(() => getCurrentMonthStr());
   const [txFilterMode, setTxFilterMode] = useState<'month' | 'all'>('month');
 
-  // Modo Escuro (Dark Mode)
-  const [darkMode, setDarkMode] = useState<boolean>(() => {
-    return localStorage.getItem('economia_real_dark_mode') === 'true';
-  });
-
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    localStorage.setItem('economia_real_dark_mode', String(darkMode));
-  }, [darkMode]);
-
-  const toggleDarkMode = () => {
-    setDarkMode((prev) => !prev);
-  };
+  // Modo Escuro (Dark Mode) centralizado via ThemeContext
+  const { isDarkMode } = useTheme();
+  const darkMode = isDarkMode;
 
   // Modo Privacidade (ocultar valores na tela)
   const [privacyMode, setPrivacyMode] = useState<boolean>(() => {
@@ -883,324 +864,52 @@ const MainDashboard: React.FC = () => {
     : `${selectedMonth}-01`;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 flex flex-col font-sans">
+    <div className={`min-h-screen flex flex-col font-sans transition-colors duration-200 ${darkMode ? 'bg-[#090E17] text-slate-100 dark' : 'bg-[#F8FAFC] text-slate-800'}`}>
 
-      {/* Top Header Economia Real com Glassmorphism Refinado */}
-      <header className="glass-panel sticky top-0 z-40 border-b-2 border-slate-200/90 shadow-sm transition-all">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-
-          {/* Logo e Nome da Plataforma */}
-          <div className="flex items-center gap-2.5 sm:gap-3.5">
-            <div className="relative group shrink-0">
-              <img
-                src="/logo-economia-real.png"
-                alt="Economia Real - Controle Financeiro Inteligente"
-                width={48}
-                height={48}
-                loading="eager"
-                fetchPriority="high"
-                className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl sm:rounded-2xl object-cover border-2 border-blue-200 shadow-md group-hover:scale-105 transition-transform"
-              />
-              <span className="absolute -bottom-1 -right-1 w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-emerald-500 border-2 border-white animate-pulse" title="Sistema online e conectado" />
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <span className="text-xl sm:text-2xl font-black tracking-tight text-slate-900">
-                  Economia<span className="text-[#026CD6]">Real</span>
-                </span>
-                <span className="hidden md:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-900 border border-blue-200 shadow-sm uppercase tracking-wider">
-                  <Sparkles className="w-3 h-3 text-[#026CD6]" />
-                  Inteligência Artificial 🎩
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 font-bold hidden sm:block">
-                Economia real, utilizando inteligência artificial para te fazer economizar de verdade
-              </p>
-            </div>
-          </div>
-
-          {/* Área Direita: Controles, Perfil e Autenticação */}
-          <div className="flex items-center gap-2.5">
-            {/* Botão do Guia / Tutorial do App */}
-            {isAuthenticated && (
-              <button
-                type="button"
-                onClick={() => setIsTourOpen(true)}
-                className="btn-duo btn-duo-white text-xs px-3 py-2 flex items-center gap-1.5 text-slate-700 hover:text-amber-600 transition-colors"
-                title="Abrir o tutorial e guia passo a passo do site"
-              >
-                <Compass className="h-4 w-4 stroke-[2.5] text-amber-500" />
-                <span className="hidden sm:inline">Guia</span>
-              </button>
-            )}
-
-            {/* Botão de Modo Privacidade (Ocultar/Mostrar Valores) */}
-            {isAuthenticated && (
-              <button
-                type="button"
-                onClick={togglePrivacyMode}
-                className={`btn-duo text-xs px-3 py-2 flex items-center gap-1.5 transition-all ${privacyMode
-                  ? 'btn-duo-yellow font-black ring-2 ring-amber-300'
-                  : 'btn-duo-white hover:text-[#026CD6]'
-                  }`}
-                title={privacyMode ? "Valores monetários ocultos. Clique para exibir." : "Ocultar valores monetários na tela (Modo Privacidade)"}
-              >
-                {privacyMode ? (
-                  <>
-                    <EyeOff className="h-4 w-4 stroke-[2.5]" />
-                    <span className="hidden sm:inline">Oculto</span>
-                  </>
-                ) : (
-                  <>
-                    <Eye className="h-4 w-4 stroke-[2.5] text-slate-500" />
-                    <span className="hidden sm:inline">Privacidade</span>
-                  </>
-                )}
-              </button>
-            )}
-
-            {/* Alternador de Modo Escuro / Claro */}
-            <button
-              type="button"
-              onClick={toggleDarkMode}
-              className="btn-duo btn-duo-white text-xs px-3 py-2 flex items-center gap-1.5 text-slate-700 hover:text-blue-600 transition-colors"
-              title={darkMode ? "Alternar para Modo Claro" : "Alternar para Modo Escuro"}
-            >
-              {darkMode ? (
-                <>
-                  <Sun className="h-4 w-4 stroke-[2.5] text-amber-500" />
-                  <span className="hidden sm:inline">Claro</span>
-                </>
-              ) : (
-                <>
-                  <Moon className="h-4 w-4 stroke-[2.5] text-indigo-500" />
-                  <span className="hidden sm:inline">Escuro</span>
-                </>
-              )}
-            </button>
-
-            {/* Autenticação / Perfil do Usuário */}
-            {isAuthenticated && user ? (
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-blue-50/90 border-2 border-blue-200 text-xs shadow-sm">
-                  <div className="h-7 w-7 rounded-xl bg-gradient-to-br from-[#026CD6] to-[#0153AB] border-b-2 border-[#0153AB] text-white font-black flex items-center justify-center text-xs shadow-sm">
-                    {user.fullName ? user.fullName.substring(0, 1).toUpperCase() : 'U'}
-                  </div>
-                  <div className="text-left hidden md:block">
-                    <p className="font-extrabold text-slate-800 leading-tight">{user.fullName}</p>
-                    <p className="text-[10px] text-blue-700 font-bold leading-tight truncate max-w-[140px]">{user.email}</p>
-                  </div>
-                </div>
-
-                <button
-                  onClick={logout}
-                  className="btn-duo btn-duo-white text-xs px-3 py-2 flex items-center gap-1.5 text-rose-600 hover:text-rose-700 border-rose-200 hover:bg-rose-50/50"
-                  title="Encerrar sessão"
-                >
-                  <LogOut className="h-4 w-4" />
-                  <span className="hidden sm:inline">Sair</span>
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => {
-                    setAuthModalMode('login');
-                    setAuthModalOpen(true);
-                  }}
-                  onMouseEnter={warmUpBackend}
-                  onTouchStart={warmUpBackend}
-                  className="btn-duo btn-duo-white text-xs px-4 py-2"
-                >
-                  <LogIn className="h-4 w-4 mr-1 text-slate-500" />
-                  Entrar
-                </button>
-                <button
-                  onClick={() => {
-                    setAuthModalMode('register');
-                    setAuthModalOpen(true);
-                  }}
-                  onMouseEnter={warmUpBackend}
-                  onTouchStart={warmUpBackend}
-                  className="btn-duo btn-duo-green text-xs px-4 py-2"
-                >
-                  Cadastrar Grátis
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
+      {/* Top Header Modularizado */}
+      <TopNavigation
+        user={user}
+        isAuthenticated={isAuthenticated}
+        privacyMode={privacyMode}
+        togglePrivacyMode={togglePrivacyMode}
+        onOpenTour={() => setIsTourOpen(true)}
+        onOpenAuthModal={(mode) => {
+          setAuthModalMode(mode);
+          setAuthModalOpen(true);
+        }}
+        onWarmUpBackend={warmUpBackend}
+        onLogout={logout}
+      />
 
       {/* Conteúdo Principal */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
         {isAuthenticated && user ? (
           <>
-            {/* Banner Destaque Economia Real (Azul Suave, Moderno e Confiável - Área Logada) */}
-            <div className="card-real-blue p-4 sm:p-6 lg:p-8 relative overflow-hidden">
-              <div className="max-w-2xl lg:max-w-3xl space-y-3 relative z-10">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/90 border-2 border-blue-200 text-[#026CD6] text-xs font-black shadow-sm uppercase tracking-wider">
-                  <Sparkles className="h-3.5 w-3.5 text-blue-500 fill-blue-400" />
-                  Painel de Controle Financeiro
-                </div>
-
-                <h1 className="text-xl sm:text-3xl lg:text-4xl font-black tracking-tight text-slate-900 leading-tight">
-                  Olá{firstName ? `, ${firstName}` : ''}! <span className="text-[#026CD6] underline decoration-blue-300 decoration-4">Pronto para organizar suas contas? Vamos começar!</span> 🎩✨
-                </h1>
-
-                <p className="text-slate-700 text-xs sm:text-base font-bold leading-relaxed">
-                  Monitore seu fluxo de caixa, planeje seus lançamentos e acompanhe suas metas com precisão e suporte de IA.
-                </p>
-
-                {/* Ações Rápidas em Destaque (Grid 2x2 no mobile, Flex no desktop) */}
-                <div className="pt-2 grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-3">
-                  <button
-                    id="tour-add-btn"
-                    onClick={() => setTransactionModalOpen(true)}
-                    className="btn-duo btn-duo-green text-xs sm:text-sm px-3 sm:px-4 py-2.5 flex items-center justify-center gap-1.5 sm:gap-2 w-full sm:w-auto"
-                  >
-                    <Plus className="h-4 w-4 stroke-[3] shrink-0" />
-                    <span className="truncate">Novo Lançamento</span>
-                  </button>
-
-                  <button
-                    id="tour-ai-btn"
-                    onClick={() => setAiModalOpen(true)}
-                    className="btn-duo btn-duo-purple text-xs sm:text-sm px-3 sm:px-4 py-2.5 flex items-center justify-center gap-1.5 sm:gap-2 w-full sm:w-auto"
-                  >
-                    <Mic className="h-4 w-4 shrink-0" />
-                    <span className="truncate">Falar com IA</span>
-                  </button>
-
-                  <button
-                    id="tour-import-btn"
-                    onClick={() => setImportModalOpen(true)}
-                    className="btn-duo btn-duo-white text-xs sm:text-sm px-3 sm:px-4 py-2.5 flex items-center justify-center gap-1.5 sm:gap-2 w-full sm:w-auto"
-                  >
-                    <UploadCloud className="h-4 w-4 text-[#0284C7] shrink-0" />
-                    <span className="truncate">Importar Extrato</span>
-                  </button>
-
-                  <button
-                    onClick={handleExportCsv}
-                    disabled={transactions.length === 0 || exportingCsv}
-                    className="btn-duo btn-duo-white text-xs sm:text-sm px-3 sm:px-4 py-2.5 flex items-center justify-center gap-1.5 sm:gap-2 w-full sm:w-auto disabled:opacity-50"
-                    title="Exportar para Excel em CSV formatado"
-                  >
-                    <Download className={`h-4 w-4 text-blue-600 shrink-0 ${exportingCsv ? 'animate-bounce' : ''}`} />
-                    <span className="truncate">{exportingCsv ? 'Gerando...' : 'Exportar Planilha'}</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Indicador Flutuante de IA e Projeção de Economia */}
-              <div className="hidden lg:flex absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none select-none items-center">
-                <div className="bg-white/95 backdrop-blur-md rounded-3xl border-2 border-blue-200/90 p-4 shadow-xl shadow-blue-900/10 space-y-2.5 w-64 rotate-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                      Radar de IA Ativo
-                    </span>
-                    <span className="text-[11px] font-black px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                      +18.4%
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-[11px] font-bold text-slate-400">Economia Projetada</span>
-                    <p className="text-2xl font-black text-slate-900 tracking-tight">R$ 1.420,00</p>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-[11px] font-bold text-blue-800 bg-blue-50 px-2.5 py-1.5 rounded-xl border border-blue-100">
-                    <Sparkles className="w-3.5 h-3.5 text-[#026CD6] shrink-0" />
-                    <span>Otimização contínua ativada</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* Banner Destaque Economia Real Modularizado */}
+            <DashboardHeroBanner
+              firstName={firstName}
+              onOpenTransactionModal={() => setTransactionModalOpen(true)}
+              onOpenAiModal={() => setAiModalOpen(true)}
+              onOpenImportModal={() => setImportModalOpen(true)}
+              onExportCsv={handleExportCsv}
+              hasTransactions={transactions.length > 0}
+              exportingCsv={exportingCsv}
+            />
 
             <div className="space-y-8">
 
-            {/* Seletor Global de Mês / Navegação Temporal no Estilo Duolingo */}
-            <div className="card-duo p-4 sm:p-5 flex flex-col md:flex-row items-center justify-between gap-4 bg-gradient-to-r from-white via-blue-50/40 to-white">
-
-              {/* Lado Esquerdo: Identificação do Mês Ativo */}
-              <div className="flex items-center gap-3.5 w-full md:w-auto">
-                <div className="h-12 w-12 rounded-2xl bg-[#DDF4FF] border-2 border-[#BAE6FD] text-[#026CD6] flex items-center justify-center shadow-sm shrink-0">
-                  <Calendar className="h-6 w-6 stroke-[2.5]" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-black uppercase text-slate-400 tracking-wider">
-                      Período de Referência
-                    </span>
-                    {isCurrentMonth ? (
-                      <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-[#E8F8E8] text-[#388302] border border-[#D7FFB8] flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#58CC02] animate-pulse" />
-                        Mês Atual
-                      </span>
-                    ) : selectedMonth < getCurrentMonthStr() ? (
-                      <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-                        Mês Anterior
-                      </span>
-                    ) : (
-                      <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200">
-                        Planejamento Futuro
-                      </span>
-                    )}
-                  </div>
-                  <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight capitalize">
-                    {formatMonthLabel(selectedMonth)}
-                  </h2>
-                </div>
-              </div>
-
-              {/* Lado Direito: Controles de Navegação (Mês Anterior, Seletor Rápido, Próximo Mês, Botão Mês Atual) */}
-              <div className="flex items-center justify-between sm:justify-end gap-1.5 sm:gap-2 w-full md:w-auto">
-                <button
-                  type="button"
-                  onClick={handlePrevMonth}
-                  className="btn-duo btn-duo-white text-xs px-2.5 sm:px-3 py-2 flex items-center gap-1 sm:gap-1.5 shrink-0"
-                  title="Voltar para o mês anterior"
-                >
-                  <ChevronLeft className="h-4 w-4 stroke-[3] text-slate-600" />
-                  <span className="hidden sm:inline">Mês Anterior</span>
-                </button>
-
-                {/* Input de Seleção Direta de Mês / Ano */}
-                <div className="relative flex-1 sm:flex-initial">
-                  <input
-                    type="month"
-                    value={selectedMonth}
-                    onChange={handleSelectMonthInput}
-                    aria-label="Escolher mês e ano de referência"
-                    className="btn-duo btn-duo-white text-xs font-black px-2.5 sm:px-3 py-1.5 cursor-pointer text-slate-700 hover:text-[#026CD6] border-2 border-slate-200 rounded-2xl focus:outline-none focus:border-[#026CD6] w-full text-center"
-                    title="Clique para escolher qualquer mês e ano diretamente"
-                  />
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleNextMonth}
-                  className="btn-duo btn-duo-white text-xs px-2.5 sm:px-3 py-2 flex items-center gap-1 sm:gap-1.5 shrink-0"
-                  title="Avançar para o próximo mês"
-                >
-                  <span className="hidden sm:inline">Próximo Mês</span>
-                  <ChevronRight className="h-4 w-4 stroke-[3] text-slate-600" />
-                </button>
-
-                {!isCurrentMonth && (
-                  <button
-                    type="button"
-                    onClick={handleCurrentMonth}
-                    className="btn-duo btn-duo-blue text-xs px-2.5 sm:px-3.5 py-2 flex items-center gap-1 sm:gap-1.5 animate-fadeIn shrink-0"
-                    title="Voltar para o mês atual"
-                  >
-                    <RefreshCw className="h-3.5 w-3.5 stroke-[2.5]" />
-                    <span className="hidden xs:inline sm:inline">Mês Atual</span>
-                  </button>
-                )}
-              </div>
-            </div>
+            {/* Seletor Global de Mês Modularizado */}
+            <MonthSelector
+              selectedMonth={selectedMonth}
+              isCurrentMonth={isCurrentMonth}
+              formatMonthLabel={formatMonthLabel}
+              getCurrentMonthStr={getCurrentMonthStr}
+              onPrevMonth={handlePrevMonth}
+              onNextMonth={handleNextMonth}
+              onCurrentMonth={handleCurrentMonth}
+              onSelectMonthInput={handleSelectMonthInput}
+            />
 
             {/* 4 Cards de Métricas Principais (Modularizado) */}
             <KpiSummaryCards
@@ -1290,8 +999,8 @@ const MainDashboard: React.FC = () => {
 
                     <div className="space-y-2.5">
                       {incomeTransactions.length === 0 ? (
-                        <div className="p-5 rounded-2xl border-2 border-dashed border-slate-200 text-center space-y-2">
-                          <p className="text-xs font-bold text-slate-400">Nenhuma entrada registrada este mês.</p>
+                        <div className="p-5 rounded-2xl border-2 border-dashed border-slate-200 dark:!border-slate-800 dark:!bg-[#090E17] text-center space-y-2">
+                          <p className="text-xs font-bold text-slate-400 dark:!text-slate-300">Nenhuma entrada registrada este mês.</p>
                           <button
                             onClick={handleOpenNewIncome}
                             className="btn-duo btn-emerald text-xs px-3 py-1.5"
@@ -1305,10 +1014,10 @@ const MainDashboard: React.FC = () => {
                           return (
                             <div
                               key={tx.id}
-                              className="p-3 rounded-2xl bg-slate-50 border-2 border-slate-100 hover:border-emerald-200 transition-all flex items-center justify-between group"
+                              className="p-3 rounded-2xl bg-slate-50 dark:!bg-[#0F172A] border-2 border-slate-100 dark:!border-slate-800 hover:border-emerald-200 dark:hover:border-emerald-700 transition-all flex items-center justify-between group"
                             >
                               <div className="space-y-0.5 min-w-0 pr-2">
-                                <p className="font-black text-xs text-slate-800 truncate">{tx.description}</p>
+                                <p className="font-black text-xs text-slate-800 dark:!text-white truncate">{tx.description}</p>
                                 <div className="flex items-center gap-1.5">
                                   <span className="text-[10px] font-bold text-slate-400 font-mono">
                                     {tx.accrualDate}
@@ -1517,8 +1226,8 @@ const MainDashboard: React.FC = () => {
                         </button>
                       </div>
                     ) : (
-                      <div className="p-4 rounded-2xl border-2 border-dashed border-slate-200 text-center space-y-2.5">
-                        <p className="text-xs font-bold text-slate-400">
+                      <div className="p-4 rounded-2xl border-2 border-dashed border-slate-200 dark:!border-slate-800 dark:!bg-[#090E17] text-center space-y-2.5">
+                        <p className="text-xs font-bold text-slate-400 dark:!text-slate-300">
                           Nenhum teto de gastos configurado para este mês.
                         </p>
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
@@ -1771,8 +1480,8 @@ const MainDashboard: React.FC = () => {
 
                   <div className="overflow-x-auto">
                     {displayedTransactions.length === 0 ? (
-                      <div className="p-8 rounded-2xl border-2 border-dashed border-slate-200 text-center space-y-3">
-                        <p className="text-xs font-bold text-slate-400">
+                      <div className="p-8 rounded-2xl border-2 border-dashed border-slate-200 dark:!border-slate-800 dark:!bg-[#090E17] text-center space-y-3">
+                        <p className="text-xs font-bold text-slate-400 dark:!text-slate-300">
                           {searchQuery
                             ? `Nenhum resultado encontrado para "${searchQuery}".`
                             : categoryFilter !== 'ALL'
@@ -2263,32 +1972,32 @@ const MainDashboard: React.FC = () => {
 
           {/* Pilares de Valor do Produto (Área Logada) */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
-            <div className="card-duo p-6 space-y-3">
-              <div className="h-12 w-12 rounded-2xl bg-emerald-50 border-2 border-emerald-200 flex items-center justify-center text-emerald-600 shadow-sm">
+            <div className="card-duo p-6 space-y-3 dark:!bg-[#0F172A] dark:!border-slate-800">
+              <div className="h-12 w-12 rounded-2xl bg-emerald-50 dark:!bg-[#1E293B] border-2 border-emerald-200 dark:!border-emerald-800 flex items-center justify-center text-emerald-600 dark:!text-emerald-400 shadow-sm">
                 <ShieldCheck className="h-6 w-6 stroke-[2.5]" />
               </div>
-              <h3 className="text-base font-black text-slate-900">Precisão ao Centavo</h3>
-              <p className="text-xs font-bold text-slate-500 leading-relaxed">
+              <h3 className="text-base font-black text-slate-900 dark:!text-white">Precisão ao Centavo</h3>
+              <p className="text-xs font-bold text-slate-500 dark:!text-slate-400 leading-relaxed">
                 Controle faturas de cartão, parcelas futuras e saldos bancários com exatidão matemática. Saiba exatamente onde cada real está, sem surpresas no fim do mês.
               </p>
             </div>
 
-            <div className="card-duo p-6 space-y-3">
-              <div className="h-12 w-12 rounded-2xl bg-[#DDF4FF] border-2 border-[#BAE6FD] flex items-center justify-center text-[#1CB0F6] shadow-sm">
+            <div className="card-duo p-6 space-y-3 dark:!bg-[#0F172A] dark:!border-slate-800">
+              <div className="h-12 w-12 rounded-2xl bg-[#DDF4FF] dark:!bg-[#1E293B] border-2 border-[#BAE6FD] dark:!border-sky-800 flex items-center justify-center text-[#1CB0F6] dark:!text-sky-400 shadow-sm">
                 <Layers className="h-6 w-6 stroke-[2.5]" />
               </div>
-              <h3 className="text-base font-black text-slate-900">Visão Real dos Seus Gastos</h3>
-              <p className="text-xs font-bold text-slate-500 leading-relaxed">
+              <h3 className="text-base font-black text-slate-900 dark:!text-white">Visão Real dos Seus Gastos</h3>
+              <p className="text-xs font-bold text-slate-500 dark:!text-slate-400 leading-relaxed">
                 Pagamentos de faturas e transferências não distorcem seu orçamento. Você enxerga seu consumo real de despesas sem duplicidades nem confusão contábil.
               </p>
             </div>
 
-            <div className="card-duo p-6 space-y-3">
-              <div className="h-12 w-12 rounded-2xl bg-[#F5EBFF] border-2 border-[#E9D5FF] flex items-center justify-center text-[#CE82FF] shadow-sm">
+            <div className="card-duo p-6 space-y-3 dark:!bg-[#0F172A] dark:!border-slate-800">
+              <div className="h-12 w-12 rounded-2xl bg-[#F5EBFF] dark:!bg-[#1E293B] border-2 border-[#E9D5FF] dark:!border-purple-800 flex items-center justify-center text-[#CE82FF] dark:!text-purple-400 shadow-sm">
                 <Sparkles className="h-6 w-6 stroke-[2.5]" />
               </div>
-              <h3 className="text-base font-black text-slate-900">Lançamento Ágil com I.A</h3>
-              <p className="text-xs font-bold text-slate-500 leading-relaxed">
+              <h3 className="text-base font-black text-slate-900 dark:!text-white">Lançamento Ágil com I.A</h3>
+              <p className="text-xs font-bold text-slate-500 dark:!text-slate-400 leading-relaxed">
                 Fale por voz ou digite livremente — como <em>"ifood 49,19"</em> ou <em>"uber 25"</em> — e a inteligência artificial categoriza, data e organiza tudo em segundos.
               </p>
             </div>
@@ -2637,15 +2346,15 @@ const MainDashboard: React.FC = () => {
             )}
 
             {singleTx && singleTx.notes && (singleTx.notes.includes('RECURRING_INCOME:') || singleTx.notes.includes('RECURRING_EXPENSE:') || singleTx.notes.includes('RECURRING_BILL:')) && (
-              <div className="p-3.5 bg-amber-50/90 border-2 border-amber-300 rounded-2xl space-y-2.5 text-left">
-                <div className="flex items-center gap-1.5 text-amber-900 text-xs font-black">
+              <div className="p-3.5 bg-amber-50/90 dark:!bg-[#1E293B] border-2 border-amber-300 dark:!border-amber-900/80 rounded-2xl space-y-2.5 text-left">
+                <div className="flex items-center gap-1.5 text-amber-900 dark:!text-amber-300 text-xs font-black">
                   <Repeat className="w-3.5 h-3.5 stroke-[2.5]" />
                   <span>
                     {singleTx.notes.includes('RECURRING_INCOME:') ? 'Renda Recorrente Detectada' : (singleTx.notes.includes('RECURRING_BILL:') ? 'Custo Fixo Recorrente Detectado' : 'Despesa Recorrente Detectada')}
                   </span>
                 </div>
-                <div className="space-y-1.5 text-xs font-bold text-slate-700">
-                  <label className="flex items-center gap-2 cursor-pointer p-2 rounded-xl bg-white/60 hover:bg-white border border-amber-200/70 transition-colors">
+                <div className="space-y-1.5 text-xs font-bold text-slate-700 dark:!text-slate-200">
+                  <label className="flex items-center gap-2 cursor-pointer p-2 rounded-xl bg-white/60 dark:!bg-[#0F172A] hover:bg-white dark:hover:!bg-[#1E293B] border border-amber-200/70 dark:!border-slate-700 transition-colors">
                     <input
                       type="radio"
                       name="deleteScope"
@@ -2655,7 +2364,7 @@ const MainDashboard: React.FC = () => {
                     />
                     <span>Excluir apenas o lançamento deste mês</span>
                   </label>
-                  <label className="flex items-center gap-2 cursor-pointer p-2 rounded-xl bg-white/60 hover:bg-white border border-amber-200/70 transition-colors">
+                  <label className="flex items-center gap-2 cursor-pointer p-2 rounded-xl bg-white/60 dark:!bg-[#0F172A] hover:bg-white dark:hover:!bg-[#1E293B] border border-amber-200/70 dark:!border-slate-700 transition-colors">
                     <input
                       type="radio"
                       name="deleteScope"
@@ -2663,7 +2372,7 @@ const MainDashboard: React.FC = () => {
                       onChange={() => setDeleteConfirmState((prev) => ({ ...prev, deleteFutureRecurring: true }))}
                       className="text-rose-600 focus:ring-rose-500 accent-rose-600"
                     />
-                    <span className="text-rose-700 font-extrabold">Excluir este e todos os meses futuros</span>
+                    <span className="text-rose-700 dark:!text-rose-400 font-extrabold">Excluir este e todos os meses futuros</span>
                   </label>
                 </div>
                 <p className="text-[10px] text-slate-500 font-medium">

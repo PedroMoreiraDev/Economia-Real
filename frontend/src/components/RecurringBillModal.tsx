@@ -359,21 +359,21 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
           {!billToEdit && (
             <div className={`p-3.5 rounded-2xl transition-all space-y-3 ${
               autoLaunch
-                ? 'bg-blue-50/80 border-2 border-blue-200/90'
-                : 'bg-slate-50 border-2 border-slate-200'
+                ? 'bg-blue-50/80 dark:!bg-[#0F172A] border-2 border-blue-200/90 dark:!border-blue-800'
+                : 'bg-slate-50 dark:!bg-[#0F172A] border-2 border-slate-200 dark:!border-slate-800'
             }`}>
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5">
                   <div className={`p-2 rounded-xl shrink-0 transition-colors ${
-                    autoLaunch ? 'bg-blue-100 text-[#026CD6]' : 'bg-slate-200 text-slate-500'
+                    autoLaunch ? 'bg-blue-100 dark:!bg-[#1E293B] text-[#026CD6] dark:!text-sky-300' : 'bg-slate-200 dark:!bg-slate-800 text-slate-500 dark:!text-slate-400'
                   }`}>
                     <Repeat className="h-4 w-4 stroke-[2.5]" />
                   </div>
                   <div>
-                    <span className="text-xs sm:text-sm font-black text-slate-800 block">
+                    <span className="text-xs sm:text-sm font-black text-slate-800 dark:!text-white block">
                       Custo Fixo Recorrente
                     </span>
-                    <span className="text-[11px] font-bold text-slate-500 block">
+                    <span className="text-[11px] font-bold text-slate-500 dark:!text-slate-400 block">
                       Repetir automaticamente nos meses seguintes (assinatura, mensalidade, conta fixa)
                     </span>
                   </div>
@@ -382,7 +382,7 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
                   type="button"
                   onClick={() => setAutoLaunch(!autoLaunch)}
                   className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                    autoLaunch ? 'bg-[#026CD6]' : 'bg-slate-300'
+                    autoLaunch ? 'bg-[#026CD6]' : 'bg-slate-300 dark:bg-slate-700'
                   }`}
                   role="switch"
                   aria-checked={autoLaunch}
@@ -396,16 +396,16 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
               </div>
 
               {autoLaunch && (
-                <div className="space-y-3 pt-3 border-t border-blue-200/70 animate-fade-in">
+                <div className="space-y-3 pt-3 border-t border-blue-200/70 dark:!border-slate-800 animate-fade-in">
                   <div>
-                    <label className="block text-xs font-black uppercase tracking-wider text-slate-500 mb-1">
+                    <label className="block text-xs font-black uppercase tracking-wider text-slate-500 dark:!text-slate-400 mb-1">
                       Mês de Início da Repetição
                     </label>
                     <input
                       type="month"
                       value={launchMonth}
                       onChange={(e) => setLaunchMonth(e.target.value)}
-                      className="w-full px-3.5 py-2 rounded-xl bg-white border-2 border-slate-200 text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:border-[#026CD6]"
+                      className="w-full px-3.5 py-2 rounded-xl bg-white dark:!bg-slate-900 border-2 border-slate-200 dark:!border-slate-700 text-xs sm:text-sm font-bold text-slate-800 dark:!text-white focus:outline-none focus:border-[#026CD6]"
                     />
                   </div>
 

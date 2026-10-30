@@ -76,45 +76,45 @@ export const RecurringMonthsPicker: React.FC<RecurringMonthsPickerProps> = ({
 
   const { startFormatted, endFormatted } = calculateProjectionSummary();
 
-  // Estilização por tema
+  // Estilização por tema com alto contraste e harmonia no Modo Escuro (sem tons pastéis ou fundos leitosos)
   const themeStyles = {
     income: {
       activeChip: 'bg-emerald-600 text-white border-emerald-600 shadow-[0_2px_0_0_#047857]',
-      stepperBtn: 'hover:bg-emerald-100 text-emerald-800 border-emerald-300',
+      stepperBtn: 'hover:bg-emerald-100 dark:hover:!bg-[#1E293B] text-emerald-800 dark:!text-emerald-400 border-emerald-300 dark:!border-emerald-800',
       inputFocus: 'focus:border-emerald-500 focus:ring-emerald-200',
-      badge: 'text-emerald-800 bg-emerald-100/80 border-emerald-300',
-      accentText: 'text-emerald-900',
+      badge: 'text-emerald-800 dark:!text-emerald-300 bg-emerald-100/80 dark:!bg-[#0F172A] border-emerald-300 dark:!border-emerald-800',
+      accentText: 'text-emerald-900 dark:!text-emerald-200',
     },
     expense: {
       activeChip: 'bg-rose-600 text-white border-rose-600 shadow-[0_2px_0_0_#BE123C]',
-      stepperBtn: 'hover:bg-rose-100 text-rose-800 border-rose-300',
+      stepperBtn: 'hover:bg-rose-100 dark:hover:!bg-[#1E293B] text-rose-800 dark:!text-rose-400 border-rose-300 dark:!border-rose-800',
       inputFocus: 'focus:border-rose-500 focus:ring-rose-200',
-      badge: 'text-rose-800 bg-rose-100/80 border-rose-300',
-      accentText: 'text-rose-900',
+      badge: 'text-rose-800 dark:!text-rose-300 bg-rose-100/80 dark:!bg-[#0F172A] border-rose-300 dark:!border-rose-800',
+      accentText: 'text-rose-900 dark:!text-rose-200',
     },
     bill: {
       activeChip: 'bg-[#026CD6] text-white border-[#026CD6] shadow-[0_2px_0_0_#0153AB]',
-      stepperBtn: 'hover:bg-blue-100 text-[#026CD6] border-blue-300',
+      stepperBtn: 'hover:bg-blue-100 dark:hover:!bg-[#1E293B] text-[#026CD6] dark:!text-sky-300 border-blue-300 dark:!border-blue-800',
       inputFocus: 'focus:border-[#026CD6] focus:ring-blue-200',
-      badge: 'text-blue-800 bg-blue-100/80 border-blue-300',
-      accentText: 'text-blue-900',
+      badge: 'text-blue-800 dark:!text-sky-300 bg-blue-100/80 dark:!bg-[#0F172A] border-blue-300 dark:!border-blue-800',
+      accentText: 'text-blue-900 dark:!text-sky-200',
     },
   }[theme];
 
   return (
     <div className="space-y-3 pt-2">
       <div className="flex items-center justify-between">
-        <label className="block text-xs font-black uppercase tracking-wider text-slate-600">
+        <label className="block text-xs font-black uppercase tracking-wider text-slate-600 dark:!text-slate-300">
           {label}
         </label>
-        <span className="text-[11px] font-bold text-slate-500">
+        <span className="text-[11px] font-bold text-slate-500 dark:!text-slate-400">
           (Mín. {minMonths} a Máx. {maxMonths} meses)
         </span>
       </div>
 
       {/* Controle Central: Stepper Interativo com Input Livre */}
       <div className="flex items-center gap-3">
-        <div className="flex items-center bg-white border-2 border-slate-200 rounded-2xl shadow-inner p-1">
+        <div className="flex items-center bg-white dark:!bg-[#0F172A] border-2 border-slate-200 dark:!border-slate-800 rounded-2xl shadow-inner p-1">
           <button
             type="button"
             onClick={() => handleClamp(months - 1)}
@@ -132,9 +132,9 @@ export const RecurringMonthsPicker: React.FC<RecurringMonthsPickerProps> = ({
               max={maxMonths}
               value={months}
               onChange={handleInputChange}
-              className={`w-14 text-center font-black text-base text-slate-800 bg-transparent focus:outline-none transition-all ${themeStyles.inputFocus}`}
+              className={`w-14 text-center font-black text-base text-slate-800 dark:!text-white bg-transparent focus:outline-none transition-all ${themeStyles.inputFocus}`}
             />
-            <span className="text-xs font-bold text-slate-400 select-none pr-1">
+            <span className="text-xs font-bold text-slate-400 dark:!text-slate-400 select-none pr-1">
               {months === 1 ? 'mês' : 'meses'}
             </span>
           </div>
@@ -162,7 +162,7 @@ export const RecurringMonthsPicker: React.FC<RecurringMonthsPickerProps> = ({
                 className={`py-1.5 px-2.5 rounded-xl border text-xs font-bold transition-all ${
                   isSelected
                     ? themeStyles.activeChip
-                    : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                    : 'bg-white dark:!bg-[#1E293B] border-slate-200 dark:!border-slate-700 text-slate-600 dark:!text-slate-200 hover:bg-slate-50 dark:hover:!bg-[#334155]'
                 }`}
               >
                 {chip.label}

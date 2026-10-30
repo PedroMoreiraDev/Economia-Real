@@ -6,7 +6,8 @@ import {
   ArrowUpRight, 
   ArrowDownRight, 
   PiggyBank, 
-  Wallet
+  Wallet,
+  Sparkles
 } from 'lucide-react';
 import { MonthlyEvolutionItem } from '../types/analytics';
 
@@ -142,23 +143,23 @@ export const FinancialEvolutionChart: React.FC<FinancialEvolutionChartProps> = (
   const activeMonthData = activeMonthIdx !== null ? data[activeMonthIdx] : null;
 
   return (
-    <div className="card-duo p-6 sm:p-8 space-y-6 overflow-hidden">
+    <div className="card-duo p-6 sm:p-8 space-y-6 overflow-hidden dark:!bg-[#0F172A] dark:!border-slate-800">
       
       {/* 1. CABEÇALHO DO GRÁFICO & CONTROLES */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b-2 border-slate-100 pb-5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b-2 border-slate-100 dark:!border-slate-800 pb-5">
         <div className="space-y-1">
           <div className="flex items-center gap-2.5">
             <div className="p-2.5 rounded-2xl bg-gradient-to-br from-[#10B981] to-[#059669] text-white shadow-[0_3px_0_0_#047857]">
               <TrendingUp className="w-5 h-5 stroke-[2.5]" />
             </div>
             <div>
-              <h3 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+              <h3 className="text-xl font-black text-slate-900 dark:!text-white tracking-tight flex items-center gap-2">
                 Evolução Financeira
-                <span className="text-xs font-black px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                <span className="text-xs font-black px-2.5 py-0.5 rounded-full bg-slate-100 dark:!bg-slate-800 text-slate-600 dark:!text-slate-300 border border-slate-200 dark:!border-slate-700">
                   Últimos 6 Meses
                 </span>
               </h3>
-              <p className="text-xs font-bold text-slate-500">
+              <p className="text-xs font-bold text-slate-500 dark:!text-slate-400">
                 Histórico comparativo de receitas, despesas e taxa de economia
               </p>
             </div>
@@ -167,13 +168,13 @@ export const FinancialEvolutionChart: React.FC<FinancialEvolutionChartProps> = (
 
         {/* Alternador de Modo de Visualização (Barras vs Linhas) */}
         <div className="flex items-center gap-3">
-          <div className="bg-slate-100 p-1 rounded-2xl border-2 border-slate-200 flex items-center gap-1 shadow-inner">
+          <div className="bg-slate-100 dark:!bg-slate-800/80 p-1 rounded-2xl border-2 border-slate-200 dark:!border-slate-700 flex items-center gap-1 shadow-inner">
             <button
               onClick={() => setViewMode('bars')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all ${
                 viewMode === 'bars'
-                  ? 'bg-white text-slate-900 shadow-sm border border-slate-200/60'
-                  : 'text-slate-500 hover:text-slate-800'
+                  ? 'bg-white dark:!bg-slate-900 text-slate-900 dark:!text-white shadow-sm border border-slate-200/60 dark:!border-slate-700'
+                  : 'text-slate-500 dark:!text-slate-400 hover:text-slate-800 dark:hover:!text-white'
               }`}
               title="Visualização em Barras com Curva de Saldo"
             >
@@ -184,8 +185,8 @@ export const FinancialEvolutionChart: React.FC<FinancialEvolutionChartProps> = (
               onClick={() => setViewMode('area')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all ${
                 viewMode === 'area'
-                  ? 'bg-white text-[#026CD6] shadow-sm border border-slate-200/60'
-                  : 'text-slate-500 hover:text-slate-800'
+                  ? 'bg-white dark:!bg-slate-900 text-[#026CD6] dark:!text-sky-400 shadow-sm border border-slate-200/60 dark:!border-slate-700'
+                  : 'text-slate-500 dark:!text-slate-400 hover:text-slate-800 dark:hover:!text-white'
               }`}
               title="Visualização em Curvas de Tendência Fluida"
             >
@@ -203,20 +204,20 @@ export const FinancialEvolutionChart: React.FC<FinancialEvolutionChartProps> = (
           onClick={() => setHighlightMetric(prev => prev === 'income' ? 'all' : 'income')}
           className={`cursor-pointer p-3.5 rounded-2xl border-2 transition-all ${
             highlightMetric === 'income'
-              ? 'bg-emerald-50 border-emerald-300 ring-2 ring-emerald-200'
-              : 'bg-slate-50/70 border-slate-200/80 hover:bg-emerald-50/40 hover:border-emerald-200'
+              ? 'bg-emerald-50 dark:!bg-[#0F172A] border-emerald-300 dark:!border-emerald-600 ring-2 ring-emerald-200 dark:ring-emerald-900/60'
+              : 'bg-slate-50/70 dark:!bg-[#1E293B] border-slate-200/80 dark:!border-slate-800 hover:bg-emerald-50/40 dark:hover:!bg-[#253347] hover:border-emerald-200 dark:hover:!border-emerald-800'
           }`}
         >
-          <div className="flex items-center justify-between text-xs font-black text-slate-500 mb-1">
-            <span className="flex items-center gap-1.5 text-emerald-700">
+          <div className="flex items-center justify-between text-xs font-black text-slate-500 dark:!text-slate-400 mb-1">
+            <span className="flex items-center gap-1.5 text-emerald-700 dark:!text-emerald-400">
               <span className="w-2.5 h-2.5 rounded-full bg-[#10B981] shadow-sm" />
               Receitas no Período
             </span>
-            <ArrowUpRight className="w-3.5 h-3.5 text-emerald-600" />
+            <ArrowUpRight className="w-3.5 h-3.5 text-emerald-600 dark:!text-emerald-400" />
           </div>
-          <p className="text-lg font-black text-slate-900">{formatBRL(totalIncome)}</p>
-          <p className="text-[11px] font-bold text-slate-500 mt-0.5">
-            Média de <span className="font-black text-emerald-700">{formatBRL(avgIncome)}/mês</span>
+          <p className="text-lg font-black text-slate-900 dark:!text-white">{formatBRL(totalIncome)}</p>
+          <p className="text-[11px] font-bold text-slate-500 dark:!text-slate-400 mt-0.5">
+            Média de <span className="font-black text-emerald-700 dark:!text-emerald-400">{formatBRL(avgIncome)}/mês</span>
           </p>
         </div>
 
@@ -225,20 +226,20 @@ export const FinancialEvolutionChart: React.FC<FinancialEvolutionChartProps> = (
           onClick={() => setHighlightMetric(prev => prev === 'expense' ? 'all' : 'expense')}
           className={`cursor-pointer p-3.5 rounded-2xl border-2 transition-all ${
             highlightMetric === 'expense'
-              ? 'bg-rose-50 border-rose-300 ring-2 ring-rose-200'
-              : 'bg-slate-50/70 border-slate-200/80 hover:bg-rose-50/40 hover:border-rose-200'
+              ? 'bg-rose-50 dark:!bg-[#0F172A] border-rose-300 dark:!border-rose-600 ring-2 ring-rose-200 dark:ring-rose-900/60'
+              : 'bg-slate-50/70 dark:!bg-[#1E293B] border-slate-200/80 dark:!border-slate-800 hover:bg-rose-50/40 dark:hover:!bg-[#253347] hover:border-rose-200 dark:hover:!border-rose-800'
           }`}
         >
-          <div className="flex items-center justify-between text-xs font-black text-slate-500 mb-1">
-            <span className="flex items-center gap-1.5 text-rose-700">
+          <div className="flex items-center justify-between text-xs font-black text-slate-500 dark:!text-slate-400 mb-1">
+            <span className="flex items-center gap-1.5 text-rose-700 dark:!text-rose-400">
               <span className="w-2.5 h-2.5 rounded-full bg-[#F43F5E] shadow-sm" />
               Despesas no Período
             </span>
-            <ArrowDownRight className="w-3.5 h-3.5 text-rose-600" />
+            <ArrowDownRight className="w-3.5 h-3.5 text-rose-600 dark:!text-rose-400" />
           </div>
-          <p className="text-lg font-black text-slate-900">{formatBRL(totalExpense)}</p>
-          <p className="text-[11px] font-bold text-slate-500 mt-0.5">
-            Média de <span className="font-black text-rose-700">{formatBRL(avgExpense)}/mês</span>
+          <p className="text-lg font-black text-slate-900 dark:!text-white">{formatBRL(totalExpense)}</p>
+          <p className="text-[11px] font-bold text-slate-500 dark:!text-slate-400 mt-0.5">
+            Média de <span className="font-black text-rose-700 dark:!text-rose-400">{formatBRL(avgExpense)}/mês</span>
           </p>
         </div>
 
@@ -247,25 +248,25 @@ export const FinancialEvolutionChart: React.FC<FinancialEvolutionChartProps> = (
           onClick={() => setHighlightMetric(prev => prev === 'savings' ? 'all' : 'savings')}
           className={`cursor-pointer p-3.5 rounded-2xl border-2 transition-all ${
             highlightMetric === 'savings'
-              ? 'bg-blue-50 border-blue-300 ring-2 ring-blue-200'
-              : 'bg-slate-50/70 border-slate-200/80 hover:bg-blue-50/40 hover:border-blue-200'
+              ? 'bg-blue-50 dark:!bg-[#0F172A] border-blue-300 dark:!border-blue-600 ring-2 ring-blue-200 dark:ring-blue-900/60'
+              : 'bg-slate-50/70 dark:!bg-[#1E293B] border-slate-200/80 dark:!border-slate-800 hover:bg-blue-50/40 dark:hover:!bg-[#253347] hover:border-blue-200 dark:hover:!border-blue-800'
           }`}
         >
-          <div className="flex items-center justify-between text-xs font-black text-slate-500 mb-1">
-            <span className="flex items-center gap-1.5 text-blue-700">
+          <div className="flex items-center justify-between text-xs font-black text-slate-500 dark:!text-slate-400 mb-1">
+            <span className="flex items-center gap-1.5 text-blue-700 dark:!text-sky-400">
               <span className="w-2.5 h-2.5 rounded-full bg-[#026CD6] shadow-sm" />
               Saldo Líquido Acumulado
             </span>
-            <PiggyBank className="w-3.5 h-3.5 text-blue-600" />
+            <PiggyBank className="w-3.5 h-3.5 text-blue-600 dark:!text-sky-400" />
           </div>
-          <p className={`text-lg font-black ${netSavings >= 0 ? 'text-[#026CD6]' : 'text-rose-600'}`}>
+          <p className={`text-lg font-black ${netSavings >= 0 ? 'text-[#026CD6] dark:!text-sky-400' : 'text-rose-600 dark:!text-rose-400'}`}>
             {formatBRL(netSavings)}
           </p>
-          <p className="text-[11px] font-bold text-slate-500 mt-0.5">
+          <p className="text-[11px] font-bold text-slate-500 dark:!text-slate-400 mt-0.5">
             {savingsRate >= 0 ? (
-              <span className="text-emerald-700 font-black">+{savingsRate}% da renda poupada</span>
+              <span className="text-emerald-700 dark:!text-emerald-400 font-black">+{savingsRate}% da renda poupada</span>
             ) : (
-              <span className="text-rose-600 font-black">{savingsRate}% de déficit</span>
+              <span className="text-rose-600 dark:!text-rose-400 font-black">{savingsRate}% de déficit</span>
             )}
           </p>
         </div>
@@ -273,16 +274,24 @@ export const FinancialEvolutionChart: React.FC<FinancialEvolutionChartProps> = (
 
       {/* 3. ÁREA PRINCIPAL DO GRÁFICO SVG */}
       {!hasData ? (
-        <div className="h-64 flex flex-col items-center justify-center text-center p-6 border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50/50">
-          <Wallet className="w-10 h-10 text-slate-300 mb-2 stroke-[1.5]" />
-          <h4 className="text-sm font-black text-slate-700">Nenhum dado consolidado no período</h4>
-          <p className="text-xs font-bold text-slate-400 max-w-sm mt-1">
+        <div className="chart-empty-state h-72 flex flex-col items-center justify-center text-center p-8 border-2 border-dashed rounded-3xl transition-all">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500/20 to-emerald-500/20 dark:from-blue-600/30 dark:to-emerald-600/25 border-2 border-blue-400/40 dark:border-blue-500/50 flex items-center justify-center text-[#026CD6] dark:text-sky-400 shadow-md mb-3.5">
+            <Wallet className="w-7 h-7 stroke-[2.2]" />
+          </div>
+          <h4 className="text-base sm:text-lg font-black tracking-tight text-slate-800 dark:!text-white">
+            Nenhum dado consolidado no período
+          </h4>
+          <p className="text-xs sm:text-sm font-bold max-w-md mt-2 leading-relaxed text-slate-600 dark:!text-slate-100">
             À medida que você adicionar receitas e despesas ou importar seus extratos, o comparativo mês a mês aparecerá aqui.
           </p>
+          <div className="mt-4 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 dark:bg-[#0F1E36] border border-blue-200 dark:border-blue-800/80 text-xs font-black text-blue-700 dark:text-sky-300 shadow-xs">
+            <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-sky-400 shrink-0" />
+            <span>Adicione lançamentos ou extratos para gerar as barras</span>
+          </div>
         </div>
       ) : (
         <div className="space-y-3">
-          <div className="relative w-full bg-slate-50/40 border-2 border-slate-100 rounded-3xl p-3 sm:p-5">
+          <div className="relative w-full bg-slate-50/40 dark:!bg-[#090E17] border-2 border-slate-100 dark:!border-slate-800 rounded-3xl p-3 sm:p-5">
             
             {/* SVG Responsivo */}
             <svg
@@ -597,26 +606,28 @@ export const FinancialEvolutionChart: React.FC<FinancialEvolutionChartProps> = (
               {/* Indicadores do Mês */}
               <div className="flex flex-wrap items-center gap-4 text-xs font-black">
                 {/* Entradas */}
-                <div className="flex items-center gap-1.5 bg-white/90 border border-emerald-200 px-3 py-1.5 rounded-xl shadow-xs">
+                <div className="flex items-center gap-1.5 bg-white/90 dark:!bg-[#0F172A] border border-emerald-200 dark:!border-emerald-800/80 px-3 py-1.5 rounded-xl shadow-xs">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#10B981]" />
-                  <span className="text-slate-500 font-bold">Entradas:</span>
-                  <span className="text-emerald-700 font-black">+{formatBRL(activeMonthData.income)}</span>
+                  <span className="text-slate-500 dark:!text-slate-300 font-bold">Entradas:</span>
+                  <span className="text-emerald-700 dark:!text-emerald-400 font-black">+{formatBRL(activeMonthData.income)}</span>
                 </div>
 
                 {/* Saídas */}
-                <div className="flex items-center gap-1.5 bg-white/90 border border-rose-200 px-3 py-1.5 rounded-xl shadow-xs">
+                <div className="flex items-center gap-1.5 bg-white/90 dark:!bg-[#0F172A] border border-rose-200 dark:!border-rose-800/80 px-3 py-1.5 rounded-xl shadow-xs">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#F43F5E]" />
-                  <span className="text-slate-500 font-bold">Saídas:</span>
-                  <span className="text-rose-700 font-black">-{formatBRL(activeMonthData.expense)}</span>
+                  <span className="text-slate-500 dark:!text-slate-300 font-bold">Saídas:</span>
+                  <span className="text-rose-700 dark:!text-rose-400 font-black">-{formatBRL(activeMonthData.expense)}</span>
                 </div>
 
                 {/* Saldo Líquido */}
-                <div className={`flex items-center gap-1.5 bg-white/90 border px-3 py-1.5 rounded-xl shadow-xs ${
-                  activeMonthData.netSavings >= 0 ? 'border-blue-200' : 'border-amber-300'
+                <div className={`flex items-center gap-1.5 bg-white/90 dark:!bg-[#0F172A] border px-3 py-1.5 rounded-xl shadow-xs ${
+                  activeMonthData.netSavings >= 0
+                    ? 'border-blue-200 dark:!border-blue-800/80'
+                    : 'border-amber-300 dark:!border-amber-800/80'
                 }`}>
                   <span className="w-2.5 h-2.5 rounded-full bg-[#026CD6]" />
-                  <span className="text-slate-500 font-bold">Saldo:</span>
-                  <span className={`font-black ${activeMonthData.netSavings >= 0 ? 'text-[#026CD6]' : 'text-rose-600'}`}>
+                  <span className="text-slate-500 dark:!text-slate-300 font-bold">Saldo:</span>
+                  <span className={`font-black ${activeMonthData.netSavings >= 0 ? 'text-[#026CD6] dark:!text-sky-400' : 'text-rose-600 dark:!text-rose-400'}`}>
                     {formatBRL(activeMonthData.netSavings)}
                   </span>
                 </div>

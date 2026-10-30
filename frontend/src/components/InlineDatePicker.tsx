@@ -247,21 +247,21 @@ export const InlineDatePicker: React.FC<InlineDatePickerProps> = ({
               width: '260px',
               zIndex: 9999,
             }}
-            className="card-duo bg-white/98 backdrop-blur-md border-2 border-slate-200/90 shadow-2xl p-3 rounded-2xl animate-scaleUp text-slate-800 select-none"
+            className="card-duo bg-white/98 dark:!bg-[#0F172A] backdrop-blur-md border-2 border-slate-200/90 dark:!border-slate-800 shadow-2xl p-3 rounded-2xl animate-scaleUp text-slate-800 dark:!text-white select-none"
           >
             {/* Cabeçalho do Mês e Ano */}
-            <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
+            <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100 dark:!border-slate-800">
               <button
                 type="button"
                 onClick={handlePrevMonth}
-                className="p-1 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 active:scale-95 transition-all cursor-pointer"
+                className="p-1 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-95 transition-all cursor-pointer"
                 title="Mês anterior"
               >
                 <ChevronLeft className="w-4 h-4 stroke-[2.5]" />
               </button>
 
-              <span className="text-xs font-black text-slate-800 tracking-wide capitalize">
-                {MONTH_NAMES[viewMonth]} <span className="text-slate-500 font-bold">{viewYear}</span>
+              <span className="text-xs font-black text-slate-800 dark:!text-white tracking-wide capitalize">
+                {MONTH_NAMES[viewMonth]} <span className="text-slate-500 dark:text-slate-400 font-bold">{viewYear}</span>
               </span>
 
               <button

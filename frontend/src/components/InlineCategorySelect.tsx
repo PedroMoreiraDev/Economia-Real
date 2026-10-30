@@ -174,7 +174,7 @@ export const InlineCategorySelect: React.FC<InlineCategorySelectProps> = ({
               width: '240px',
               zIndex: 9999,
             }}
-            className="card-duo bg-white/98 backdrop-blur-md border-2 border-slate-200/90 shadow-2xl p-2 rounded-2xl animate-scaleUp text-slate-800"
+            className="card-duo bg-white/98 dark:!bg-[#0F172A] backdrop-blur-md border-2 border-slate-200/90 dark:!border-slate-800 shadow-2xl p-2 rounded-2xl animate-scaleUp text-slate-800 dark:!text-white"
           >
             {/* Campo de Busca Rápida de Categorias */}
             <div className="relative mb-2">
@@ -185,7 +185,7 @@ export const InlineCategorySelect: React.FC<InlineCategorySelectProps> = ({
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Buscar categoria..."
                 autoFocus
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-8 pr-2.5 py-1.5 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#026CD6] focus:bg-white transition-all"
+                className="w-full bg-slate-50 dark:!bg-[#1E293B] border border-slate-200 dark:!border-slate-700 rounded-xl pl-8 pr-2.5 py-1.5 text-xs font-semibold text-slate-800 dark:!text-white placeholder-slate-400 focus:outline-none focus:border-[#026CD6] focus:bg-white dark:focus:!bg-[#1E293B] transition-all"
               />
             </div>
 

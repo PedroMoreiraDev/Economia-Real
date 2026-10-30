@@ -44,8 +44,8 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({
     <div className="space-y-6">
       
       {/* 1. SEÇÃO DE BURN RATE & RITMO DE CONSUMO (Card Verde Suave Estilo Duolingo) */}
-      <div className="card-duo-green p-6 sm:p-8 space-y-6 relative overflow-hidden">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b-2 border-emerald-200 pb-5">
+      <div className="card-duo-green p-6 sm:p-8 space-y-6 relative overflow-hidden dark:!bg-[#0F172A] dark:!border-slate-800">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b-2 border-emerald-200 dark:!border-slate-800 pb-5">
           <div className="flex items-center gap-3">
             <div className={`p-3.5 rounded-2xl border-b-4 shadow-md ${
               burnRate.burnStatus === 'CRITICAL'
@@ -58,13 +58,13 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-xl font-black text-slate-900">Ritmo de Gastos (Burn Rate)</h3>
+                <h3 className="text-xl font-black text-slate-900 dark:!text-white">Ritmo de Gastos (Burn Rate)</h3>
                 <span className={`text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider ${
                   burnRate.burnStatus === 'CRITICAL'
-                    ? 'bg-rose-100 text-rose-800 border border-rose-300'
+                    ? 'bg-rose-100 dark:!bg-rose-950/80 text-rose-800 dark:!text-rose-300 border border-rose-300 dark:!border-rose-800'
                     : burnRate.burnStatus === 'WARNING'
-                    ? 'bg-amber-100 text-amber-800 border border-amber-300'
-                    : 'bg-white text-[#388302] border-2 border-[#58CC02]'
+                    ? 'bg-amber-100 dark:!bg-amber-950/80 text-amber-800 dark:!text-amber-300 border border-amber-300 dark:!border-amber-800'
+                    : 'bg-white dark:!bg-slate-900 text-[#388302] dark:!text-emerald-400 border-2 border-[#58CC02] dark:!border-emerald-600'
                 }`}>
                   {burnRate.burnStatus === 'CRITICAL'
                     ? '⚠️ Consumo Acelerado'
@@ -73,7 +73,7 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({
                     : '✅ Ritmo Saudável'}
                 </span>
               </div>
-              <p className="text-xs font-bold text-slate-600 mt-0.5">
+              <p className="text-xs font-bold text-slate-600 dark:!text-slate-400 mt-0.5">
                 Projeção estatística baseada no seu gasto diário até o fim do mês
               </p>
             </div>
@@ -102,8 +102,8 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({
 
         {/* Indicadores do Burn Rate */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-4 rounded-2xl bg-white border-2 border-slate-200/90 shadow-[0_3px_0_0_#E2E8F0]">
-            <span className="text-xs font-bold text-slate-500 flex items-center gap-1.5 mb-1">
+          <div className="p-4 rounded-2xl bg-white dark:!bg-[#1E293B] border-2 border-slate-200/90 dark:!border-slate-700/80 shadow-[0_3px_0_0_#E2E8F0] dark:shadow-none">
+            <span className="text-xs font-bold text-slate-500 dark:!text-slate-400 flex items-center gap-1.5 mb-1">
               <Calendar className="w-3.5 h-3.5 text-slate-400" />
               Gasto no Mês Até Hoje
             </span>
@@ -115,26 +115,26 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({
             </span>
           </div>
 
-          <div className="p-4 rounded-2xl bg-white border-2 border-slate-200/90 shadow-[0_3px_0_0_#E2E8F0]">
-            <span className="text-xs font-bold text-slate-500 flex items-center gap-1.5 mb-1">
+          <div className="p-4 rounded-2xl bg-white dark:!bg-[#1E293B] border-2 border-slate-200/90 dark:!border-slate-700/80 shadow-[0_3px_0_0_#E2E8F0] dark:shadow-none">
+            <span className="text-xs font-bold text-slate-500 dark:!text-slate-400 flex items-center gap-1.5 mb-1">
               <Clock className="w-3.5 h-3.5 text-slate-400" />
               Média Diária
             </span>
-            <p className="text-xl font-black text-slate-800">
+            <p className="text-xl font-black text-slate-800 dark:!text-white">
               {formatBRL(burnRate.dailyAverage)}
             </p>
             <span className="text-[11px] font-bold text-slate-400">Por dia no mês</span>
           </div>
 
-          <div className="p-4 rounded-2xl bg-white border-2 border-slate-200/90 shadow-[0_3px_0_0_#E2E8F0]">
-            <span className="text-xs font-bold text-slate-500 flex items-center gap-1.5 mb-1">
+          <div className="p-4 rounded-2xl bg-white dark:!bg-[#1E293B] border-2 border-slate-200/90 dark:!border-slate-700/80 shadow-[0_3px_0_0_#E2E8F0] dark:shadow-none">
+            <span className="text-xs font-bold text-slate-500 dark:!text-slate-400 flex items-center gap-1.5 mb-1">
               <TrendingUp className="w-3.5 h-3.5 text-slate-400" />
               Projeção Fim do Mês
             </span>
             <p className={`text-xl font-black ${
               burnRate.monthlyBudgetTotal > 0 && burnRate.projectedMonthEnd > burnRate.monthlyBudgetTotal
                 ? 'text-[#FF4B4B]'
-                : 'text-[#1899D6]'
+                : 'text-[#1899D6] dark:!text-sky-400'
             }`}>
               {formatBRL(burnRate.projectedMonthEnd)}
             </p>
@@ -143,12 +143,12 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({
             </span>
           </div>
 
-          <div className="p-4 rounded-2xl bg-white border-2 border-slate-200/90 shadow-[0_3px_0_0_#E2E8F0]">
-            <span className="text-xs font-bold text-slate-500 flex items-center gap-1.5 mb-1">
+          <div className="p-4 rounded-2xl bg-white dark:!bg-[#1E293B] border-2 border-slate-200/90 dark:!border-slate-700/80 shadow-[0_3px_0_0_#E2E8F0] dark:shadow-none">
+            <span className="text-xs font-bold text-slate-500 dark:!text-slate-400 flex items-center gap-1.5 mb-1">
               <Target className="w-3.5 h-3.5 text-slate-400" />
               Teto Máximo Mensal
             </span>
-            <p className="text-xl font-black text-[#46A302]">
+            <p className="text-xl font-black text-[#46A302] dark:!text-emerald-400">
               {(globalLimit && globalLimit > 0) 
                 ? formatBRL(globalLimit) 
                 : (burnRate.monthlyBudgetTotal > 0 ? formatBRL(burnRate.monthlyBudgetTotal) : 'Sem teto')}
@@ -161,10 +161,10 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({
 
         {/* Barra de Progresso Temporal vs Orçamento */}
         {burnRate.monthlyBudgetTotal > 0 && (
-          <div className="space-y-2 bg-white/70 p-4 rounded-2xl border-2 border-emerald-200">
-            <div className="flex justify-between text-xs font-black text-slate-700">
+          <div className="space-y-2 bg-white/70 dark:!bg-[#1E293B] p-4 rounded-2xl border-2 border-emerald-200 dark:!border-slate-700">
+            <div className="flex justify-between text-xs font-black text-slate-700 dark:!text-slate-300">
               <span>Consumo do Orçamento Total</span>
-              <span className="text-slate-900 font-black">
+              <span className="text-slate-900 dark:!text-white font-black">
                 {Math.round((burnRate.spentSoFar / burnRate.monthlyBudgetTotal) * 100)}% consumido
               </span>
             </div>
@@ -205,13 +205,13 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({
           </div>
 
           {categoryDistribution.length === 0 ? (
-            <div className="h-48 flex items-center justify-center text-center text-xs font-bold text-slate-400 border-2 border-dashed border-slate-200 rounded-2xl">
+            <div className="h-48 flex items-center justify-center text-center text-xs font-bold text-slate-400 dark:!text-slate-300 border-2 border-dashed border-slate-200 dark:!border-slate-800 dark:!bg-[#090E17] rounded-2xl">
               Nenhuma despesa categorizada neste mês.
             </div>
           ) : (
             <div className="space-y-4">
               {/* Barra segmentada horizontal colorida */}
-              <div className="h-4 w-full bg-slate-100 rounded-full overflow-hidden flex border-2 border-slate-200 shadow-inner">
+              <div className="h-4 w-full bg-slate-100 dark:!bg-slate-800 rounded-full overflow-hidden flex border-2 border-slate-200 dark:!border-slate-700 shadow-inner">
                 {categoryDistribution.map((cat) => (
                   <div
                     key={cat.categoryId}
@@ -230,20 +230,20 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({
                 {categoryDistribution.map((cat) => (
                   <div
                     key={cat.categoryId}
-                    className="flex items-center justify-between text-xs p-3 rounded-2xl bg-slate-50 border-2 border-slate-100 hover:border-slate-200 transition"
+                    className="flex items-center justify-between text-xs p-3 rounded-2xl bg-slate-50 dark:!bg-[#0F172A] border-2 border-slate-100 dark:!border-slate-800 hover:border-slate-200 dark:hover:border-slate-700 transition"
                   >
                     <div className="flex items-center gap-2.5">
                       <span
                         className="w-3.5 h-3.5 rounded-full flex-shrink-0 shadow-sm"
                         style={{ backgroundColor: cat.colorHex }}
                       />
-                      <span className="text-slate-800 font-black">{cat.categoryName}</span>
+                      <span className="text-slate-800 dark:!text-white font-black">{cat.categoryName}</span>
                     </div>
                     <div className="text-right">
-                      <span className="font-black text-slate-900 block">
+                      <span className="font-black text-slate-900 dark:!text-white block">
                         {formatBRL(cat.totalAmount)}
                       </span>
-                      <span className="text-[11px] text-slate-500 font-extrabold">
+                      <span className="text-[11px] text-slate-500 dark:!text-slate-400 font-extrabold">
                         {cat.percentage}%
                       </span>
                     </div>
@@ -291,8 +291,8 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({
         </div>
 
         {budgets.length === 0 ? (
-          <div className="p-8 rounded-2xl border-2 border-dashed border-slate-200 text-center space-y-3">
-            <p className="text-xs font-bold text-slate-400">Você ainda não configurou metas para este mês.</p>
+          <div className="p-8 rounded-2xl border-2 border-dashed border-slate-200 dark:!border-slate-800 dark:!bg-[#090E17] text-center space-y-3">
+            <p className="text-xs font-bold text-slate-400 dark:!text-slate-300">Você ainda não configurou metas para este mês.</p>
             <button
               onClick={onOpenBudgetModal}
               className="btn-duo btn-duo-green text-xs px-4 py-2"
@@ -307,14 +307,14 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({
               return (
                 <div
                   key={b.id || b.categoryId}
-                  className={`p-5 rounded-3xl border-2 transition-all shadow-[0_3px_0_0_#E2E8F0] ${
+                  className={`p-5 rounded-3xl border-2 transition-all shadow-[0_3px_0_0_#E2E8F0] dark:shadow-none ${
                     !hasLimit
-                      ? 'bg-slate-50/70 border-slate-200/90 hover:border-blue-300'
+                      ? 'bg-slate-50/70 dark:!bg-[#1E293B] border-slate-200/90 dark:!border-slate-700 hover:border-blue-300'
                       : b.isExceeded
-                      ? 'bg-rose-50/70 border-rose-300'
+                      ? 'bg-rose-50/70 dark:!bg-[#1E293B] border-rose-300 dark:!border-rose-900'
                       : b.isWarning
-                      ? 'bg-amber-50/70 border-amber-300'
-                      : 'bg-white border-slate-200/90 hover:border-emerald-300'
+                      ? 'bg-amber-50/70 dark:!bg-[#1E293B] border-amber-300 dark:!border-amber-900'
+                      : 'bg-white dark:!bg-[#1E293B] border-slate-200/90 dark:!border-slate-700 hover:border-emerald-300'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-3">
@@ -323,23 +323,23 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({
                         className="w-4 h-4 rounded-full flex-shrink-0 shadow-sm"
                         style={{ backgroundColor: b.categoryColorHex }}
                       />
-                      <span className="text-sm font-black text-slate-900">{b.categoryName}</span>
+                      <span className="text-sm font-black text-slate-900 dark:!text-white">{b.categoryName}</span>
                     </div>
 
                     {!hasLimit ? (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-black text-slate-600 bg-slate-100 border border-slate-300 px-2.5 py-0.5 rounded-full">
+                      <span className="inline-flex items-center gap-1 text-[11px] font-black text-slate-600 dark:!text-slate-300 bg-slate-100 dark:!bg-slate-800 border border-slate-300 dark:!border-slate-700 px-2.5 py-0.5 rounded-full">
                         Sem Teto Definido
                       </span>
                     ) : b.isExceeded ? (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-black text-rose-700 bg-rose-100 border border-rose-300 px-2.5 py-0.5 rounded-full">
+                      <span className="inline-flex items-center gap-1 text-[11px] font-black text-rose-700 dark:!text-rose-300 bg-rose-100 dark:!bg-rose-950/80 border border-rose-300 dark:!border-rose-800 px-2.5 py-0.5 rounded-full">
                         <AlertOctagon className="w-3.5 h-3.5" /> Estourou!
                       </span>
                     ) : b.isWarning ? (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-black text-amber-800 bg-amber-100 border border-amber-300 px-2.5 py-0.5 rounded-full">
+                      <span className="inline-flex items-center gap-1 text-[11px] font-black text-amber-800 dark:!text-amber-300 bg-amber-100 dark:!bg-amber-950/80 border border-amber-300 dark:!border-amber-800 px-2.5 py-0.5 rounded-full">
                         <AlertTriangle className="w-3.5 h-3.5" /> Atenção ({b.alertThresholdPercentage}%)
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-black text-[#388302] bg-[#E8F8E8] border border-[#D7FFB8] px-2.5 py-0.5 rounded-full">
+                      <span className="inline-flex items-center gap-1 text-[11px] font-black text-[#388302] dark:!text-emerald-400 bg-[#E8F8E8] dark:!bg-emerald-950/80 border border-[#D7FFB8] dark:!border-emerald-800 px-2.5 py-0.5 rounded-full">
                         <CheckCircle2 className="w-3.5 h-3.5 stroke-[3]" /> No Limite
                       </span>
                     )}
@@ -361,17 +361,17 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({
                         }`}
                       />
                     </div>
-                    <div className="flex justify-between text-xs font-bold text-slate-500">
-                      <span>Gasto: <strong className="text-slate-900">{formatBRL(b.spentAmount)}</strong></span>
-                      <span>Meta: <strong className="text-slate-900">{hasLimit ? formatBRL(b.monthlyLimit) : 'Sem teto'}</strong></span>
+                    <div className="flex justify-between text-xs font-bold text-slate-500 dark:!text-slate-400">
+                      <span>Gasto: <strong className="text-slate-900 dark:!text-white">{formatBRL(b.spentAmount)}</strong></span>
+                      <span>Meta: <strong className="text-slate-900 dark:!text-white">{hasLimit ? formatBRL(b.monthlyLimit) : 'Sem teto'}</strong></span>
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-center text-[11px] font-extrabold text-slate-500 pt-2 border-t-2 border-slate-100">
+                  <div className="flex justify-between items-center text-[11px] font-extrabold text-slate-500 dark:!text-slate-400 pt-2 border-t-2 border-slate-100 dark:!border-slate-800">
                     {hasLimit ? (
                       <>
                         <span>{b.percentageUsed}% utilizado</span>
-                        <span className={b.remainingAmount < 0 ? 'text-[#FF4B4B]' : 'text-slate-700'}>
+                        <span className={b.remainingAmount < 0 ? 'text-[#FF4B4B]' : 'text-slate-700 dark:!text-slate-300'}>
                           {b.remainingAmount < 0 ? 'Excedeu ' : 'Resta '}
                           {formatBRL(Math.abs(b.remainingAmount))}
                         </span>

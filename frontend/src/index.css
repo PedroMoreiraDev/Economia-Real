@@ -15,36 +15,303 @@
     --foreground: 210 40% 98%;
   }
 
-  body {
+  html {
     background-color: #F8FAFC;
     color: #0F172A;
+  }
+
+  html.dark {
+    background-color: #090E17 !important;
+    color: #F1F5F9 !important;
+  }
+
+  body {
+    background-color: transparent;
+    color: inherit;
     font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.25s ease;
   }
 
-  .dark body {
-    background-color: #0B1120;
-    color: #F8FAFC;
+  html.dark body {
+    background-color: #090E17;
+    color: #F1F5F9;
   }
 
-  .dark .card-duo,
+  /* Suporte estético ao modo escuro em componentes base */
+  .dark .card-duo {
+    background-color: #0F172A;
+    background-image: none !important;
+    border-color: #1E293B;
+    box-shadow: 0 4px 0 0 #020617;
+    color: #F1F5F9;
+  }
+
+  .dark .card-duo-interactive:hover {
+    border-color: #38BDF8;
+    box-shadow: 0 6px 0 0 #0369A1;
+  }
+
+  /* Cards da Landing Page e Dashboard em modo escuro */
+  .dark [class*="bg-gradient-to-br"][class*="from-indigo-50"],
+  .dark [class*="bg-gradient-to-br"][class*="from-blue-50"],
+  .dark [class*="bg-gradient-to-br"][class*="from-emerald-50"],
+  .dark [class*="bg-gradient-to-br"][class*="from-amber-50"],
+  .dark [class*="bg-gradient-to-b"][class*="from-blue-50"],
+  .dark [class*="bg-gradient-to-b"][class*="from-indigo-50"],
+  .dark [class*="bg-gradient-to-b"][class*="from-emerald-50"],
+  .dark [class*="bg-gradient-to-b"][class*="from-rose-50"],
+  .dark [class*="bg-gradient-to-b"][class*="from-amber-50"] {
+    background-image: none !important;
+    background-color: #0F172A !important;
+  }
+
+  .dark .card-duo-green,
   .dark .card-real-blue {
-    background-color: #131E32;
-    border-color: #1E2E4A;
-    color: #F8FAFC;
+    background-image: none !important;
+    background-color: #0F172A !important;
+    border-color: #1E293B !important;
+    box-shadow: 0 4px 0 0 #020617 !important;
+    color: #F8FAFC !important;
   }
 
   .dark header {
-    background-color: #0B1120/90;
-    border-color: #1E2E4A;
+    background-color: rgba(9, 14, 23, 0.85);
+    border-color: #1E293B;
   }
 
   .dark .btn-duo-white {
     background-color: #1E293B;
     border-color: #334155;
     color: #F1F5F9;
+    box-shadow: 0 4px 0 0 #0F172A;
+  }
+
+  .dark .btn-duo-white:hover {
+    background-color: #273549;
+    border-color: #475569;
+  }
+
+  .dark .text-slate-900,
+  .dark .text-slate-800,
+  .dark .text-slate-700 {
+    color: #F1F5F9;
+  }
+
+  .dark .text-slate-600,
+  .dark .text-slate-500 {
+    color: #94A3B8;
+  }
+
+  .dark .bg-white,
+  .dark [class*="bg-white"],
+  .dark [class*="bg-white/"],
+  .dark .bg-\[\#F4FBF4\],
+  .dark .bg-\[\#E8F8E8\],
+  .dark .bg-\[\#F0F7FF\],
+  .dark .bg-\[\#E8F3FF\],
+  .dark .bg-\[\#DBEAFE\],
+  .dark .bg-\[\#DDF4FF\],
+  .dark .bg-\[\#F5EBFF\],
+  .dark .bg-\[\#F8FAFC\],
+  .dark .bg-\[\#F1F5F9\],
+  .dark .bg-emerald-50,
+  .dark .bg-emerald-100,
+  .dark [class*="bg-emerald-50"],
+  .dark [class*="bg-emerald-100"],
+  .dark .bg-green-50,
+  .dark .bg-green-100,
+  .dark [class*="bg-green-50"],
+  .dark [class*="bg-green-100"],
+  .dark .bg-rose-50,
+  .dark .bg-rose-100,
+  .dark [class*="bg-rose-50"],
+  .dark [class*="bg-rose-100"],
+  .dark .bg-red-50,
+  .dark .bg-red-100,
+  .dark [class*="bg-red-50"],
+  .dark [class*="bg-red-100"],
+  .dark .bg-blue-50,
+  .dark .bg-blue-100,
+  .dark [class*="bg-blue-50"],
+  .dark [class*="bg-blue-100"],
+  .dark .bg-amber-50,
+  .dark .bg-amber-100,
+  .dark [class*="bg-amber-50"],
+  .dark [class*="bg-amber-100"],
+  .dark .bg-purple-50,
+  .dark .bg-purple-100,
+  .dark [class*="bg-purple-50"],
+  .dark [class*="bg-purple-100"],
+  .dark .bg-slate-50,
+  .dark .bg-slate-100,
+  .dark [class*="bg-slate-50"],
+  .dark [class*="bg-slate-100"],
+  .dark .bg-gray-50,
+  .dark .bg-gray-100,
+  .dark [class*="bg-gray-50"],
+  .dark [class*="bg-gray-100"],
+  .dark .bg-zinc-50,
+  .dark .bg-zinc-100,
+  .dark [class*="bg-zinc-50"],
+  .dark [class*="bg-zinc-100"] {
+    background-color: #0F172A !important;
+  }
+
+  /* Blindagem universal para inputs, selects e textareas no dark mode */
+  .dark input,
+  .dark select,
+  .dark textarea {
+    background-color: #0F172A !important;
+    color: #F1F5F9 !important;
+    border-color: #334155 !important;
+  }
+
+  .dark input:focus,
+  .dark select:focus,
+  .dark textarea:focus,
+  .dark [class*="focus:bg-white"]:focus,
+  .dark [class*="focus:bg-white\\/"]:focus {
+    background-color: #1E293B !important;
+    color: #FFFFFF !important;
+    border-color: #38BDF8 !important;
+  }
+
+  .dark input::placeholder,
+  .dark textarea::placeholder {
+    color: #64748B !important;
+  }
+
+  .dark option {
+    background-color: #0F172A !important;
+    color: #F1F5F9 !important;
+  }
+
+  /* Blindagem universal para estados vazios (Empty States com borda tracejada) */
+  .dark [class*="border-dashed"] {
+    background-color: #090E17 !important;
+    border-color: #1E293B !important;
+  }
+
+  .dark [class*="border-dashed"] h3,
+  .dark [class*="border-dashed"] h4,
+  .dark [class*="border-dashed"] h5 {
+    color: #FFFFFF !important;
+  }
+
+  .dark [class*="border-dashed"] p {
+    color: #CBD5E1 !important;
+  }
+
+  /* Anulação de hovers que tentem clarear elementos no dark mode */
+  .dark [class*="hover:bg-white"]:hover,
+  .dark [class*="hover:bg-white/"]:hover,
+  .dark [class*="hover:bg-white\\/"]:hover,
+  .dark [class*="hover:bg-slate-50"]:hover,
+  .dark [class*="hover:bg-slate-100"]:hover,
+  .dark [class*="hover:bg-blue-50"]:hover,
+  .dark [class*="hover:bg-emerald-50"]:hover,
+  .dark [class*="hover:bg-rose-50"]:hover {
+    background-color: #1E293B !important;
+  }
+
+  .dark .text-emerald-700,
+  .dark .text-emerald-800,
+  .dark .text-emerald-900,
+  .dark .text-emerald-950 {
+    color: #34D399 !important;
+  }
+
+  .dark .text-rose-700,
+  .dark .text-rose-800,
+  .dark .text-rose-900,
+  .dark .text-rose-950 {
+    color: #FB7185 !important;
+  }
+
+  .dark .text-blue-700,
+  .dark .text-blue-800,
+  .dark .text-blue-900,
+  .dark .text-blue-950 {
+    color: #60A5FA !important;
+  }
+
+  .dark .text-amber-700,
+  .dark .text-amber-800,
+  .dark .text-amber-900,
+  .dark .text-amber-950 {
+    color: #FBBF24 !important;
+  }
+
+  .dark .border-emerald-200,
+  .dark .border-emerald-300,
+  .dark [class*="border-emerald-200"],
+  .dark [class*="border-emerald-300"],
+  .dark .border-\[\#D7FFB8\] {
+    border-color: #065F46 !important;
+  }
+
+  .dark .border-rose-200,
+  .dark .border-rose-300,
+  .dark [class*="border-rose-200"],
+  .dark [class*="border-rose-300"] {
+    border-color: #881337 !important;
+  }
+
+  .dark .border-blue-200,
+  .dark .border-blue-300,
+  .dark [class*="border-blue-200"],
+  .dark [class*="border-blue-300"] {
+    border-color: #1E3A8A !important;
+  }
+
+  .dark .border-amber-200,
+  .dark .border-amber-300,
+  .dark [class*="border-amber-200"],
+  .dark [class*="border-amber-300"] {
+    border-color: #78350F !important;
+  }
+
+  .dark .border-slate-200,
+  .dark .border-slate-300 {
+    border-color: #1E293B !important;
+  }
+
+  /* Estado vazio do gráfico de evolução financeira - Fundo escuro absoluto e fonte nítida */
+  .chart-empty-state {
+    background-color: #F8FAFC !important;
+    border-color: #E2E8F0 !important;
+  }
+
+  .dark .chart-empty-state {
+    background-color: #090E17 !important;
+    border-color: #1E293B !important;
+  }
+
+  .dark .chart-empty-state h4 {
+    color: #FFFFFF !important;
+  }
+
+  .dark .chart-empty-state p {
+    color: #E2E8F0 !important;
+  }
+
+  .dark table {
+    color: #F1F5F9;
+    background-color: #0F172A;
+  }
+
+  .dark table tr {
+    border-color: #1E293B;
+  }
+
+  .dark table tbody tr {
+    background-color: #0F172A;
+  }
+
+  .dark table tbody tr:hover {
+    background-color: #1E293B !important;
   }
 }
 
@@ -102,8 +369,37 @@
   @apply bg-white hover:bg-slate-50 text-slate-700 border-2 border-b-4 border-slate-200 active:border-b-2 active:translate-y-0.5 rounded-2xl px-4 py-2 shadow-sm transition-colors;
 }
 
+.dark .btn-duo-white {
+  @apply bg-slate-800 hover:bg-slate-700 text-slate-100 border-slate-700 border-b-slate-950;
+}
+
 .btn-duo-ghost {
   @apply bg-transparent hover:bg-blue-50/70 text-slate-600 hover:text-[#026CD6] font-extrabold rounded-2xl px-3 py-1.5 transition-colors;
+}
+
+/* Coluna em Destaque na Tabela Comparativa (Exclusivo para Modo Claro) */
+html:not(.dark) .col-highlight-real {
+  background-color: rgba(239, 246, 255, 0.85) !important;
+  border-left-width: 2px !important;
+  border-right-width: 2px !important;
+  border-left-color: #BFDBFE !important;
+  border-right-color: #BFDBFE !important;
+}
+
+html:not(.dark) th.col-highlight-real {
+  background-color: #026CD6 !important;
+  color: #FDE047 !important;
+  border-left-color: #60A5FA !important;
+  border-right-color: #60A5FA !important;
+}
+
+html:not(.dark) td.col-highlight-real-price {
+  background-color: #DBEAFE !important;
+  border-left-width: 2px !important;
+  border-right-width: 2px !important;
+  border-left-color: #93C5FD !important;
+  border-right-color: #93C5FD !important;
+  color: #026CD6 !important;
 }
 
 /* Cards com Relevo Físico e Contornos Macios */
@@ -123,11 +419,11 @@
 
 /* Painel com Efeito Vidro Fosco (Glassmorphism) */
 .glass-panel {
-  @apply bg-white/80 backdrop-blur-xl border border-white/60 shadow-lg shadow-slate-900/5;
+  @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/60 dark:border-slate-800 shadow-lg shadow-slate-900/5 dark:shadow-black/20;
 }
 
 .glass-pill {
-  @apply bg-white/85 backdrop-blur-md border border-white/80 shadow-sm;
+  @apply bg-white/85 dark:bg-slate-800/85 backdrop-blur-md border border-white/80 dark:border-slate-700 shadow-sm;
 }
 
 /* Badges e Pílulas */

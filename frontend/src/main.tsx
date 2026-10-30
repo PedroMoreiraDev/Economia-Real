@@ -5,6 +5,8 @@ import './index.css';
 import { initBackendKeepAlive } from './services/backendWarmup';
 import { initTelemetry } from './services/telemetryService';
 
+import { ThemeProvider } from './context/ThemeContext';
+
 // Inicializa heartbeat e pré-aquecimento do backend para prevenir cold start
 initBackendKeepAlive();
 
@@ -22,7 +24,9 @@ if ('serviceWorker' in navigator && window.location.protocol.startsWith('http'))
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <App />
+    <ThemeProvider>
+      <App />
+    </ThemeProvider>
   </React.StrictMode>,
 );
 

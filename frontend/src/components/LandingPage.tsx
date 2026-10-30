@@ -72,7 +72,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </div>
 
             {/* Título Principal com Destaques Cromáticos */}
-            <h1 className="text-3xl sm:text-5xl lg:text-[3.25rem] font-black text-slate-900 tracking-tight leading-[1.15]">
+            <h1 className="text-3xl sm:text-5xl lg:text-[3.25rem] font-black text-slate-900 dark:text-white tracking-tight leading-[1.15]">
               Controle suas finanças sem o sofrimento de{' '}
               <span className="bg-gradient-to-r from-[#026CD6] via-[#2563EB] to-[#4F46E5] bg-clip-text text-transparent">
                 anotar tudo na mão
@@ -80,9 +80,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </h1>
 
             {/* Subtítulo Persuasivo */}
-            <p className="text-base sm:text-lg font-bold text-slate-600 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+            <p className="text-base sm:text-lg font-bold text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl mx-auto lg:mx-0">
               Fale no microfone ou suba a fatura do seu banco. A I.A categoriza tudo em segundos, define seus limites ideais e{' '}
-              <span className="text-amber-900 bg-amber-100/90 px-2 py-0.5 rounded-lg font-black border border-amber-300">
+              <span className="text-amber-900 dark:text-amber-300 bg-amber-100/90 dark:bg-amber-950/70 px-2 py-0.5 rounded-lg font-black border border-amber-300 dark:border-amber-700/80">
                 te avisa antes de você estourar o orçamento
               </span>.
             </p>
@@ -320,62 +320,90 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           ========================================================================= */}
       <section className="space-y-8">
         <div className="text-center max-w-3xl mx-auto space-y-3">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-rose-100 text-rose-800 border-2 border-rose-300 text-xs font-black uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 border-2 border-rose-300 dark:border-rose-800 text-xs font-black uppercase tracking-wider">
             A Dor da Desorganização
           </div>
-          <h2 className="text-2xl sm:text-4xl font-black text-slate-900">
+          <h2 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white">
             Por que 9 em cada 10 pessoas desistem de controlar os gastos?
           </h2>
-          <p className="text-slate-600 text-sm sm:text-base font-bold">
+          <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-base font-bold">
             O problema não é sua força de vontade. É o atrito absurdo das ferramentas que te oferecem por aí.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
           
-          {/* Card 1: Planilhas (Vermelho/Coral Suave mas bem colorido) */}
-          <div className="rounded-3xl p-6 space-y-4 border-2 border-rose-300/80 bg-gradient-to-b from-rose-50 via-red-50/60 to-rose-100/40 shadow-[0_6px_0_0_#FDA4AF] transition-all">
-            <div className="h-12 w-12 rounded-2xl bg-rose-500 border-b-4 border-rose-700 flex items-center justify-center text-white shadow-md">
-              <FileSpreadsheet className="h-6 w-6 stroke-[2.5]" />
+          {/* Card 1: Planilhas (A Dor) */}
+          <div className="rounded-3xl p-6 sm:p-7 space-y-4 border-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-[0_4px_0_0_#E2E8F0] dark:shadow-[0_4px_0_0_#020617] transition-all flex flex-col justify-between">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="h-12 w-12 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border-2 border-rose-200 dark:border-rose-900/60 flex items-center justify-center text-rose-500 dark:text-rose-400 shadow-sm">
+                  <FileSpreadsheet className="h-6 w-6 stroke-[2.5]" />
+                </div>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/60 text-xs font-black uppercase tracking-wider">
+                  <XCircle className="h-3.5 w-3.5 stroke-[2.5]" /> Manual
+                </span>
+              </div>
+              <h3 className="text-xl font-black text-slate-900 dark:text-white">
+                Planilhas de Excel
+              </h3>
+              <p className="text-sm font-medium text-slate-600 dark:text-slate-400 leading-relaxed">
+                Você precisa ligar o computador no domingo, caçar comprovantes antigos, brigar com fórmulas que quebram e, na segunda semana, já desistiu de tudo.
+              </p>
             </div>
-            <h3 className="text-lg font-black text-rose-950 flex items-center gap-2">
-              <XCircle className="h-5 w-5 text-rose-600 shrink-0" />
-              Planilhas de Excel
-            </h3>
-            <p className="text-xs sm:text-sm font-bold text-rose-900/80 leading-relaxed">
-              Você precisa ligar o computador no domingo, caçar comprovantes antigos, brigar com fórmulas que quebram e, na segunda semana, já desistiu de tudo.
-            </p>
+            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center gap-2 text-xs font-bold text-rose-600 dark:text-rose-400">
+              <AlertTriangle className="h-4 w-4 shrink-0" />
+              <span>92% das pessoas abandonam em 15 dias</span>
+            </div>
           </div>
 
-          {/* Card 2: Outros Apps (Âmbar/Laranja Quente) */}
-          <div className="rounded-3xl p-6 space-y-4 border-2 border-amber-300/80 bg-gradient-to-b from-amber-50 via-orange-50/60 to-amber-100/40 shadow-[0_6px_0_0_#FCD34D] transition-all">
-            <div className="h-12 w-12 rounded-2xl bg-amber-500 border-b-4 border-amber-700 flex items-center justify-center text-amber-950 shadow-md">
-              <Sliders className="h-6 w-6 stroke-[2.5]" />
+          {/* Card 2: Outros Apps (A Frustração) */}
+          <div className="rounded-3xl p-6 sm:p-7 space-y-4 border-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-[0_4px_0_0_#E2E8F0] dark:shadow-[0_4px_0_0_#020617] transition-all flex flex-col justify-between">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="h-12 w-12 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-200 dark:border-amber-900/60 flex items-center justify-center text-amber-500 dark:text-amber-400 shadow-sm">
+                  <Sliders className="h-6 w-6 stroke-[2.5]" />
+                </div>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-900/60 text-xs font-black uppercase tracking-wider">
+                  <XCircle className="h-3.5 w-3.5 stroke-[2.5]" /> Complexo
+                </span>
+              </div>
+              <h3 className="text-xl font-black text-slate-900 dark:text-white">
+                Apps Tradicionais
+              </h3>
+              <p className="text-sm font-medium text-slate-600 dark:text-slate-400 leading-relaxed">
+                Exigem preencher 8 campos manuais para cada cafezinho de R$ 6,00. E pior: cobram mensalidade cara e duplicam o pagamento da sua fatura nos relatórios.
+              </p>
             </div>
-            <h3 className="text-lg font-black text-amber-950 flex items-center gap-2">
-              <XCircle className="h-5 w-5 text-amber-600 shrink-0" />
-              Apps Tradicionais
-            </h3>
-            <p className="text-xs sm:text-sm font-bold text-amber-900/80 leading-relaxed">
-              Exigem preencher 8 campos manuais para cada cafezinho de R$ 6,00. E pior: cobram mensalidade cara e duplicam o pagamento da sua fatura nos relatórios.
-            </p>
+            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center gap-2 text-xs font-bold text-amber-600 dark:text-amber-400">
+              <AlertTriangle className="h-4 w-4 shrink-0" />
+              <span>Planos pagos & erros contábeis</span>
+            </div>
           </div>
 
-          {/* Card 3: Economia Real (Verde Esmeralda Vibrante em Destaque!) */}
-          <div className="rounded-3xl p-6 space-y-4 border-2 border-emerald-500 bg-gradient-to-b from-emerald-600 to-teal-700 text-white shadow-[0_8px_0_0_#065F46] md:-translate-y-2 hover:-translate-y-3 transition-all relative overflow-hidden">
-            <div className="absolute top-3 right-3 px-3 py-1 rounded-full bg-yellow-400 text-slate-950 text-[10px] font-black uppercase tracking-wider shadow-sm">
-              ✨ Solução Definitiva
+          {/* Card 3: Economia Real com I.A (A Solução Definitiva com Identidade Visual da Marca) */}
+          <div className="rounded-3xl p-6 sm:p-7 space-y-4 border-2 border-[#026CD6] bg-gradient-to-b from-[#026CD6] to-[#0153AB] dark:from-[#0B2545] dark:via-[#0D213D] dark:to-[#081729] text-white shadow-[0_8px_0_0_#0153AB] dark:shadow-[0_8px_0_0_#062A57] md:-translate-y-2 hover:-translate-y-3 transition-all flex flex-col justify-between relative overflow-hidden">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="h-12 w-12 rounded-2xl bg-white/20 dark:bg-blue-500/20 border-2 border-white/30 dark:border-blue-400/40 flex items-center justify-center text-white shadow-md">
+                  <Zap className="h-6 w-6 fill-white stroke-[2.5]" />
+                </div>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-400 text-slate-950 text-xs font-black uppercase tracking-wider shadow-sm">
+                  <Sparkles className="h-3.5 w-3.5 fill-slate-950" /> Solução Definitiva
+                </span>
+              </div>
+              <h3 className="text-xl font-black text-white flex items-center gap-2">
+                <CheckCircle2 className="h-6 w-6 text-yellow-300 dark:text-sky-300 shrink-0" />
+                Economia Real com I.A
+              </h3>
+              <p className="text-sm font-medium text-blue-50 dark:text-slate-200 leading-relaxed">
+                Fale 1 áudio de 2 segundos enquanto entra no carro ou arraste o extrato no final do mês. A inteligência artificial organiza tudo e te avisa antes de você estourar.
+              </p>
             </div>
-            <div className="h-12 w-12 rounded-2xl bg-white text-emerald-700 border-b-4 border-emerald-200 flex items-center justify-center shadow-lg">
-              <Zap className="h-6 w-6 fill-emerald-600 stroke-[2.5]" />
+            <div className="pt-3 border-t border-white/20 dark:border-blue-800/60 flex items-center gap-2 text-xs font-black text-yellow-300 dark:text-sky-300">
+              <CheckCircle2 className="h-4 w-4 shrink-0" />
+              <span>100% Gratuito & Lançamento em 2 segundos</span>
             </div>
-            <h3 className="text-xl font-black text-white flex items-center gap-2">
-              <CheckCircle2 className="h-6 w-6 text-yellow-300 shrink-0" />
-              Economia Real com I.A
-            </h3>
-            <p className="text-xs sm:text-sm font-bold text-emerald-50 leading-relaxed">
-              Fale 1 áudio de 2 segundos enquanto entra no carro ou arraste o extrato no final do mês. A inteligência artificial organiza tudo e te avisa antes de você estourar.
-            </p>
           </div>
 
         </div>
@@ -389,10 +417,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-100 text-[#026CD6] border-2 border-blue-300 text-xs font-black uppercase tracking-wider">
             Superpoderes da Plataforma
           </div>
-          <h2 className="text-2xl sm:text-4xl font-black text-slate-900">
+          <h2 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white">
             A inteligência artificial trabalhando pelo seu bolso
           </h2>
-          <p className="text-slate-600 text-sm sm:text-base font-bold">
+          <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-base font-bold">
             Feito sob medida para quem não quer perder tempo e exige saber exatamente para onde vai cada centavo.
           </p>
         </div>
@@ -400,30 +428,30 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <div className="space-y-8">
           
           {/* Card 1: Lançamento por Voz (Tema Índigo / Roxo Tecnológico) */}
-          <div className="rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-indigo-50/90 via-white to-purple-50/80 border-2 border-indigo-200 shadow-[0_6px_0_0_#C7D2FE] transition-all">
+          <div className="rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-indigo-50/90 via-white to-purple-50/80 dark:bg-none dark:bg-slate-900/95 border-2 border-indigo-200 dark:border-indigo-900/70 shadow-[0_6px_0_0_#C7D2FE] dark:shadow-[0_6px_0_0_#1E1B4B] transition-all">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
               <div className="lg:col-span-7 space-y-4">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-600 text-white text-xs font-black shadow-sm">
                   <Mic className="h-4 w-4" />
                   Lançamento por Voz Nativo
                 </div>
-                <h3 className="text-2xl sm:text-3xl font-black text-slate-900">
+                <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
                   Diga o que gastou e pronto. A I.A faz o resto.
                 </h3>
-                <p className="text-sm sm:text-base font-bold text-slate-600 leading-relaxed">
-                  Basta apertar o microfone e falar como você conversa com um amigo: <strong className="text-indigo-900 bg-indigo-100 px-1.5 py-0.5 rounded">"Almoço 45 reais no débito"</strong> ou <strong className="text-indigo-900 bg-indigo-100 px-1.5 py-0.5 rounded">"Farmácia 89,90 parcelado em 2x"</strong>.
+                <p className="text-sm sm:text-base font-bold text-slate-600 dark:text-slate-300 leading-relaxed">
+                  Basta apertar o microfone e falar como você conversa com um amigo: <strong className="text-indigo-900 dark:text-indigo-200 bg-indigo-100 dark:bg-indigo-950/80 px-1.5 py-0.5 rounded border border-indigo-200 dark:border-indigo-800">"Almoço 45 reais no débito"</strong> ou <strong className="text-indigo-900 dark:text-indigo-200 bg-indigo-100 dark:bg-indigo-950/80 px-1.5 py-0.5 rounded border border-indigo-200 dark:border-indigo-800">"Farmácia 89,90 parcelado em 2x"</strong>.
                 </p>
-                <ul className="space-y-2.5 text-xs sm:text-sm font-bold text-slate-700">
+                <ul className="space-y-2.5 text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">
                   <li className="flex items-center gap-2.5">
-                    <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">✓</div>
+                    <div className="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800 flex items-center justify-center shrink-0">✓</div>
                     Reconhecimento de voz em tempo real no navegador do PC ou no celular
                   </li>
                   <li className="flex items-center gap-2.5">
-                    <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">✓</div>
+                    <div className="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800 flex items-center justify-center shrink-0">✓</div>
                     Identifica categoria, valor numérico exato, data e conta correspondente
                   </li>
                   <li className="flex items-center gap-2.5">
-                    <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">✓</div>
+                    <div className="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800 flex items-center justify-center shrink-0">✓</div>
                     Nunca mais gaste 2 minutos preenchendo formulários para um cafezinho
                   </li>
                 </ul>
@@ -461,7 +489,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
 
           {/* Card 2: Importação de Fatura e Extrato (Tema Azul Elétrico / Sky Blue) */}
-          <div className="rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-blue-50/90 via-white to-sky-50/80 border-2 border-blue-200 shadow-[0_6px_0_0_#BFDBFE] transition-all">
+          <div className="rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-blue-50/90 via-white to-sky-50/80 dark:bg-none dark:bg-slate-900/95 border-2 border-blue-200 dark:border-blue-900/70 shadow-[0_6px_0_0_#BFDBFE] dark:shadow-[0_6px_0_0_#1E3A8A] transition-all">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
               
               <div className="lg:col-span-5 order-2 lg:order-1 bg-gradient-to-br from-blue-900 via-slate-900 to-sky-950 p-6 rounded-3xl border-2 border-blue-700/60 text-white shadow-xl space-y-4">
@@ -504,23 +532,23 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   <UploadCloud className="h-4 w-4" />
                   Importação Instantânea de Extrato
                 </div>
-                <h3 className="text-2xl sm:text-3xl font-black text-slate-900">
+                <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
                   O mês inteiro lançado com um simples arrastar de arquivo.
                 </h3>
-                <p className="text-sm sm:text-base font-bold text-slate-600 leading-relaxed">
+                <p className="text-sm sm:text-base font-bold text-slate-600 dark:text-slate-300 leading-relaxed">
                   Não quer registrar gasto por gasto todo dia? No final do mês, baixe o extrato ou fatura do seu aplicativo bancário e arraste para o Economia Real.
                 </p>
-                <ul className="space-y-2.5 text-xs sm:text-sm font-bold text-slate-700">
+                <ul className="space-y-2.5 text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">
                   <li className="flex items-center gap-2.5">
-                    <div className="w-5 h-5 rounded-full bg-blue-100 text-[#026CD6] flex items-center justify-center shrink-0">✓</div>
+                    <div className="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-950 text-[#026CD6] dark:text-sky-400 border border-blue-300 dark:border-blue-800 flex items-center justify-center shrink-0">✓</div>
                     Reconhece automaticamente iFood, Uber, Netflix, Mercados, Farmácias e Postos
                   </li>
                   <li className="flex items-center gap-2.5">
-                    <div className="w-5 h-5 rounded-full bg-blue-100 text-[#026CD6] flex items-center justify-center shrink-0">✓</div>
-                    <strong className="text-slate-900">Sem dupla contagem:</strong> O pagamento da fatura não duplica suas despesas!
+                    <div className="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-950 text-[#026CD6] dark:text-sky-400 border border-blue-300 dark:border-blue-800 flex items-center justify-center shrink-0">✓</div>
+                    <strong className="text-slate-900 dark:text-white">Sem dupla contagem:</strong> O pagamento da fatura não duplica suas despesas!
                   </li>
                   <li className="flex items-center gap-2.5">
-                    <div className="w-5 h-5 rounded-full bg-blue-100 text-[#026CD6] flex items-center justify-center shrink-0">✓</div>
+                    <div className="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-950 text-[#026CD6] dark:text-sky-400 border border-blue-300 dark:border-blue-800 flex items-center justify-center shrink-0">✓</div>
                     Aprende com as suas correções para as próximas faturas
                   </li>
                 </ul>
@@ -530,30 +558,30 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
 
           {/* Card 3: Metas Proporcionais com Travas (Tema Verde Esmeralda / Menta) */}
-          <div className="rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-emerald-50/90 via-white to-teal-50/80 border-2 border-emerald-200 shadow-[0_6px_0_0_#A7F3D0] transition-all">
+          <div className="rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-emerald-50/90 via-white to-teal-50/80 dark:bg-none dark:bg-slate-900/95 border-2 border-emerald-200 dark:border-emerald-900/70 shadow-[0_6px_0_0_#A7F3D0] dark:shadow-[0_6px_0_0_#064E3B] transition-all">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
               <div className="lg:col-span-7 space-y-4">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-600 text-white text-xs font-black shadow-sm">
                   <PieChart className="h-4 w-4" />
                   Planejamento Inteligente com I.A
                 </div>
-                <h3 className="text-2xl sm:text-3xl font-black text-slate-900">
+                <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
                   Distribuição de Orçamento com travas personalizadas.
                 </h3>
-                <p className="text-sm sm:text-base font-bold text-slate-600 leading-relaxed">
+                <p className="text-sm sm:text-base font-bold text-slate-600 dark:text-slate-300 leading-relaxed">
                   Defina o limite máximo que você pode gastar no mês (ex: R$ 4.000,00). A I.A calcula a divisão ideal por categoria. Se você tem custos fixos, trave a categoria e veja a mágica acontecer!
                 </p>
-                <ul className="space-y-2.5 text-xs sm:text-sm font-bold text-slate-700">
+                <ul className="space-y-2.5 text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">
                   <li className="flex items-center gap-2.5">
-                    <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">✓</div>
-                    <strong>Travas Individuais:</strong> Aluguel fixo em R$ 1.800? Trave Moradia e a I.A reequilibra o restante proporcionalmente.
+                    <div className="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800 flex items-center justify-center shrink-0">✓</div>
+                    <strong className="text-slate-900 dark:text-white">Travas Individuais:</strong> Aluguel fixo em R$ 1.800? Trave Moradia e a I.A reequilibra o restante proporcionalmente.
                   </li>
                   <li className="flex items-center gap-2.5">
-                    <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">✓</div>
+                    <div className="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800 flex items-center justify-center shrink-0">✓</div>
                     Garante que a soma nunca ultrapasse 1 único centavo do teto estipulado
                   </li>
                   <li className="flex items-center gap-2.5">
-                    <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">✓</div>
+                    <div className="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800 flex items-center justify-center shrink-0">✓</div>
                     Sugestões baseadas nas proporções saudáveis de gestão financeira (50-30-20)
                   </li>
                 </ul>
@@ -588,7 +616,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
 
           {/* Card 4: Alerta Preventivo de Limite (Tema Âmbar / Dourado Radiante) */}
-          <div className="rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-amber-50/90 via-white to-yellow-50/80 border-2 border-amber-200 shadow-[0_6px_0_0_#FDE68A] transition-all">
+          <div className="rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-amber-50/90 via-white to-yellow-50/80 dark:bg-none dark:bg-slate-900/95 border-2 border-amber-200 dark:border-amber-900/70 shadow-[0_6px_0_0_#FDE68A] dark:shadow-[0_6px_0_0_#78350F] transition-all">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
               
               <div className="lg:col-span-5 order-2 lg:order-1 bg-gradient-to-br from-amber-950 via-slate-900 to-orange-950 p-6 rounded-3xl border-2 border-amber-500/60 text-white shadow-xl space-y-3">
@@ -616,23 +644,23 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   <AlertTriangle className="h-4 w-4" />
                   Alerta Preventivo de Consumo
                 </div>
-                <h3 className="text-2xl sm:text-3xl font-black text-slate-900">
+                <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
                   Nunca mais descubra que estourou o limite no último dia do mês.
                 </h3>
-                <p className="text-sm sm:text-base font-bold text-slate-600 leading-relaxed">
+                <p className="text-sm sm:text-base font-bold text-slate-600 dark:text-slate-300 leading-relaxed">
                   Saber que gastou demais depois que a fatura fechou não serve para nada. Defina sua margem de segurança (ex: 80%) e receba avisos preventivos para agir com antecedência.
                 </p>
-                <ul className="space-y-2.5 text-xs sm:text-sm font-bold text-slate-700">
+                <ul className="space-y-2.5 text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">
                   <li className="flex items-center gap-2.5">
-                    <div className="w-5 h-5 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">✓</div>
+                    <div className="w-5 h-5 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-400 border border-amber-300 dark:border-amber-800 flex items-center justify-center shrink-0">✓</div>
                     Radar visual com alertas amarelos e vermelhos antes de extrapolar o teto
                   </li>
                   <li className="flex items-center gap-2.5">
-                    <div className="w-5 h-5 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">✓</div>
+                    <div className="w-5 h-5 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-400 border border-amber-300 dark:border-amber-800 flex items-center justify-center shrink-0">✓</div>
                     Cálculo diário em tempo real de quanto ainda pode ser gasto com segurança
                   </li>
                   <li className="flex items-center gap-2.5">
-                    <div className="w-5 h-5 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">✓</div>
+                    <div className="w-5 h-5 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-400 border border-amber-300 dark:border-amber-800 flex items-center justify-center shrink-0">✓</div>
                     Tranquilidade para manter a economia mensal intacta
                   </li>
                 </ul>
@@ -645,114 +673,127 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </section>
 
       {/* =========================================================================
-          4. TABELA COMPARATIVA MATADORA COM CABEÇALHO AZUL REAL SÓLIDO
+          4. TABELA COMPARATIVA MATADORA COM FUNDO 100% UNIFORME E ELEGANTE
           ========================================================================= */}
       <section className="space-y-8">
         <div className="text-center max-w-3xl mx-auto space-y-3">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border-2 border-emerald-300 text-xs font-black uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border-2 border-emerald-300 dark:border-emerald-800 text-xs font-black uppercase tracking-wider">
             Comparativo Transparente
           </div>
-          <h2 className="text-2xl sm:text-4xl font-black text-slate-900">
+          <h2 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white">
             Por que o Economia Real é diferente de tudo o que você já usou?
           </h2>
-          <p className="text-slate-600 text-sm sm:text-base font-bold">
+          <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-base font-bold">
             Compare lado a lado e entenda por que a nossa abordagem traz resultados reais.
           </p>
         </div>
 
-        <div className="rounded-3xl overflow-hidden border-2 border-slate-300 shadow-2xl bg-white">
+        <div className="rounded-3xl overflow-hidden border-2 border-slate-300 dark:border-slate-800 shadow-2xl bg-white dark:bg-slate-900">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs sm:text-sm">
               <thead>
                 <tr className="bg-slate-900 text-white border-b-2 border-slate-800">
                   <th className="p-4 sm:p-5 font-black text-slate-200">Recurso / Diferencial</th>
-                  <th className="p-4 sm:p-5 font-black text-yellow-300 bg-[#026CD6] border-x-2 border-blue-400 text-center text-sm sm:text-base">
-                    💼 Economia Real
+                  <th className="p-4 sm:p-5 font-black text-center text-sm sm:text-base text-yellow-300 dark:text-sky-400 col-highlight-real">
+                    <span className="inline-flex items-center gap-1.5">
+                      <Sparkles className="h-4 w-4 fill-yellow-300 dark:fill-sky-400" /> Economia Real
+                    </span>
                   </th>
                   <th className="p-4 sm:p-5 font-extrabold text-slate-300 text-center">Planilhas Excel</th>
                   <th className="p-4 sm:p-5 font-extrabold text-slate-300 text-center">Outros Apps</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 font-bold">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-bold">
                 
                 {/* Linha 1 */}
-                <tr className="hover:bg-slate-50/50">
-                  <td className="p-4 sm:p-5 text-slate-900 font-black">Lançamento de Gastos por Voz com I.A</td>
-                  <td className="p-4 sm:p-5 text-center bg-blue-50/80 border-x-2 border-blue-200 text-emerald-700 font-black">
-                    <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-5 w-5 text-emerald-600 stroke-[3]" /> Sim, em tempo real</span>
+                <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                  <td className="p-4 sm:p-5 text-slate-900 dark:text-slate-100 font-black">Lançamento de Gastos por Voz com I.A</td>
+                  <td className="p-4 sm:p-5 text-center text-emerald-700 dark:text-emerald-400 font-black col-highlight-real">
+                    <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-5 w-5 stroke-[2.5]" /> Sim, em tempo real</span>
                   </td>
-                  <td className="p-4 sm:p-5 text-center text-rose-500 font-extrabold">
+                  <td className="p-4 sm:p-5 text-center text-rose-500">
                     <XCircle className="h-5 w-5 text-rose-400 mx-auto" />
                   </td>
-                  <td className="p-4 sm:p-5 text-center text-rose-500 font-extrabold">
+                  <td className="p-4 sm:p-5 text-center text-rose-500">
                     <XCircle className="h-5 w-5 text-rose-400 mx-auto" />
                   </td>
                 </tr>
 
                 {/* Linha 2 */}
-                <tr className="hover:bg-slate-50/50">
-                  <td className="p-4 sm:p-5 text-slate-900 font-black">Importação de Faturas e Extratos (OFX/CSV)</td>
-                  <td className="p-4 sm:p-5 text-center bg-blue-50/80 border-x-2 border-blue-200 text-emerald-700 font-black">
-                    <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-5 w-5 text-emerald-600 stroke-[3]" /> Sim, automático</span>
+                <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                  <td className="p-4 sm:p-5 text-slate-900 dark:text-slate-100 font-black">Importação de Faturas e Extratos (OFX/CSV)</td>
+                  <td className="p-4 sm:p-5 text-center text-emerald-700 dark:text-emerald-400 font-black col-highlight-real">
+                    <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-5 w-5 stroke-[2.5]" /> Sim, automático</span>
                   </td>
-                  <td className="p-4 sm:p-5 text-center text-slate-500">Copiar e colar manual</td>
-                  <td className="p-4 sm:p-5 text-center text-rose-600">Cobram plano pago</td>
+                  <td className="p-4 sm:p-5 text-center text-slate-600 dark:text-slate-300 font-medium">Copiar e colar manual</td>
+                  <td className="p-4 sm:p-5 text-center text-rose-600 dark:text-rose-400 font-bold">Cobram plano pago</td>
                 </tr>
 
                 {/* Linha 3 */}
-                <tr className="hover:bg-slate-50/50">
-                  <td className="p-4 sm:p-5 text-slate-900 font-black">Prevenção contra Dupla Contagem de Cartão</td>
-                  <td className="p-4 sm:p-5 text-center bg-blue-50/80 border-x-2 border-blue-200 text-emerald-700 font-black">
-                    <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-5 w-5 text-emerald-600 stroke-[3]" /> Sim (Passivo Real)</span>
+                <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                  <td className="p-4 sm:p-5 text-slate-900 dark:text-slate-100 font-black">Prevenção contra Dupla Contagem de Cartão</td>
+                  <td className="p-4 sm:p-5 text-center text-emerald-700 dark:text-emerald-400 font-black col-highlight-real">
+                    <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-5 w-5 stroke-[2.5]" /> Sim (Passivo Real)</span>
                   </td>
-                  <td className="p-4 sm:p-5 text-center text-slate-500">Fórmulas complexas</td>
+                  <td className="p-4 sm:p-5 text-center text-slate-600 dark:text-slate-300 font-medium">Fórmulas complexas</td>
                   <td className="p-4 sm:p-5 text-center text-rose-500">
                     <XCircle className="h-5 w-5 text-rose-400 mx-auto" />
                   </td>
                 </tr>
 
                 {/* Linha 4 */}
-                <tr className="hover:bg-slate-50/50">
-                  <td className="p-4 sm:p-5 text-slate-900 font-black">Sugestão de Percentuais & Metas com I.A</td>
-                  <td className="p-4 sm:p-5 text-center bg-blue-50/80 border-x-2 border-blue-200 text-emerald-700 font-black">
-                    <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-5 w-5 text-emerald-600 stroke-[3]" /> Com travas individuais</span>
+                <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                  <td className="p-4 sm:p-5 text-slate-900 dark:text-slate-100 font-black">Sugestão de Percentuais & Metas com I.A</td>
+                  <td className="p-4 sm:p-5 text-center text-emerald-700 dark:text-emerald-400 font-black col-highlight-real">
+                    <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-5 w-5 stroke-[2.5]" /> Com travas individuais</span>
                   </td>
                   <td className="p-4 sm:p-5 text-center text-rose-500">
                     <XCircle className="h-5 w-5 text-rose-400 mx-auto" />
                   </td>
-                  <td className="p-4 sm:p-5 text-center text-slate-500">Apenas valores fixos</td>
+                  <td className="p-4 sm:p-5 text-center text-slate-600 dark:text-slate-300 font-medium">Apenas valores fixos</td>
                 </tr>
 
                 {/* Linha 5 */}
-                <tr className="hover:bg-slate-50/50">
-                  <td className="p-4 sm:p-5 text-slate-900 font-black">Alerta Preventivo de Limite (Antes de Estourar)</td>
-                  <td className="p-4 sm:p-5 text-center bg-blue-50/80 border-x-2 border-blue-200 text-emerald-700 font-black">
-                    <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-5 w-5 text-emerald-600 stroke-[3]" /> Sim, personalizável</span>
+                <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                  <td className="p-4 sm:p-5 text-slate-900 dark:text-slate-100 font-black">Alerta Preventivo de Limite (Antes de Estourar)</td>
+                  <td className="p-4 sm:p-5 text-center text-emerald-700 dark:text-emerald-400 font-black col-highlight-real">
+                    <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-5 w-5 stroke-[2.5]" /> Sim, personalizável</span>
                   </td>
                   <td className="p-4 sm:p-5 text-center text-rose-500">
                     <XCircle className="h-5 w-5 text-rose-400 mx-auto" />
                   </td>
-                  <td className="p-4 sm:p-5 text-center text-slate-500">Apenas aviso tardio</td>
+                  <td className="p-4 sm:p-5 text-center text-slate-600 dark:text-slate-300 font-medium">Apenas aviso tardio</td>
                 </tr>
 
                 {/* Linha 6 */}
-                <tr className="hover:bg-slate-50/50">
-                  <td className="p-4 sm:p-5 text-slate-900 font-black">Precisão Monetária ao Centavo</td>
-                  <td className="p-4 sm:p-5 text-center bg-blue-50/80 border-x-2 border-blue-200 text-emerald-700 font-black">
-                    <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-5 w-5 text-emerald-600 stroke-[3]" /> 100% Determinística</span>
+                <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                  <td className="p-4 sm:p-5 text-slate-900 dark:text-slate-100 font-black">Precisão Monetária ao Centavo</td>
+                  <td className="p-4 sm:p-5 text-center text-emerald-700 dark:text-emerald-400 font-black col-highlight-real">
+                    <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-5 w-5 stroke-[2.5]" /> 100% Determinística</span>
                   </td>
-                  <td className="p-4 sm:p-5 text-center text-emerald-600 font-black">Sim</td>
-                  <td className="p-4 sm:p-5 text-center text-rose-500">Arredonda errado</td>
+                  <td className="p-4 sm:p-5 text-center text-emerald-600 dark:text-emerald-400 font-black">Sim</td>
+                  <td className="p-4 sm:p-5 text-center text-rose-600 dark:text-rose-400 font-bold">Arredonda errado</td>
                 </tr>
 
-                {/* Linha 7 */}
-                <tr className="bg-slate-50/90">
-                  <td className="p-4 sm:p-5 text-slate-900 font-black">Preço / Mensalidade</td>
-                  <td className="p-4 sm:p-5 text-center bg-blue-100 border-x-2 border-blue-300 text-[#026CD6] font-black text-base">
-                    100% Gratuito
+                {/* Linha 7: Destaque Final de Preço */}
+                <tr className="bg-slate-100 dark:bg-slate-900/90 border-t-2 border-slate-300 dark:border-slate-800">
+                  <td className="p-4 sm:p-5 text-slate-900 dark:text-white font-black text-sm sm:text-base">
+                    Preço / Mensalidade
                   </td>
-                  <td className="p-4 sm:p-5 text-center text-slate-600">Grátis (muito trabalho)</td>
-                  <td className="p-4 sm:p-5 text-center text-rose-600 font-black">R$ 15 a R$ 35/mês</td>
+                  <td className="p-4 sm:p-5 text-center font-black text-sm sm:text-base col-highlight-real-price">
+                    <span className="hidden dark:inline-flex items-center justify-center px-3.5 py-1.5 rounded-xl bg-emerald-950/60 text-emerald-400 border border-emerald-800 font-black text-sm shadow-sm">
+                      100% Gratuito
+                    </span>
+                    <span className="inline-block dark:hidden">
+                      100% Gratuito
+                    </span>
+                  </td>
+                  <td className="p-4 sm:p-5 text-center text-slate-600 dark:text-slate-300 font-medium text-xs sm:text-sm">
+                    Grátis (muito trabalho)
+                  </td>
+                  <td className="p-4 sm:p-5 text-center text-rose-600 dark:text-rose-400 font-black text-xs sm:text-sm">
+                    R$ 15 a R$ 35/mês
+                  </td>
                 </tr>
 
               </tbody>
@@ -766,13 +807,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           ========================================================================= */}
       <section className="space-y-8">
         <div className="text-center max-w-2xl mx-auto space-y-3">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-indigo-100 text-indigo-800 border-2 border-indigo-300 text-xs font-black uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-indigo-100 dark:bg-indigo-950/80 text-indigo-800 dark:text-indigo-300 border-2 border-indigo-300 dark:border-indigo-800 text-xs font-black uppercase tracking-wider">
             Simplicidade Total
           </div>
-          <h2 className="text-2xl sm:text-4xl font-black text-slate-900">
+          <h2 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white">
             Comece em menos de 1 minuto
           </h2>
-          <p className="text-slate-600 text-sm sm:text-base font-bold">
+          <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-base font-bold">
             Sem burocracias. Você cria sua conta e já começa a economizar hoje.
           </p>
         </div>
@@ -780,34 +821,34 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
           
           {/* Passo 1 (Azul Real) */}
-          <div className="rounded-3xl p-6 space-y-3.5 text-center sm:text-left bg-gradient-to-b from-blue-50 to-white border-2 border-blue-200 shadow-[0_6px_0_0_#93C5FD]">
+          <div className="rounded-3xl p-6 space-y-3.5 text-center sm:text-left bg-gradient-to-b from-blue-50 to-white dark:!bg-none dark:!bg-[#0F172A] border-2 border-blue-200 dark:border-blue-900/70 shadow-[0_6px_0_0_#93C5FD] dark:shadow-[0_6px_0_0_#1E3A8A] transition-all">
             <div className="h-12 w-12 rounded-2xl bg-[#026CD6] border-b-4 border-blue-800 text-white font-black text-xl flex items-center justify-center shadow-md mx-auto sm:mx-0">
               1
             </div>
-            <h3 className="text-lg font-black text-slate-900">Crie sua Conta Grátis</h3>
-            <p className="text-xs sm:text-sm font-bold text-slate-600 leading-relaxed">
+            <h3 className="text-lg font-black text-slate-900 dark:!text-white">Crie sua Conta Grátis</h3>
+            <p className="text-xs sm:text-sm font-bold text-slate-600 dark:!text-slate-300 leading-relaxed">
               Informe apenas seu nome e e-mail. Não pedimos cartão de crédito, CPF ou senhas bancárias.
             </p>
           </div>
 
           {/* Passo 2 (Índigo Tecnológico) */}
-          <div className="rounded-3xl p-6 space-y-3.5 text-center sm:text-left bg-gradient-to-b from-indigo-50 to-white border-2 border-indigo-200 shadow-[0_6px_0_0_#C7D2FE]">
+          <div className="rounded-3xl p-6 space-y-3.5 text-center sm:text-left bg-gradient-to-b from-indigo-50 to-white dark:!bg-none dark:!bg-[#0F172A] border-2 border-indigo-200 dark:border-indigo-900/70 shadow-[0_6px_0_0_#C7D2FE] dark:shadow-[0_6px_0_0_#1E1B4B] transition-all">
             <div className="h-12 w-12 rounded-2xl bg-indigo-600 border-b-4 border-indigo-800 text-white font-black text-xl flex items-center justify-center shadow-md mx-auto sm:mx-0">
               2
             </div>
-            <h3 className="text-lg font-black text-slate-900">Lance com Voz ou Fatura</h3>
-            <p className="text-xs sm:text-sm font-bold text-slate-600 leading-relaxed">
+            <h3 className="text-lg font-black text-slate-900 dark:!text-white">Lance com Voz ou Fatura</h3>
+            <p className="text-xs sm:text-sm font-bold text-slate-600 dark:!text-slate-300 leading-relaxed">
               Fale o que gastou no microfone em segundos ou arraste a fatura do seu banco. A I.A categoriza tudo.
             </p>
           </div>
 
           {/* Passo 3 (Verde Esmeralda) */}
-          <div className="rounded-3xl p-6 space-y-3.5 text-center sm:text-left bg-gradient-to-b from-emerald-50 to-white border-2 border-emerald-200 shadow-[0_6px_0_0_#A7F3D0]">
+          <div className="rounded-3xl p-6 space-y-3.5 text-center sm:text-left bg-gradient-to-b from-emerald-50 to-white dark:!bg-none dark:!bg-[#0F172A] border-2 border-emerald-200 dark:border-emerald-900/70 shadow-[0_6px_0_0_#A7F3D0] dark:shadow-[0_6px_0_0_#064E3B] transition-all">
             <div className="h-12 w-12 rounded-2xl bg-emerald-600 border-b-4 border-emerald-800 text-white font-black text-xl flex items-center justify-center shadow-md mx-auto sm:mx-0">
               3
             </div>
-            <h3 className="text-lg font-black text-slate-900">Acompanhe e Economize</h3>
-            <p className="text-xs sm:text-sm font-bold text-slate-600 leading-relaxed">
+            <h3 className="text-lg font-black text-slate-900 dark:!text-white">Acompanhe e Economize</h3>
+            <p className="text-xs sm:text-sm font-bold text-slate-600 dark:!text-slate-300 leading-relaxed">
               Receba avisos antes de ultrapassar suas metas e tome decisões inteligentes para sobrar dinheiro no bolso.
             </p>
           </div>
@@ -820,13 +861,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           ========================================================================= */}
       <section className="space-y-8 max-w-3xl mx-auto">
         <div className="text-center space-y-3">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-slate-200 text-slate-800 border-2 border-slate-300 text-xs font-black uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-2 border-slate-300 dark:border-slate-700 text-xs font-black uppercase tracking-wider">
             Tire Suas Dúvidas
           </div>
-          <h2 className="text-2xl sm:text-4xl font-black text-slate-900">
+          <h2 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white">
             Perguntas Frequentes
           </h2>
-          <p className="text-slate-600 text-sm font-bold">
+          <p className="text-slate-600 dark:text-slate-400 text-sm font-bold">
             Tudo o que você precisa saber para começar com total segurança.
           </p>
         </div>
@@ -854,10 +895,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               answer: 'Você estipula uma margem de segurança (por exemplo, 80%). Quando os seus gastos em Alimentação, Lazer ou qualquer outra categoria atingem esse patamar, a plataforma acende alertas visuais inteligentes avisando quantos reais restam até o final do período, para que você não seja pego de surpresa.'
             }
           ].map((faq, idx) => (
-            <div key={idx} className="rounded-2xl overflow-hidden border-2 border-slate-200/90 bg-white shadow-sm hover:border-blue-300 transition-all border-l-4 border-l-[#026CD6]">
+            <div key={idx} className="rounded-2xl overflow-hidden border-2 border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm hover:border-blue-300 dark:hover:border-blue-700 transition-all border-l-4 border-l-[#026CD6]">
               <button
                 onClick={() => toggleFaq(idx)}
-                className="w-full p-5 text-left font-black text-slate-900 flex items-center justify-between gap-4 hover:bg-blue-50/30 transition-colors"
+                className="w-full p-5 text-left font-black text-slate-900 dark:text-white flex items-center justify-between gap-4 hover:bg-blue-50/30 dark:hover:bg-slate-800/50 transition-colors"
               >
                 <span className="text-sm sm:text-base">{faq.question}</span>
                 <ChevronDown
@@ -867,7 +908,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 />
               </button>
               {openFaq === idx && (
-                <div className="px-5 pb-5 pt-1 text-xs sm:text-sm font-bold text-slate-600 leading-relaxed border-t border-slate-100 bg-slate-50/50">
+                <div className="px-5 pb-5 pt-2 text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-100 dark:border-slate-800/70 bg-transparent dark:!bg-transparent">
                   {faq.answer}
                 </div>
               )}
@@ -877,16 +918,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </section>
 
       {/* =========================================================================
-          7. CTA FINAL DE ALTA CONVERSÃO COM DEGRADÊ AZUL REAL VIBRANTE
+          7. CTA FINAL DE ALTA CONVERSÃO COM FUNDO ESCURO NEUTRO NO DARK MODE
           ========================================================================= */}
-      <section className="rounded-3xl p-8 sm:p-14 text-center relative overflow-hidden space-y-6 bg-gradient-to-br from-[#026CD6] via-[#0A7DEF] to-[#4F46E5] text-white shadow-2xl border-4 border-blue-300/40 shadow-blue-600/30">
+      <section className="rounded-3xl p-8 sm:p-14 text-center relative overflow-hidden space-y-6 bg-gradient-to-br from-[#026CD6] via-[#0A7DEF] to-[#4F46E5] dark:bg-none dark:bg-slate-900 text-white shadow-2xl border-4 border-blue-300/40 dark:border-slate-800 shadow-blue-600/30 dark:shadow-[0_8px_0_0_#020617]">
         
-        {/* Glows internos decorativos */}
-        <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-yellow-400/10 rounded-full blur-3xl pointer-events-none" />
+        {/* Glows internos decorativos (apenas no modo claro) */}
+        <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-3xl pointer-events-none dark:hidden" />
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-yellow-400/10 rounded-full blur-3xl pointer-events-none dark:hidden" />
 
         <div className="max-w-2xl mx-auto space-y-5 relative z-10">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-yellow-300 text-xs font-black shadow-sm uppercase tracking-wider mx-auto">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/20 dark:bg-slate-800 backdrop-blur-md border border-white/30 dark:border-slate-700 text-yellow-300 dark:text-sky-300 text-xs font-black shadow-sm uppercase tracking-wider mx-auto">
             <Sparkles className="h-4 w-4" />
             Comece a Economizar Hoje
           </div>
@@ -895,7 +936,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             Pronto para ter o controle do seu dinheiro no piloto automático?
           </h2>
 
-          <p className="text-blue-100 text-sm sm:text-base font-bold leading-relaxed">
+          <p className="text-blue-100 dark:text-slate-300 text-sm sm:text-base font-bold leading-relaxed">
             Junte-se a quem já parou de perder horas com planilhas e começou a poupar de verdade com inteligência artificial.
           </p>
 
@@ -907,7 +948,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               }}
               onMouseEnter={warmUpBackend}
               onTouchStart={warmUpBackend}
-              className="btn-duo btn-duo-green w-full sm:w-auto text-base sm:text-lg px-8 py-4 flex items-center justify-center gap-3 shadow-2xl shadow-emerald-950/40 border-b-4 border-emerald-800 hover:scale-[1.02] transition-transform"
+              className="btn-duo btn-duo-green w-full sm:w-auto text-base sm:text-lg px-8 py-4 flex items-center justify-center gap-3 shadow-xl border-b-4 border-emerald-800 hover:scale-[1.02] transition-transform"
             >
               <Zap className="h-5 w-5 fill-white stroke-[2.5]" />
               Criar Minha Conta Grátis
@@ -920,13 +961,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               }}
               onMouseEnter={warmUpBackend}
               onTouchStart={warmUpBackend}
-              className="btn-duo btn-duo-white w-full sm:w-auto text-base px-6 py-4 flex items-center justify-center gap-2 text-slate-800"
+              className="btn-duo btn-duo-white w-full sm:w-auto text-base px-6 py-4 flex items-center justify-center gap-2"
             >
               Já tenho conta cadastrada
             </button>
           </div>
 
-          <p className="text-xs font-bold text-blue-200/90 pt-2">
+          <p className="text-xs font-bold text-blue-200/90 dark:text-slate-400 pt-2">
             ⚡ Leva menos de 1 minuto • Sem cartão de crédito • Acesso imediato
           </p>
         </div>
@@ -935,36 +976,36 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       {/* =========================================================================
           8. RODAPÉ INSTITUCIONAL COM SELOS E-E-A-T & CONFIABILIDADE (YMYL)
           ========================================================================= */}
-      <footer className="pt-10 border-t-2 border-slate-200/80 space-y-8">
+      <footer className="pt-10 border-t-2 border-slate-200/80 dark:border-slate-800 space-y-8">
         {/* Faixa de Selos de Confiança */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pb-6 border-b border-slate-200">
-          <div className="flex items-center gap-3 p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-            <div className="h-10 w-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">
+          <div className="flex items-center gap-3 p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div className="h-10 w-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0">
               <ShieldCheck className="h-5 w-5 stroke-[2.5]" />
             </div>
             <div>
-              <p className="text-xs font-black text-slate-900">100% Conforme LGPD</p>
-              <p className="text-[11px] font-bold text-slate-500">Seus dados financeiros nunca são vendidos.</p>
+              <p className="text-xs font-black text-slate-900 dark:text-white">100% Conforme LGPD</p>
+              <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400">Seus dados financeiros nunca são vendidos.</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-            <div className="h-10 w-10 rounded-xl bg-blue-100 text-[#026CD6] flex items-center justify-center shrink-0">
+          <div className="flex items-center gap-3 p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div className="h-10 w-10 rounded-xl bg-blue-100 dark:bg-blue-950/80 text-[#026CD6] dark:text-sky-400 flex items-center justify-center shrink-0">
               <Lock className="h-5 w-5 stroke-[2.5]" />
             </div>
             <div>
-              <p className="text-xs font-black text-slate-900">Zero Senha Bancária</p>
-              <p className="text-[11px] font-bold text-slate-500">Importação por arquivo OFX ou comando de voz.</p>
+              <p className="text-xs font-black text-slate-900 dark:text-white">Zero Senha Bancária</p>
+              <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400">Importação por arquivo OFX ou comando de voz.</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-            <div className="h-10 w-10 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
+          <div className="flex items-center gap-3 p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div className="h-10 w-10 rounded-xl bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-400 flex items-center justify-center shrink-0">
               <Sparkles className="h-5 w-5 stroke-[2.5]" />
             </div>
             <div>
-              <p className="text-xs font-black text-slate-900">Precisão Decimal Rigorosa</p>
-              <p className="text-[11px] font-bold text-slate-500">Cálculos no backend sem alucinação da I.A.</p>
+              <p className="text-xs font-black text-slate-900 dark:text-white">Precisão Decimal Rigorosa</p>
+              <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400">Cálculos no backend sem alucinação da I.A.</p>
             </div>
           </div>
         </div>

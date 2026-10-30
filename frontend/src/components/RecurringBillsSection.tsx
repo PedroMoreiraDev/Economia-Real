@@ -265,12 +265,12 @@ export const RecurringBillsSection: React.FC<RecurringBillsSectionProps> = ({
           Carregando contas recorrentes...
         </div>
       ) : bills.length === 0 ? (
-        <div className="p-12 rounded-3xl bg-white border-2 border-dashed border-slate-200 text-center">
-          <div className="w-16 h-16 rounded-3xl bg-[#E8F8E8] text-[#58CC02] border-2 border-[#D7FFB8] flex items-center justify-center mx-auto mb-4 text-2xl">
+        <div className="p-12 rounded-3xl bg-white dark:!bg-[#070C14] border-2 border-dashed border-slate-200 dark:!border-slate-800 text-center">
+          <div className="w-16 h-16 rounded-3xl bg-[#E8F8E8] dark:!bg-[#0F1E36] text-[#58CC02] dark:!text-emerald-400 border-2 border-[#D7FFB8] dark:!border-emerald-800/80 flex items-center justify-center mx-auto mb-4 text-2xl">
             📅
           </div>
-          <h3 className="text-base font-black text-slate-800 mb-1">Nenhuma conta recorrente cadastrada</h3>
-          <p className="text-xs sm:text-sm font-semibold text-slate-400 max-w-sm mx-auto mb-6">
+          <h3 className="text-base font-black text-slate-800 dark:!text-white mb-1">Nenhuma conta recorrente cadastrada</h3>
+          <p className="text-xs sm:text-sm font-bold text-slate-400 dark:!text-slate-200 max-w-sm mx-auto mb-6">
             Cadastre aluguel, internet, streaming ou academia para prever seus gastos sem surpresas!
           </p>
           <button
@@ -297,7 +297,7 @@ export const RecurringBillsSection: React.FC<RecurringBillsSectionProps> = ({
                     : isDueSoon
                     ? 'border-[#FF9600]/60 ring-2 ring-[#FF9600]/20'
                     : bill.isPaidThisMonth
-                    ? 'border-[#58CC02]/40 bg-[#F4FBF4]'
+                    ? 'border-[#58CC02]/40 bg-[#F4FBF4] dark:bg-emerald-950/30 dark:border-emerald-800/50'
                     : ''
                 }`}
               >
@@ -340,7 +340,7 @@ export const RecurringBillsSection: React.FC<RecurringBillsSectionProps> = ({
                   </div>
 
                   {/* Meio de Pagamento */}
-                  <div className="flex items-center space-x-2 text-xs font-bold text-slate-500 mb-4 bg-slate-50 border border-slate-200/80 p-2.5 rounded-2xl">
+                  <div className="flex items-center space-x-2 text-xs font-bold text-slate-500 dark:!text-slate-300 mb-4 bg-slate-50 dark:!bg-[#0F172A] border border-slate-200/80 dark:!border-slate-800 p-2.5 rounded-2xl">
                     {bill.creditCardName ? (
                       <>
                         <CardIcon className="w-4 h-4 text-[#CE82FF] shrink-0" />
@@ -449,7 +449,7 @@ export const RecurringBillsSection: React.FC<RecurringBillsSectionProps> = ({
                   type="month"
                   value={launchMonth}
                   onChange={(e) => setLaunchMonth(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border-2 border-slate-200 text-slate-800 font-bold focus:outline-none focus:border-[#58CC02] focus:bg-white transition-all text-sm"
+                  className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 dark:!bg-[#0F172A] border-2 border-slate-200 dark:!border-slate-700 text-slate-800 dark:!text-white font-bold focus:outline-none focus:border-[#58CC02] focus:bg-white dark:focus:!bg-[#1E293B] transition-all text-sm"
                 />
                 <span className="text-[11px] font-bold text-slate-400 mt-1 block">
                   Vencimento configurado para o dia {billToLaunch.dayOfMonth}
@@ -473,8 +473,8 @@ export const RecurringBillsSection: React.FC<RecurringBillsSectionProps> = ({
                       onClick={() => setReplicateMonths(opt.value)}
                       className={`py-2.5 px-2 rounded-2xl border-2 text-xs font-black transition-all text-center ${
                         replicateMonths === opt.value
-                          ? 'bg-[#E8F8E8] border-[#58CC02] text-[#46A302] shadow-[0_2px_0_0_#58CC02]'
-                          : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100'
+                          ? 'bg-[#E8F8E8] dark:!bg-emerald-950/80 border-[#58CC02] text-[#46A302] dark:!text-emerald-300 shadow-[0_2px_0_0_#58CC02]'
+                          : 'bg-slate-50 dark:!bg-[#0F172A] border-slate-200 dark:!border-slate-700 text-slate-500 dark:!text-slate-300 hover:bg-slate-100 dark:hover:!bg-[#1E293B]'
                       }`}
                     >
                       {opt.label}
@@ -483,7 +483,7 @@ export const RecurringBillsSection: React.FC<RecurringBillsSectionProps> = ({
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-blue-50/60 border border-blue-200/60 text-xs font-bold text-blue-800 flex items-start space-x-2">
+              <div className="p-3.5 rounded-2xl bg-blue-50/60 dark:!bg-[#0F1E36] border border-blue-200/60 dark:!border-blue-900/60 text-xs font-bold text-blue-800 dark:!text-sky-300 flex items-start space-x-2">
                 <Layers className="w-4 h-4 text-[#026CD6] shrink-0 mt-0.5" />
                 <span>
                   {replicateMonths === 1

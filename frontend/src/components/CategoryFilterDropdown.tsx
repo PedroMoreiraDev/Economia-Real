@@ -204,7 +204,7 @@ export const CategoryFilterDropdown: React.FC<CategoryFilterDropdownProps> = ({
               width: `${coords.width}px`,
               zIndex: 9999,
             }}
-            className="card-duo bg-white/98 backdrop-blur-md border-2 border-slate-200/90 shadow-2xl p-2 rounded-2xl animate-scaleUp text-slate-800"
+            className="card-duo bg-white/98 dark:!bg-[#0F172A] backdrop-blur-md border-2 border-slate-200/90 dark:!border-slate-800 shadow-2xl p-2 rounded-2xl animate-scaleUp text-slate-800 dark:!text-white"
           >
             {/* Campo de Busca Rápida */}
             <div className="relative mb-2">
@@ -215,7 +215,7 @@ export const CategoryFilterDropdown: React.FC<CategoryFilterDropdownProps> = ({
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Buscar categoria..."
                 autoFocus
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-8 pr-2.5 py-1.5 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#026CD6] focus:bg-white transition-all"
+                className="w-full bg-slate-50 dark:!bg-[#1E293B] border border-slate-200 dark:!border-slate-700 rounded-xl pl-8 pr-2.5 py-1.5 text-xs font-semibold text-slate-800 dark:!text-white placeholder-slate-400 focus:outline-none focus:border-[#026CD6] focus:bg-white dark:focus:!bg-[#1E293B] transition-all"
               />
             </div>
 
@@ -230,8 +230,8 @@ export const CategoryFilterDropdown: React.FC<CategoryFilterDropdownProps> = ({
                 }}
                 className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold transition-all text-left ${
                   isAll
-                    ? 'bg-blue-50 text-[#026CD6] font-black'
-                    : 'hover:bg-slate-100 text-slate-700'
+                    ? 'bg-blue-50 dark:!bg-[#1E293B] text-[#026CD6] dark:!text-sky-400 font-black'
+                    : 'hover:bg-slate-100 dark:hover:!bg-[#1E293B] text-slate-700 dark:!text-slate-200'
                 }`}
               >
                 <div className="flex items-center gap-2">

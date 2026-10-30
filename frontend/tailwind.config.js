@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -18,6 +19,45 @@ export default {
           700: '#06478D',
           800: '#0B3C73',
           900: '#07264D',
+          primary: '#026CD6',
+          hover: '#0A7DEF',
+          active: '#0153AB',
+          light: '#E0EFFF',
+          surface: '#F0F7FF',
+        },
+        success: {
+          50: '#F0FDF4',
+          100: '#DCFCE7',
+          200: '#BBF7D0',
+          500: '#10B981',
+          600: '#059669',
+          700: '#047857',
+          duo: '#58CC02',
+          duoDark: '#46A302',
+          duoLight: '#E8F8E8',
+          duoBorder: '#D7FFB8',
+        },
+        danger: {
+          50: '#FEF2F2',
+          100: '#FEE2E2',
+          500: '#EF4444',
+          600: '#DC2626',
+          700: '#B91C1C',
+        },
+        warning: {
+          50: '#FFFBEB',
+          100: '#FEF3C7',
+          500: '#F59E0B',
+          600: '#D97706',
+          700: '#B45309',
+        },
+        surface: {
+          light: '#FFFFFF',
+          subtle: '#F8FAFC',
+          muted: '#F1F5F9',
+          dark: '#0F172A',
+          cardDark: '#1E293B',
+          bgDark: '#090E17',
         },
         duo: {
           green: '#026CD6',

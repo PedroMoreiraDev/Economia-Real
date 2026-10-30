@@ -565,29 +565,29 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white border-2 border-slate-200 rounded-3xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         
-        {/* Cabeçalho alegre estilo Duolingo */}
-        <div className="p-6 border-b-2 border-slate-100 bg-[#F4FBF4] flex items-center justify-between">
+        {/* Cabeçalho alegre estilo Duolingo com suporte a Modo Escuro */}
+        <div className="p-6 border-b-2 border-slate-100 dark:border-slate-800 bg-[#F4FBF4] dark:!bg-slate-900 flex items-center justify-between">
           <div className="flex items-center gap-3.5">
             <div className="p-3 rounded-2xl bg-[#58CC02] text-white shadow-[0_3px_0_0_#46A302]">
               <Sparkles className="w-6 h-6 stroke-[2.5]" />
             </div>
             <div>
-              <h2 className="text-xl sm:text-2xl font-black text-slate-800 flex items-center gap-2">
+              <h2 className="text-xl sm:text-2xl font-black text-slate-800 dark:!text-white flex items-center gap-2">
                 <span>Lançamento com IA</span>
-                <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#E8F8E8] text-[#46A302] border border-[#D7FFB8]">
+                <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#E8F8E8] dark:!bg-emerald-950/80 text-[#46A302] dark:!text-emerald-400 border border-[#D7FFB8] dark:!border-emerald-800/80">
                   Zero Alucinação
                 </span>
               </h2>
-              <p className="text-xs sm:text-sm font-bold text-slate-400">
+              <p className="text-xs sm:text-sm font-bold text-slate-500 dark:!text-slate-400">
                 Fale ou digite naturalmente — o sistema estrutura para você!
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 p-2 rounded-xl hover:bg-slate-100 transition-colors"
+            className="text-slate-400 hover:text-slate-600 dark:hover:text-white p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
           >
             <X className="w-5 h-5 stroke-[2.5]" />
           </button>
@@ -808,30 +808,30 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
               
               {/* Balão de transcrição se veio de voz */}
               {extractedData.transcribedText && (
-                <div className="p-3.5 bg-purple-50 border-2 border-[#CE82FF]/40 rounded-2xl text-xs font-bold text-[#A64BFF]">
-                  <span className="font-black uppercase tracking-wider block mb-0.5">Transcrição de Voz:</span>
+                <div className="p-3.5 bg-purple-50 dark:bg-purple-950/40 border-2 border-[#CE82FF]/40 dark:border-purple-800/80 rounded-2xl text-xs font-bold text-[#A64BFF] dark:text-purple-300">
+                  <span className="font-black uppercase tracking-wider block mb-0.5 text-purple-700 dark:text-purple-300">Transcrição de Voz:</span>
                   "{extractedData.transcribedText}"
                 </div>
               )}
 
               {/* Banner de Validação & Confiança */}
-              <div className="flex items-center justify-between p-3.5 bg-[#E8F8E8] border-2 border-[#D7FFB8] rounded-2xl">
+              <div className="flex items-center justify-between p-3.5 bg-[#E8F8E8] dark:!bg-emerald-950/80 border-2 border-[#D7FFB8] dark:!border-emerald-800 rounded-2xl shadow-sm">
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#58CC02] stroke-[2.5]" />
-                  <span className="text-xs font-black text-slate-700">
+                  <CheckCircle2 className="w-4 h-4 text-[#58CC02] dark:!text-emerald-400 stroke-[2.5]" />
+                  <span className="text-xs font-black text-slate-800 dark:!text-emerald-200">
                     Dados interpretados. Revise e confirme:
                   </span>
                 </div>
-                <span className="text-xs font-black px-2.5 py-0.5 rounded-full bg-white text-[#46A302] border border-[#58CC02]">
+                <span className="text-xs font-black px-2.5 py-0.5 rounded-full bg-white dark:!bg-slate-900 text-[#46A302] dark:!text-emerald-400 border border-[#58CC02] dark:!border-emerald-700 shadow-sm">
                   {Math.round(extractedData.confidenceScore * 100)}% Confiança
                 </span>
               </div>
 
               {/* Avisos de Ambiguidade se houver */}
               {extractedData.ambiguities && extractedData.ambiguities.length > 0 && (
-                <div className="p-3.5 bg-amber-50 border-2 border-[#FFC800] rounded-2xl space-y-1">
+                <div className="p-3.5 bg-amber-50 dark:bg-amber-950/40 border-2 border-[#FFC800] dark:border-amber-800/80 rounded-2xl space-y-1">
                   {extractedData.ambiguities.map((amb, i) => (
-                    <p key={i} className="text-xs font-bold text-[#B37800] flex items-center gap-1.5">
+                    <p key={i} className="text-xs font-bold text-[#B37800] dark:text-amber-300 flex items-center gap-1.5">
                       <HelpCircle className="w-3.5 h-3.5 shrink-0" />
                       {amb}
                     </p>
@@ -959,7 +959,7 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
                 />
 
                 {confirmCategoryName && !confirmCategoryId && (
-                  <p className="text-[11px] font-bold text-[#46A302] flex items-center gap-1.5 bg-[#E8F8E8] p-2.5 rounded-xl border border-[#D7FFB8]">
+                  <p className="text-[11px] font-bold text-[#46A302] dark:text-emerald-300 flex items-center gap-1.5 bg-[#E8F8E8] dark:bg-emerald-950/60 p-2.5 rounded-xl border border-[#D7FFB8] dark:border-emerald-800">
                     <CheckCircle2 className="w-3.5 h-3.5 shrink-0 stroke-[2.5]" />
                     <span>
                       A categoria <strong>"{confirmCategoryName}"</strong> será cadastrada automaticamente ao confirmar.
