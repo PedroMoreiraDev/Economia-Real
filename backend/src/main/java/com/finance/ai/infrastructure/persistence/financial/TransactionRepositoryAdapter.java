@@ -27,11 +27,21 @@ class TransactionRepositoryAdapter implements TransactionRepository {
     }
 
     @Override
+    public org.springframework.data.domain.Page<Transaction> findAllByUserId(UUID userId, org.springframework.data.domain.Pageable pageable) {
+        return jpa.findAllByUserId(userId, pageable).map(this::toDomain);
+    }
+
+    @Override
     public List<Transaction> findAllByUserIdAndPeriod(UUID userId, LocalDate startDate, LocalDate endDate) {
         return jpa.findAllByUserIdAndPeriod(userId, startDate, endDate)
                 .stream()
                 .map(this::toDomain)
                 .toList();
+    }
+
+    @Override
+    public org.springframework.data.domain.Page<Transaction> findAllByUserIdAndPeriod(UUID userId, LocalDate startDate, LocalDate endDate, org.springframework.data.domain.Pageable pageable) {
+        return jpa.findAllByUserIdAndPeriod(userId, startDate, endDate, pageable).map(this::toDomain);
     }
 
     @Override

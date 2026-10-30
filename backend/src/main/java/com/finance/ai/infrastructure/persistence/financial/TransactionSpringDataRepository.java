@@ -14,10 +14,18 @@ interface TransactionSpringDataRepository extends JpaRepository<TransactionJpaEn
 
     List<TransactionJpaEntity> findAllByUserIdOrderByAccrualDateDescCreatedAtDesc(UUID userId);
 
+    org.springframework.data.domain.Page<TransactionJpaEntity> findAllByUserId(UUID userId, org.springframework.data.domain.Pageable pageable);
+
     @Query("SELECT t FROM TransactionJpaEntity t WHERE t.userId = :userId AND t.accrualDate >= :startDate AND t.accrualDate <= :endDate ORDER BY t.accrualDate DESC, t.createdAt DESC")
     List<TransactionJpaEntity> findAllByUserIdAndPeriod(@Param("userId") UUID userId,
                                                         @Param("startDate") LocalDate startDate,
                                                         @Param("endDate") LocalDate endDate);
+
+    @Query("SELECT t FROM TransactionJpaEntity t WHERE t.userId = :userId AND t.accrualDate >= :startDate AND t.accrualDate <= :endDate")
+    org.springframework.data.domain.Page<TransactionJpaEntity> findAllByUserIdAndPeriod(@Param("userId") UUID userId,
+                                                                                        @Param("startDate") LocalDate startDate,
+                                                                                        @Param("endDate") LocalDate endDate,
+                                                                                        org.springframework.data.domain.Pageable pageable);
 
     @Query("SELECT t FROM TransactionJpaEntity t WHERE t.userId = :userId AND t.notes LIKE CONCAT(:prefix, '%')")
     List<TransactionJpaEntity> findAllByUserIdAndNotesStartingWith(@Param("userId") UUID userId, @Param("prefix") String prefix);

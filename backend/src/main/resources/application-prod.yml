@@ -1,0 +1,18 @@
+# Configurações Estritas de Produção (Profile: prod)
+spring:
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+    baseline-on-migrate: false
+
+app:
+  security:
+    # Em produção, JWT_SECRET é OBRIGATÓRIA e não possui valor padrão, garantindo Fail-Fast
+    jwt-secret: ${JWT_SECRET}
+
+cors:
+  # Em produção, origens permitidas devem ser explicitamente configuradas
+  allowed-origins: ${CORS_ALLOWED_ORIGINS}

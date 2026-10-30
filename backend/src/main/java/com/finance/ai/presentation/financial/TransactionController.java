@@ -98,6 +98,22 @@ public class TransactionController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/paged")
+    @Operation(summary = "Lista transações paginadas do usuário autenticado")
+    public ResponseEntity<org.springframework.data.domain.Page<TransactionResponse>> listPaged(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @org.springframework.data.web.PageableDefault(size = 30, sort = "accrualDate", direction = org.springframework.data.domain.Sort.Direction.DESC) org.springframework.data.domain.Pageable pageable) {
+
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        var transactionsPage = listTransactionsUseCase.executePaged(user.userId(), startDate, endDate, pageable);
+        var progressMap = listTransactionsUseCase.getRecurringProgressMap(user.userId(), transactionsPage.getContent());
+        var responsePage = transactionsPage.map(t -> toResponse(t, progressMap));
+        return ResponseEntity.ok(responsePage);
+    }
+
     @GetMapping("/summary")
     @Operation(summary = "Obtém métricas determinísticas consolidadas (receitas, despesas e saldos)")
     public ResponseEntity<FinancialSummaryResult> getSummary(

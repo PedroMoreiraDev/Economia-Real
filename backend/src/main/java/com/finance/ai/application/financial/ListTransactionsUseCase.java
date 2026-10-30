@@ -26,6 +26,14 @@ public class ListTransactionsUseCase {
         return transactionRepository.findAllByUserId(userId);
     }
 
+    @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<Transaction> executePaged(UUID userId, LocalDate startDate, LocalDate endDate, org.springframework.data.domain.Pageable pageable) {
+        if (startDate != null && endDate != null) {
+            return transactionRepository.findAllByUserIdAndPeriod(userId, startDate, endDate, pageable);
+        }
+        return transactionRepository.findAllByUserId(userId, pageable);
+    }
+
     public record RecurringProgress(int current, int total, int remaining) {}
 
     private static final java.util.regex.Pattern NOTES_FRACTION_PATTERN = java.util.regex.Pattern.compile("\\((\\d+)/(\\d+)\\)");

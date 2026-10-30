@@ -230,8 +230,34 @@ const MainDashboard: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isAdminUser]);
 
-  // Abas de navegação estilo Duolingo
-  const [activeTab, setActiveTab] = useState<TabType>('overview');
+  // Abas de navegação estilo Duolingo sincronizadas com a URL (Deep-linking)
+  const getInitialTab = (): TabType => {
+    const hash = window.location.hash.replace('#', '').toLowerCase();
+    if (hash === 'analytics' || hash === 'recurring' || hash === 'goals') {
+      return hash as TabType;
+    }
+    return 'overview';
+  };
+
+  const [activeTab, setActiveTabState] = useState<TabType>(getInitialTab);
+
+  const setActiveTab = (tab: TabType) => {
+    setActiveTabState(tab);
+    window.location.hash = tab === 'overview' ? '' : tab;
+  };
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '').toLowerCase();
+      if (hash === 'analytics' || hash === 'recurring' || hash === 'goals') {
+        setActiveTabState(hash as TabType);
+      } else {
+        setActiveTabState('overview');
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   // Navegação de Mês e Filtros Temporais Globais
   const [selectedMonth, setSelectedMonth] = useState<string>(() => getCurrentMonthStr());

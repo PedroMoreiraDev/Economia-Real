@@ -33,6 +33,7 @@ public class CategoryController {
 
     @PostMapping
     @Operation(summary = "Cria uma nova categoria para o usuário autenticado")
+    @org.springframework.cache.annotation.CacheEvict(value = "userCategories", key = "#user.userId()")
     public ResponseEntity<CategoryResponse> create(
             @AuthenticationPrincipal AuthenticatedUser user,
             @Valid @RequestBody CreateCategoryRequest request) {
@@ -51,6 +52,7 @@ public class CategoryController {
 
     @GetMapping
     @Operation(summary = "Lista todas as categorias do usuário e padrões de sistema")
+    @org.springframework.cache.annotation.Cacheable(value = "userCategories", key = "#user.userId()")
     public ResponseEntity<List<CategoryResponse>> list(@AuthenticationPrincipal AuthenticatedUser user) {
         if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
