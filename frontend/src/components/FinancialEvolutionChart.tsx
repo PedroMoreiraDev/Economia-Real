@@ -143,17 +143,17 @@ export const FinancialEvolutionChart: React.FC<FinancialEvolutionChartProps> = (
   const activeMonthData = activeMonthIdx !== null ? data[activeMonthIdx] : null;
 
   return (
-    <div className="card-duo p-6 sm:p-8 space-y-6 overflow-hidden dark:!bg-[#0F172A] dark:!border-slate-800">
+    <div className="card-duo p-3.5 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 overflow-hidden dark:!bg-[#0F172A] dark:!border-slate-800">
       
       {/* 1. CABEÇALHO DO GRÁFICO & CONTROLES */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b-2 border-slate-100 dark:!border-slate-800 pb-5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 border-b-2 border-slate-100 dark:!border-slate-800 pb-3 sm:pb-5">
         <div className="space-y-1">
           <div className="flex items-center gap-2.5">
-            <div className="p-2.5 rounded-2xl bg-gradient-to-br from-[#10B981] to-[#059669] text-white shadow-[0_3px_0_0_#047857]">
+            <div className="p-2.5 rounded-2xl bg-gradient-to-br from-[#10B981] to-[#059669] text-white shadow-[0_3px_0_0_#047857] shrink-0">
               <TrendingUp className="w-5 h-5 stroke-[2.5]" />
             </div>
             <div>
-              <h3 className="text-xl font-black text-slate-900 dark:!text-white tracking-tight flex items-center gap-2">
+              <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:!text-white tracking-tight flex items-center gap-2">
                 Evolução Financeira
                 <span className="text-xs font-black px-2.5 py-0.5 rounded-full bg-slate-100 dark:!bg-slate-800 text-slate-600 dark:!text-slate-300 border border-slate-200 dark:!border-slate-700">
                   Últimos 6 Meses

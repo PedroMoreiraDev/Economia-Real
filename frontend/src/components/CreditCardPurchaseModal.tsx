@@ -91,42 +91,42 @@ export const CreditCardPurchaseModal: React.FC<CreditCardPurchaseModalProps> = (
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
       <div 
-        className="w-full max-w-lg rounded-3xl bg-white border-2 border-slate-200 shadow-2xl p-5 sm:p-8 relative max-h-[92vh] overflow-y-auto"
+        className="w-full max-w-lg rounded-3xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 shadow-2xl p-4 sm:p-8 relative max-h-[90dvh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+          className="absolute top-4 sm:top-5 right-4 sm:right-5 p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
           title="Fechar"
         >
           <X className="h-5 w-5 stroke-[2.5]" />
         </button>
 
-        <div className="flex items-center gap-3.5 mb-6">
-          <div className="h-12 w-12 rounded-2xl bg-purple-50 border-2 border-[#CE82FF] text-[#A64BFF] flex items-center justify-center shadow-[0_3px_0_0_#A64BFF]">
-            <ShoppingBag className="h-6 w-6 stroke-[2.5]" />
+        <div className="flex items-center gap-3 sm:gap-3.5 mb-5 sm:mb-6">
+          <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl bg-purple-50 dark:bg-purple-950/60 border-2 border-[#CE82FF] dark:border-purple-800 text-[#A64BFF] dark:text-purple-400 flex items-center justify-center shadow-[0_3px_0_0_#A64BFF] dark:shadow-none shrink-0">
+            <ShoppingBag className="h-5 w-5 sm:h-6 sm:w-6 stroke-[2.5]" />
           </div>
           <div>
-            <h2 className="text-xl sm:text-2xl font-black text-slate-800">Compra no Cartão</h2>
-            <p className="text-xs sm:text-sm font-bold text-slate-400">À vista ou parcelada com cálculo exato de centavos</p>
+            <h2 className="text-lg sm:text-2xl font-black text-slate-800 dark:text-white">Compra no Cartão</h2>
+            <p className="text-xs sm:text-sm font-bold text-slate-400 dark:text-slate-400">À vista ou parcelada com cálculo exato de centavos</p>
           </div>
         </div>
 
         {error && (
-          <div className="mb-5 p-3.5 rounded-2xl bg-rose-50 border-2 border-[#FF4B4B] flex items-center gap-2 text-xs sm:text-sm font-bold text-[#EA2B2B]">
+          <div className="mb-4 sm:mb-5 p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border-2 border-[#FF4B4B] dark:border-rose-800 flex items-center gap-2 text-xs sm:text-sm font-bold text-[#EA2B2B] dark:text-rose-300">
             <AlertCircle className="h-5 w-5 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4">
           <div className="space-y-1.5">
-            <label className="block text-xs font-black uppercase tracking-wider text-slate-500">Selecione o Cartão</label>
+            <label className="block text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Selecione o Cartão</label>
             <select
               required
               value={cardId}
               onChange={(e) => setCardId(e.target.value)}
-              className="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-800 focus:outline-none focus:border-[#CE82FF] focus:bg-white transition-all"
+              className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold text-slate-800 dark:text-white focus:outline-none focus:border-[#CE82FF] focus:bg-white dark:focus:bg-slate-800 transition-all"
             >
               <option value="">Selecione...</option>
               {cards.map((c) => (
@@ -137,24 +137,24 @@ export const CreditCardPurchaseModal: React.FC<CreditCardPurchaseModalProps> = (
             </select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div className="space-y-1.5">
-              <label className="block text-xs font-black uppercase tracking-wider text-slate-500">Valor Total (R$)</label>
+              <label className="block text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Valor Total (R$)</label>
               <CurrencyInput
                 required
                 placeholder="0,00"
                 value={totalAmount}
                 onChangeValue={(val) => setTotalAmount(val > 0 ? val.toString() : '')}
-                className="py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-black text-slate-800 focus:border-[#026CD6] focus:bg-white"
+                className="py-2.5 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-black text-slate-800 dark:text-white focus:border-[#026CD6] focus:bg-white dark:focus:bg-slate-800"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-black uppercase tracking-wider text-slate-500">Parcelas</label>
+              <label className="block text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Parcelas</label>
               <select
                 value={installments}
                 onChange={(e) => setInstallments(e.target.value)}
-                className="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-800 focus:outline-none focus:border-[#CE82FF] focus:bg-white transition-all"
+                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold text-slate-800 dark:text-white focus:outline-none focus:border-[#CE82FF] focus:bg-white dark:focus:bg-slate-800 transition-all"
               >
                 {[...Array(48)].map((_, idx) => (
                   <option key={idx + 1} value={idx + 1}>
@@ -165,33 +165,33 @@ export const CreditCardPurchaseModal: React.FC<CreditCardPurchaseModalProps> = (
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div className="space-y-1.5">
-              <label className="block text-xs font-black uppercase tracking-wider text-slate-500">Descrição</label>
+              <label className="block text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Descrição</label>
               <input
                 type="text"
                 required
                 placeholder="Ex: Notebook, Supermercado"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-800 focus:outline-none focus:border-[#CE82FF] focus:bg-white transition-all"
+                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold text-slate-800 dark:text-white focus:outline-none focus:border-[#CE82FF] focus:bg-white dark:focus:bg-slate-800 transition-all"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-black uppercase tracking-wider text-slate-500">Data da Compra</label>
+              <label className="block text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Data da Compra</label>
               <input
                 type="date"
                 required
                 value={purchaseDate}
                 onChange={(e) => setPurchaseDate(e.target.value)}
-                className="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-800 focus:outline-none focus:border-[#CE82FF] focus:bg-white transition-all"
+                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold text-slate-800 dark:text-white focus:outline-none focus:border-[#CE82FF] focus:bg-white dark:focus:bg-slate-800 transition-all"
               />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="block text-xs font-black uppercase tracking-wider text-slate-500">Categoria</label>
+            <label className="block text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Categoria</label>
             <CategoryCombobox
               value={categoryId}
               categoryName={categoryName}
@@ -204,7 +204,7 @@ export const CreditCardPurchaseModal: React.FC<CreditCardPurchaseModalProps> = (
             />
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-4 border-t-2 border-slate-100">
+          <div className="flex items-center justify-end gap-3 pt-4 border-t-2 border-slate-100 dark:border-slate-800">
             <button
               type="button"
               onClick={onClose}

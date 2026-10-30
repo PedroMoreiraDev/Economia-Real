@@ -191,39 +191,39 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-lg rounded-3xl bg-white border-2 border-slate-200 p-6 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto"
+        className="relative w-full max-w-lg rounded-3xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 p-4 sm:p-8 shadow-2xl max-h-[90dvh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+          className="absolute top-4 sm:top-5 right-4 sm:right-5 p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
         >
           <X className="w-5 h-5 stroke-[2.5]" />
         </button>
 
-        <div className="flex items-center space-x-3.5 mb-6">
-          <div className="p-3 rounded-2xl bg-blue-50 text-[#026CD6] border-2 border-blue-200">
+        <div className="flex items-center space-x-3.5 mb-5 sm:mb-6">
+          <div className="p-3 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-[#026CD6] dark:text-sky-400 border-2 border-blue-200 dark:border-blue-800 shrink-0">
             <Calendar className="w-6 h-6" />
           </div>
           <div>
-            <h2 className="text-xl sm:text-2xl font-black text-slate-800">
+            <h2 className="text-lg sm:text-2xl font-black text-slate-800 dark:text-white">
               {billToEdit ? 'Editar Assinatura / Conta' : 'Nova Assinatura / Conta Fixa'}
             </h2>
-            <p className="text-xs sm:text-sm font-bold text-slate-400">
+            <p className="text-xs sm:text-sm font-bold text-slate-400 dark:text-slate-400">
               Automatize a previsão de despesas fixas recorrentes
             </p>
           </div>
         </div>
 
         {error && (
-          <div className="mb-5 flex items-center space-x-2.5 p-3.5 rounded-2xl bg-rose-50 border-2 border-[#FF4B4B] text-[#EA2B2B] text-xs sm:text-sm font-bold">
+          <div className="mb-4 sm:mb-5 flex items-center space-x-2.5 p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border-2 border-[#FF4B4B] dark:border-rose-800 text-[#EA2B2B] dark:text-rose-300 text-xs sm:text-sm font-bold">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {billToEdit && (
-          <div className="mb-5 flex items-start space-x-2.5 p-3.5 rounded-2xl bg-blue-50 border-2 border-blue-200 text-[#026CD6] text-xs sm:text-sm font-bold">
+          <div className="mb-4 sm:mb-5 flex items-start space-x-2.5 p-3.5 rounded-2xl bg-blue-50 dark:bg-blue-950/60 border-2 border-blue-200 dark:border-blue-800 text-[#026CD6] dark:text-sky-300 text-xs sm:text-sm font-bold">
             <Sparkles className="w-4 h-4 shrink-0 mt-0.5" />
             <span>
               Ao atualizar, todos os lançamentos desta despesa no extrato (mês atual e meses futuros) serão atualizados automaticamente com os novos dados.
@@ -231,9 +231,9 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4">
           <div>
-            <label className="block text-xs font-black uppercase tracking-wider text-slate-500 mb-1.5">
+            <label className="block text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
               Descrição / Serviço
             </label>
             <input
@@ -242,13 +242,13 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
               placeholder="Ex: Netflix, Aluguel, Internet, Academia"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border-2 border-slate-200 text-slate-800 font-bold placeholder-slate-400 focus:outline-none focus:border-[#58CC02] focus:bg-white transition-all"
+              className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white font-bold placeholder-slate-400 focus:outline-none focus:border-[#58CC02] focus:bg-white dark:focus:bg-slate-800 transition-all"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-black uppercase tracking-wider text-slate-500 mb-1.5">
+              <label className="block text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
                 Valor Recorrente (R$)
               </label>
               <CurrencyInput
@@ -256,12 +256,12 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
                 placeholder="0,00"
                 value={amount}
                 onChangeValue={(val) => setAmount(val > 0 ? val.toString() : '')}
-                className="py-2.5 rounded-2xl bg-slate-50 border-2 border-slate-200 text-slate-800 font-bold placeholder-slate-400 focus:border-[#026CD6] focus:bg-white"
+                className="py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white font-bold placeholder-slate-400 focus:border-[#026CD6] focus:bg-white dark:focus:bg-slate-800"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-black uppercase tracking-wider text-slate-500 mb-1.5">
+              <label className="block text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
                 Dia do Vencimento
               </label>
               <input
@@ -272,20 +272,20 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
                 placeholder="1 a 31"
                 value={dayOfMonth}
                 onChange={(e) => setDayOfMonth(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border-2 border-slate-200 text-slate-800 font-bold placeholder-slate-400 focus:outline-none focus:border-[#58CC02] focus:bg-white transition-all"
+                className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white font-bold placeholder-slate-400 focus:outline-none focus:border-[#58CC02] focus:bg-white dark:focus:bg-slate-800 transition-all"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-black uppercase tracking-wider text-slate-500 mb-1.5">
+              <label className="block text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
                 Frequência
               </label>
               <select
                 value={frequency}
                 onChange={(e) => setFrequency(e.target.value as RecurringFrequency)}
-                className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border-2 border-slate-200 text-slate-800 font-bold focus:outline-none focus:border-[#58CC02] focus:bg-white transition-all"
+                className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white font-bold focus:outline-none focus:border-[#58CC02] focus:bg-white dark:focus:bg-slate-800 transition-all"
               >
                 <option value="MONTHLY">Mensal</option>
                 <option value="WEEKLY">Semanal</option>
@@ -294,7 +294,7 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-black uppercase tracking-wider text-slate-500 mb-1.5">
+              <label className="block text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
                 Categoria
               </label>
               <CategoryCombobox
@@ -311,17 +311,17 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-black uppercase tracking-wider text-slate-500 mb-1.5">
+            <label className="block text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
               Forma de Pagamento
             </label>
-            <div className="grid grid-cols-2 gap-2 mb-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
               <button
                 type="button"
                 onClick={() => setPaymentSourceType('direct')}
                 className={`flex items-center justify-center space-x-1.5 py-2.5 px-3 rounded-2xl border-2 text-xs font-black transition-all ${
                   paymentSourceType === 'direct'
-                    ? 'bg-[#EBF7FF] border-[#1CB0F6] text-[#1899D6] shadow-[0_3px_0_0_#1899D6]'
-                    : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100'
+                    ? 'bg-[#EBF7FF] dark:bg-blue-950/60 border-[#1CB0F6] dark:border-blue-700 text-[#1899D6] dark:text-sky-300 shadow-[0_3px_0_0_#1899D6] dark:shadow-none'
+                    : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
                 }`}
               >
                 <span>À Vista / Pix / Boleto</span>
@@ -331,8 +331,8 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
                 onClick={() => setPaymentSourceType('card')}
                 className={`flex items-center justify-center space-x-1.5 py-2.5 px-3 rounded-2xl border-2 text-xs font-black transition-all ${
                   paymentSourceType === 'card'
-                    ? 'bg-purple-50 border-[#CE82FF] text-[#A64BFF] shadow-[0_3px_0_0_#A64BFF]'
-                    : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100'
+                    ? 'bg-purple-50 dark:bg-purple-950/60 border-[#CE82FF] dark:border-purple-700 text-[#A64BFF] dark:text-purple-300 shadow-[0_3px_0_0_#A64BFF] dark:shadow-none'
+                    : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
                 }`}
               >
                 <CardIcon className="w-3.5 h-3.5" />
@@ -344,7 +344,7 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
               <select
                 value={creditCardId}
                 onChange={(e) => setCreditCardId(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border-2 border-slate-200 text-slate-800 font-bold focus:outline-none focus:border-[#58CC02] focus:bg-white transition-all"
+                className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white font-bold focus:outline-none focus:border-[#58CC02] focus:bg-white dark:focus:bg-slate-800 transition-all"
               >
                 <option value="">Selecione um cartão cadastrado...</option>
                 {creditCards.map((card) => (

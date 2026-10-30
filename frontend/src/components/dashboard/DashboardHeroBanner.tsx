@@ -21,22 +21,22 @@ export const DashboardHeroBanner: React.FC<DashboardHeroBannerProps> = ({
   exportingCsv,
 }) => {
   return (
-    <div className="card-real-blue p-4 sm:p-6 lg:p-8 relative overflow-hidden">
+    <div className="card-real-blue p-3.5 sm:p-6 lg:p-8 relative overflow-hidden">
       <div className="max-w-2xl lg:max-w-3xl space-y-3 relative z-10">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/90 dark:bg-slate-800/90 border-2 border-blue-200 dark:border-blue-700 text-[#026CD6] dark:text-sky-300 text-xs font-black shadow-sm uppercase tracking-wider">
+        <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/90 dark:bg-slate-800/90 border-2 border-blue-200 dark:border-blue-700 text-[#026CD6] dark:text-sky-300 text-xs font-black shadow-sm uppercase tracking-wider">
           <Sparkles className="h-3.5 w-3.5 text-blue-500 fill-blue-400" />
           Painel de Controle Financeiro
         </div>
 
-        <h1 className="text-xl sm:text-3xl lg:text-4xl font-black tracking-tight text-slate-900 dark:text-white leading-tight">
+        <h1 className="text-lg sm:text-3xl lg:text-4xl font-black tracking-tight text-slate-900 dark:text-white leading-tight">
           Olá{firstName ? `, ${firstName}` : ''}!{' '}
           <span className="text-[#026CD6] dark:text-sky-400 underline decoration-blue-300 dark:decoration-blue-500 decoration-4">
-            Pronto para organizar suas contas? Vamos começar!
+            Pronto para organizar suas contas?
           </span>{' '}
           🎩✨
         </h1>
 
-        <p className="text-slate-700 dark:text-slate-300 text-xs sm:base font-bold leading-relaxed">
+        <p className="text-slate-700 dark:text-slate-300 text-xs sm:text-base font-bold leading-relaxed">
           Monitore seu fluxo de caixa, planeje seus lançamentos e acompanhe suas metas com precisão e suporte de IA.
         </p>
 
@@ -45,7 +45,7 @@ export const DashboardHeroBanner: React.FC<DashboardHeroBannerProps> = ({
           <button
             id="tour-add-btn"
             onClick={onOpenTransactionModal}
-            className="btn-duo btn-duo-green text-xs sm:text-sm px-3 sm:px-4 py-2.5 flex items-center justify-center gap-1.5 sm:gap-2 w-full sm:w-auto"
+            className="btn-duo btn-duo-green text-xs sm:text-sm px-2.5 sm:px-4 py-2 sm:py-2.5 flex items-center justify-center gap-1.5 sm:gap-2 w-full sm:w-auto"
           >
             <Plus className="h-4 w-4 stroke-[3] shrink-0" />
             <span className="truncate">Novo Lançamento</span>
@@ -54,7 +54,7 @@ export const DashboardHeroBanner: React.FC<DashboardHeroBannerProps> = ({
           <button
             id="tour-ai-btn"
             onClick={onOpenAiModal}
-            className="btn-duo btn-duo-purple text-xs sm:text-sm px-3 sm:px-4 py-2.5 flex items-center justify-center gap-1.5 sm:gap-2 w-full sm:w-auto"
+            className="btn-duo btn-duo-purple text-xs sm:text-sm px-2.5 sm:px-4 py-2 sm:py-2.5 flex items-center justify-center gap-1.5 sm:gap-2 w-full sm:w-auto"
           >
             <Mic className="h-4 w-4 shrink-0" />
             <span className="truncate">Falar com IA</span>
@@ -63,7 +63,7 @@ export const DashboardHeroBanner: React.FC<DashboardHeroBannerProps> = ({
           <button
             id="tour-import-btn"
             onClick={onOpenImportModal}
-            className="btn-duo btn-duo-white text-xs sm:text-sm px-3 sm:px-4 py-2.5 flex items-center justify-center gap-1.5 sm:gap-2 w-full sm:w-auto"
+            className="btn-duo btn-duo-white text-xs sm:text-sm px-2.5 sm:px-4 py-2 sm:py-2.5 flex items-center justify-center gap-1.5 sm:gap-2 w-full sm:w-auto"
           >
             <UploadCloud className="h-4 w-4 text-[#0284C7] shrink-0" />
             <span className="truncate">Importar Extrato</span>
@@ -72,7 +72,7 @@ export const DashboardHeroBanner: React.FC<DashboardHeroBannerProps> = ({
           <button
             onClick={onExportCsv}
             disabled={!hasTransactions || exportingCsv}
-            className="btn-duo btn-duo-white text-xs sm:text-sm px-3 sm:px-4 py-2.5 flex items-center justify-center gap-1.5 sm:gap-2 w-full sm:w-auto disabled:opacity-50"
+            className="btn-duo btn-duo-white text-xs sm:text-sm px-2.5 sm:px-4 py-2 sm:py-2.5 flex items-center justify-center gap-1.5 sm:gap-2 w-full sm:w-auto disabled:opacity-50"
             title="Exportar para Excel em CSV formatado"
           >
             <Download className={`h-4 w-4 text-blue-600 shrink-0 ${exportingCsv ? 'animate-bounce' : ''}`} />

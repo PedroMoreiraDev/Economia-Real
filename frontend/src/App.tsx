@@ -882,7 +882,7 @@ const MainDashboard: React.FC = () => {
       />
 
       {/* Conteúdo Principal */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-5 sm:space-y-8">
 
         {isAuthenticated && user ? (
           <>
@@ -897,7 +897,7 @@ const MainDashboard: React.FC = () => {
               exportingCsv={exportingCsv}
             />
 
-            <div className="space-y-8">
+            <div className="space-y-5 sm:space-y-8">
 
             {/* Seletor Global de Mês Modularizado */}
             <MonthSelector
@@ -1367,7 +1367,7 @@ const MainDashboard: React.FC = () => {
                         onClick={() => setTypeFilter('ALL')}
                         className={`text-[11px] font-extrabold px-2.5 py-1 rounded-xl transition-all ${typeFilter === 'ALL'
                           ? 'bg-[#026CD6] text-white shadow-sm'
-                          : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                          : 'bg-white dark:!bg-slate-800 text-slate-600 dark:!text-slate-300 hover:bg-slate-100 dark:hover:!bg-slate-700 border border-slate-200 dark:!border-slate-700'
                           }`}
                       >
                         Todas
@@ -1377,7 +1377,7 @@ const MainDashboard: React.FC = () => {
                         onClick={() => setTypeFilter('INCOME')}
                         className={`text-[11px] font-extrabold px-2.5 py-1 rounded-xl transition-all ${typeFilter === 'INCOME'
                           ? 'bg-[#10B981] text-white shadow-sm'
-                          : 'bg-white text-emerald-700 hover:bg-emerald-50 border border-emerald-200'
+                          : 'bg-white dark:!bg-slate-800 text-emerald-700 dark:!text-emerald-400 hover:bg-emerald-50 dark:hover:!bg-emerald-950/40 border border-emerald-200 dark:!border-emerald-800'
                           }`}
                       >
                         Receitas
@@ -1387,7 +1387,7 @@ const MainDashboard: React.FC = () => {
                         onClick={() => setTypeFilter('EXPENSE')}
                         className={`text-[11px] font-extrabold px-2.5 py-1 rounded-xl transition-all ${typeFilter === 'EXPENSE'
                           ? 'bg-rose-600 text-white shadow-sm'
-                          : 'bg-white text-rose-700 hover:bg-rose-50 border border-rose-200'
+                          : 'bg-white dark:!bg-slate-800 text-rose-700 dark:!text-rose-400 hover:bg-rose-50 dark:hover:!bg-rose-950/40 border border-rose-200 dark:!border-rose-800'
                           }`}
                       >
                         Despesas
@@ -1407,7 +1407,7 @@ const MainDashboard: React.FC = () => {
                           }}
                           className={`text-[11px] font-black px-2.5 py-1 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ml-1 ${showOnlyUncategorized || categoryFilter === 'NONE'
                             ? 'bg-amber-500 text-white shadow-sm ring-2 ring-amber-300'
-                            : 'bg-amber-50 text-amber-900 hover:bg-amber-100 border-2 border-amber-300/80'
+                            : 'bg-amber-50 dark:!bg-amber-950/40 text-amber-900 dark:!text-amber-300 hover:bg-amber-100 dark:hover:!bg-amber-900/60 border-2 border-amber-300/80 dark:!border-amber-700'
                             }`}
                           title={showOnlyUncategorized ? 'Mostrar todas as movimentações' : 'Filtrar apenas movimentações sem categoria'}
                         >
@@ -1543,10 +1543,10 @@ const MainDashboard: React.FC = () => {
                                 key={tx.id}
                                 className={`p-3.5 rounded-2xl border-2 transition-all space-y-2.5 ${
                                   isSelected
-                                    ? 'bg-blue-50/90 border-[#026CD6] shadow-sm'
+                                    ? 'bg-blue-50/90 dark:!bg-blue-950/40 border-[#026CD6] dark:!border-blue-600 shadow-sm'
                                     : isRowUncategorized
-                                      ? 'bg-amber-50/40 border-amber-300 shadow-2xs'
-                                      : 'bg-white border-slate-200/90 shadow-2xs'
+                                      ? 'bg-amber-50/40 dark:!bg-amber-950/30 border-amber-300 dark:!border-amber-800 shadow-2xs'
+                                      : 'bg-white dark:!bg-slate-900 border-slate-200/90 dark:!border-slate-800 shadow-2xs'
                                 }`}
                               >
                                 {/* Linha 1: Checkbox, Data, Origem e Tipo */}
@@ -1556,7 +1556,7 @@ const MainDashboard: React.FC = () => {
                                       type="checkbox"
                                       checked={isSelected}
                                       onChange={() => handleToggleSelectTx(tx.id)}
-                                      className="w-4 h-4 rounded border-2 border-slate-300 text-[#026CD6] focus:ring-[#026CD6] cursor-pointer accent-[#026CD6]"
+                                      className="w-4 h-4 rounded border-2 border-slate-300 dark:border-slate-600 text-[#026CD6] focus:ring-[#026CD6] cursor-pointer accent-[#026CD6]"
                                     />
                                     <InlineDatePicker
                                       value={tx.accrualDate}
@@ -1565,42 +1565,42 @@ const MainDashboard: React.FC = () => {
                                     />
                                   </div>
 
-                                  <div className="flex items-center gap-1.5">
+                                  <div className="flex items-center gap-1.5 flex-wrap">
                                     {tx.origin === 'AI_TEXT' ? (
-                                      <span className="inline-flex items-center gap-1 text-[10px] font-black text-purple-700 bg-purple-100 border border-purple-200 px-2 py-0.5 rounded-full">
+                                      <span className="inline-flex items-center gap-1 text-[10px] font-black text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-800 px-2 py-0.5 rounded-full">
                                         <Sparkles className="w-2.5 h-2.5" /> IA
                                       </span>
                                     ) : tx.origin === 'AI_AUDIO' ? (
-                                      <span className="inline-flex items-center gap-1 text-[10px] font-black text-indigo-700 bg-indigo-100 border border-indigo-200 px-2 py-0.5 rounded-full">
+                                      <span className="inline-flex items-center gap-1 text-[10px] font-black text-indigo-700 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 px-2 py-0.5 rounded-full">
                                         <Mic className="w-2.5 h-2.5" /> Voz
                                       </span>
                                     ) : tx.origin === 'CSV_IMPORT' ? (
-                                      <span className="inline-flex items-center gap-1 text-[10px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                                      <span className="inline-flex items-center gap-1 text-[10px] font-black text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 rounded-full">
                                         <FileSpreadsheet className="w-2.5 h-2.5 stroke-[2.5]" /> CSV
                                       </span>
                                     ) : tx.origin === 'OFX_IMPORT' ? (
-                                      <span className="inline-flex items-center gap-1 text-[10px] font-black text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">
+                                      <span className="inline-flex items-center gap-1 text-[10px] font-black text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 px-2 py-0.5 rounded-full">
                                         <FileText className="w-2.5 h-2.5 stroke-[2.5]" /> OFX
                                       </span>
                                     ) : null}
 
                                     {tx.type === 'INCOME' && (
-                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-black">
+                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-[10px] font-black">
                                         <ArrowUpRight className="h-3 w-3 stroke-[3]" /> Receita
                                       </span>
                                     )}
                                     {tx.type === 'EXPENSE' && (
-                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-200 text-[10px] font-black">
+                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 text-[10px] font-black">
                                         <ArrowDownLeft className="h-3 w-3 stroke-[3]" /> Despesa
                                       </span>
                                     )}
                                     {tx.type === 'TRANSFER' && (
-                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200 text-[10px] font-black">
+                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800 text-[10px] font-black">
                                         <ArrowLeftRight className="h-3 w-3 stroke-[3]" /> Transf.
                                       </span>
                                     )}
                                     {tx.type === 'INVOICE_PAYMENT' && (
-                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-black">
+                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800 text-[10px] font-black">
                                         <DollarSign className="h-3 w-3 stroke-[3]" /> Fatura
                                       </span>
                                     )}
@@ -1611,7 +1611,7 @@ const MainDashboard: React.FC = () => {
                                 <div className="flex items-start justify-between gap-2">
                                   <div className="min-w-0 flex-1">
                                     <div className="flex items-center gap-1.5 flex-wrap">
-                                      <p className="font-black text-sm text-slate-800 truncate" title={tx.description}>
+                                      <p className="font-black text-sm text-slate-800 dark:!text-white truncate" title={tx.description}>
                                         {tx.description}
                                       </p>
                                       {(() => {
@@ -1633,8 +1633,8 @@ const MainDashboard: React.FC = () => {
                                           <span
                                             className={`inline-flex items-center gap-1 text-[10px] font-black px-1.5 py-0.5 rounded-md whitespace-nowrap shrink-0 leading-none ${
                                               isIncome
-                                                ? 'text-emerald-700 bg-emerald-100/90 border border-emerald-300'
-                                                : 'text-rose-700 bg-rose-100/90 border border-rose-300'
+                                                ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-100/90 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800'
+                                                : 'text-rose-700 dark:text-rose-300 bg-rose-100/90 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-800'
                                             }`}
                                             title={progress ? progress.tooltip : (isIncome ? 'Renda Recorrente' : 'Despesa Recorrente')}
                                           >
@@ -1656,7 +1656,7 @@ const MainDashboard: React.FC = () => {
                                       const displayNotes = cleanTransactionNotes(tx.notes, tx.description);
                                       if (!displayNotes) return null;
                                       return (
-                                        <span className="text-[11px] text-slate-400 font-normal truncate block mt-0.5" title={displayNotes}>
+                                        <span className="text-[11px] text-slate-400 dark:text-slate-400 font-normal truncate block mt-0.5" title={displayNotes}>
                                           {displayNotes}
                                         </span>
                                       );
@@ -1675,8 +1675,8 @@ const MainDashboard: React.FC = () => {
                                           initialValue={tx.amount}
                                           disabled={inlineUpdatingTxId === tx.id}
                                           onSave={(val) => handleInlineUpdateAmount(tx, val)}
-                                          className={`w-24 text-right font-black text-sm font-numeric bg-slate-50 hover:bg-blue-50/60 focus:bg-white px-2 py-1 rounded-xl border border-slate-200 hover:border-blue-300 focus:border-[#026CD6] focus:ring-1 focus:ring-blue-100 focus:outline-none transition-all cursor-pointer ${
-                                            tx.type === 'INCOME' ? 'text-[#10B981]' : 'text-slate-900'
+                                          className={`w-24 text-right font-black text-sm font-numeric bg-slate-50 dark:!bg-slate-800 hover:bg-blue-50/60 dark:hover:!bg-slate-700 focus:bg-white dark:focus:!bg-slate-800 px-2 py-1 rounded-xl border border-slate-200 dark:!border-slate-700 hover:border-blue-300 dark:hover:!border-blue-500 focus:border-[#026CD6] focus:ring-1 focus:ring-blue-100 dark:focus:ring-blue-900 focus:outline-none transition-all cursor-pointer ${
+                                            tx.type === 'INCOME' ? 'text-[#10B981] dark:text-emerald-400' : 'text-slate-900 dark:!text-white'
                                           }`}
                                           title="Clique para alterar o valor (Enter para salvar)"
                                         />
@@ -1686,7 +1686,7 @@ const MainDashboard: React.FC = () => {
                                 </div>
 
                                 {/* Linha 3: Categoria e Ações */}
-                                <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-100">
+                                <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-100 dark:!border-slate-800">
                                   <div className="flex-1 min-w-0">
                                     <InlineCategorySelect
                                       currentCategoryId={tx.categoryId}
@@ -1701,7 +1701,7 @@ const MainDashboard: React.FC = () => {
                                     <button
                                       type="button"
                                       onClick={() => handleEditTransaction(tx)}
-                                      className="p-2 min-h-[36px] min-w-[36px] rounded-xl text-slate-500 hover:text-[#026CD6] bg-slate-100 hover:bg-blue-50 transition-colors flex items-center justify-center"
+                                      className="p-2 min-h-[36px] min-w-[36px] rounded-xl text-slate-500 hover:text-[#026CD6] dark:text-slate-300 dark:hover:text-sky-300 bg-slate-100 hover:bg-blue-50 dark:bg-slate-800 dark:hover:bg-slate-700 transition-colors flex items-center justify-center"
                                       title="Editar movimentação"
                                     >
                                       <Pencil className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -1709,7 +1709,7 @@ const MainDashboard: React.FC = () => {
                                     <button
                                       type="button"
                                       onClick={() => handleRequestDeleteTransaction(tx.id)}
-                                      className="p-2 min-h-[36px] min-w-[36px] rounded-xl text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 transition-colors flex items-center justify-center"
+                                      className="p-2 min-h-[36px] min-w-[36px] rounded-xl text-rose-500 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 transition-colors flex items-center justify-center"
                                       title="Excluir movimentação"
                                     >
                                       <Trash2 className="w-3.5 h-3.5 stroke-[2.5]" />

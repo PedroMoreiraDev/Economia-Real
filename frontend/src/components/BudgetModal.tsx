@@ -180,17 +180,17 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
     : categories;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white dark:!bg-[#0F172A] border-2 border-slate-200 dark:!border-slate-800 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col text-slate-800 dark:!text-white">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
+      <div className="bg-white dark:!bg-[#0F172A] border-2 border-slate-200 dark:!border-slate-800 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col text-slate-800 dark:!text-white max-h-[90dvh] my-auto">
         
         {/* Cabeçalho */}
-        <div className="p-6 border-b-2 border-slate-100 dark:!border-slate-800 flex items-center justify-between bg-blue-50/70 dark:!bg-blue-950/40">
-          <div className="flex items-center gap-3.5">
-            <div className="p-3 rounded-2xl bg-[#026CD6] text-white shadow-[0_3px_0_0_#0153AB]">
-              <Target className="w-6 h-6 stroke-[2.5]" />
+        <div className="p-4 sm:p-6 border-b-2 border-slate-100 dark:!border-slate-800 flex items-center justify-between bg-blue-50/70 dark:!bg-blue-950/40">
+          <div className="flex items-center gap-3 sm:gap-3.5">
+            <div className="p-2.5 sm:p-3 rounded-2xl bg-[#026CD6] text-white shadow-[0_3px_0_0_#0153AB] shrink-0">
+              <Target className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2.5]" />
             </div>
             <div>
-              <h2 className="text-xl sm:text-2xl font-black text-slate-800 dark:!text-white">Meta de Orçamento</h2>
+              <h2 className="text-lg sm:text-2xl font-black text-slate-800 dark:!text-white">Meta de Orçamento</h2>
               <p className="text-xs sm:text-sm font-bold text-slate-400">Estabeleça limites e alertas de monitoramento</p>
             </div>
           </div>
@@ -203,7 +203,7 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
         </div>
 
         {/* Formulário */}
-        <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 lg:p-8 space-y-4 overflow-y-auto">
           {error && (
             <div className="p-3.5 bg-rose-50 dark:!bg-rose-950/50 border-2 border-[#FF4B4B] dark:!border-rose-800 rounded-2xl flex items-center gap-2.5 text-xs sm:text-sm font-bold text-[#EA2B2B] dark:!text-rose-300">
               <AlertCircle className="w-5 h-5 flex-shrink-0" />
