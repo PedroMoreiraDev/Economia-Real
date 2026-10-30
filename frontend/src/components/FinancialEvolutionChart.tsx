@@ -583,21 +583,21 @@ export const FinancialEvolutionChart: React.FC<FinancialEvolutionChartProps> = (
 
           {/* 4. CARD INFORMATIVO DE DETALHES DO MÊS SELECIONADO */}
           {activeMonthData && (
-            <div className="bg-gradient-to-r from-blue-50/70 via-indigo-50/50 to-slate-50/80 border-2 border-blue-200/80 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm transition-all duration-200">
+            <div className="bg-gradient-to-r from-blue-50/70 via-indigo-50/50 to-slate-50/80 dark:!bg-none dark:!bg-[#0B111E] border-2 border-blue-200/80 dark:!border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm transition-all duration-200">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-[#026CD6] text-white shadow-sm font-black text-xs uppercase tracking-wider">
                   {activeMonthData.monthLabel}
                 </div>
                 <div>
-                  <h4 className="text-sm font-black text-slate-900 flex items-center gap-2">
+                  <h4 className="text-sm font-black text-slate-900 dark:!text-white flex items-center gap-2">
                     Resumo de {activeMonthData.monthLabel}
                     {hoveredIdx !== null && (
-                      <span className="text-[10px] font-bold text-blue-600 bg-blue-100/80 px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] font-bold text-blue-600 dark:!text-sky-300 bg-blue-100/80 dark:!bg-blue-950/80 border border-blue-200 dark:!border-blue-800 px-2 py-0.5 rounded-full">
                         Em foco
                       </span>
                     )}
                   </h4>
-                  <p className="text-xs font-bold text-slate-500">
+                  <p className="text-xs font-bold text-slate-500 dark:!text-slate-300">
                     Balanço do mês de competência ({activeMonthData.monthIso})
                   </p>
                 </div>
@@ -638,12 +638,14 @@ export const FinancialEvolutionChart: React.FC<FinancialEvolutionChartProps> = (
       )}
 
       {/* 5. LEGENDA INTERATIVA COM GUIA VISUAL */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pt-2 text-xs font-black text-slate-600">
+      <div className="flex flex-wrap items-center justify-between gap-3 pt-2 text-xs font-black text-slate-600 dark:!text-slate-300">
         <div className="flex items-center gap-4">
           <button
             onClick={() => setHighlightMetric(prev => prev === 'income' ? 'all' : 'income')}
             className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl transition-all ${
-              highlightMetric === 'income' ? 'bg-emerald-100 text-emerald-800' : 'hover:bg-slate-100 text-slate-600'
+              highlightMetric === 'income'
+                ? 'bg-emerald-100 dark:!bg-emerald-950/80 text-emerald-800 dark:!text-emerald-300 border border-emerald-300 dark:!border-emerald-800'
+                : 'hover:bg-slate-100 dark:hover:!bg-[#1E293B] text-slate-600 dark:!text-slate-300'
             }`}
           >
             <span className="w-3 h-3 rounded-full bg-[#10B981] shadow-xs" />
@@ -653,7 +655,9 @@ export const FinancialEvolutionChart: React.FC<FinancialEvolutionChartProps> = (
           <button
             onClick={() => setHighlightMetric(prev => prev === 'expense' ? 'all' : 'expense')}
             className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl transition-all ${
-              highlightMetric === 'expense' ? 'bg-rose-100 text-rose-800' : 'hover:bg-slate-100 text-slate-600'
+              highlightMetric === 'expense'
+                ? 'bg-rose-100 dark:!bg-rose-950/80 text-rose-800 dark:!text-rose-300 border border-rose-300 dark:!border-rose-800'
+                : 'hover:bg-slate-100 dark:hover:!bg-[#1E293B] text-slate-600 dark:!text-slate-300'
             }`}
           >
             <span className="w-3 h-3 rounded-full bg-[#F43F5E] shadow-xs" />
@@ -663,7 +667,9 @@ export const FinancialEvolutionChart: React.FC<FinancialEvolutionChartProps> = (
           <button
             onClick={() => setHighlightMetric(prev => prev === 'savings' ? 'all' : 'savings')}
             className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl transition-all ${
-              highlightMetric === 'savings' ? 'bg-blue-100 text-blue-800' : 'hover:bg-slate-100 text-slate-600'
+              highlightMetric === 'savings'
+                ? 'bg-blue-100 dark:!bg-blue-950/80 text-blue-800 dark:!text-blue-300 border border-blue-300 dark:!border-blue-800'
+                : 'hover:bg-slate-100 dark:hover:!bg-[#1E293B] text-slate-600 dark:!text-slate-300'
             }`}
           >
             <span className="w-3 h-1 bg-[#026CD6] rounded-full shadow-xs" />
@@ -671,7 +677,7 @@ export const FinancialEvolutionChart: React.FC<FinancialEvolutionChartProps> = (
           </button>
         </div>
 
-        <span className="text-[11px] font-bold text-slate-400">
+        <span className="text-[11px] font-bold text-slate-400 dark:!text-slate-400">
           💡 Dica: Passe o mouse para inspecionar cada mês ou alterne entre Barras e Curvas
         </span>
       </div>

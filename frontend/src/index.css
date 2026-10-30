@@ -62,9 +62,15 @@
   .dark [class*="bg-gradient-to-b"][class*="from-indigo-50"],
   .dark [class*="bg-gradient-to-b"][class*="from-emerald-50"],
   .dark [class*="bg-gradient-to-b"][class*="from-rose-50"],
-  .dark [class*="bg-gradient-to-b"][class*="from-amber-50"] {
+  .dark [class*="bg-gradient-to-b"][class*="from-amber-50"],
+  .dark [class*="bg-gradient-to-r"][class*="from-blue-50"],
+  .dark [class*="bg-gradient-to-r"][class*="from-indigo-50"],
+  .dark [class*="bg-gradient-to-r"][class*="from-emerald-50"],
+  .dark [class*="bg-gradient-to-r"][class*="from-amber-50"],
+  .dark [class*="bg-gradient-to-r"][class*="from-slate-50"] {
     background-image: none !important;
-    background-color: #0F172A !important;
+    background-color: #0B111E !important;
+    border-color: #1E293B !important;
   }
 
   .dark .card-duo-green,
