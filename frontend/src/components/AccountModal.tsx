@@ -69,7 +69,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
         </button>
 
         <div className="flex items-center gap-3.5 mb-6">
-          <div className="h-12 w-12 rounded-2xl bg-[#EBF7FF] border-2 border-[#1CB0F6] text-[#1CB0F6] flex items-center justify-center shadow-[0_3px_0_0_#1CB0F6]">
+          <div className="h-12 w-12 rounded-2xl bg-[#E8E4D9] border-2 border-[#1C4939] text-[#1C4939] flex items-center justify-center shadow-[0_3px_0_0_#1C4939]">
             <Landmark className="h-6 w-6 stroke-[2.5]" />
           </div>
           <div>
@@ -94,7 +94,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
               placeholder="Ex: Nubank, Itaú Corrente, Carteira Física"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#1CB0F6] focus:bg-white transition-all"
+              className="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#1C4939] focus:bg-white transition-all"
             />
           </div>
 
@@ -103,7 +103,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
             <select
               value={type}
               onChange={(e) => setType(e.target.value as AccountType)}
-              className="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-800 focus:outline-none focus:border-[#1CB0F6] focus:bg-white transition-all"
+              className="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-800 focus:outline-none focus:border-[#1C4939] focus:bg-white transition-all"
             >
               <option value="CHECKING">Conta Corrente</option>
               <option value="SAVINGS">Conta Poupança</option>
@@ -118,7 +118,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
               value={initialBalance}
               onChangeValue={(val) => setInitialBalance(val > 0 ? val.toString() : '')}
               placeholder="0,00"
-              className="py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-black text-slate-800 placeholder-slate-400 focus:border-[#1CB0F6] focus:bg-white"
+              className="py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-black text-slate-800 placeholder-slate-400 focus:border-[#1C4939] focus:bg-white"
             />
           </div>
 

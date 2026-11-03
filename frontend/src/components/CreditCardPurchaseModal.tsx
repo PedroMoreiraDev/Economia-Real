@@ -103,7 +103,7 @@ export const CreditCardPurchaseModal: React.FC<CreditCardPurchaseModalProps> = (
         </button>
 
         <div className="flex items-center gap-3 sm:gap-3.5 mb-5 sm:mb-6">
-          <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl bg-purple-50 dark:bg-purple-950/60 border-2 border-[#CE82FF] dark:border-purple-800 text-[#A64BFF] dark:text-purple-400 flex items-center justify-center shadow-[0_3px_0_0_#A64BFF] dark:shadow-none shrink-0">
+          <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl bg-purple-50 dark:bg-purple-950/60 border-2 border-[#D4A94F] dark:border-purple-800 text-[#B8892E] dark:text-purple-400 flex items-center justify-center shadow-[0_3px_0_0_#B8892E] dark:shadow-none shrink-0">
             <ShoppingBag className="h-5 w-5 sm:h-6 sm:w-6 stroke-[2.5]" />
           </div>
           <div>
@@ -126,7 +126,7 @@ export const CreditCardPurchaseModal: React.FC<CreditCardPurchaseModalProps> = (
               required
               value={cardId}
               onChange={(e) => setCardId(e.target.value)}
-              className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold text-slate-800 dark:text-white focus:outline-none focus:border-[#CE82FF] focus:bg-white dark:focus:bg-slate-800 transition-all"
+              className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold text-slate-800 dark:text-white focus:outline-none focus:border-[#D4A94F] focus:bg-white dark:focus:bg-slate-800 transition-all"
             >
               <option value="">Selecione...</option>
               {cards.map((c) => (
@@ -145,7 +145,7 @@ export const CreditCardPurchaseModal: React.FC<CreditCardPurchaseModalProps> = (
                 placeholder="0,00"
                 value={totalAmount}
                 onChangeValue={(val) => setTotalAmount(val > 0 ? val.toString() : '')}
-                className="py-2.5 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-black text-slate-800 dark:text-white focus:border-[#026CD6] focus:bg-white dark:focus:bg-slate-800"
+                className="py-2.5 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-black text-slate-800 dark:text-white focus:border-[#1C4939] focus:bg-white dark:focus:bg-slate-800"
               />
             </div>
 
@@ -154,7 +154,7 @@ export const CreditCardPurchaseModal: React.FC<CreditCardPurchaseModalProps> = (
               <select
                 value={installments}
                 onChange={(e) => setInstallments(e.target.value)}
-                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold text-slate-800 dark:text-white focus:outline-none focus:border-[#CE82FF] focus:bg-white dark:focus:bg-slate-800 transition-all"
+                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold text-slate-800 dark:text-white focus:outline-none focus:border-[#D4A94F] focus:bg-white dark:focus:bg-slate-800 transition-all"
               >
                 {[...Array(48)].map((_, idx) => (
                   <option key={idx + 1} value={idx + 1}>
@@ -174,7 +174,7 @@ export const CreditCardPurchaseModal: React.FC<CreditCardPurchaseModalProps> = (
                 placeholder="Ex: Notebook, Supermercado"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold text-slate-800 dark:text-white focus:outline-none focus:border-[#CE82FF] focus:bg-white dark:focus:bg-slate-800 transition-all"
+                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold text-slate-800 dark:text-white focus:outline-none focus:border-[#D4A94F] focus:bg-white dark:focus:bg-slate-800 transition-all"
               />
             </div>
 
@@ -185,7 +185,7 @@ export const CreditCardPurchaseModal: React.FC<CreditCardPurchaseModalProps> = (
                 required
                 value={purchaseDate}
                 onChange={(e) => setPurchaseDate(e.target.value)}
-                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold text-slate-800 dark:text-white focus:outline-none focus:border-[#CE82FF] focus:bg-white dark:focus:bg-slate-800 transition-all"
+                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold text-slate-800 dark:text-white focus:outline-none focus:border-[#D4A94F] focus:bg-white dark:focus:bg-slate-800 transition-all"
               />
             </div>
           </div>

@@ -101,7 +101,7 @@ export const CategoryCombobox: React.FC<CategoryComboboxProps> = ({
         }}
         className={`w-full min-h-[46px] px-4 py-2.5 bg-slate-50 border-2 rounded-2xl flex items-center justify-between cursor-pointer transition-all select-none active:scale-[0.99] ${
           isOpen
-            ? 'border-[#58CC02] bg-white ring-2 ring-[#58CC02]/20 shadow-sm'
+            ? 'border-[#1C4939] bg-white ring-2 ring-[#1C4939]/20 shadow-sm'
             : 'border-slate-200 hover:border-slate-300 hover:bg-slate-100/70'
         }`}
       >
@@ -149,7 +149,7 @@ export const CategoryCombobox: React.FC<CategoryComboboxProps> = ({
             </button>
           )}
           <div className="p-1 text-slate-400">
-            <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180 text-[#58CC02]' : ''}`} />
+            <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180 text-[#1C4939]' : ''}`} />
           </div>
         </div>
       </div>
@@ -166,7 +166,7 @@ export const CategoryCombobox: React.FC<CategoryComboboxProps> = ({
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Buscar ou digitar nova..."
-              className="w-full pl-9 pr-8 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#58CC02] focus:bg-white transition-all"
+              className="w-full pl-9 pr-8 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#1C4939] focus:bg-white transition-all"
             />
             {searchTerm && (
               <button
@@ -185,17 +185,17 @@ export const CategoryCombobox: React.FC<CategoryComboboxProps> = ({
               <button
                 type="button"
                 onClick={handleSelectNew}
-                className="w-full text-left p-3 rounded-xl text-xs sm:text-sm font-black text-[#46A302] bg-[#E8F8E8] hover:bg-[#D7FFB8] border-2 border-[#58CC02] mb-1 flex items-center justify-between transition-all active:scale-[0.99] shadow-sm"
+                className="w-full text-left p-3 rounded-xl text-xs sm:text-sm font-black text-[#102D25] bg-[#E8E4D9] hover:bg-[#D4A94F] border-2 border-[#1C4939] mb-1 flex items-center justify-between transition-all active:scale-[0.99] shadow-sm"
               >
                 <span className="flex items-center gap-2 truncate">
-                  <div className="w-6 h-6 rounded-lg bg-[#58CC02] text-white flex items-center justify-center shrink-0 shadow-sm">
+                  <div className="w-6 h-6 rounded-lg bg-[#1C4939] text-white flex items-center justify-center shrink-0 shadow-sm">
                     <Plus className="w-4 h-4 stroke-[3]" />
                   </div>
                   <span className="truncate">
                     Criar: <strong className="underline font-black">{searchTerm.trim()}</strong>
                   </span>
                 </span>
-                <span className="text-[10px] uppercase font-black px-2 py-0.5 rounded-full bg-[#58CC02] text-white shrink-0 shadow-sm">
+                <span className="text-[10px] uppercase font-black px-2 py-0.5 rounded-full bg-[#1C4939] text-white shrink-0 shadow-sm">
                   + Nova
                 </span>
               </button>
@@ -211,7 +211,7 @@ export const CategoryCombobox: React.FC<CategoryComboboxProps> = ({
               }}
               className={`w-full text-left px-3.5 py-2.5 min-h-[42px] rounded-xl text-xs sm:text-sm font-bold flex items-center justify-between transition-colors active:scale-[0.99] ${
                 !displayName
-                  ? 'bg-[#E8F8E8] text-[#46A302] border-2 border-[#D7FFB8] font-black'
+                  ? 'bg-[#E8E4D9] text-[#102D25] border-2 border-[#D4A94F] font-black'
                   : 'text-slate-500 hover:bg-slate-100'
               }`}
             >
@@ -219,7 +219,7 @@ export const CategoryCombobox: React.FC<CategoryComboboxProps> = ({
                 <Tag className="w-4 h-4 text-slate-400" />
                 <span>Sem categoria</span>
               </div>
-              {!displayName && <Check className="w-4 h-4 text-[#58CC02] stroke-[3] shrink-0" />}
+              {!displayName && <Check className="w-4 h-4 text-[#1C4939] stroke-[3] shrink-0" />}
             </button>
 
             {/* Lista com TODAS as categorias cadastradas */}
@@ -236,7 +236,7 @@ export const CategoryCombobox: React.FC<CategoryComboboxProps> = ({
                     onClick={() => handleSelect(cat)}
                     className={`w-full text-left px-3.5 py-2.5 min-h-[42px] rounded-xl text-xs sm:text-sm font-bold flex items-center justify-between transition-colors active:scale-[0.99] ${
                       isSelected
-                        ? 'bg-[#E8F8E8] text-[#46A302] border-2 border-[#D7FFB8] font-black'
+                        ? 'bg-[#E8E4D9] text-[#102D25] border-2 border-[#D4A94F] font-black'
                         : 'text-slate-700 hover:bg-slate-100'
                     }`}
                   >
@@ -252,7 +252,7 @@ export const CategoryCombobox: React.FC<CategoryComboboxProps> = ({
                         </span>
                       )}
                     </div>
-                    {isSelected && <Check className="w-4 h-4 text-[#58CC02] stroke-[3] shrink-0" />}
+                    {isSelected && <Check className="w-4 h-4 text-[#1C4939] stroke-[3] shrink-0" />}
                   </button>
                 );
               })
@@ -273,7 +273,7 @@ export const CategoryCombobox: React.FC<CategoryComboboxProps> = ({
                     setIsOpen(false);
                     onOpenCreateCategory();
                   }}
-                  className="w-full text-left px-3 py-2 rounded-xl text-xs font-black text-[#58CC02] hover:bg-[#E8F8E8] flex items-center justify-center gap-1.5 transition-colors"
+                  className="w-full text-left px-3 py-2 rounded-xl text-xs font-black text-[#1C4939] hover:bg-[#E8E4D9] flex items-center justify-center gap-1.5 transition-colors"
                 >
                   <Plus className="w-3.5 h-3.5 stroke-[3]" />
                   <span>Cadastrar categoria com cor personalizada</span>

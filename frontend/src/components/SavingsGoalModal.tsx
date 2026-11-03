@@ -93,7 +93,7 @@ export const SavingsGoalModal: React.FC<SavingsGoalModalProps> = ({
         </button>
 
         <div className="flex items-center space-x-3.5 mb-6">
-          <div className="p-3 rounded-2xl bg-[#E8F8E8] text-[#58CC02] border-2 border-[#D7FFB8]">
+          <div className="p-3 rounded-2xl bg-[#E8E4D9] text-[#1C4939] border-2 border-[#D4A94F]">
             <Target className="w-6 h-6 stroke-[2.5]" />
           </div>
           <div>
@@ -124,7 +124,7 @@ export const SavingsGoalModal: React.FC<SavingsGoalModalProps> = ({
               placeholder="Ex: Reserva de Emergência, Carro Novo, Férias"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border-2 border-slate-200 text-slate-800 font-bold placeholder-slate-400 focus:outline-none focus:border-[#58CC02] focus:bg-white transition-all"
+              className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border-2 border-slate-200 text-slate-800 font-bold placeholder-slate-400 focus:outline-none focus:border-[#1C4939] focus:bg-white transition-all"
             />
           </div>
 
@@ -136,7 +136,7 @@ export const SavingsGoalModal: React.FC<SavingsGoalModalProps> = ({
               value={targetAmount}
               onChangeValue={(val) => setTargetAmount(val > 0 ? val.toString() : '')}
               placeholder="0,00"
-              className="py-2.5 rounded-2xl bg-slate-50 border-2 border-slate-200 text-slate-800 font-black placeholder-slate-400 focus:border-[#58CC02] focus:bg-white"
+              className="py-2.5 rounded-2xl bg-slate-50 border-2 border-slate-200 text-slate-800 font-black placeholder-slate-400 focus:border-[#1C4939] focus:bg-white"
             />
           </div>
 
@@ -148,7 +148,7 @@ export const SavingsGoalModal: React.FC<SavingsGoalModalProps> = ({
               type="date"
               value={targetDate}
               onChange={(e) => setTargetDate(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border-2 border-slate-200 text-slate-800 font-bold focus:outline-none focus:border-[#58CC02] focus:bg-white transition-all"
+              className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border-2 border-slate-200 text-slate-800 font-bold focus:outline-none focus:border-[#1C4939] focus:bg-white transition-all"
             />
           </div>
 

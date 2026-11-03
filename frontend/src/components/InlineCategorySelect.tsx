@@ -185,7 +185,7 @@ export const InlineCategorySelect: React.FC<InlineCategorySelectProps> = ({
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Buscar categoria..."
                 autoFocus
-                className="w-full bg-slate-50 dark:!bg-[#1E293B] border border-slate-200 dark:!border-slate-700 rounded-xl pl-8 pr-2.5 py-1.5 text-xs font-semibold text-slate-800 dark:!text-white placeholder-slate-400 focus:outline-none focus:border-[#026CD6] focus:bg-white dark:focus:!bg-[#1E293B] transition-all"
+                className="w-full bg-slate-50 dark:!bg-[#1E293B] border border-slate-200 dark:!border-slate-700 rounded-xl pl-8 pr-2.5 py-1.5 text-xs font-semibold text-slate-800 dark:!text-white placeholder-slate-400 focus:outline-none focus:border-[#1C4939] focus:bg-white dark:focus:!bg-[#1E293B] transition-all"
               />
             </div>
 
@@ -208,19 +208,19 @@ export const InlineCategorySelect: React.FC<InlineCategorySelectProps> = ({
                       }}
                       className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold transition-all text-left group ${
                         isCurrent
-                          ? 'bg-blue-50 text-[#026CD6] font-black'
+                          ? 'bg-blue-50 text-[#1C4939] font-black'
                           : 'hover:bg-slate-100 text-slate-700'
                       }`}
                     >
                       <div className="flex items-center gap-2 min-w-0 pr-1">
                         <span
                           className="w-3 h-3 rounded-full flex-shrink-0 shadow-xs"
-                          style={{ backgroundColor: cat.colorHex || '#026CD6' }}
+                          style={{ backgroundColor: cat.colorHex || '#1C4939' }}
                         />
                         <span className="truncate">{cat.name}</span>
                       </div>
                       {isCurrent && (
-                        <Check className="w-3.5 h-3.5 text-[#026CD6] flex-shrink-0 stroke-[3]" />
+                        <Check className="w-3.5 h-3.5 text-[#1C4939] flex-shrink-0 stroke-[3]" />
                       )}
                     </button>
                   );
@@ -236,7 +236,7 @@ export const InlineCategorySelect: React.FC<InlineCategorySelectProps> = ({
                   setIsOpen(false);
                   onOpenCreateCategory();
                 }}
-                className="w-full flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-black text-[#026CD6] bg-blue-50/80 hover:bg-blue-100/80 border border-blue-200 transition-all text-left"
+                className="w-full flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-black text-[#1C4939] bg-blue-50/80 hover:bg-blue-100/80 border border-blue-200 transition-all text-left"
               >
                 <Plus className="w-3.5 h-3.5 stroke-[3]" />
                 <span>Criar Nova Categoria...</span>

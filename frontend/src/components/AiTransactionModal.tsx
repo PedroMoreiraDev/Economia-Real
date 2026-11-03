@@ -23,7 +23,7 @@ import { CurrencyInput } from './CurrencyInput';
 import { CategoryCombobox } from './CategoryCombobox';
 
 const CATEGORY_COLORS = [
-  '#026CD6', // Azul Principal
+  '#1C4939', // Azul Principal
   '#10B981', // Verde Esmeralda
   '#8B5CF6', // Roxo Moderno
   '#EC4899', // Rosa
@@ -570,13 +570,13 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
         {/* Cabeçalho alegre estilo Duolingo com suporte a Modo Escuro */}
         <div className="p-6 border-b-2 border-slate-100 dark:border-slate-800 bg-[#F4FBF4] dark:!bg-slate-900 flex items-center justify-between">
           <div className="flex items-center gap-3.5">
-            <div className="p-3 rounded-2xl bg-[#58CC02] text-white shadow-[0_3px_0_0_#46A302]">
+            <div className="p-3 rounded-2xl bg-[#1C4939] text-white shadow-[0_3px_0_0_#102D25]">
               <Sparkles className="w-6 h-6 stroke-[2.5]" />
             </div>
             <div>
               <h2 className="text-xl sm:text-2xl font-black text-slate-800 dark:!text-white flex items-center gap-2">
                 <span>Lançamento com IA</span>
-                <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#E8F8E8] dark:!bg-emerald-950/80 text-[#46A302] dark:!text-emerald-400 border border-[#D7FFB8] dark:!border-emerald-800/80">
+                <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#E8E4D9] dark:!bg-emerald-950/80 text-[#102D25] dark:!text-emerald-400 border border-[#D4A94F] dark:!border-emerald-800/80">
                   Zero Alucinação
                 </span>
               </h2>
@@ -598,14 +598,14 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
 
           {/* Mensagem de Sucesso após Salvar */}
           {successFeedback && (
-            <div className="p-3.5 bg-[#E8F8E8] border-2 border-[#58CC02] rounded-2xl flex items-center justify-between gap-3 text-slate-800 text-xs sm:text-sm font-bold shadow-sm animate-fade-in">
+            <div className="p-3.5 bg-[#E8E4D9] border-2 border-[#1C4939] rounded-2xl flex items-center justify-between gap-3 text-slate-800 text-xs sm:text-sm font-bold shadow-sm animate-fade-in">
               <div className="flex items-center gap-2.5">
-                <div className="p-1.5 rounded-xl bg-[#58CC02] text-white shadow-[0_2px_0_0_#46A302]">
+                <div className="p-1.5 rounded-xl bg-[#1C4939] text-white shadow-[0_2px_0_0_#102D25]">
                   <CheckCircle2 className="w-4 h-4 stroke-[3]" />
                 </div>
                 <div>
                   <span className="text-slate-800">{successFeedback}</span>
-                  <p className="text-[11px] text-[#46A302] font-extrabold mt-0.5">
+                  <p className="text-[11px] text-[#102D25] font-extrabold mt-0.5">
                     Você já pode clicar no microfone abaixo e falar o próximo registro!
                   </p>
                 </div>
@@ -629,7 +629,7 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
                 onClick={() => { setActiveTab('text'); setError(null); }}
                 className={`flex-1 py-2 text-xs sm:text-sm font-black rounded-xl flex items-center justify-center gap-2 transition-all ${
                   activeTab === 'text'
-                    ? 'bg-[#58CC02] text-white shadow-[0_3px_0_0_#46A302]'
+                    ? 'bg-[#1C4939] text-white shadow-[0_3px_0_0_#102D25]'
                     : 'text-slate-600 hover:text-slate-800 hover:bg-white/60'
                 }`}
               >
@@ -641,7 +641,7 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
                 onClick={() => { setActiveTab('voice'); setError(null); }}
                 className={`flex-1 py-2 text-xs sm:text-sm font-black rounded-xl flex items-center justify-center gap-2 transition-all ${
                   activeTab === 'voice'
-                    ? 'bg-[#CE82FF] text-white shadow-[0_3px_0_0_#A64BFF]'
+                    ? 'bg-[#D4A94F] text-white shadow-[0_3px_0_0_#B8892E]'
                     : 'text-slate-600 hover:text-slate-800 hover:bg-white/60'
                 }`}
               >
@@ -674,7 +674,7 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
                         onChange={(e) => setInputText(e.target.value)}
                         placeholder="Ex: Almoço 45 reais no débito hoje, ou Uber 22,50 ontem no cartão..."
                         rows={3}
-                        className="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-4 py-3 text-slate-800 font-bold placeholder-slate-400 focus:outline-none focus:border-[#58CC02] focus:bg-white transition-all resize-none"
+                        className="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-4 py-3 text-slate-800 font-bold placeholder-slate-400 focus:outline-none focus:border-[#1C4939] focus:bg-white transition-all resize-none"
                       />
                     </div>
                   </div>
@@ -691,7 +691,7 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
                             setInputText(ex);
                             handleProcessText(ex);
                           }}
-                          className="text-xs px-3 py-1.5 rounded-xl bg-slate-100 text-slate-600 font-bold hover:bg-[#E8F8E8] hover:text-[#46A302] border-2 border-slate-200 hover:border-[#D7FFB8] transition-all"
+                          className="text-xs px-3 py-1.5 rounded-xl bg-slate-100 text-slate-600 font-bold hover:bg-[#E8E4D9] hover:text-[#102D25] border-2 border-slate-200 hover:border-[#D4A94F] transition-all"
                         >
                           "{ex}"
                         </button>
@@ -733,7 +733,7 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
                         className={`relative z-10 w-24 h-24 rounded-full flex items-center justify-center transition-all ${
                           isRecording
                             ? 'bg-[#FF4B4B] text-white shadow-[0_6px_0_0_#EA2B2B] active:translate-y-1'
-                            : 'bg-[#58CC02] text-white shadow-[0_6px_0_0_#46A302] hover:bg-[#46A302] active:translate-y-1'
+                            : 'bg-[#1C4939] text-white shadow-[0_6px_0_0_#102D25] hover:bg-[#102D25] active:translate-y-1'
                         }`}
                       >
                         {isRecording ? (
@@ -765,11 +765,11 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
                       <div className="space-y-1.5">
                         <p className="text-xs sm:text-sm font-bold text-slate-600">
                           Clique no microfone e diga, por exemplo: <br />
-                          <span className="text-[#58CC02] font-black">"Ifood 49,19 no débito hoje"</span>
+                          <span className="text-[#1C4939] font-black">"Ifood 49,19 no débito hoje"</span>
                         </p>
                         {successFeedback && (
-                          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E8F8E8] text-[#46A302] border border-[#58CC02] text-xs font-black">
-                            <span className="w-2 h-2 rounded-full bg-[#58CC02] animate-ping" />
+                          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E8E4D9] text-[#102D25] border border-[#1C4939] text-xs font-black">
+                            <span className="w-2 h-2 rounded-full bg-[#1C4939] animate-ping" />
                             <span>Pronto para o próximo! Clique no microfone acima</span>
                           </div>
                         )}
@@ -792,7 +792,7 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
                   </div>
 
                   {isProcessingAi && (
-                    <div className="flex items-center justify-center gap-2 text-sm font-bold text-[#58CC02] py-2">
+                    <div className="flex items-center justify-center gap-2 text-sm font-bold text-[#1C4939] py-2">
                       <RefreshCw className="w-4 h-4 animate-spin" />
                       Transcrevendo e estruturando com precisão...
                     </div>
@@ -808,21 +808,21 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
               
               {/* Balão de transcrição se veio de voz */}
               {extractedData.transcribedText && (
-                <div className="p-3.5 bg-purple-50 dark:bg-purple-950/40 border-2 border-[#CE82FF]/40 dark:border-purple-800/80 rounded-2xl text-xs font-bold text-[#A64BFF] dark:text-purple-300">
+                <div className="p-3.5 bg-purple-50 dark:bg-purple-950/40 border-2 border-[#D4A94F]/40 dark:border-purple-800/80 rounded-2xl text-xs font-bold text-[#B8892E] dark:text-purple-300">
                   <span className="font-black uppercase tracking-wider block mb-0.5 text-purple-700 dark:text-purple-300">Transcrição de Voz:</span>
                   "{extractedData.transcribedText}"
                 </div>
               )}
 
               {/* Banner de Validação & Confiança */}
-              <div className="flex items-center justify-between p-3.5 bg-[#E8F8E8] dark:!bg-emerald-950/80 border-2 border-[#D7FFB8] dark:!border-emerald-800 rounded-2xl shadow-sm">
+              <div className="flex items-center justify-between p-3.5 bg-[#E8E4D9] dark:!bg-emerald-950/80 border-2 border-[#D4A94F] dark:!border-emerald-800 rounded-2xl shadow-sm">
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#58CC02] dark:!text-emerald-400 stroke-[2.5]" />
+                  <CheckCircle2 className="w-4 h-4 text-[#1C4939] dark:!text-emerald-400 stroke-[2.5]" />
                   <span className="text-xs font-black text-slate-800 dark:!text-emerald-200">
                     Dados interpretados. Revise e confirme:
                   </span>
                 </div>
-                <span className="text-xs font-black px-2.5 py-0.5 rounded-full bg-white dark:!bg-slate-900 text-[#46A302] dark:!text-emerald-400 border border-[#58CC02] dark:!border-emerald-700 shadow-sm">
+                <span className="text-xs font-black px-2.5 py-0.5 rounded-full bg-white dark:!bg-slate-900 text-[#102D25] dark:!text-emerald-400 border border-[#1C4939] dark:!border-emerald-700 shadow-sm">
                   {Math.round(extractedData.confidenceScore * 100)}% Confiança
                 </span>
               </div>
@@ -847,7 +847,7 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
                   <select
                     value={confirmType}
                     onChange={(e) => setConfirmType(e.target.value as TransactionType)}
-                    className="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-3.5 py-2.5 text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:border-[#58CC02] focus:bg-white transition-all"
+                    className="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-3.5 py-2.5 text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:border-[#1C4939] focus:bg-white transition-all"
                   >
                     <option value="EXPENSE">Despesa</option>
                     <option value="INCOME">Receita</option>
@@ -862,7 +862,7 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
                     value={confirmAmount}
                     onChangeValue={(val) => setConfirmAmount(val > 0 ? val.toString() : '')}
                     placeholder="0,00"
-                    className="bg-slate-50 border-2 border-slate-200 rounded-2xl py-2.5 text-xs sm:text-sm font-black text-slate-800 focus:border-[#58CC02] focus:bg-white"
+                    className="bg-slate-50 border-2 border-slate-200 rounded-2xl py-2.5 text-xs sm:text-sm font-black text-slate-800 focus:border-[#1C4939] focus:bg-white"
                   />
                 </div>
               </div>
@@ -875,7 +875,7 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
                   required
                   value={confirmDescription}
                   onChange={(e) => setConfirmDescription(e.target.value)}
-                  className="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-3.5 py-2.5 text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:border-[#58CC02] focus:bg-white transition-all"
+                  className="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-3.5 py-2.5 text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:border-[#1C4939] focus:bg-white transition-all"
                 />
               </div>
 
@@ -892,7 +892,7 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
                     required
                     value={confirmDate}
                     onChange={(e) => setConfirmDate(e.target.value)}
-                    className="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-3.5 py-2.5 text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:border-[#58CC02] focus:bg-white transition-all"
+                    className="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-3.5 py-2.5 text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:border-[#1C4939] focus:bg-white transition-all"
                   />
                 </div>
 
@@ -904,7 +904,7 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
                       Meio de Pagamento
                     </label>
                     <div className="px-3.5 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-xs sm:text-sm font-bold text-slate-700 flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-[#58CC02]" />
+                      <span className="w-2 h-2 rounded-full bg-[#1C4939]" />
                       <span>
                         {extractedData.suggestedPaymentMethod === 'CREDIT_CARD'
                           ? 'Cartão de Crédito'
@@ -935,7 +935,7 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
                       setQuickCatError(null);
                       setShowQuickCategoryModal(true);
                     }}
-                    className="text-xs font-black text-[#58CC02] hover:text-[#46A302] flex items-center gap-1 transition-colors px-2 py-0.5 rounded-lg hover:bg-[#E8F8E8] active:scale-95"
+                    className="text-xs font-black text-[#1C4939] hover:text-[#102D25] flex items-center gap-1 transition-colors px-2 py-0.5 rounded-lg hover:bg-[#E8E4D9] active:scale-95"
                   >
                     <Plus className="w-3.5 h-3.5 stroke-[3]" />
                     Nova Categoria
@@ -959,7 +959,7 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
                 />
 
                 {confirmCategoryName && !confirmCategoryId && (
-                  <p className="text-[11px] font-bold text-[#46A302] dark:text-emerald-300 flex items-center gap-1.5 bg-[#E8F8E8] dark:bg-emerald-950/60 p-2.5 rounded-xl border border-[#D7FFB8] dark:border-emerald-800">
+                  <p className="text-[11px] font-bold text-[#102D25] dark:text-emerald-300 flex items-center gap-1.5 bg-[#E8E4D9] dark:bg-emerald-950/60 p-2.5 rounded-xl border border-[#D4A94F] dark:border-emerald-800">
                     <CheckCircle2 className="w-3.5 h-3.5 shrink-0 stroke-[2.5]" />
                     <span>
                       A categoria <strong>"{confirmCategoryName}"</strong> será cadastrada automaticamente ao confirmar.
@@ -1011,7 +1011,7 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
           <div className="bg-white border-2 border-slate-200 rounded-3xl w-full max-w-sm p-5 shadow-2xl space-y-4 animate-scale-up">
             <div className="flex items-center justify-between pb-3 border-b-2 border-slate-100">
               <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-[#58CC02] text-white shadow-[0_2px_0_0_#46A302]">
+                <div className="p-2 rounded-xl bg-[#1C4939] text-white shadow-[0_2px_0_0_#102D25]">
                   <Tag className="w-4 h-4 stroke-[2.5]" />
                 </div>
                 <h4 className="text-sm font-black text-slate-800">Nova Categoria</h4>
@@ -1043,7 +1043,7 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
                   placeholder="Ex: Farmácia, Pet Shop, Lazer..."
                   value={newCatName}
                   onChange={(e) => setNewCatName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:border-[#58CC02] focus:bg-white transition-all"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:border-[#1C4939] focus:bg-white transition-all"
                 />
               </div>
 

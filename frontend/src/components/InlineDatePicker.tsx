@@ -311,9 +311,9 @@ export const InlineDatePicker: React.FC<InlineDatePickerProps> = ({
                     onClick={() => handleSelectDay(day)}
                     className={`h-7 w-7 mx-auto flex items-center justify-center text-xs rounded-xl font-bold transition-all cursor-pointer ${
                       isSelected
-                        ? 'bg-[#026CD6] text-white font-black shadow-[0_2px_0_0_#024fa0] scale-105'
+                        ? 'bg-[#1C4939] text-white font-black shadow-[0_2px_0_0_#024fa0] scale-105'
                         : isToday
-                        ? 'bg-blue-50 text-[#026CD6] font-black ring-1 ring-[#026CD6]/40 hover:bg-blue-100'
+                        ? 'bg-blue-50 text-[#1C4939] font-black ring-1 ring-[#1C4939]/40 hover:bg-blue-100'
                         : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 active:scale-95'
                     }`}
                   >
@@ -329,7 +329,7 @@ export const InlineDatePicker: React.FC<InlineDatePickerProps> = ({
                 <button
                   type="button"
                   onClick={handleSelectToday}
-                  className="px-2 py-1 rounded-lg text-[10px] font-black text-[#026CD6] bg-blue-50 hover:bg-blue-100 transition-colors"
+                  className="px-2 py-1 rounded-lg text-[10px] font-black text-[#1C4939] bg-blue-50 hover:bg-blue-100 transition-colors"
                 >
                   Hoje
                 </button>

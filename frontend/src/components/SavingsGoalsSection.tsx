@@ -85,16 +85,18 @@ export const SavingsGoalsSection: React.FC<SavingsGoalsSectionProps> = ({
   return (
     <div className="space-y-6">
       
-      {/* Cabeçalho Estilo Duolingo */}
+      {/* Cabeçalho */}
       <div className="card-duo p-6 sm:p-8 space-y-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b-2 border-slate-100 pb-5">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[#E2DDD0] dark:border-[#214E3E] pb-5">
           <div className="space-y-1">
-            <h2 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2.5">
-              <span className="text-2xl">🎯</span>
-              <span>Metas de Economia & Conquistas</span>
+            <h2 className="text-xl sm:text-2xl font-extrabold text-[#102D25] dark:text-[#E8E4D9] flex items-center gap-2.5">
+              <span className="p-2.5 rounded-xl bg-[#D4A94F] text-[#102D25] border border-[#B88B32]">
+                <Target className="w-5 h-5 stroke-[2.3]" />
+              </span>
+              <span>Cofres & Metas de Patrimônio</span>
             </h2>
-            <p className="text-xs sm:text-sm font-bold text-slate-500">
-              Transforme seus sonhos em realidade guardando um pouquinho a cada mês!
+            <p className="text-xs sm:text-sm font-semibold text-[#526B61] dark:text-[#9AB3A8]">
+              Construa sua reserva de emergência e alcance seus objetivos de médio e longo prazo
             </p>
           </div>
 
@@ -105,17 +107,17 @@ export const SavingsGoalsSection: React.FC<SavingsGoalsSectionProps> = ({
             }}
             className="btn-duo btn-duo-green text-xs sm:text-sm px-4 py-2.5 flex items-center gap-2 self-start sm:self-auto"
           >
-            <Plus className="w-4 h-4 stroke-[3]" />
+            <Plus className="w-4 h-4 stroke-[2.5]" />
             <span>Criar Nova Meta</span>
           </button>
         </div>
 
         {feedbackMessage && (
           <div
-            className={`flex items-center space-x-2.5 p-3.5 rounded-2xl text-xs font-black border-2 ${
+            className={`flex items-center space-x-2.5 p-3.5 rounded-xl text-xs font-bold border ${
               feedbackMessage.type === 'success'
-                ? 'bg-[#E8F8E8] border-[#D7FFB8] text-[#388302]'
-                : 'bg-rose-50 border-rose-200 text-rose-700'
+                ? 'bg-[#E6EFEA] dark:bg-[#16382E] border-[#1C4939] text-[#102D25] dark:text-[#E8E4D9]'
+                : 'bg-rose-50 border-rose-200 text-[#B93838]'
             }`}
           >
             <AlertCircle className="w-4 h-4 shrink-0" />
@@ -123,73 +125,73 @@ export const SavingsGoalsSection: React.FC<SavingsGoalsSectionProps> = ({
           </div>
         )}
 
-        {/* 3 Cards de Resumo Gamificados */}
+        {/* 3 Cards de Resumo Executivos */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-          <div className="p-5 rounded-3xl bg-[#F4FBF4] dark:bg-emerald-950/20 border-2 border-emerald-200 dark:border-emerald-800/40 shadow-[0_3px_0_0_#D1FAE5] dark:shadow-[0_3px_0_0_#064E3B]">
+          <div className="p-5 rounded-2xl bg-[#E6EFEA]/70 dark:bg-[#16382E]/80 border border-[#1C4939]/30 dark:border-[#285C49]">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#355248] dark:text-[#9AB3A8]">
                 Total Poupado
               </span>
-              <Coins className="w-5 h-5 text-[#58CC02]" />
+              <Coins className="w-5 h-5 text-[#1C4939] dark:text-[#78C6A3]" />
             </div>
             <div className="mt-2">
-              <span className="text-2xl sm:text-3xl font-black text-[#46A302]">
+              <span className="text-2xl sm:text-3xl font-extrabold text-[#1C4939] dark:text-[#78C6A3] font-numeric">
                 {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalSaved)}
               </span>
             </div>
-            <span className="text-xs font-bold text-slate-500 mt-1 block">
-              Guardado em caixinhas seguras
+            <span className="text-xs font-semibold text-[#526B61] dark:text-[#9AB3A8] mt-1 block">
+              Alocado em objetivos dedicados
             </span>
           </div>
 
-          <div className="p-5 rounded-3xl bg-[#DDF4FF] border-2 border-[#BAE6FD] shadow-[0_3px_0_0_#BAE6FD]">
+          <div className="p-5 rounded-2xl bg-[#EFECE3] dark:bg-[#102D25] border border-[#D5CFC0] dark:border-[#214E3E]">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#526B61] dark:text-[#9AB3A8]">
                 Objetivo Global
               </span>
-              <Target className="w-5 h-5 text-[#1CB0F6]" />
+              <Target className="w-5 h-5 text-[#102D25] dark:text-[#D4A94F]" />
             </div>
-            <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-2xl sm:text-3xl font-black text-slate-900">
+            <div className="mt-2 flex items-baseline gap-2 font-numeric">
+              <span className="text-2xl sm:text-3xl font-extrabold text-[#102D25] dark:text-[#E8E4D9]">
                 {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalTarget)}
               </span>
-              <span className="text-xs font-black text-[#1899D6]">({overallPercentage.toFixed(0)}%)</span>
+              <span className="text-xs font-bold text-[#1C4939] dark:text-[#D4A94F]">({overallPercentage.toFixed(0)}%)</span>
             </div>
-            <span className="text-xs font-bold text-slate-500 mt-1 block">
+            <span className="text-xs font-semibold text-[#526B61] dark:text-[#9AB3A8] mt-1 block">
               Soma de todas as metas
             </span>
           </div>
 
-          <div className="p-5 rounded-3xl bg-[#FFF5D1] border-2 border-[#FDE68A] shadow-[0_3px_0_0_#FDE68A]">
+          <div className="p-5 rounded-2xl bg-[#F7EFE0] dark:bg-[#16382E] border border-[#D4A94F]/50">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-black uppercase tracking-wider text-amber-800">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#9A7220] dark:text-[#D4A94F]">
                 Metas Conquistadas
               </span>
-              <Trophy className="w-5 h-5 text-amber-500 fill-amber-400" />
+              <Trophy className="w-5 h-5 text-[#D4A94F]" />
             </div>
-            <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-2xl sm:text-3xl font-black text-amber-950">
+            <div className="mt-2 flex items-baseline gap-2 font-numeric">
+              <span className="text-2xl sm:text-3xl font-extrabold text-[#102D25] dark:text-[#E8E4D9]">
                 {completedGoalsCount}
               </span>
-              <span className="text-xs font-extrabold text-amber-800">de {goals.length} metas</span>
+              <span className="text-xs font-bold text-[#9A7220] dark:text-[#D4A94F]">de {goals.length} metas</span>
             </div>
-            <span className="text-xs font-bold text-amber-700 mt-1 block">
-              {completedGoalsCount > 0 ? 'Parabéns pelo foco! 🏆' : 'Em andamento'}
+            <span className="text-xs font-semibold text-[#526B61] dark:text-[#9AB3A8] mt-1 block">
+              {completedGoalsCount > 0 ? 'Objetivos concluídos' : 'Em andamento'}
             </span>
           </div>
         </div>
 
         {/* Lista de Metas */}
         {loading ? (
-          <div className="p-12 text-center text-slate-400 text-sm font-bold">Carregando metas...</div>
+          <div className="p-12 text-center text-[#526B61] dark:text-[#9AB3A8] text-sm font-bold">Carregando metas...</div>
         ) : goals.length === 0 ? (
-          <div className="p-10 rounded-3xl border-2 border-dashed border-slate-200 dark:!border-slate-800 dark:!bg-[#070C14] text-center space-y-3">
-            <div className="w-16 h-16 rounded-3xl bg-[#D7FFB8] dark:!bg-[#0F1E36] text-3xl flex items-center justify-center mx-auto shadow-sm border-2 border-transparent dark:!border-emerald-800/80">
-              ✨
+          <div className="p-10 rounded-2xl border border-dashed border-[#D5CFC0] dark:border-[#214E3E] bg-[#EFECE3]/40 dark:bg-[#0D241D] text-center space-y-3">
+            <div className="w-14 h-14 rounded-2xl bg-[#102D25] text-[#D4A94F] border border-[#D4A94F]/40 flex items-center justify-center mx-auto">
+              <Sparkles className="w-6 h-6" />
             </div>
-            <h3 className="text-base font-black text-slate-800 dark:!text-white">Nenhuma meta criada ainda</h3>
-            <p className="text-xs font-bold text-slate-400 dark:!text-slate-200 max-w-sm mx-auto">
-              Defina uma meta para reserva de emergência, uma viagem de férias ou um sonho que queira realizar!
+            <h3 className="text-base font-extrabold text-[#102D25] dark:text-[#E8E4D9]">Nenhuma meta criada ainda</h3>
+            <p className="text-xs font-medium text-[#526B61] dark:text-[#9AB3A8] max-w-sm mx-auto">
+              Defina uma meta para reserva de emergência, uma viagem ou construção de patrimônio.
             </p>
             <button
               onClick={() => {
@@ -208,46 +210,45 @@ export const SavingsGoalsSection: React.FC<SavingsGoalsSectionProps> = ({
               return (
                 <div
                   key={goal.id}
-                  className={`rounded-3xl border-2 p-6 transition-all flex flex-col justify-between relative overflow-hidden shadow-[0_4px_0_0_#E2E8F0] dark:shadow-[0_4px_0_0_#020617] ${
+                  className={`rounded-2xl border p-6 transition-all flex flex-col justify-between relative overflow-hidden ${
                     goal.isReached
-                      ? 'bg-gradient-to-br from-[#F4FBF4] to-[#E8F8E8] dark:from-emerald-950/40 dark:to-slate-900 border-[#58CC02] dark:border-emerald-600 shadow-[0_4px_0_0_#A7F3D0] dark:shadow-[0_4px_0_0_#064E3B]'
-                      : 'bg-white dark:bg-slate-900 border-slate-200/90 dark:border-slate-800 hover:border-emerald-300'
+                      ? 'bg-[#E6EFEA]/60 dark:bg-[#16382E] border-[#1C4939] dark:border-[#D4A94F]'
+                      : 'bg-[#FAF8F4] dark:bg-[#102D25] border-[#D5CFC0] dark:border-[#214E3E] hover:border-[#1C4939]/50'
                   }`}
                 >
                   {goal.isReached && (
-                    <div className="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFC800] text-amber-950 border-2 border-[#E5A500] text-[11px] font-black shadow-sm uppercase tracking-wider">
+                    <div className="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#D4A94F] text-[#102D25] text-[11px] font-extrabold shadow-2xs uppercase tracking-wider">
                       <Sparkles className="w-3.5 h-3.5" />
-                      <span>Conquistada! 🎉</span>
+                      <span>Conquistada</span>
                     </div>
                   )}
 
                   <div>
                     <div className="mb-4 pr-16">
-                      <h3 className="text-lg font-black text-slate-900 tracking-tight">{goal.title}</h3>
+                      <h3 className="text-lg font-extrabold text-[#102D25] dark:text-[#E8E4D9] tracking-tight">{goal.title}</h3>
                       {goal.targetDate && (
-                        <span className="text-xs font-bold text-slate-400 flex items-center gap-1 mt-1">
-                          <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                        <span className="text-xs font-semibold text-[#526B61] dark:text-[#9AB3A8] flex items-center gap-1 mt-1">
+                          <Calendar className="w-3.5 h-3.5" />
                           <span>Alvo: {new Date(goal.targetDate + 'T12:00:00').toLocaleDateString('pt-BR')}</span>
                         </span>
                       )}
                     </div>
 
-                    {/* Barra de Progresso Estilo Duolingo */}
                     <div className="space-y-1.5 my-4">
-                      <div className="flex justify-between text-xs font-black">
-                        <span className="text-slate-500 uppercase tracking-wider text-[10px]">Progresso</span>
-                        <span className={goal.isReached ? 'text-[#46A302] font-black' : 'text-slate-800'}>
+                      <div className="flex justify-between text-xs font-bold font-numeric">
+                        <span className="text-[#526B61] dark:text-[#9AB3A8] uppercase tracking-wider text-[10px]">Progresso</span>
+                        <span className={goal.isReached ? 'text-[#1C4939] dark:text-[#D4A94F] font-extrabold' : 'text-[#102D25] dark:text-[#E8E4D9]'}>
                           {goal.progressPercentage.toFixed(0)}%
                         </span>
                       </div>
-                      <div className="progress-duo-track h-4">
+                      <div className="progress-duo-track h-3">
                         <div
                           className={`progress-duo-fill ${
                             goal.isReached
-                              ? 'bg-[#58CC02]'
+                              ? 'bg-[#1C4939]'
                               : pct >= 50
-                              ? 'bg-[#1CB0F6]'
-                              : 'bg-[#FF9600]'
+                              ? 'bg-gradient-to-r from-[#1C4939] to-[#D4A94F]'
+                              : 'bg-[#D4A94F]'
                           }`}
                           style={{ width: `${pct}%` }}
                         />
@@ -255,16 +256,16 @@ export const SavingsGoalsSection: React.FC<SavingsGoalsSectionProps> = ({
                     </div>
 
                     {/* Valores Numéricos */}
-                    <div className="grid grid-cols-2 gap-2 p-3.5 rounded-2xl bg-slate-50 dark:!bg-[#0F172A] border-2 border-slate-100 dark:!border-slate-800 text-xs mb-4">
+                    <div className="grid grid-cols-2 gap-2 p-3.5 rounded-xl bg-[#EFECE3]/70 dark:bg-[#0D241D] border border-[#E2DDD0] dark:border-[#214E3E] text-xs mb-4 font-numeric">
                       <div>
-                        <span className="text-[10px] uppercase font-black text-slate-400 dark:!text-slate-400 block tracking-wider">Acumulado</span>
-                        <span className="font-black text-[#46A302] dark:!text-emerald-400 text-sm sm:text-base">
+                        <span className="text-[10px] uppercase font-bold text-[#526B61] dark:text-[#9AB3A8] block tracking-wider">Acumulado</span>
+                        <span className="font-extrabold text-[#1C4939] dark:text-[#78C6A3] text-sm sm:text-base">
                           {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(goal.currentAmount)}
                         </span>
                       </div>
                       <div className="text-right">
-                        <span className="text-[10px] uppercase font-black text-slate-400 dark:!text-slate-400 block tracking-wider">Objetivo</span>
-                        <span className="font-black text-slate-900 dark:!text-white text-sm sm:text-base">
+                        <span className="text-[10px] uppercase font-bold text-[#526B61] dark:text-[#9AB3A8] block tracking-wider">Objetivo</span>
+                        <span className="font-extrabold text-[#102D25] dark:text-[#E8E4D9] text-sm sm:text-base">
                           {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(goal.targetAmount)}
                         </span>
                       </div>
@@ -272,13 +273,13 @@ export const SavingsGoalsSection: React.FC<SavingsGoalsSectionProps> = ({
                   </div>
 
                   {/* Ações */}
-                  <div className="pt-3 border-t-2 border-slate-100 flex items-center justify-between gap-2">
+                  <div className="pt-3 border-t border-[#E2DDD0] dark:border-[#214E3E] flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleOpenTx(goal, 'deposit')}
                         className="btn-duo btn-duo-green text-xs px-3 py-1.5 flex items-center gap-1"
                       >
-                        <ArrowUpRight className="w-3.5 h-3.5 stroke-[3]" />
+                        <ArrowUpRight className="w-3.5 h-3.5 stroke-[2.5]" />
                         <span>Guardar</span>
                       </button>
                       {goal.currentAmount > 0 && (
@@ -286,7 +287,7 @@ export const SavingsGoalsSection: React.FC<SavingsGoalsSectionProps> = ({
                           onClick={() => handleOpenTx(goal, 'withdraw')}
                           className="btn-duo btn-duo-white text-xs px-3 py-1.5 flex items-center gap-1"
                         >
-                          <ArrowDownLeft className="w-3.5 h-3.5 stroke-[3]" />
+                          <ArrowDownLeft className="w-3.5 h-3.5 stroke-[2.5]" />
                           <span>Resgatar</span>
                         </button>
                       )}
@@ -299,14 +300,14 @@ export const SavingsGoalsSection: React.FC<SavingsGoalsSectionProps> = ({
                           setIsGoalModalOpen(true);
                         }}
                         title="Editar Meta"
-                        className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                        className="p-2 rounded-lg text-[#526B61] dark:text-[#9AB3A8] hover:text-[#102D25] dark:hover:text-[#E8E4D9] hover:bg-[#EFECE3] dark:hover:bg-[#16382E] transition-colors"
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(goal)}
                         title="Excluir Meta"
-                        className="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                        className="p-2 rounded-lg text-[#526B61] dark:text-[#9AB3A8] hover:text-[#B93838] hover:bg-rose-50 transition-colors"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>

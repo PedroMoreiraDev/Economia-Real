@@ -93,9 +93,9 @@ export const RecurringMonthsPicker: React.FC<RecurringMonthsPickerProps> = ({
       accentText: 'text-rose-900 dark:!text-rose-200',
     },
     bill: {
-      activeChip: 'bg-[#026CD6] text-white border-[#026CD6] shadow-[0_2px_0_0_#0153AB]',
-      stepperBtn: 'hover:bg-blue-100 dark:hover:!bg-[#1E293B] text-[#026CD6] dark:!text-sky-300 border-blue-300 dark:!border-blue-800',
-      inputFocus: 'focus:border-[#026CD6] focus:ring-blue-200',
+      activeChip: 'bg-[#1C4939] text-white border-[#1C4939] shadow-[0_2px_0_0_#102D25]',
+      stepperBtn: 'hover:bg-blue-100 dark:hover:!bg-[#1E293B] text-[#1C4939] dark:!text-sky-300 border-blue-300 dark:!border-blue-800',
+      inputFocus: 'focus:border-[#1C4939] focus:ring-blue-200',
       badge: 'text-blue-800 dark:!text-sky-300 bg-blue-100/80 dark:!bg-[#0F172A] border-blue-300 dark:!border-blue-800',
       accentText: 'text-blue-900 dark:!text-sky-200',
     },

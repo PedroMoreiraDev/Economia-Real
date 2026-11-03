@@ -4,568 +4,594 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 222 47% 11%;
-    --primary: 221 83% 53%; /* Azul Real */
-    --primary-foreground: 0 0% 100%;
+    --bg-canvas: #E8E4D9;
+    --bg-surface: #F7F5F0;
+    --bg-elevated: #FFFFFF;
+    --text-primary: #102D25;
+    --text-secondary: #355248;
+    --text-muted: #5E766D;
+    --border-primary: #D5CFC0;
+    --border-subtle: #E2DDD0;
+    --brand-dark: #102D25;
+    --brand-green: #1C4939;
+    --brand-gold: #D4A94F;
+    --brand-cream: #E8E4D9;
   }
 
   .dark {
-    --background: 222 47% 11%;
-    --foreground: 210 40% 98%;
+    --bg-canvas: #0A1D17;
+    --bg-surface: #102D25;
+    --bg-elevated: #16382E;
+    --text-primary: #E8E4D9;
+    --text-secondary: #B8C7C0;
+    --text-muted: #829A90;
+    --border-primary: #214E3E;
+    --border-subtle: #183C30;
+    --brand-dark: #102D25;
+    --brand-green: #1C4939;
+    --brand-gold: #D4A94F;
+    --brand-cream: #E8E4D9;
   }
 
   html {
-    background-color: #F8FAFC;
-    color: #0F172A;
+    font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: #E8E4D9;
+    color: #102D25;
+    scroll-behavior: smooth;
   }
 
   html.dark {
-    background-color: #090E17 !important;
-    color: #F1F5F9 !important;
+    background-color: #0A1D17;
+    color: #E8E4D9;
+    color-scheme: dark;
   }
 
   body {
-    background-color: transparent;
-    color: inherit;
-    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.25s ease;
+    @apply bg-[#E8E4D9] text-[#102D25] dark:bg-[#0A1D17] dark:text-[#E8E4D9] overflow-x-hidden selection:bg-[#1C4939] selection:text-[#E8E4D9] transition-colors duration-200;
   }
 
-  html.dark body {
-    background-color: #090E17;
-    color: #F1F5F9;
-  }
-
-  /* Suporte estético ao modo escuro em componentes base */
-  .dark .card-duo {
-    background-color: #0F172A;
-    background-image: none !important;
-    border-color: #1E293B;
-    box-shadow: 0 4px 0 0 #020617;
-    color: #F1F5F9;
-  }
-
-  .dark .card-duo-interactive:hover {
-    border-color: #38BDF8;
-    box-shadow: 0 6px 0 0 #0369A1;
-  }
-
-  /* Cards da Landing Page e Dashboard em modo escuro */
-  .dark [class*="bg-gradient-to-br"][class*="from-indigo-50"],
-  .dark [class*="bg-gradient-to-br"][class*="from-blue-50"],
-  .dark [class*="bg-gradient-to-br"][class*="from-emerald-50"],
-  .dark [class*="bg-gradient-to-br"][class*="from-amber-50"],
-  .dark [class*="bg-gradient-to-b"][class*="from-blue-50"],
-  .dark [class*="bg-gradient-to-b"][class*="from-indigo-50"],
-  .dark [class*="bg-gradient-to-b"][class*="from-emerald-50"],
-  .dark [class*="bg-gradient-to-b"][class*="from-rose-50"],
-  .dark [class*="bg-gradient-to-b"][class*="from-amber-50"],
-  .dark [class*="bg-gradient-to-r"][class*="from-blue-50"],
-  .dark [class*="bg-gradient-to-r"][class*="from-indigo-50"],
-  .dark [class*="bg-gradient-to-r"][class*="from-emerald-50"],
-  .dark [class*="bg-gradient-to-r"][class*="from-amber-50"],
-  .dark [class*="bg-gradient-to-r"][class*="from-slate-50"] {
-    background-image: none !important;
-    background-color: #0B111E !important;
-    border-color: #1E293B !important;
-  }
-
-  .dark .card-duo-green,
-  .dark .card-real-blue {
-    background-image: none !important;
-    background-color: #0F172A !important;
-    border-color: #1E293B !important;
-    box-shadow: 0 4px 0 0 #020617 !important;
-    color: #F8FAFC !important;
-  }
-
-  .dark header {
-    background-color: rgba(9, 14, 23, 0.85);
-    border-color: #1E293B;
-  }
-
-  .dark .btn-duo-white {
-    background-color: #1E293B;
-    border-color: #334155;
-    color: #F1F5F9;
-    box-shadow: 0 4px 0 0 #0F172A;
-  }
-
-  .dark .btn-duo-white:hover {
-    background-color: #273549;
-    border-color: #475569;
-  }
-
-  .dark .text-slate-900,
-  .dark .text-slate-800,
-  .dark .text-slate-700 {
-    color: #F1F5F9;
-  }
-
-  .dark .text-slate-600,
-  .dark .text-slate-500 {
-    color: #94A3B8;
-  }
-
-  .dark .bg-white,
-  .dark [class*="bg-white"],
-  .dark [class*="bg-white/"],
-  .dark .bg-\[\#F4FBF4\],
-  .dark .bg-\[\#E8F8E8\],
-  .dark .bg-\[\#F0F7FF\],
-  .dark .bg-\[\#E8F3FF\],
-  .dark .bg-\[\#DBEAFE\],
-  .dark .bg-\[\#DDF4FF\],
-  .dark .bg-\[\#F5EBFF\],
-  .dark .bg-\[\#F8FAFC\],
-  .dark .bg-\[\#F1F5F9\],
-  .dark .bg-emerald-50,
-  .dark .bg-emerald-100,
-  .dark [class~="bg-emerald-50"],
-  .dark [class*="bg-emerald-50/"],
-  .dark [class~="bg-emerald-100"],
-  .dark [class*="bg-emerald-100/"],
-  .dark .bg-green-50,
-  .dark .bg-green-100,
-  .dark [class~="bg-green-50"],
-  .dark [class*="bg-green-50/"],
-  .dark [class~="bg-green-100"],
-  .dark [class*="bg-green-100/"],
-  .dark .bg-rose-50,
-  .dark .bg-rose-100,
-  .dark [class~="bg-rose-50"],
-  .dark [class*="bg-rose-50/"],
-  .dark [class~="bg-rose-100"],
-  .dark [class*="bg-rose-100/"],
-  .dark .bg-red-50,
-  .dark .bg-red-100,
-  .dark [class~="bg-red-50"],
-  .dark [class*="bg-red-50/"],
-  .dark [class~="bg-red-100"],
-  .dark [class*="bg-red-100/"],
-  .dark .bg-blue-50,
-  .dark .bg-blue-100,
-  .dark [class~="bg-blue-50"],
-  .dark [class*="bg-blue-50/"],
-  .dark [class~="bg-blue-100"],
-  .dark [class*="bg-blue-100/"],
-  .dark .bg-amber-50,
-  .dark .bg-amber-100,
-  .dark [class~="bg-amber-50"],
-  .dark [class*="bg-amber-50/"],
-  .dark [class~="bg-amber-100"],
-  .dark [class*="bg-amber-100/"],
-  .dark .bg-purple-50,
-  .dark .bg-purple-100,
-  .dark [class~="bg-purple-50"],
-  .dark [class*="bg-purple-50/"],
-  .dark [class~="bg-purple-100"],
-  .dark [class*="bg-purple-100/"],
-  .dark .bg-slate-50,
-  .dark .bg-slate-100,
-  .dark [class~="bg-slate-50"],
-  .dark [class*="bg-slate-50/"],
-  .dark [class~="bg-slate-100"],
-  .dark [class*="bg-slate-100/"],
-  .dark .bg-gray-50,
-  .dark .bg-gray-100,
-  .dark [class~="bg-gray-50"],
-  .dark [class*="bg-gray-50/"],
-  .dark [class~="bg-gray-100"],
-  .dark [class*="bg-gray-100/"],
-  .dark .bg-zinc-50,
-  .dark .bg-zinc-100,
-  .dark [class~="bg-zinc-50"],
-  .dark [class*="bg-zinc-50/"],
-  .dark [class~="bg-zinc-100"],
-  .dark [class*="bg-zinc-100/"] {
-    background-color: #0F172A !important;
-  }
-
-  /* Preservação explícita de cores vivas e indicadores de status online no dark mode */
-  .dark .bg-emerald-500,
-  .dark [class~="bg-emerald-500"],
-  .dark [class*="bg-emerald-500/"],
-  .dark .bg-emerald-400,
-  .dark [class~="bg-emerald-400"],
-  .dark .bg-green-500,
-  .dark [class~="bg-green-500"] {
-    background-color: #10B981 !important;
-  }
-
-  /* Blindagem universal para inputs, selects e textareas no dark mode */
-  .dark input,
-  .dark select,
-  .dark textarea {
-    background-color: #0F172A !important;
-    color: #F1F5F9 !important;
-    border-color: #334155 !important;
-  }
-
-  .dark input:focus,
-  .dark select:focus,
-  .dark textarea:focus,
-  .dark [class*="focus:bg-white"]:focus,
-  .dark [class*="focus:bg-white\\/"]:focus {
-    background-color: #1E293B !important;
-    color: #FFFFFF !important;
-    border-color: #38BDF8 !important;
-  }
-
-  .dark input::placeholder,
-  .dark textarea::placeholder {
-    color: #64748B !important;
-  }
-
-  .dark option {
-    background-color: #0F172A !important;
-    color: #F1F5F9 !important;
-  }
-
-  /* Blindagem universal para estados vazios (Empty States com borda tracejada) */
-  .dark [class*="border-dashed"] {
-    background-color: #090E17 !important;
-    border-color: #1E293B !important;
-  }
-
-  .dark [class*="border-dashed"] h3,
-  .dark [class*="border-dashed"] h4,
-  .dark [class*="border-dashed"] h5 {
-    color: #FFFFFF !important;
-  }
-
-  .dark [class*="border-dashed"] p {
-    color: #CBD5E1 !important;
-  }
-
-  /* Anulação de hovers que tentem clarear elementos no dark mode */
-  .dark [class*="hover:bg-white"]:hover,
-  .dark [class*="hover:bg-white/"]:hover,
-  .dark [class*="hover:bg-white\\/"]:hover,
-  .dark [class*="hover:bg-slate-50"]:hover,
-  .dark [class*="hover:bg-slate-100"]:hover,
-  .dark [class*="hover:bg-blue-50"]:hover,
-  .dark [class*="hover:bg-emerald-50"]:hover,
-  .dark [class*="hover:bg-rose-50"]:hover {
-    background-color: #1E293B !important;
-  }
-
-  .dark .text-emerald-700,
-  .dark .text-emerald-800,
-  .dark .text-emerald-900,
-  .dark .text-emerald-950 {
-    color: #34D399 !important;
-  }
-
-  .dark .text-rose-700,
-  .dark .text-rose-800,
-  .dark .text-rose-900,
-  .dark .text-rose-950 {
-    color: #FB7185 !important;
-  }
-
-  .dark .text-blue-700,
-  .dark .text-blue-800,
-  .dark .text-blue-900,
-  .dark .text-blue-950 {
-    color: #60A5FA !important;
-  }
-
-  .dark .text-amber-700,
-  .dark .text-amber-800,
-  .dark .text-amber-900,
-  .dark .text-amber-950 {
-    color: #FBBF24 !important;
-  }
-
-  .dark .border-emerald-200,
-  .dark .border-emerald-300,
-  .dark [class*="border-emerald-200"],
-  .dark [class*="border-emerald-300"],
-  .dark .border-\[\#D7FFB8\] {
-    border-color: #065F46 !important;
-  }
-
-  .dark .border-rose-200,
-  .dark .border-rose-300,
-  .dark [class*="border-rose-200"],
-  .dark [class*="border-rose-300"] {
-    border-color: #881337 !important;
-  }
-
-  .dark .border-blue-200,
-  .dark .border-blue-300,
-  .dark [class*="border-blue-200"],
-  .dark [class*="border-blue-300"] {
-    border-color: #1E3A8A !important;
-  }
-
-  .dark .border-amber-200,
-  .dark .border-amber-300,
-  .dark [class*="border-amber-200"],
-  .dark [class*="border-amber-300"] {
-    border-color: #78350F !important;
-  }
-
-  .dark .border-slate-200,
-  .dark .border-slate-300 {
-    border-color: #1E293B !important;
-  }
-
-  /* Estado vazio do gráfico de evolução financeira - Fundo escuro absoluto e fonte nítida */
-  .chart-empty-state {
-    background-color: #F8FAFC !important;
-    border-color: #E2E8F0 !important;
-  }
-
-  .dark .chart-empty-state {
-    background-color: #090E17 !important;
-    border-color: #1E293B !important;
-  }
-
-  .dark .chart-empty-state h4 {
-    color: #FFFFFF !important;
-  }
-
-  .dark .chart-empty-state p {
-    color: #E2E8F0 !important;
-  }
-
-  .dark table {
-    color: #F1F5F9;
-    background-color: #0F172A;
-  }
-
-  .dark table tr {
-    border-color: #1E293B;
-  }
-
-  .dark table tbody tr {
-    background-color: #0F172A;
-  }
-
-  .dark table tbody tr:hover {
-    background-color: #1E293B !important;
+  /* Garantir alinhamento numérico impecável para valores financeiros */
+  .tabular-nums,
+  .font-numeric {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
   }
 }
 
-/* =============================================================================
-   Design System Economia Real — Estética Premium, Tátil e Confiável
-   ============================================================================= */
+/* ==========================================================================
+   SISTEMA VISUAL FINTECH MODERNA & PRIVATE WEALTH
+   Paleta Oficial:
+   - Verde Escuro: #102D25
+   - Verde:        #1C4939
+   - Off-White:    #E8E4D9
+   - Dourado:      #D4A94F
+   ========================================================================== */
 
-/* Botões 3D Táteis com Efeito Push-down */
-.btn-duo {
-  @apply relative inline-flex items-center justify-center font-extrabold tracking-wide select-none transition-all duration-100 active:translate-y-1 cursor-pointer;
-}
-
-/* Botão Primário da Marca (Azul Real Institucional) */
-.btn-duo-blue,
-.btn-real-blue {
-  @apply bg-[#026CD6] hover:bg-[#0A7DEF] text-white border-b-4 border-[#0153AB] active:border-b-0 rounded-2xl px-4 py-2.5 shadow-sm shadow-blue-500/10;
-}
-
-/* Botão Verde Esmeralda (Sucesso / Receitas / Economia / Confirmação) */
-.btn-duo-green,
-.btn-emerald {
-  @apply bg-[#10B981] hover:bg-[#059669] text-white border-b-4 border-[#047857] active:border-b-0 rounded-2xl px-4 py-2.5 shadow-sm shadow-emerald-500/10;
-}
-
-/* Botão Azul Celeste / Ação Secundária */
-.btn-real-sky {
-  @apply bg-[#0284C7] hover:bg-[#039BE5] text-white border-b-4 border-[#0369A1] active:border-b-0 rounded-2xl px-4 py-2.5 shadow-sm;
-}
-
-/* Botão Azul Marinho / Ação Nobre */
-.btn-real-navy {
-  @apply bg-[#0F172A] hover:bg-[#1E293B] text-white border-b-4 border-[#020617] active:border-b-0 rounded-2xl px-4 py-2.5 shadow-sm;
-}
-
-/* Botão Destaque / Alerta Dourado */
-.btn-duo-yellow,
-.btn-amber {
-  @apply bg-[#F59E0B] hover:bg-[#FBBF24] text-amber-950 border-b-4 border-[#D97706] active:border-b-0 rounded-2xl px-4 py-2.5 shadow-sm;
-}
-
-/* Botão Perigo / Exclusão */
-.btn-duo-red,
-.btn-rose {
-  @apply bg-[#EF4444] hover:bg-[#F87171] text-white border-b-4 border-[#DC2626] active:border-b-0 rounded-2xl px-4 py-2.5 shadow-sm;
-}
-
-/* Botão IA / Inteligência Artificial (Índigo Tecnológico & Gradiente) */
-.btn-duo-purple,
-.btn-real-indigo {
-  @apply bg-gradient-to-r from-[#4F46E5] to-[#6366F1] hover:from-[#4338CA] hover:to-[#4F46E5] text-white border-b-4 border-[#3730A3] active:border-b-0 rounded-2xl px-4 py-2.5 shadow-sm shadow-indigo-500/20;
-}
-
-/* Botão Branco Tátil com Contorno Macio */
-.btn-duo-white {
-  @apply bg-white hover:bg-slate-50 text-slate-700 border-2 border-b-4 border-slate-200 active:border-b-2 active:translate-y-0.5 rounded-2xl px-4 py-2 shadow-sm transition-colors;
-}
-
-.dark .btn-duo-white {
-  @apply bg-slate-800 hover:bg-slate-700 text-slate-100 border-slate-700 border-b-slate-950;
-}
-
-.btn-duo-ghost {
-  @apply bg-transparent hover:bg-blue-50/70 text-slate-600 hover:text-[#026CD6] font-extrabold rounded-2xl px-3 py-1.5 transition-colors;
-}
-
-/* Coluna em Destaque na Tabela Comparativa (Exclusivo para Modo Claro) */
-html:not(.dark) .col-highlight-real {
-  background-color: rgba(239, 246, 255, 0.85) !important;
-  border-left-width: 2px !important;
-  border-right-width: 2px !important;
-  border-left-color: #BFDBFE !important;
-  border-right-color: #BFDBFE !important;
-}
-
-html:not(.dark) th.col-highlight-real {
-  background-color: #026CD6 !important;
-  color: #FDE047 !important;
-  border-left-color: #60A5FA !important;
-  border-right-color: #60A5FA !important;
-}
-
-html:not(.dark) td.col-highlight-real-price {
-  background-color: #DBEAFE !important;
-  border-left-width: 2px !important;
-  border-right-width: 2px !important;
-  border-left-color: #93C5FD !important;
-  border-right-color: #93C5FD !important;
-  color: #026CD6 !important;
-}
-
-/* Cards com Relevo Físico e Contornos Macios */
+/* Superfície de Cartão Executivo */
 .card-duo {
-  @apply bg-white rounded-3xl border-2 border-slate-200/90 shadow-[0_4px_0_0_#E2E8F0] transition-all duration-150;
+  @apply bg-[#FAF8F4] dark:bg-[#102D25] rounded-2xl border border-[#D5CFC0] dark:border-[#214E3E] transition-all duration-200;
+  box-shadow: 0 4px 20px -2px rgba(16, 45, 37, 0.05), 0 1px 3px 0 rgba(16, 45, 37, 0.03);
+}
+
+.dark .card-duo {
+  box-shadow: 0 10px 30px -6px rgba(0, 0, 0, 0.45), inset 0 1px 0 0 rgba(232, 228, 217, 0.04);
 }
 
 .card-duo-interactive {
-  @apply bg-white rounded-3xl border-2 border-slate-200/90 shadow-[0_4px_0_0_#E2E8F0] hover:border-blue-300 hover:shadow-[0_6px_0_0_#DBEAFE] hover:-translate-y-0.5 transition-all duration-150;
+  @apply bg-[#FAF8F4] dark:bg-[#102D25] rounded-2xl border border-[#D5CFC0] dark:border-[#214E3E] transition-all duration-200 cursor-pointer;
+  box-shadow: 0 4px 20px -2px rgba(16, 45, 37, 0.05);
 }
 
-/* Card Destaque Hero (Degradê Azul Suave e Refinado) */
-.card-duo-green,
+.card-duo-interactive:hover {
+  @apply border-[#1C4939]/50 dark:border-[#D4A94F]/50 -translate-y-0.5;
+  box-shadow: 0 12px 28px -6px rgba(16, 45, 37, 0.12);
+}
+
+.card-duo-interactive:active {
+  @apply translate-y-0;
+}
+
+/* Cartões de Destaque da Marca */
+.card-duo-green {
+  @apply bg-[#EEF3F0] dark:bg-[#14352B] rounded-2xl border border-[#1C4939]/25 dark:border-[#2A6650];
+  box-shadow: 0 4px 16px -2px rgba(28, 73, 57, 0.08);
+}
+
 .card-real-blue {
-  @apply bg-gradient-to-br from-[#F0F7FF] via-[#E8F3FF] to-[#DBEAFE] rounded-3xl border-2 border-blue-200/90 shadow-[0_4px_0_0_#BFDBFE];
+  @apply bg-[#F7EFE0]/70 dark:bg-[#16382E] rounded-2xl border border-[#D4A94F]/40 dark:border-[#D4A94F]/30;
+  box-shadow: 0 4px 16px -2px rgba(212, 169, 79, 0.1);
 }
 
-/* Painel com Efeito Vidro Fosco (Glassmorphism) */
+/* Painel translúcido / Header */
 .glass-panel {
-  @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/60 dark:border-slate-800 shadow-lg shadow-slate-900/5 dark:shadow-black/20;
+  @apply bg-[#FAF8F4]/95 dark:bg-[#102D25]/95 backdrop-blur-md border border-[#D5CFC0] dark:border-[#214E3E];
+  box-shadow: 0 4px 20px -2px rgba(16, 45, 37, 0.06);
 }
 
-.glass-pill {
-  @apply bg-white/85 dark:bg-slate-800/85 backdrop-blur-md border border-white/80 dark:border-slate-700 shadow-sm;
+/* ==========================================================================
+   BOTÕES FINTECH PROFISSIONAIS (Substituição da estética cartoon por precisão bancária)
+   ========================================================================== */
+.btn-duo {
+  @apply relative inline-flex items-center justify-center font-bold tracking-tight rounded-xl transition-all duration-150 select-none cursor-pointer disabled:opacity-50 disabled:pointer-events-none;
 }
 
-/* Badges e Pílulas */
-.badge-duo {
-  @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider;
+.btn-duo:hover:not(:disabled) {
+  transform: translateY(-1px);
 }
 
-/* Barra de Progresso com Brilho Tátil */
+.btn-duo:active:not(:disabled) {
+  transform: translateY(0px) scale(0.99);
+}
+
+/* Primário Institucional: Verde #1C4939 -> Verde Escuro #102D25 */
+.btn-duo-blue,
+.btn-real-blue,
+.btn-duo-green,
+.btn-emerald {
+  @apply bg-[#1C4939] text-[#E8E4D9] border border-[#102D25] hover:bg-[#102D25] hover:text-white;
+  box-shadow: 0 2px 8px -1px rgba(16, 45, 37, 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+}
+
+.dark .btn-duo-blue,
+.dark .btn-real-blue,
+.dark .btn-duo-green,
+.dark .btn-emerald {
+  @apply bg-[#1C4939] text-[#E8E4D9] border border-[#2B6B54] hover:bg-[#235B47] hover:border-[#D4A94F]/60;
+  box-shadow: 0 4px 14px -2px rgba(0, 0, 0, 0.4), inset 0 1px 0 0 rgba(232, 228, 217, 0.12);
+}
+
+/* Destaque Prestige / IA: Dourado #D4A94F com tipografia Verde Escuro #102D25 */
+.btn-duo-purple,
+.btn-real-indigo,
+.btn-duo-yellow,
+.btn-amber {
+  @apply bg-[#D4A94F] text-[#102D25] border border-[#B88B32] hover:bg-[#C6993E] font-extrabold;
+  box-shadow: 0 2px 10px -1px rgba(212, 169, 79, 0.3), inset 0 1px 0 0 rgba(255, 255, 255, 0.35);
+}
+
+.dark .btn-duo-purple,
+.dark .btn-real-indigo,
+.dark .btn-duo-yellow,
+.dark .btn-amber {
+  @apply bg-[#D4A94F] text-[#102D25] border border-[#E2BA64] hover:bg-[#DFB65C];
+  box-shadow: 0 4px 16px -2px rgba(212, 169, 79, 0.28), inset 0 1px 0 0 rgba(255, 255, 255, 0.35);
+}
+
+/* Perigo / Exclusão Sóbria */
+.btn-duo-red {
+  @apply bg-[#B93838] text-[#FAF8F4] border border-[#962A2A] hover:bg-[#9E2E2E];
+  box-shadow: 0 2px 8px -1px rgba(185, 56, 56, 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+}
+
+/* Secundário / Superfície Clara */
+.btn-duo-white {
+  @apply bg-[#FAF8F4] dark:bg-[#16382E] text-[#102D25] dark:text-[#E8E4D9] border border-[#CFC8B6] dark:border-[#285C49] hover:bg-[#EFECE3] dark:hover:bg-[#1C4939] hover:border-[#1C4939]/40 dark:hover:border-[#D4A94F]/50;
+  box-shadow: 0 1px 3px 0 rgba(16, 45, 37, 0.05);
+}
+
+/* Ghost */
+.btn-duo-ghost {
+  @apply bg-transparent text-[#355248] dark:text-[#B8C7C0] hover:bg-[#DED9CA]/60 dark:hover:bg-[#16382E] hover:text-[#102D25] dark:hover:text-[#E8E4D9] border border-transparent;
+}
+
+/* ==========================================================================
+   BARRAS DE PROGRESSO EXECUTIVAS
+   ========================================================================== */
 .progress-duo-track {
-  @apply h-4 rounded-full bg-slate-100 border-2 border-slate-200/80 overflow-hidden relative shadow-inner;
+  @apply w-full h-2.5 bg-[#E2DDD0] dark:bg-[#0A1D17] rounded-full overflow-hidden p-0 border border-[#D5CFC0]/70 dark:border-[#214E3E];
 }
 
 .progress-duo-fill {
-  @apply h-full rounded-full transition-all duration-500 relative overflow-hidden bg-gradient-to-r from-blue-600 to-sky-500;
+  @apply h-full rounded-full relative transition-all duration-500 ease-out;
 }
 
 .progress-duo-fill::after {
   content: '';
-  @apply absolute inset-x-0 top-0 h-1/2 bg-white/35 rounded-t-full pointer-events-none;
+  @apply absolute top-0 left-0 right-0 h-[35%] bg-white/20 rounded-t-full pointer-events-none;
 }
 
-/* Tipografia de Números Tabulares para Finanças */
-.font-numeric {
-  font-variant-numeric: tabular-nums;
+/* ==========================================================================
+   TABELAS & DESTAQUES DE COLUNA
+   ========================================================================== */
+.col-highlight-real {
+  background: linear-gradient(180deg, rgba(28, 73, 57, 0.06) 0%, rgba(212, 169, 79, 0.08) 100%);
 }
 
-/* Animações e Micro-transições */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.dark .col-highlight-real {
+  background: linear-gradient(180deg, rgba(28, 73, 57, 0.35) 0%, rgba(212, 169, 79, 0.12) 100%);
 }
 
-@keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+/* ==========================================================================
+   HARMONIZAÇÃO DE CLASSES UTILITÁRIAS PARA ESTÉTICA FINTECH (LIGHT & DARK)
+   ========================================================================== */
+/* No modo claro, suaviza brancos puros e cinzas frios para o espectro Off-white/Alabaster */
+html:not(.dark) .bg-slate-50 {
+  background-color: #F2EFE7;
 }
 
-@keyframes pulseGlow {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(2, 108, 214, 0.4);
-  }
-  50% {
-    box-shadow: 0 0 0 6px rgba(2, 108, 214, 0);
-  }
+html:not(.dark) .bg-slate-100 {
+  background-color: #E8E4D9;
 }
 
-.animate-fade-in {
-  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+html:not(.dark) .border-slate-200 {
+  border-color: #D5CFC0;
 }
 
-.animate-scale-in {
-  animation: scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+html:not(.dark) .border-slate-100 {
+  border-color: #E4DFD2;
 }
 
-.pulse-glow {
-  animation: pulseGlow 2.5s infinite;
+html:not(.dark) .text-slate-800,
+html:not(.dark) .text-slate-900 {
+  color: #102D25;
 }
 
-/* Scrollbar Bonita e Discreta */
+html:not(.dark) .text-slate-600,
+html:not(.dark) .text-slate-700 {
+  color: #2D4A40;
+}
+
+html:not(.dark) .text-slate-500 {
+  color: #526B61;
+}
+
+/* No modo escuro, garante que todos os painéis sigam a profundidade #0A1D17 / #102D25 / #16382E */
+.dark .bg-white {
+  background-color: #102D25 !important;
+  color: #E8E4D9;
+}
+
+.dark .bg-white\/98,
+.dark .bg-white\/95,
+.dark .bg-white\/90,
+.dark .bg-white\/80,
+.dark .bg-white\/70,
+.dark .bg-white\/60 {
+  background-color: rgba(16, 45, 37, 0.96) !important;
+}
+
+.dark .bg-slate-50,
+.dark .bg-slate-50\/90,
+.dark .bg-slate-50\/80,
+.dark .bg-slate-50\/70,
+.dark .bg-slate-50\/60,
+.dark .bg-slate-50\/50,
+.dark .bg-slate-50\/40 {
+  background-color: #0D241D !important;
+}
+
+.dark .bg-slate-100,
+.dark .bg-slate-100\/80,
+.dark .bg-slate-100\/70,
+.dark .bg-slate-200,
+.dark .bg-slate-200\/70 {
+  background-color: #16382E !important;
+}
+
+.dark .bg-slate-900 {
+  background-color: #071511 !important;
+}
+
+.dark .bg-slate-800 {
+  background-color: #14352B !important;
+}
+
+.dark .text-slate-900,
+.dark .text-slate-800,
+.dark .text-slate-700 {
+  color: #E8E4D9 !important;
+}
+
+.dark .text-slate-600,
+.dark .text-slate-500 {
+  color: #A3B8AF !important;
+}
+
+.dark .text-slate-400 {
+  color: #799488 !important;
+}
+
+.dark .border-slate-100,
+.dark .border-slate-200,
+.dark .border-slate-200\/80,
+.dark .border-slate-200\/60,
+.dark .border-slate-300,
+.dark .border-slate-700,
+.dark .border-slate-800 {
+  border-color: #214E3E !important;
+}
+
+.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
+.dark .divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #1B4235 !important;
+}
+
+/* ==========================================================================
+   PROTEÇÃO TOTAL NO MODO ESCURO (DARK MODE)
+   Garante contraste e elimina qualquer fundo branco/claro ou texto apagado
+   ========================================================================== */
+.dark .bg-white,
+.dark .bg-white\/98,
+.dark .bg-white\/95,
+.dark .bg-white\/90,
+.dark .bg-white\/80,
+.dark .bg-white\/70,
+.dark .bg-white\/60,
+.dark .bg-white\/50 {
+  background-color: #102D25 !important;
+  color: #E8E4D9 !important;
+}
+
+.dark .bg-slate-50,
+.dark .bg-slate-50\/90,
+.dark .bg-slate-50\/80,
+.dark .bg-slate-50\/70,
+.dark .bg-slate-50\/60,
+.dark .bg-slate-50\/50,
+.dark .bg-slate-50\/40,
+.dark .bg-emerald-50,
+.dark .bg-emerald-50\/90,
+.dark .bg-emerald-50\/80,
+.dark .bg-emerald-50\/60,
+.dark .bg-emerald-50\/50,
+.dark .bg-emerald-50\/40,
+.dark .bg-blue-50,
+.dark .bg-blue-50\/90,
+.dark .bg-blue-50\/80,
+.dark .bg-blue-50\/70,
+.dark .bg-blue-50\/60,
+.dark .bg-blue-50\/50,
+.dark .bg-blue-50\/40,
+.dark .bg-blue-50\/30,
+.dark .bg-indigo-50,
+.dark .bg-indigo-50\/60,
+.dark .bg-indigo-50\/50,
+.dark .bg-indigo-50\/40,
+.dark .bg-sky-50,
+.dark .bg-sky-50\/80,
+.dark .bg-purple-50,
+.dark .bg-purple-50\/70,
+.dark .bg-purple-50\/40,
+.dark .bg-amber-50,
+.dark .bg-amber-50\/90,
+.dark .bg-amber-50\/80,
+.dark .bg-amber-50\/70,
+.dark .bg-amber-50\/60,
+.dark .bg-amber-50\/50,
+.dark .bg-rose-50,
+.dark .bg-rose-50\/50,
+.dark .bg-rose-50\/40 {
+  background-color: #0D241D !important;
+  color: #E8E4D9 !important;
+}
+
+.dark .bg-slate-100,
+.dark .bg-slate-100\/80,
+.dark .bg-slate-100\/70,
+.dark .bg-slate-200,
+.dark .bg-slate-200\/70,
+.dark .bg-emerald-100,
+.dark .bg-emerald-100\/90,
+.dark .bg-emerald-100\/80,
+.dark .bg-emerald-200,
+.dark .bg-blue-100,
+.dark .bg-blue-100\/80,
+.dark .bg-blue-200,
+.dark .bg-indigo-100,
+.dark .bg-purple-100,
+.dark .bg-purple-200,
+.dark .bg-amber-100,
+.dark .bg-amber-100\/80,
+.dark .bg-amber-200,
+.dark .bg-amber-200\/80,
+.dark .bg-rose-100 {
+  background-color: #16382E !important;
+  color: #E8E4D9 !important;
+}
+
+.dark .from-blue-50,
+.dark .from-indigo-50,
+.dark .from-purple-50,
+.dark .from-emerald-50,
+.dark .from-amber-50 {
+  --tw-gradient-from: #16382E !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(22, 56, 46, 0)) !important;
+}
+
+.dark .to-indigo-50,
+.dark .to-blue-50,
+.dark .to-purple-50,
+.dark .to-emerald-50,
+.dark .to-amber-50 {
+  --tw-gradient-to: #102D25 !important;
+}
+
+.dark .text-slate-900,
+.dark .text-slate-800,
+.dark .text-slate-700,
+.dark .text-blue-950,
+.dark .text-blue-900,
+.dark .text-blue-800,
+.dark .text-emerald-950,
+.dark .text-emerald-900,
+.dark .text-emerald-800,
+.dark .text-purple-950,
+.dark .text-purple-900,
+.dark .text-purple-800,
+.dark .text-amber-950,
+.dark .text-amber-900,
+.dark .text-amber-800 {
+  color: #E8E4D9 !important;
+}
+
+.dark .border-blue-100,
+.dark .border-blue-200,
+.dark .border-blue-200\/80,
+.dark .border-indigo-100,
+.dark .border-indigo-200,
+.dark .border-purple-200,
+.dark .border-emerald-100,
+.dark .border-emerald-200,
+.dark .border-amber-200,
+.dark .border-slate-200,
+.dark .border-slate-300 {
+  border-color: #214E3E !important;
+}
+
+/* Mapeamento de classes utilitárias legadas (blue/indigo/purple/sky) para a paleta Fintech (#102D25, #1C4939, #E8E4D9, #D4A94F) */
+.bg-blue-50,
+.bg-blue-50\/90,
+.bg-blue-50\/80,
+.bg-blue-50\/50,
+.bg-blue-100,
+.bg-blue-100\/80,
+.bg-sky-50,
+.bg-indigo-50,
+.bg-indigo-100 {
+  background-color: #EFECE3 !important;
+}
+
+.bg-purple-50,
+.bg-purple-100 {
+  background-color: #FAF3E3 !important;
+}
+
+.text-blue-600,
+.text-blue-700,
+.text-blue-800,
+.text-blue-900,
+.text-blue-950,
+.text-sky-700,
+.text-indigo-700 {
+  color: #102D25 !important;
+}
+
+.text-purple-700 {
+  color: #8A6418 !important;
+}
+
+.border-blue-100,
+.border-blue-200,
+.border-blue-200\/80,
+.border-blue-200\/90,
+.border-blue-300,
+.border-sky-200,
+.border-indigo-200 {
+  border-color: #C8C1B0 !important;
+}
+
+.border-purple-200 {
+  border-color: rgba(212, 169, 79, 0.45) !important;
+}
+
+.dark .bg-blue-50\/90,
+.dark .bg-blue-50\/80,
+.dark .bg-blue-100,
+.dark .bg-blue-100\/80,
+.dark .bg-blue-950\/60,
+.dark .bg-blue-950\/40,
+.dark .bg-sky-50,
+.dark .bg-sky-950\/60,
+.dark .bg-indigo-100,
+.dark .bg-indigo-950\/60,
+.dark .bg-purple-100,
+.dark .bg-purple-950\/60 {
+  background-color: #16382E !important;
+}
+
+.dark .text-blue-600,
+.dark .text-blue-700,
+.dark .text-blue-800,
+.dark .text-blue-900,
+.dark .text-blue-950,
+.dark .text-sky-200,
+.dark .text-sky-300,
+.dark .text-sky-400,
+.dark .text-indigo-300,
+.dark .text-purple-200,
+.dark .text-purple-300,
+.dark .text-emerald-700,
+.dark .text-emerald-800,
+.dark .text-emerald-900 {
+  color: #E8E4D9 !important;
+}
+
+.dark .text-\[\#1C4939\] {
+  color: #D4A94F !important;
+}
+
+.dark input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+.dark select,
+.dark textarea {
+  background-color: #0D241D !important;
+  color: #E8E4D9 !important;
+  border-color: #255745 !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #6E887D !important;
+}
+
+.dark input:focus,
+.dark select:focus,
+.dark textarea:focus {
+  border-color: #D4A94F !important;
+}
+
+/* ==========================================================================
+   SCROLLBARS CUSTOMIZADAS (FINTECH DISCRETA)
+   ========================================================================== */
 ::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
 }
+
 ::-webkit-scrollbar-track {
-  background: #F1F5F9;
+  background: #E2DDD0;
 }
+
+.dark ::-webkit-scrollbar-track {
+  background: #0A1D17;
+}
+
 ::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
+  background: #B5AFA0;
   border-radius: 9999px;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: #94A3B8;
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #235342;
+  border-radius: 9999px;
 }
 
-/* =============================================================================
-   Destaque Visual Interativo do Tutorial / Tour Guiado
-   ============================================================================= */
-@keyframes tourPulseHalo {
+::-webkit-scrollbar-thumb:hover {
+  background: #1C4939;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #D4A94F;
+}
+
+/* ==========================================================================
+   SPOTLIGHT DO TOUR GUIADO DE ONBOARDING
+   ========================================================================== */
+.tour-target-highlight {
+  position: relative !important;
+  z-index: 30 !important;
+  box-shadow: 0 0 0 4px #D4A94F, 0 0 0 10px rgba(212, 169, 79, 0.25), 0 20px 35px -5px rgba(16, 45, 37, 0.4) !important;
+  border-radius: 1.25rem !important;
+  transition: box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s ease !important;
+  animation: tourPulseSpotlight 2.2s infinite ease-in-out !important;
+}
+
+@keyframes tourPulseSpotlight {
   0%, 100% {
-    box-shadow: 0 0 0 4px #026CD6, 0 0 35px rgba(2, 108, 214, 0.55);
-    transform: scale(1);
+    box-shadow: 0 0 0 3px #D4A94F, 0 0 0 8px rgba(212, 169, 79, 0.22), 0 20px 35px -5px rgba(16, 45, 37, 0.35);
   }
   50% {
-    box-shadow: 0 0 0 8px #38BDF8, 0 0 60px rgba(56, 189, 248, 0.8);
-    transform: scale(1.015);
+    box-shadow: 0 0 0 5px #1C4939, 0 0 0 14px rgba(212, 169, 79, 0.35), 0 20px 40px -5px rgba(16, 45, 37, 0.45);
   }
-}
-
-.tour-target-highlight {
-  outline: 3px solid #026CD6 !important;
-  outline-offset: 6px !important;
-  animation: tourPulseHalo 1.8s ease-in-out infinite !important;
-  transition: all 0.3s ease !important;
-  z-index: 40 !important;
-  position: relative !important;
 }

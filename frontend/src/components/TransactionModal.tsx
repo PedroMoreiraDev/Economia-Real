@@ -222,7 +222,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
             }}
             className={`flex-1 py-2 text-xs font-black rounded-xl flex items-center justify-center gap-1.5 transition-all ${
               type === 'INCOME'
-                ? 'bg-[#58CC02] text-white shadow-[0_3px_0_0_#46A302]'
+                ? 'bg-[#1C4939] text-white shadow-[0_3px_0_0_#102D25]'
                 : 'text-slate-600 dark:!text-slate-300 hover:text-slate-800 dark:hover:!text-white hover:bg-white/60 dark:hover:!bg-slate-700/60'
             }`}
           >
@@ -254,7 +254,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               onClick={() => { setType('TRANSFER'); setError(null); }}
               className={`flex-1 py-2 text-xs font-black rounded-xl flex items-center justify-center gap-1.5 transition-all ${
                 type === 'TRANSFER'
-                  ? 'bg-[#1CB0F6] text-white shadow-[0_3px_0_0_#1899D6]'
+                  ? 'bg-[#1C4939] text-white shadow-[0_3px_0_0_#102D25]'
                   : 'text-slate-600 dark:!text-slate-300 hover:text-slate-800 dark:hover:!text-white hover:bg-white/60 dark:hover:!bg-slate-700/60'
               }`}
             >
@@ -280,7 +280,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 placeholder="0,00"
                 value={amount}
                 onChangeValue={(val) => setAmount(val > 0 ? val.toString() : '')}
-                className="py-2.5 bg-slate-50 dark:!bg-slate-900 border-2 border-slate-200 dark:!border-slate-700 rounded-2xl text-base font-black text-slate-800 dark:!text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-[#026CD6] focus:bg-white dark:focus:!bg-slate-900"
+                className="py-2.5 bg-slate-50 dark:!bg-slate-900 border-2 border-slate-200 dark:!border-slate-700 rounded-2xl text-base font-black text-slate-800 dark:!text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-[#1C4939] focus:bg-white dark:focus:!bg-slate-900"
               />
             </div>
 
@@ -297,7 +297,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 required
                 value={accrualDate}
                 onChange={(e) => setAccrualDate(e.target.value)}
-                className="w-full px-4 py-2.5 bg-slate-50 dark:!bg-slate-900 border-2 border-slate-200 dark:!border-slate-700 rounded-2xl text-sm font-bold text-slate-800 dark:!text-white focus:outline-none focus:border-[#58CC02] focus:bg-white dark:focus:!bg-slate-900 transition-all"
+                className="w-full px-4 py-2.5 bg-slate-50 dark:!bg-slate-900 border-2 border-slate-200 dark:!border-slate-700 rounded-2xl text-sm font-bold text-slate-800 dark:!text-white focus:outline-none focus:border-[#1C4939] focus:bg-white dark:focus:!bg-slate-900 transition-all"
               />
               <span className="block text-[11px] font-bold text-slate-400">
                 Data em que o valor realmente entrou ou saiu da sua conta.
@@ -313,7 +313,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               placeholder="Ex: Almoço de negócios, Salário mensal, Supermercado"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-4 py-2.5 bg-slate-50 dark:!bg-slate-900 border-2 border-slate-200 dark:!border-slate-700 rounded-2xl text-sm font-bold text-slate-800 dark:!text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-[#58CC02] focus:bg-white dark:focus:!bg-slate-900 transition-all"
+              className="w-full px-4 py-2.5 bg-slate-50 dark:!bg-slate-900 border-2 border-slate-200 dark:!border-slate-700 rounded-2xl text-sm font-bold text-slate-800 dark:!text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-[#1C4939] focus:bg-white dark:focus:!bg-slate-900 transition-all"
             />
           </div>
 
@@ -349,7 +349,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   onClick={() => setIsRecurring(!isRecurring)}
                   className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
                     isRecurring
-                      ? (type === 'INCOME' ? 'bg-[#58CC02]' : 'bg-[#FF4B4B]')
+                      ? (type === 'INCOME' ? 'bg-[#1C4939]' : 'bg-[#FF4B4B]')
                       : 'bg-slate-300 dark:!bg-slate-700'
                   }`}
                   role="switch"
@@ -419,7 +419,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 <select
                   value={accountId}
                   onChange={(e) => setAccountId(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-slate-50 dark:!bg-slate-900 border-2 border-slate-200 dark:!border-slate-700 rounded-2xl text-sm font-bold text-slate-800 dark:!text-white focus:outline-none focus:border-[#58CC02] focus:bg-white dark:focus:!bg-slate-900 transition-all"
+                  className="w-full px-4 py-2.5 bg-slate-50 dark:!bg-slate-900 border-2 border-slate-200 dark:!border-slate-700 rounded-2xl text-sm font-bold text-slate-800 dark:!text-white focus:outline-none focus:border-[#1C4939] focus:bg-white dark:focus:!bg-slate-900 transition-all"
                 >
                   <option value="">Selecione uma conta...</option>
                   {accounts.map((acc) => (
@@ -434,7 +434,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   required
                   value={destinationAccountId}
                   onChange={(e) => setDestinationAccountId(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-slate-50 dark:!bg-slate-900 border-2 border-slate-200 dark:!border-slate-700 rounded-2xl text-sm font-bold text-slate-800 dark:!text-white focus:outline-none focus:border-[#58CC02] focus:bg-white dark:focus:!bg-slate-900 transition-all"
+                  className="w-full px-4 py-2.5 bg-slate-50 dark:!bg-slate-900 border-2 border-slate-200 dark:!border-slate-700 rounded-2xl text-sm font-bold text-slate-800 dark:!text-white focus:outline-none focus:border-[#1C4939] focus:bg-white dark:focus:!bg-slate-900 transition-all"
                 >
                   <option value="">Selecione a conta destino...</option>
                   {accounts.map((acc) => (
@@ -466,7 +466,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               placeholder="Anotações adicionais"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full px-4 py-2.5 bg-slate-50 dark:!bg-slate-900 border-2 border-slate-200 dark:!border-slate-700 rounded-2xl text-sm font-bold text-slate-800 dark:!text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-[#58CC02] focus:bg-white dark:focus:!bg-slate-900 transition-all"
+              className="w-full px-4 py-2.5 bg-slate-50 dark:!bg-slate-900 border-2 border-slate-200 dark:!border-slate-700 rounded-2xl text-sm font-bold text-slate-800 dark:!text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-[#1C4939] focus:bg-white dark:focus:!bg-slate-900 transition-all"
             />
           </div>
 

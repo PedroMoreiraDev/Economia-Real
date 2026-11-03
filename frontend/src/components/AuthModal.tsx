@@ -291,7 +291,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       <div className="p-3 bg-slate-50 border-2 border-slate-200 rounded-2xl space-y-2.5">
         <div className="flex items-center justify-between text-xs font-black text-slate-600">
           <span className="flex items-center gap-1.5">
-            <ShieldCheck className="h-4 w-4 text-[#026CD6]" />
+            <ShieldCheck className="h-4 w-4 text-[#1C4939]" />
             Verificação Anti-Bot
           </span>
           <button
@@ -301,7 +301,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             className="flex items-center gap-1 text-[11px] font-bold text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
             title="Trocar imagem"
           >
-            <RefreshCw className={`h-3 w-3 ${loadingCaptcha ? 'animate-spin text-[#026CD6]' : ''}`} />
+            <RefreshCw className={`h-3 w-3 ${loadingCaptcha ? 'animate-spin text-[#1C4939]' : ''}`} />
             Trocar
           </button>
         </div>
@@ -323,7 +323,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             placeholder="Digite o código"
             value={captchaAnswer}
             onChange={(e) => setCaptchaAnswer(e.target.value.toUpperCase())}
-            className="flex-1 px-3 py-2 bg-white border-2 border-slate-200 rounded-xl text-sm font-black tracking-widest uppercase text-slate-800 placeholder-slate-400 placeholder:normal-case placeholder:font-normal focus:outline-none focus:border-[#026CD6] transition-all"
+            className="flex-1 px-3 py-2 bg-white border-2 border-slate-200 rounded-xl text-sm font-black tracking-widest uppercase text-slate-800 placeholder-slate-400 placeholder:normal-case placeholder:font-normal focus:outline-none focus:border-[#1C4939] transition-all"
           />
         </div>
         {fieldErrors.captcha && (
@@ -352,11 +352,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         <div className="text-center space-y-1 mb-5">
           <img
             src="/logo-economia-real.png"
-            alt="Economia Real - Mascote Oficial"
+            alt="Economia Real - Logo Oficial"
             width={64}
             height={64}
             loading="lazy"
-            className="inline-block h-16 w-16 rounded-3xl object-cover border-2 border-blue-200 shadow-[0_4px_0_0_#BFDBFE] mb-2"
+            className="inline-block h-16 w-16 rounded-3xl object-cover border border-[#1C4939]/40 dark:border-[#D4A94F]/40 shadow-sm mb-2"
           />
           <h2 className="text-2xl font-black tracking-tight text-slate-800">
             {mode === 'login' && 'Entrar na Economia Real'}
@@ -383,7 +383,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 }}
                 className={`flex-1 py-2 text-xs sm:text-sm font-black rounded-xl transition-all ${
                   mode === 'login'
-                    ? 'bg-[#026CD6] text-white shadow-[0_3px_0_0_#0153AB]'
+                    ? 'bg-[#1C4939] text-white shadow-[0_3px_0_0_#102D25]'
                     : 'text-slate-600 hover:text-slate-800 hover:bg-white/60'
                 }`}
               >
@@ -398,7 +398,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 }}
                 className={`flex-1 py-2 text-xs sm:text-sm font-black rounded-xl transition-all ${
                   mode === 'register'
-                    ? 'bg-[#026CD6] text-white shadow-[0_3px_0_0_#0153AB]'
+                    ? 'bg-[#1C4939] text-white shadow-[0_3px_0_0_#102D25]'
                     : 'text-slate-600 hover:text-slate-800 hover:bg-white/60'
                 }`}
               >
@@ -417,7 +417,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         )}
 
         {successMessage && (
-          <div className="mb-4 p-3.5 rounded-2xl bg-blue-50 border-2 border-[#026CD6] flex items-center gap-2.5 text-xs sm:text-sm font-bold text-[#026CD6]">
+          <div className="mb-4 p-3.5 rounded-2xl bg-blue-50 border-2 border-[#1C4939] flex items-center gap-2.5 text-xs sm:text-sm font-bold text-[#1C4939]">
             <CheckCircle2 className="h-5 w-5 shrink-0" />
             <span>{successMessage}</span>
           </div>
@@ -453,7 +453,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   placeholder="000000"
                   value={verificationCode}
                   onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
-                  className="w-full text-center tracking-[0.4em] font-mono pl-10 pr-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-2xl text-xl font-black text-slate-800 placeholder-slate-300 focus:outline-none focus:border-[#026CD6] focus:bg-white transition-all"
+                  className="w-full text-center tracking-[0.4em] font-mono pl-10 pr-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-2xl text-xl font-black text-slate-800 placeholder-slate-300 focus:outline-none focus:border-[#1C4939] focus:bg-white transition-all"
                 />
               </div>
             </div>
@@ -480,7 +480,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 type="button"
                 onClick={handleResendActivationCode}
                 disabled={resendingCode}
-                className="font-bold text-[#026CD6] hover:underline flex items-center gap-1 disabled:opacity-50"
+                className="font-bold text-[#1C4939] hover:underline flex items-center gap-1 disabled:opacity-50"
               >
                 <Send className="h-3 w-3" />
                 {resendingCode ? 'Reenviando...' : 'Reenviar código'}
@@ -515,7 +515,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   placeholder="seu.email@exemplo.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#026CD6] focus:bg-white transition-all"
+                  className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#1C4939] focus:bg-white transition-all"
                 />
               </div>
             </div>
@@ -574,7 +574,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   placeholder="000000"
                   value={resetCode}
                   onChange={(e) => setResetCode(e.target.value.replace(/\D/g, ''))}
-                  className="w-full text-center tracking-[0.3em] font-mono pl-10 pr-4 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-lg font-black text-slate-800 focus:outline-none focus:border-[#026CD6] focus:bg-white transition-all"
+                  className="w-full text-center tracking-[0.3em] font-mono pl-10 pr-4 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-lg font-black text-slate-800 focus:outline-none focus:border-[#1C4939] focus:bg-white transition-all"
                 />
               </div>
             </div>
@@ -589,7 +589,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   placeholder="Mínimo 8 caracteres"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#026CD6] focus:bg-white transition-all"
+                  className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#1C4939] focus:bg-white transition-all"
                 />
                 <button
                   type="button"
@@ -611,7 +611,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   placeholder="Repita a nova senha"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#026CD6] focus:bg-white transition-all"
+                  className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#1C4939] focus:bg-white transition-all"
                 />
                 <button
                   type="button"
@@ -668,7 +668,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     placeholder="Ex: Pedro Silva"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#026CD6] focus:bg-white transition-all"
+                    className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#1C4939] focus:bg-white transition-all"
                   />
                 </div>
                 {fieldErrors.fullName && (
@@ -687,7 +687,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   placeholder="seu.email@exemplo.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#026CD6] focus:bg-white transition-all"
+                  className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#1C4939] focus:bg-white transition-all"
                 />
               </div>
               {fieldErrors.email && (
@@ -706,7 +706,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       setErrorMessage(null);
                       setSuccessMessage(null);
                     }}
-                    className="text-xs font-bold text-[#026CD6] hover:underline"
+                    className="text-xs font-bold text-[#1C4939] hover:underline"
                   >
                     Esqueceu a senha?
                   </button>
@@ -720,7 +720,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   placeholder="Mínimo de 8 caracteres"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#026CD6] focus:bg-white transition-all"
+                  className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#1C4939] focus:bg-white transition-all"
                 />
                 <button
                   type="button"

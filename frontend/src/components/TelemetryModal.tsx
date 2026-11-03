@@ -88,7 +88,7 @@ export const TelemetryModal: React.FC<TelemetryModalProps> = ({ isOpen, onClose 
             onClick={() => setActiveTab('metrics')}
             className={`px-4 py-2.5 text-xs font-black rounded-t-xl transition-colors border-t-2 border-x-2 -mb-[2px] flex items-center gap-1.5 ${
               activeTab === 'metrics'
-                ? 'bg-white text-[#026CD6] border-slate-200 border-b-transparent shadow-xs'
+                ? 'bg-white text-[#1C4939] border-slate-200 border-b-transparent shadow-xs'
                 : 'text-slate-500 hover:text-slate-800 border-transparent'
             }`}
           >
@@ -99,7 +99,7 @@ export const TelemetryModal: React.FC<TelemetryModalProps> = ({ isOpen, onClose 
             onClick={() => setActiveTab('utm_generator')}
             className={`px-4 py-2.5 text-xs font-black rounded-t-xl transition-colors border-t-2 border-x-2 -mb-[2px] flex items-center gap-1.5 ${
               activeTab === 'utm_generator'
-                ? 'bg-white text-[#026CD6] border-slate-200 border-b-transparent shadow-xs'
+                ? 'bg-white text-[#1C4939] border-slate-200 border-b-transparent shadow-xs'
                 : 'text-slate-500 hover:text-slate-800 border-transparent'
             }`}
           >
@@ -110,7 +110,7 @@ export const TelemetryModal: React.FC<TelemetryModalProps> = ({ isOpen, onClose 
             onClick={() => setActiveTab('events')}
             className={`px-4 py-2.5 text-xs font-black rounded-t-xl transition-colors border-t-2 border-x-2 -mb-[2px] flex items-center gap-1.5 ${
               activeTab === 'events'
-                ? 'bg-white text-[#026CD6] border-slate-200 border-b-transparent shadow-xs'
+                ? 'bg-white text-[#1C4939] border-slate-200 border-b-transparent shadow-xs'
                 : 'text-slate-500 hover:text-slate-800 border-transparent'
             }`}
           >
@@ -135,7 +135,7 @@ export const TelemetryModal: React.FC<TelemetryModalProps> = ({ isOpen, onClose 
                 }`}>
                   <div className="flex items-center justify-between pb-2">
                     <span className="text-xs font-black uppercase tracking-wider flex items-center gap-1.5">
-                      <TrendingUp className="w-4 h-4 text-[#026CD6]" />
+                      <TrendingUp className="w-4 h-4 text-[#1C4939]" />
                       Google Analytics 4
                     </span>
                     {diagnostics.isGaConfigured ? (
@@ -165,7 +165,7 @@ export const TelemetryModal: React.FC<TelemetryModalProps> = ({ isOpen, onClose 
                 }`}>
                   <div className="flex items-center justify-between pb-2">
                     <span className="text-xs font-black uppercase tracking-wider flex items-center gap-1.5">
-                      <Search className="w-4 h-4 text-[#026CD6]" />
+                      <Search className="w-4 h-4 text-[#1C4939]" />
                       Google Search Console
                     </span>
                     {diagnostics.isGscConfigured ? (
@@ -192,7 +192,7 @@ export const TelemetryModal: React.FC<TelemetryModalProps> = ({ isOpen, onClose 
               {/* 2. As 5 Métricas do Funil */}
               <div className="space-y-3">
                 <h4 className="text-xs font-black text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                  <BarChart3 className="w-4 h-4 text-[#026CD6]" />
+                  <BarChart3 className="w-4 h-4 text-[#1C4939]" />
                   Quadro de Controle do Funil Semanal
                 </h4>
 
@@ -204,7 +204,7 @@ export const TelemetryModal: React.FC<TelemetryModalProps> = ({ isOpen, onClose 
                       Canal de Aquisição Atual
                     </span>
                     <div className="flex items-center gap-2">
-                      <span className="text-base font-black text-[#026CD6]">
+                      <span className="text-base font-black text-[#1C4939]">
                         {diagnostics.attribution.detected_channel}
                       </span>
                     </div>
@@ -284,7 +284,7 @@ export const TelemetryModal: React.FC<TelemetryModalProps> = ({ isOpen, onClose 
                       Visita Qualificada (Regra)
                     </span>
                     <p className="text-xs font-bold text-slate-600 leading-relaxed">
-                      Visitante que permanece <span className="font-black text-[#026CD6]">mais de 15 segundos</span> no site ou rola <span className="font-black text-[#026CD6]">mais de 40% da Landing Page</span>.
+                      Visitante que permanece <span className="font-black text-[#1C4939]">mais de 15 segundos</span> no site ou rola <span className="font-black text-[#1C4939]">mais de 40% da Landing Page</span>.
                     </p>
                     <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full inline-block border border-emerald-200">
                       Disparo automático ativo
@@ -341,7 +341,7 @@ export const TelemetryModal: React.FC<TelemetryModalProps> = ({ isOpen, onClose 
                       }}
                       className={`px-3 py-2 text-xs font-bold rounded-xl border-2 transition-all text-left ${
                         utmSource === preset.source && utmMedium === preset.medium
-                          ? 'bg-blue-50 border-[#026CD6] text-[#026CD6] shadow-xs'
+                          ? 'bg-blue-50 border-[#1C4939] text-[#1C4939] shadow-xs'
                           : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
                       }`}
                     >
@@ -362,7 +362,7 @@ export const TelemetryModal: React.FC<TelemetryModalProps> = ({ isOpen, onClose 
                     value={utmSource}
                     onChange={(e) => setUtmSource(e.target.value)}
                     placeholder="ex: instagram"
-                    className="w-full px-3 py-2 bg-white border-2 border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-[#026CD6]"
+                    className="w-full px-3 py-2 bg-white border-2 border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-[#1C4939]"
                   />
                 </div>
                 <div className="space-y-1">
@@ -374,7 +374,7 @@ export const TelemetryModal: React.FC<TelemetryModalProps> = ({ isOpen, onClose 
                     value={utmMedium}
                     onChange={(e) => setUtmMedium(e.target.value)}
                     placeholder="ex: bio, reels, cpc"
-                    className="w-full px-3 py-2 bg-white border-2 border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-[#026CD6]"
+                    className="w-full px-3 py-2 bg-white border-2 border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-[#1C4939]"
                   />
                 </div>
                 <div className="space-y-1">
@@ -386,7 +386,7 @@ export const TelemetryModal: React.FC<TelemetryModalProps> = ({ isOpen, onClose 
                     value={utmCampaign}
                     onChange={(e) => setUtmCampaign(e.target.value)}
                     placeholder="ex: lancamento"
-                    className="w-full px-3 py-2 bg-white border-2 border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-[#026CD6]"
+                    className="w-full px-3 py-2 bg-white border-2 border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-[#1C4939]"
                   />
                 </div>
               </div>
@@ -460,7 +460,7 @@ export const TelemetryModal: React.FC<TelemetryModalProps> = ({ isOpen, onClose 
                     >
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="font-black text-[#026CD6]">{evt.name}</span>
+                          <span className="font-black text-[#1C4939]">{evt.name}</span>
                           <span className="text-[10px] text-slate-400 font-sans">
                             {new Date(evt.timestamp).toLocaleTimeString('pt-BR')}
                           </span>

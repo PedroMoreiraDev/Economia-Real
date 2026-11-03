@@ -670,7 +670,7 @@ export const AiBudgetSuggestionModal: React.FC<AiBudgetSuggestionModalProps> = (
 
         {/* Cabeçalho */}
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-3 bg-gradient-to-br from-[#026CD6] to-[#0153AB] rounded-2xl text-white shadow-md">
+          <div className="p-3 bg-gradient-to-br from-[#1C4939] to-[#102D25] rounded-2xl text-white shadow-md">
             <Sparkles className="w-6 h-6 stroke-[2.5]" />
           </div>
           <div>
@@ -693,7 +693,7 @@ export const AiBudgetSuggestionModal: React.FC<AiBudgetSuggestionModalProps> = (
               value={globalLimitInput}
               onChangeValue={(val) => setGlobalLimitInput(val > 0 ? val.toString() : '')}
               placeholder="Ex: 3.500,00"
-              className="w-full px-4 py-2 bg-white border-2 border-slate-200 rounded-xl text-base font-black text-slate-800 focus:outline-none focus:border-[#026CD6]"
+              className="w-full px-4 py-2 bg-white border-2 border-slate-200 rounded-xl text-base font-black text-slate-800 focus:outline-none focus:border-[#1C4939]"
             />
           </div>
           <button
@@ -717,7 +717,7 @@ export const AiBudgetSuggestionModal: React.FC<AiBudgetSuggestionModalProps> = (
         <div className="flex-1 overflow-y-auto space-y-4 pr-1">
           {loading ? (
             <div className="py-12 flex flex-col items-center justify-center space-y-3">
-              <div className="w-10 h-10 border-4 border-[#026CD6] border-t-transparent rounded-full animate-spin" />
+              <div className="w-10 h-10 border-4 border-[#1C4939] border-t-transparent rounded-full animate-spin" />
               <p className="text-xs font-black text-slate-600">
                 A IA está analisando seus hábitos e faturas...
               </p>
@@ -726,7 +726,7 @@ export const AiBudgetSuggestionModal: React.FC<AiBudgetSuggestionModalProps> = (
             <>
               {/* Insight da IA */}
               <div className="p-4 rounded-2xl bg-blue-50/80 border-2 border-blue-200/80 flex items-start gap-3">
-                <Sparkles className="w-5 h-5 text-[#026CD6] shrink-0 mt-0.5" />
+                <Sparkles className="w-5 h-5 text-[#1C4939] shrink-0 mt-0.5" />
                 <p className="text-xs font-bold text-blue-950 leading-relaxed">
                   {aiData.aiInsight}
                 </p>
@@ -745,7 +745,7 @@ export const AiBudgetSuggestionModal: React.FC<AiBudgetSuggestionModalProps> = (
                 {customizedCategoryIds.size > 0 && (
                   <div className="p-2.5 rounded-xl bg-blue-50/80 border border-blue-200 text-blue-900 text-[11px] font-bold flex items-center justify-between animate-fadeIn">
                     <span className="flex items-center gap-1.5">
-                      <Lock className="w-3.5 h-3.5 text-[#026CD6] shrink-0" />
+                      <Lock className="w-3.5 h-3.5 text-[#1C4939] shrink-0" />
                       <span>{customizedCategoryIds.size} categoria(s) fixada(s). As demais se adaptam automaticamente para manter a soma em {formatBRL(targetTotal)}.</span>
                     </span>
                     <button
@@ -758,7 +758,7 @@ export const AiBudgetSuggestionModal: React.FC<AiBudgetSuggestionModalProps> = (
                           setEditableSuggestions(rebalanced);
                         }
                       }}
-                      className="text-[10px] font-black text-[#026CD6] hover:text-blue-900 underline ml-2 shrink-0 cursor-pointer"
+                      className="text-[10px] font-black text-[#1C4939] hover:text-blue-900 underline ml-2 shrink-0 cursor-pointer"
                       title="Voltar todas as categorias para a distribuição da IA"
                     >
                       Liberar todas
@@ -802,7 +802,7 @@ export const AiBudgetSuggestionModal: React.FC<AiBudgetSuggestionModalProps> = (
                               {percentOfTotal}%
                             </span>
                             {isCustomized && (
-                              <span className="text-[10px] font-black px-1.5 py-0.2 rounded-md bg-blue-100 text-[#026CD6] border border-blue-200 flex items-center gap-1">
+                              <span className="text-[10px] font-black px-1.5 py-0.2 rounded-md bg-blue-100 text-[#1C4939] border border-blue-200 flex items-center gap-1">
                                 <Lock className="w-2.5 h-2.5" />
                                 Fixado
                               </span>
@@ -826,7 +826,7 @@ export const AiBudgetSuggestionModal: React.FC<AiBudgetSuggestionModalProps> = (
                                 handleLimitChange(item.categoryId, val > 0 ? val.toString() : '0');
                               }}
                               onBlur={() => handleLimitBlur(item.categoryId)}
-                              className="w-24 px-2.5 py-1.5 bg-white border-2 border-[#026CD6] rounded-xl text-right font-black text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all shadow-xs"
+                              className="w-24 px-2.5 py-1.5 bg-white border-2 border-[#1C4939] rounded-xl text-right font-black text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all shadow-xs"
                             />
                           ) : (
                             <span className="w-24 px-2.5 py-1.5 bg-white border-2 border-slate-200 rounded-xl text-right font-black text-xs text-slate-700 select-none shadow-xs">
@@ -852,7 +852,7 @@ export const AiBudgetSuggestionModal: React.FC<AiBudgetSuggestionModalProps> = (
                             }
                           }}
                           className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                            isCustomized ? 'bg-[#026CD6]' : 'bg-slate-300 hover:bg-slate-400'
+                            isCustomized ? 'bg-[#1C4939]' : 'bg-slate-300 hover:bg-slate-400'
                           }`}
                           title={
                             isCustomized
@@ -880,7 +880,7 @@ export const AiBudgetSuggestionModal: React.FC<AiBudgetSuggestionModalProps> = (
         <div className="mt-4 pt-4 border-t-2 border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="text-xs">
             <span className="font-bold text-slate-500">Soma das metas: </span>
-            <strong className={`font-black ${Math.abs(currentTotal - targetTotal) < 1 ? 'text-[#46A302]' : 'text-amber-600'}`}>
+            <strong className={`font-black ${Math.abs(currentTotal - targetTotal) < 1 ? 'text-[#102D25]' : 'text-amber-600'}`}>
               {formatBRL(currentTotal)}
             </strong>
             <span className="text-slate-400"> de {formatBRL(targetTotal)}</span>

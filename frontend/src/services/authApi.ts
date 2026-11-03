@@ -158,7 +158,7 @@ export function generateInstantCaptcha(): CaptchaChallenge {
   const challengeId = 'inst_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
   const expiresAt = Math.floor(Date.now() / 1000) + 180;
 
-  const colors = ['#0a3d62', '#1e3799', '#2c3e50', '#192a56', '#026cd6'];
+  const colors = ['#0a3d62', '#1e3799', '#2c3e50', '#192a56', '#1C4939'];
   const charSpacing = Math.floor(100 / code.length);
   let charsSvg = '';
 
@@ -173,7 +173,7 @@ export function generateInstantCaptcha(): CaptchaChallenge {
 
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="44" viewBox="0 0 140 44">` +
-    `<rect width="140" height="44" fill="#f8fafc" rx="10"/>` +
+    `<rect width="140" height="44" fill="#FAF8F4" rx="10"/>` +
     `<path d="M 8 22 Q 40 8 75 22 T 132 22" stroke="rgba(2,108,214,0.35)" stroke-width="2" fill="none"/>` +
     `<path d="M 8 28 Q 50 38 90 18 T 132 28" stroke="rgba(100,116,139,0.25)" stroke-width="1.5" fill="none"/>` +
     charsSvg +

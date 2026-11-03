@@ -88,7 +88,7 @@ export const GoalTransactionModal: React.FC<GoalTransactionModalProps> = ({
         <div className="flex items-center space-x-3.5 mb-6">
           <div className={`p-3 rounded-2xl border-2 ${
             mode === 'deposit' 
-              ? 'bg-blue-50 text-[#026CD6] border-blue-200' 
+              ? 'bg-blue-50 text-[#1C4939] border-blue-200' 
               : 'bg-amber-50 text-[#FF9600] border-[#FFC800]'
           }`}>
             {mode === 'deposit' ? <ArrowUpRight className="w-6 h-6 stroke-[2.5]" /> : <ArrowDownLeft className="w-6 h-6 stroke-[2.5]" />}
@@ -110,7 +110,7 @@ export const GoalTransactionModal: React.FC<GoalTransactionModalProps> = ({
             onClick={() => setMode('deposit')}
             className={`flex-1 py-2 text-xs sm:text-sm font-black rounded-xl transition-all ${
               mode === 'deposit'
-                ? 'bg-[#026CD6] text-white shadow-[0_3px_0_0_#0153AB]'
+                ? 'bg-[#1C4939] text-white shadow-[0_3px_0_0_#102D25]'
                 : 'text-slate-600 hover:text-slate-800 hover:bg-white/60'
             }`}
           >
@@ -145,7 +145,7 @@ export const GoalTransactionModal: React.FC<GoalTransactionModalProps> = ({
               value={amount}
               onChangeValue={(val) => setAmount(val > 0 ? val.toString() : '')}
               placeholder="0,00"
-              className="py-2.5 rounded-2xl bg-slate-50 border-2 border-slate-200 text-slate-800 font-black placeholder-slate-400 focus:border-[#026CD6] focus:bg-white"
+              className="py-2.5 rounded-2xl bg-slate-50 border-2 border-slate-200 text-slate-800 font-black placeholder-slate-400 focus:border-[#1C4939] focus:bg-white"
             />
           </div>
 
@@ -157,7 +157,7 @@ export const GoalTransactionModal: React.FC<GoalTransactionModalProps> = ({
             <select
               value={accountId}
               onChange={(e) => setAccountId(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border-2 border-slate-200 text-slate-800 font-bold focus:outline-none focus:border-[#026CD6] focus:bg-white transition-all text-xs sm:text-sm"
+              className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border-2 border-slate-200 text-slate-800 font-bold focus:outline-none focus:border-[#1C4939] focus:bg-white transition-all text-xs sm:text-sm"
             >
               <option value="">Não movimentar saldo de conta bancária</option>
               {accounts.map((acc) => (

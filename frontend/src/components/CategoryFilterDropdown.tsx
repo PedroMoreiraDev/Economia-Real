@@ -134,9 +134,9 @@ export const CategoryFilterDropdown: React.FC<CategoryFilterDropdownProps> = ({
         style={
           selectedCategory
             ? {
-                backgroundColor: `${selectedCategory.colorHex || '#026CD6'}12`,
-                color: selectedCategory.colorHex || '#026CD6',
-                borderColor: `${selectedCategory.colorHex || '#026CD6'}45`,
+                backgroundColor: `${selectedCategory.colorHex || '#1C4939'}12`,
+                color: selectedCategory.colorHex || '#1C4939',
+                borderColor: `${selectedCategory.colorHex || '#1C4939'}45`,
               }
             : undefined
         }
@@ -152,7 +152,7 @@ export const CategoryFilterDropdown: React.FC<CategoryFilterDropdownProps> = ({
           {selectedCategory ? (
             <span
               className="w-2.5 h-2.5 rounded-full flex-shrink-0 shadow-xs"
-              style={{ backgroundColor: selectedCategory.colorHex || '#026CD6' }}
+              style={{ backgroundColor: selectedCategory.colorHex || '#1C4939' }}
             />
           ) : isNone ? (
             <span className="text-xs leading-none select-none">⚠️</span>
@@ -215,7 +215,7 @@ export const CategoryFilterDropdown: React.FC<CategoryFilterDropdownProps> = ({
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Buscar categoria..."
                 autoFocus
-                className="w-full bg-slate-50 dark:!bg-[#1E293B] border border-slate-200 dark:!border-slate-700 rounded-xl pl-8 pr-2.5 py-1.5 text-xs font-semibold text-slate-800 dark:!text-white placeholder-slate-400 focus:outline-none focus:border-[#026CD6] focus:bg-white dark:focus:!bg-[#1E293B] transition-all"
+                className="w-full bg-slate-50 dark:!bg-[#1E293B] border border-slate-200 dark:!border-slate-700 rounded-xl pl-8 pr-2.5 py-1.5 text-xs font-semibold text-slate-800 dark:!text-white placeholder-slate-400 focus:outline-none focus:border-[#1C4939] focus:bg-white dark:focus:!bg-[#1E293B] transition-all"
               />
             </div>
 
@@ -230,7 +230,7 @@ export const CategoryFilterDropdown: React.FC<CategoryFilterDropdownProps> = ({
                 }}
                 className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold transition-all text-left ${
                   isAll
-                    ? 'bg-blue-50 dark:!bg-[#1E293B] text-[#026CD6] dark:!text-sky-400 font-black'
+                    ? 'bg-blue-50 dark:!bg-[#1E293B] text-[#1C4939] dark:!text-sky-400 font-black'
                     : 'hover:bg-slate-100 dark:hover:!bg-[#1E293B] text-slate-700 dark:!text-slate-200'
                 }`}
               >
@@ -238,7 +238,7 @@ export const CategoryFilterDropdown: React.FC<CategoryFilterDropdownProps> = ({
                   <Tag className="w-3.5 h-3.5 text-slate-400 stroke-[2.5]" />
                   <span>Todas as categorias</span>
                 </div>
-                {isAll && <Check className="w-3.5 h-3.5 text-[#026CD6] flex-shrink-0 stroke-[3]" />}
+                {isAll && <Check className="w-3.5 h-3.5 text-[#1C4939] flex-shrink-0 stroke-[3]" />}
               </button>
 
               {/* Opção 2: Sem Categoria */}
@@ -286,19 +286,19 @@ export const CategoryFilterDropdown: React.FC<CategoryFilterDropdownProps> = ({
                       }}
                       className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold transition-all text-left group ${
                         isCurrent
-                          ? 'bg-blue-50 text-[#026CD6] font-black'
+                          ? 'bg-blue-50 text-[#1C4939] font-black'
                           : 'hover:bg-slate-100 text-slate-700'
                       }`}
                     >
                       <div className="flex items-center gap-2 min-w-0 pr-1">
                         <span
                           className="w-2.5 h-2.5 rounded-full flex-shrink-0 shadow-xs"
-                          style={{ backgroundColor: cat.colorHex || '#026CD6' }}
+                          style={{ backgroundColor: cat.colorHex || '#1C4939' }}
                         />
                         <span className="truncate">{cat.name}</span>
                       </div>
                       {isCurrent && (
-                        <Check className="w-3.5 h-3.5 text-[#026CD6] flex-shrink-0 stroke-[3]" />
+                        <Check className="w-3.5 h-3.5 text-[#1C4939] flex-shrink-0 stroke-[3]" />
                       )}
                     </button>
                   );

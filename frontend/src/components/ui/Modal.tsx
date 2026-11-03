@@ -4,14 +4,21 @@ import { X } from 'lucide-react';
 export interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  title?: React.ReactNode;
-  subtitle?: React.ReactNode;
+  title: string;
+  subtitle?: string;
   icon?: React.ReactNode;
-  children: React.ReactNode;
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
-  headerBadge?: React.ReactNode;
-  headerClassName?: string;
+  children: React.ReactNode;
+  footer?: React.ReactNode;
 }
+
+const maxWidthClasses = {
+  sm: 'max-w-sm',
+  md: 'max-w-md',
+  lg: 'max-w-lg',
+  xl: 'max-w-xl',
+  '2xl': 'max-w-2xl',
+};
 
 export const Modal: React.FC<ModalProps> = ({
   isOpen,
@@ -19,90 +26,70 @@ export const Modal: React.FC<ModalProps> = ({
   title,
   subtitle,
   icon,
+  maxWidth = 'md',
   children,
-  maxWidth = 'lg',
-  headerBadge,
-  headerClassName = '',
+  footer,
 }) => {
-  // Fecha modal com tecla ESC
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isOpen) {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
         onClose();
       }
     };
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = 'hidden';
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = 'unset';
-    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
-  const maxWidthStyles: Record<string, string> = {
-    sm: 'max-w-sm',
-    md: 'max-w-md',
-    lg: 'max-w-lg',
-    xl: 'max-w-xl',
-    '2xl': 'max-w-2xl',
-  };
-
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in overflow-y-auto"
-      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#071511]/70 backdrop-blur-sm animate-fade-in"
       role="dialog"
       aria-modal="true"
+      aria-labelledby="modal-title"
+      onClick={onClose}
     >
       <div
-        className={`w-full ${maxWidthStyles[maxWidth]} rounded-3xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 shadow-2xl relative max-h-[92vh] flex flex-col overflow-hidden animate-scale-up`}
+        className={`relative w-full ${maxWidthClasses[maxWidth]} rounded-2xl bg-[#FAF8F4] dark:bg-[#102D25] border border-[#D5CFC0] dark:border-[#214E3E] shadow-2xl overflow-hidden animate-pop-in flex flex-col max-h-[90vh]`}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Cabeçalho */}
-        {(title || icon) && (
-          <div className={`p-5 sm:p-6 border-b-2 border-slate-100 dark:border-slate-800 flex items-center justify-between ${headerClassName}`}>
-            <div className="flex items-center gap-3.5 pr-8">
-              {icon && (
-                <div className="shrink-0 p-2.5 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border-2 border-blue-200 dark:border-blue-800/80 text-[#026CD6] dark:text-blue-400">
-                  {icon}
-                </div>
-              )}
-              <div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h2 className="text-lg sm:text-xl font-black text-slate-800 dark:text-white">
-                    {title}
-                  </h2>
-                  {headerBadge}
-                </div>
-                {subtitle && (
-                  <p className="text-xs sm:text-sm font-bold text-slate-400 dark:text-slate-400 mt-0.5">
-                    {subtitle}
-                  </p>
-                )}
+        {/* Header */}
+        <div className="px-6 py-5 border-b border-[#E2DDD0] dark:border-[#214E3E] flex items-center justify-between bg-[#F3F0E8]/70 dark:bg-[#0D241D]">
+          <div className="flex items-center gap-3.5">
+            {icon && (
+              <div className="p-2.5 rounded-xl bg-[#1C4939]/10 dark:bg-[#1C4939] text-[#1C4939] dark:text-[#D4A94F] border border-[#1C4939]/20 dark:border-[#D4A94F]/30 shrink-0">
+                {icon}
               </div>
+            )}
+            <div>
+              <h2 id="modal-title" className="text-lg sm:text-xl font-extrabold text-[#102D25] dark:text-[#E8E4D9] tracking-tight">
+                {title}
+              </h2>
+              {subtitle && (
+                <p className="text-xs font-semibold text-[#526B61] dark:text-[#9AB3A8] mt-0.5">{subtitle}</p>
+              )}
             </div>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Fechar janela"
+            className="p-2 rounded-xl text-[#526B61] hover:text-[#102D25] dark:text-[#9AB3A8] dark:hover:text-[#E8E4D9] hover:bg-[#E8E4D9] dark:hover:bg-[#16382E] transition-colors focus:outline-none"
+          >
+            <X className="w-5 h-5 stroke-[2.2]" />
+          </button>
+        </div>
 
-            <button
-              onClick={onClose}
-              className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              title="Fechar (Esc)"
-              aria-label="Fechar"
-            >
-              <X className="h-5 w-5 stroke-[2.5]" />
-            </button>
+        {/* Body */}
+        <div className="p-6 overflow-y-auto flex-1">{children}</div>
+
+        {/* Footer */}
+        {footer && (
+          <div className="px-6 py-4 bg-[#F3F0E8] dark:bg-[#0D241D] border-t border-[#E2DDD0] dark:border-[#214E3E] flex items-center justify-end gap-3">
+            {footer}
           </div>
         )}
-
-        {/* Conteúdo com rolagem interna suave */}
-        <div className="p-5 sm:p-6 overflow-y-auto">
-          {children}
-        </div>
       </div>
     </div>
   );

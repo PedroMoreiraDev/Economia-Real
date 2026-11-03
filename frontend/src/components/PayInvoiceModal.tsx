@@ -77,7 +77,7 @@ export const PayInvoiceModal: React.FC<PayInvoiceModalProps> = ({
         </button>
 
         <div className="flex items-center gap-3.5 mb-6">
-          <div className="h-12 w-12 rounded-2xl bg-blue-50 border-2 border-blue-200 text-[#026CD6] flex items-center justify-center shadow-[0_3px_0_0_#BFDBFE]">
+          <div className="h-12 w-12 rounded-2xl bg-blue-50 border-2 border-blue-200 text-[#1C4939] flex items-center justify-center shadow-[0_3px_0_0_#BFDBFE]">
             <DollarSign className="h-6 w-6 stroke-[2.5]" />
           </div>
           <div>
@@ -116,7 +116,7 @@ export const PayInvoiceModal: React.FC<PayInvoiceModalProps> = ({
               required
               value={accountId}
               onChange={(e) => setAccountId(e.target.value)}
-              className="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-800 focus:outline-none focus:border-[#026CD6] focus:bg-white transition-all"
+              className="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-800 focus:outline-none focus:border-[#1C4939] focus:bg-white transition-all"
             >
               <option value="">Selecione uma conta bancária...</option>
               {accounts.map((acc) => (
@@ -131,7 +131,7 @@ export const PayInvoiceModal: React.FC<PayInvoiceModalProps> = ({
               value={paymentAmount}
               onChangeValue={(val) => setPaymentAmount(val > 0 ? val.toString() : '')}
               placeholder="0,00"
-              className="py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-black text-slate-800 focus:border-[#026CD6] focus:bg-white"
+              className="py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-black text-slate-800 focus:border-[#1C4939] focus:bg-white"
             />
           </div>
 

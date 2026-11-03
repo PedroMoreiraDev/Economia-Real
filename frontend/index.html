@@ -1,187 +1,141 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
   <head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-68CZ3WHEMB"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-68CZ3WHEMB');
-    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
-    <!-- Título e Descrição Primária para Busca (SEO On-Page) -->
-    <title>Economia Real — Controle Financeiro Inteligente com IA</title>
-    <meta name="description" content="App de controle financeiro pessoal com Inteligência Artificial. Lance gastos por voz, importe faturas de cartão sem planilhas e economize de verdade. Grátis!" />
-    <meta name="keywords" content="controle financeiro, gestao financeira pessoal, inteligencia artificial financas, lancamento de gastos por voz, importar fatura cartao, app de financas gratis, economia real" />
-    <meta name="author" content="Economia Real" />
-    <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://economia-real.ia.br/" />
 
-    <!-- Favicon e Ícones de Dispositivos -->
+    <!-- SEO Principal -->
+    <title>Economia Real — Gestão Financeira Pessoal com IA</title>
+    <meta
+      name="description"
+      content="Assuma o controle financeiro pessoal com precisão contábil. Importe faturas e extratos em PDF, OFX ou CSV, lance gastos por voz com Inteligência Artificial e separe gastos reais de faturas."
+    />
+    <meta
+      name="keywords"
+      content="controle financeiro pessoal, gestão financeira pessoal, fintech, importar fatura cartão de crédito, gerenciador financeiro com IA, controle de gastos por voz, finanças pessoais brasil, economia real"
+    />
+    <meta name="author" content="Economia Real" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="theme-color" content="#102D25" />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://economiareal.com.br/" />
+
+    <!-- Favicon & App Icons -->
     <link rel="icon" type="image/png" href="/logo-economia-real.png" />
     <link rel="apple-touch-icon" href="/logo-economia-real.png" />
     <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#026CD6" />
 
     <!-- Open Graph / Facebook / WhatsApp / LinkedIn -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://economia-real.ia.br/" />
-    <meta property="og:site_name" content="Economia Real" />
-    <meta property="og:title" content="Economia Real — Controle Financeiro Inteligente com IA" />
-    <meta property="og:description" content="Controle suas finanças sem o sofrimento de planilhas. Lance gastos por voz, importe faturas e economize com Inteligência Artificial." />
-    <meta property="og:image" content="https://economia-real.ia.br/logo-economia-real.png" />
-    <meta property="og:image:width" content="512" />
-    <meta property="og:image:height" content="512" />
-    <meta property="og:image:alt" content="Mascote do Economia Real - Inteligência Financeira" />
     <meta property="og:locale" content="pt_BR" />
+    <meta property="og:site_name" content="Economia Real" />
+    <meta property="og:title" content="Economia Real — Gestão Financeira Pessoal Inteligente" />
+    <meta
+      property="og:description"
+      content="Chega de planilhas manuais. Importe faturas em 1 clique, registre despesas por voz com IA e tenha clareza absoluta sobre suas finanças pessoais."
+    />
+    <meta property="og:url" content="https://economiareal.com.br/" />
+    <meta property="og:image" content="https://economiareal.com.br/logo-economia-real.png" />
+    <meta property="og:image:alt" content="Logo do Economia Real — Gestão Financeira Pessoal" />
 
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:url" content="https://economia-real.ia.br/" />
-    <meta name="twitter:title" content="Economia Real — Economize de Verdade com IA" />
-    <meta name="twitter:description" content="Controle financeiro sem planilhas: lance despesas por comando de voz, importe extratos e receba alertas preditivos de gastos." />
-    <meta name="twitter:image" content="https://economia-real.ia.br/logo-economia-real.png" />
+    <!-- Twitter / X Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Economia Real — Gestão Financeira Pessoal Inteligente" />
+    <meta
+      name="twitter:description"
+      content="Importe faturas em segundos, lance despesas por voz com IA e descubra para onde seu dinheiro realmente vai."
+    />
+    <meta name="twitter:image" content="https://economiareal.com.br/logo-economia-real.png" />
 
-    <!-- Google Fonts com Preconnect Otimizado -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800;900&display=swap" rel="stylesheet">
-
-    <!-- Schema.org: SoftwareApplication & WebSite & FAQPage (Rich Snippets) -->
+    <!-- Dados Estruturados JSON-LD (Schema.org SoftwareApplication + FAQPage) -->
     <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@graph": [
-        {
-          "@type": "WebApplication",
-          "@id": "https://economia-real.ia.br/#webapp",
-          "name": "Economia Real",
-          "url": "https://economia-real.ia.br/",
-          "description": "Aplicativo de gestão financeira pessoal e controle de gastos com Inteligência Artificial, transcrição de voz e importação de faturas de cartão.",
-          "applicationCategory": "FinanceApplication",
-          "operatingSystem": "All",
-          "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "BRL"
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "SoftwareApplication",
+            "name": "Economia Real",
+            "applicationCategory": "FinanceApplication",
+            "operatingSystem": "Web, iOS, Android",
+            "url": "https://economiareal.com.br/",
+            "image": "https://economiareal.com.br/logo-economia-real.png",
+            "description": "Plataforma de gestão financeira pessoal com Inteligência Artificial que importa faturas PDF/OFX/CSV, transcreve gastos por voz e previne dupla contagem de cartão de crédito.",
+            "offers": {
+              "@type": "Offer",
+              "price": "0.00",
+              "priceCurrency": "BRL"
+            },
+            "featureList": [
+              "Importação automática de faturas e extratos em PDF, OFX e CSV",
+              "Lançamento de transações por comando de voz com Inteligência Artificial",
+              "Prevenção contábil contra dupla contagem de faturas de cartão de crédito",
+              "Sugestão inteligente de metas de gastos por categoria",
+              "Gráficos de evolução financeira e distribuição de despesas"
+            ]
           },
-          "featureList": [
-            "Lançamento de gastos por comando de voz nativo com IA",
-            "Importação de extratos e faturas em OFX e CSV",
-            "Prevenção contra dupla contagem de faturas de cartão de crédito",
-            "Alertas preditivos de metas e teto de gastos",
-            "Gráficos reativos de fluxo de caixa e relatórios consolidados"
-          ]
-        },
-        {
-          "@type": "Organization",
-          "@id": "https://economia-real.ia.br/#organization",
-          "name": "Economia Real",
-          "url": "https://economia-real.ia.br/",
-          "logo": "https://economia-real.ia.br/logo-economia-real.png"
-        },
-        {
-          "@type": "FAQPage",
-          "@id": "https://economia-real.ia.br/#faq",
-          "mainEntity": [
-            {
-              "@type": "Question",
-              "name": "Eu preciso conectar a senha da minha conta bancária?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Não! De forma alguma. Sua segurança é prioridade máxima. Você nunca insere senhas de banco no Economia Real. O lançamento é feito via comando de voz em tempo real ou você mesmo exporta o extrato/fatura (OFX ou CSV) e arrasta para cá."
+          {
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "Preciso digitar a senha do meu banco para usar o Economia Real?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Não! O Economia Real nunca pede sua senha bancária ou token de acesso. Você pode registrar gastos falando no microfone ou arrastando o arquivo PDF, OFX ou CSV da sua fatura."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Como o Economia Real evita somar a fatura do cartão duas vezes?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "O motor contábil do Economia Real separa o registro das compras parceladas da liquidação do pagamento da fatura, garantindo que seu saldo mensal reflita a realidade exata sem duplicidade."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Quais bancos e formatos de arquivo são aceitos na importação?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Aceitamos arquivos PDF, OFX e CSV dos principais bancos brasileiros, incluindo Nubank, Itaú, Bradesco, Santander, Banco Inter, C6 Bank, BTG Pactual, XP e Banco do Brasil."
+                }
               }
-            },
-            {
-              "@type": "Question",
-              "name": "Como funciona o lançamento por voz com I.A?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Basta clicar no botão de microfone e falar naturalmente: 'ifood 49,19 no crédito' ou 'uber 25 reais'. O navegador reconhece o áudio em tempo real e nossa inteligência artificial interpreta o valor, a data, a categoria e a conta, preenchendo o lançamento em menos de 2 segundos."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "O aplicativo é realmente gratuito?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Sim! Você tem acesso completo a todas as ferramentas essenciais: lançamento por voz, importação de extratos com IA, cálculo proporcional de metas com travas individuais, gráficos de fluxo de caixa e alertas de limite."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "O que é a prevenção de dupla contagem de faturas?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Muitos aplicativos somam as compras parceladas no mês em que foram feitas e, quando você paga a fatura do cartão, somam aquele valor novamente como despesa. No Economia Real, o pagamento da fatura é tratado como quitação de passivo. Assim, seus relatórios mostram a realidade exata do seu bolso, sem distorção."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "Como funcionam os alertas preventivos de metas?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Você estipula uma margem de segurança (por exemplo, 80%). Quando os seus gastos em Alimentação, Lazer ou qualquer outra categoria atingem esse patamar, a plataforma acende alertas visuais inteligentes avisando quantos reais restam até o final do período, para que você não seja pego de surpresa."
-              }
-            }
-          ]
-        }
-      ]
-    }
-    </script>
-    <!-- Script Inline para evitar Flash de Tema Claro (FOUC) no Dark Mode -->
-    <script>
-      (function() {
-        try {
-          const isDark = localStorage.getItem('economia_real_dark_mode') === 'true';
-          if (isDark) {
-            document.documentElement.classList.add('dark');
-          } else {
-            document.documentElement.classList.remove('dark');
+            ]
           }
-        } catch (_) {}
-      })();
+        ]
+      }
     </script>
-  </head>
-  <body class="min-h-screen font-sans antialiased selection:bg-[#026CD6] selection:text-white transition-colors duration-200">
-    <noscript>
-      <div style="padding: 2rem; font-family: sans-serif; text-align: center; max-width: 600px; margin: 0 auto;">
-        <h1>Economia Real — Controle Financeiro Inteligente com IA</h1>
-        <p>Economize de verdade controlando suas finanças pessoais sem planilhas. Lance despesas por voz, importe faturas de cartão de crédito e acompanhe seus limites com inteligência artificial.</p>
-        <p>Para utilizar a experiência completa do aplicativo, por favor ative o JavaScript no seu navegador.</p>
-      </div>
-    </noscript>
-    <div id="root">
-      <!-- Estrutura Semântica Inicial para Indexação e Motores de Busca (GEO/SEO) -->
-      <main class="max-w-5xl mx-auto px-4 py-12 text-center" aria-label="Economia Real - Visão Geral">
-        <header class="space-y-4">
-          <h1 class="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
-            Controle suas finanças sem o sofrimento de anotar tudo na mão.
-          </h1>
-          <p class="text-lg font-bold text-slate-600 max-w-2xl mx-auto">
-            Fale no microfone ou suba a fatura do seu banco. A Inteligência Artificial categoriza tudo em segundos, define seus limites ideais e te avisa antes de você estourar o orçamento.
-          </p>
-        </header>
 
-        <section class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
-          <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-            <h2 class="font-black text-slate-900">🎤 Lançamento de Gastos por Voz</h2>
-            <p class="text-xs text-slate-500 mt-1">Diga o que gastou e nossa IA interpreta categoria, valor e forma de pagamento instantaneamente.</p>
-          </div>
-          <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-            <h2 class="font-black text-slate-900">📄 Importador de Faturas (OFX/CSV)</h2>
-            <p class="text-xs text-slate-500 mt-1">Classifique dezenas de transações de cartão de crédito sem duplicar pagamentos de fatura.</p>
-          </div>
-          <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-            <h2 class="font-black text-slate-900">🎯 Alertas Preditivos & Metas</h2>
-            <p class="text-xs text-slate-500 mt-1">Receba avisos preventivos ao atingir 80% do teto estipulado para não estourar o mês.</p>
-          </div>
-        </section>
+    <!-- Fontes Google: Plus Jakarta Sans, Inter, Instrument Serif e JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-[#E8E4D9] text-[#102D25] antialiased selection:bg-[#1C4939] selection:text-[#E8E4D9]">
+    <div id="root"></div>
+
+    <!-- Conteúdo semântico de fallback para motores de busca que não executam JS -->
+    <noscript>
+      <main style="max-width: 800px; margin: 40px auto; padding: 20px; font-family: sans-serif; color: #102D25; background: #E8E4D9;">
+        <h1>Economia Real — Gestão Financeira Pessoal com IA</h1>
+        <p>
+          O <strong>Economia Real</strong> é o gerenciador financeiro brasileiro que une comando de voz com Inteligência
+          Artificial, importação de faturas de cartão de crédito (PDF, OFX e CSV) e contabilidade sem dupla contagem.
+        </p>
+        <h2>Principais Funcionalidades</h2>
+        <ul>
+          <li><strong>Importação de Faturas e Extratos:</strong> Compatível com Nubank, Itaú, Inter, Bradesco, C6, Santander e BB.</li>
+          <li><strong>Lançamento por Voz e Texto com IA:</strong> Fale ou digite seus gastos e a IA classifica tudo em segundos.</li>
+          <li><strong>Auditoria de Assinaturas e Custos Fixos:</strong> Previsão mensal de contas recorrentes e metas de economia.</li>
+          <li><strong>Segurança e Privacidade (LGPD):</strong> Sem exigência de senhas bancárias.</li>
+        </ul>
       </main>
-    </div>
+    </noscript>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -202,7 +202,7 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
         </button>
 
         <div className="flex items-center space-x-3.5 mb-5 sm:mb-6">
-          <div className="p-3 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-[#026CD6] dark:text-sky-400 border-2 border-blue-200 dark:border-blue-800 shrink-0">
+          <div className="p-3 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-[#1C4939] dark:text-sky-400 border-2 border-blue-200 dark:border-blue-800 shrink-0">
             <Calendar className="w-6 h-6" />
           </div>
           <div>
@@ -223,7 +223,7 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
         )}
 
         {billToEdit && (
-          <div className="mb-4 sm:mb-5 flex items-start space-x-2.5 p-3.5 rounded-2xl bg-blue-50 dark:bg-blue-950/60 border-2 border-blue-200 dark:border-blue-800 text-[#026CD6] dark:text-sky-300 text-xs sm:text-sm font-bold">
+          <div className="mb-4 sm:mb-5 flex items-start space-x-2.5 p-3.5 rounded-2xl bg-blue-50 dark:bg-blue-950/60 border-2 border-blue-200 dark:border-blue-800 text-[#1C4939] dark:text-sky-300 text-xs sm:text-sm font-bold">
             <Sparkles className="w-4 h-4 shrink-0 mt-0.5" />
             <span>
               Ao atualizar, todos os lançamentos desta despesa no extrato (mês atual e meses futuros) serão atualizados automaticamente com os novos dados.
@@ -242,7 +242,7 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
               placeholder="Ex: Netflix, Aluguel, Internet, Academia"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white font-bold placeholder-slate-400 focus:outline-none focus:border-[#58CC02] focus:bg-white dark:focus:bg-slate-800 transition-all"
+              className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white font-bold placeholder-slate-400 focus:outline-none focus:border-[#1C4939] focus:bg-white dark:focus:bg-slate-800 transition-all"
             />
           </div>
 
@@ -256,7 +256,7 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
                 placeholder="0,00"
                 value={amount}
                 onChangeValue={(val) => setAmount(val > 0 ? val.toString() : '')}
-                className="py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white font-bold placeholder-slate-400 focus:border-[#026CD6] focus:bg-white dark:focus:bg-slate-800"
+                className="py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white font-bold placeholder-slate-400 focus:border-[#1C4939] focus:bg-white dark:focus:bg-slate-800"
               />
             </div>
 
@@ -272,7 +272,7 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
                 placeholder="1 a 31"
                 value={dayOfMonth}
                 onChange={(e) => setDayOfMonth(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white font-bold placeholder-slate-400 focus:outline-none focus:border-[#58CC02] focus:bg-white dark:focus:bg-slate-800 transition-all"
+                className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white font-bold placeholder-slate-400 focus:outline-none focus:border-[#1C4939] focus:bg-white dark:focus:bg-slate-800 transition-all"
               />
             </div>
           </div>
@@ -285,7 +285,7 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
               <select
                 value={frequency}
                 onChange={(e) => setFrequency(e.target.value as RecurringFrequency)}
-                className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white font-bold focus:outline-none focus:border-[#58CC02] focus:bg-white dark:focus:bg-slate-800 transition-all"
+                className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white font-bold focus:outline-none focus:border-[#1C4939] focus:bg-white dark:focus:bg-slate-800 transition-all"
               >
                 <option value="MONTHLY">Mensal</option>
                 <option value="WEEKLY">Semanal</option>
@@ -320,7 +320,7 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
                 onClick={() => setPaymentSourceType('direct')}
                 className={`flex items-center justify-center space-x-1.5 py-2.5 px-3 rounded-2xl border-2 text-xs font-black transition-all ${
                   paymentSourceType === 'direct'
-                    ? 'bg-[#EBF7FF] dark:bg-blue-950/60 border-[#1CB0F6] dark:border-blue-700 text-[#1899D6] dark:text-sky-300 shadow-[0_3px_0_0_#1899D6] dark:shadow-none'
+                    ? 'bg-[#E8E4D9] dark:bg-blue-950/60 border-[#1C4939] dark:border-blue-700 text-[#102D25] dark:text-sky-300 shadow-[0_3px_0_0_#102D25] dark:shadow-none'
                     : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
                 }`}
               >
@@ -331,7 +331,7 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
                 onClick={() => setPaymentSourceType('card')}
                 className={`flex items-center justify-center space-x-1.5 py-2.5 px-3 rounded-2xl border-2 text-xs font-black transition-all ${
                   paymentSourceType === 'card'
-                    ? 'bg-purple-50 dark:bg-purple-950/60 border-[#CE82FF] dark:border-purple-700 text-[#A64BFF] dark:text-purple-300 shadow-[0_3px_0_0_#A64BFF] dark:shadow-none'
+                    ? 'bg-purple-50 dark:bg-purple-950/60 border-[#D4A94F] dark:border-purple-700 text-[#B8892E] dark:text-purple-300 shadow-[0_3px_0_0_#B8892E] dark:shadow-none'
                     : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
                 }`}
               >
@@ -344,7 +344,7 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
               <select
                 value={creditCardId}
                 onChange={(e) => setCreditCardId(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white font-bold focus:outline-none focus:border-[#58CC02] focus:bg-white dark:focus:bg-slate-800 transition-all"
+                className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white font-bold focus:outline-none focus:border-[#1C4939] focus:bg-white dark:focus:bg-slate-800 transition-all"
               >
                 <option value="">Selecione um cartão cadastrado...</option>
                 {creditCards.map((card) => (
@@ -365,7 +365,7 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5">
                   <div className={`p-2 rounded-xl shrink-0 transition-colors ${
-                    autoLaunch ? 'bg-blue-100 dark:!bg-[#1E293B] text-[#026CD6] dark:!text-sky-300' : 'bg-slate-200 dark:!bg-slate-800 text-slate-500 dark:!text-slate-400'
+                    autoLaunch ? 'bg-blue-100 dark:!bg-[#1E293B] text-[#1C4939] dark:!text-sky-300' : 'bg-slate-200 dark:!bg-slate-800 text-slate-500 dark:!text-slate-400'
                   }`}>
                     <Repeat className="h-4 w-4 stroke-[2.5]" />
                   </div>
@@ -382,7 +382,7 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
                   type="button"
                   onClick={() => setAutoLaunch(!autoLaunch)}
                   className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                    autoLaunch ? 'bg-[#026CD6]' : 'bg-slate-300 dark:bg-slate-700'
+                    autoLaunch ? 'bg-[#1C4939]' : 'bg-slate-300 dark:bg-slate-700'
                   }`}
                   role="switch"
                   aria-checked={autoLaunch}
@@ -405,7 +405,7 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
                       type="month"
                       value={launchMonth}
                       onChange={(e) => setLaunchMonth(e.target.value)}
-                      className="w-full px-3.5 py-2 rounded-xl bg-white dark:!bg-slate-900 border-2 border-slate-200 dark:!border-slate-700 text-xs sm:text-sm font-bold text-slate-800 dark:!text-white focus:outline-none focus:border-[#026CD6]"
+                      className="w-full px-3.5 py-2 rounded-xl bg-white dark:!bg-slate-900 border-2 border-slate-200 dark:!border-slate-700 text-xs sm:text-sm font-bold text-slate-800 dark:!text-white focus:outline-none focus:border-[#1C4939]"
                     />
                   </div>
 
@@ -437,7 +437,7 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
                 type="button"
                 onClick={() => setActive(!active)}
                 className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                  active ? 'bg-[#58CC02]' : 'bg-slate-300'
+                  active ? 'bg-[#1C4939]' : 'bg-slate-300'
                 }`}
                 role="switch"
                 aria-checked={active}

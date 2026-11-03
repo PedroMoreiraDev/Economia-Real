@@ -204,7 +204,7 @@ export function trackEvent(eventName: string, customParams: Record<string, any> 
   if (import.meta.env.DEV) {
     console.log(
       `%c[Telemetria] %c${eventName}`,
-      'color: #026CD6; font-weight: bold;',
+      'color: #1C4939; font-weight: bold;',
       'color: #10B981; font-weight: bold;',
       payload
     );

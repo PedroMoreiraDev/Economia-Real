@@ -70,7 +70,7 @@ export const CreditCardModal: React.FC<CreditCardModalProps> = ({
         </button>
 
         <div className="flex items-center gap-3.5 mb-6">
-          <div className="h-12 w-12 rounded-2xl bg-purple-50 border-2 border-[#CE82FF] text-[#A64BFF] flex items-center justify-center shadow-[0_3px_0_0_#A64BFF]">
+          <div className="h-12 w-12 rounded-2xl bg-purple-50 border-2 border-[#D4A94F] text-[#B8892E] flex items-center justify-center shadow-[0_3px_0_0_#B8892E]">
             <CardIcon className="h-6 w-6 stroke-[2.5]" />
           </div>
           <div>
@@ -95,7 +95,7 @@ export const CreditCardModal: React.FC<CreditCardModalProps> = ({
               placeholder="Ex: Nubank Ultravioleta, XP Visa Infinite"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#CE82FF] focus:bg-white transition-all"
+              className="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#D4A94F] focus:bg-white transition-all"
             />
           </div>
 
@@ -105,7 +105,7 @@ export const CreditCardModal: React.FC<CreditCardModalProps> = ({
               value={creditLimit}
               onChangeValue={(val) => setCreditLimit(val > 0 ? val.toString() : '')}
               placeholder="0,00"
-              className="py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-black text-slate-800 placeholder-slate-400 focus:border-[#CE82FF] focus:bg-white"
+              className="py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-black text-slate-800 placeholder-slate-400 focus:border-[#D4A94F] focus:bg-white"
             />
           </div>
 
@@ -119,7 +119,7 @@ export const CreditCardModal: React.FC<CreditCardModalProps> = ({
                 required
                 value={closingDay}
                 onChange={(e) => setClosingDay(e.target.value)}
-                className="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-800 focus:outline-none focus:border-[#CE82FF] focus:bg-white transition-all"
+                className="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-800 focus:outline-none focus:border-[#D4A94F] focus:bg-white transition-all"
               />
             </div>
 
@@ -132,7 +132,7 @@ export const CreditCardModal: React.FC<CreditCardModalProps> = ({
                 required
                 value={dueDay}
                 onChange={(e) => setDueDay(e.target.value)}
-                className="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-800 focus:outline-none focus:border-[#CE82FF] focus:bg-white transition-all"
+                className="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-800 focus:outline-none focus:border-[#D4A94F] focus:bg-white transition-all"
               />
             </div>
           </div>

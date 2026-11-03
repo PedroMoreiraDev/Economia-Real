@@ -23,34 +23,34 @@ export const MonthSelector: React.FC<MonthSelectorProps> = ({
   onSelectMonthInput,
 }) => {
   return (
-    <div className="card-duo p-4 sm:p-5 flex flex-col md:flex-row items-center justify-between gap-4 bg-gradient-to-r from-white via-blue-50/40 to-white dark:from-slate-900 dark:via-blue-950/20 dark:to-slate-900 border-2 border-slate-200 dark:border-slate-800 shadow-sm">
+    <div className="card-duo p-4 sm:p-5 flex flex-col md:flex-row items-center justify-between gap-4">
       
       {/* Lado Esquerdo: Identificação do Mês Ativo */}
       <div className="flex items-center gap-3.5 w-full md:w-auto">
-        <div className="h-12 w-12 rounded-2xl bg-[#DDF4FF] dark:bg-blue-950/70 border-2 border-[#BAE6FD] dark:border-blue-800 text-[#026CD6] dark:text-sky-400 flex items-center justify-center shadow-sm shrink-0">
-          <Calendar className="h-6 w-6 stroke-[2.5]" />
+        <div className="h-12 w-12 rounded-xl bg-[#102D25] border border-[#D4A94F]/40 text-[#D4A94F] flex items-center justify-center shadow-xs shrink-0">
+          <Calendar className="h-6 w-6 stroke-[2.2]" />
         </div>
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-[11px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider">
+            <span className="text-[11px] font-bold uppercase text-[#526B61] dark:text-[#9AB3A8] tracking-wider">
               Período de Referência
             </span>
             {isCurrentMonth ? (
-              <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-[#E8F8E8] dark:bg-emerald-950/60 text-[#388302] dark:text-emerald-400 border border-[#D7FFB8] dark:border-emerald-800 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#58CC02] animate-pulse" />
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#E6EFEA] dark:bg-[#16382E] text-[#1C4939] dark:text-[#78C6A3] border border-[#1C4939]/25 dark:border-[#2B6B54] flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#1C4939] dark:bg-[#D4A94F] animate-pulse" />
                 Mês Atual
               </span>
             ) : selectedMonth < getCurrentMonthStr() ? (
-              <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-sky-300 border border-blue-200 dark:border-blue-800">
-                Mês Anterior
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#EFECE3] dark:bg-[#16382E] text-[#355248] dark:text-[#B8C7C0] border border-[#D5CFC0] dark:border-[#214E3E]">
+                Histórico
               </span>
             ) : (
-              <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
-                Planejamento Futuro
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#F7EFE0] dark:bg-[#16382E] text-[#102D25] dark:text-[#D4A94F] border border-[#D4A94F]/40">
+                Projeção Futura
               </span>
             )}
           </div>
-          <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight capitalize">
+          <h2 className="text-xl sm:text-2xl font-extrabold text-[#102D25] dark:text-[#E8E4D9] tracking-tight capitalize">
             {formatMonthLabel(selectedMonth)}
           </h2>
         </div>
@@ -64,7 +64,7 @@ export const MonthSelector: React.FC<MonthSelectorProps> = ({
           className="btn-duo btn-duo-white text-xs px-2.5 sm:px-3 py-2 flex items-center gap-1 sm:gap-1.5 shrink-0"
           title="Voltar para o mês anterior"
         >
-          <ChevronLeft className="h-4 w-4 stroke-[3] text-slate-600" />
+          <ChevronLeft className="h-4 w-4 stroke-[2.5] text-[#102D25] dark:text-[#E8E4D9]" />
           <span className="hidden sm:inline">Mês Anterior</span>
         </button>
 
@@ -75,7 +75,7 @@ export const MonthSelector: React.FC<MonthSelectorProps> = ({
             value={selectedMonth}
             onChange={onSelectMonthInput}
             aria-label="Escolher mês e ano de referência"
-            className="btn-duo btn-duo-white text-xs font-black px-2.5 sm:px-3 py-1.5 cursor-pointer text-slate-700 hover:text-[#026CD6] border-2 border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:border-[#026CD6] w-full text-center"
+            className="btn-duo btn-duo-white text-xs font-extrabold px-2.5 sm:px-3 py-1.5 cursor-pointer text-[#102D25] dark:text-[#E8E4D9] hover:border-[#1C4939] dark:hover:border-[#D4A94F] rounded-xl focus:outline-none focus:border-[#1C4939] w-full text-center font-numeric"
             title="Clique para escolher qualquer mês e ano diretamente"
           />
         </div>
@@ -87,7 +87,7 @@ export const MonthSelector: React.FC<MonthSelectorProps> = ({
           title="Avançar para o próximo mês"
         >
           <span className="hidden sm:inline">Próximo Mês</span>
-          <ChevronRight className="h-4 w-4 stroke-[3] text-slate-600" />
+          <ChevronRight className="h-4 w-4 stroke-[2.5] text-[#102D25] dark:text-[#E8E4D9]" />
         </button>
 
         {!isCurrentMonth && (
