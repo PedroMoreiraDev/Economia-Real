@@ -118,29 +118,29 @@ export const ImportModal: React.FC<ImportModalProps> = ({
 
         {result ? (
           <div className="space-y-4 py-2 animate-fade-in">
-            <div className="p-4 rounded-2xl bg-blue-50 dark:!bg-blue-950/40 border-2 border-blue-200 dark:!border-blue-800/80 text-blue-900 dark:text-blue-200 space-y-2.5">
-              <div className="flex items-center gap-2 text-sm font-black text-[#1C4939] dark:text-blue-400">
+            <div className="p-4 rounded-2xl bg-[#E8E4D9] dark:!bg-[#16382E] border-2 border-[#D5CFC0] dark:!border-[#214E3E] text-[#102D25] dark:text-[#E8E4D9] space-y-2.5">
+              <div className="flex items-center gap-2 text-sm font-black text-[#1C4939] dark:text-[#D4A94F]">
                 <CheckCircle2 className="h-5 w-5 stroke-[2.5]" />
                 <span>Importação Concluída com Sucesso!</span>
               </div>
-              <p className="text-xs font-bold text-slate-600 dark:text-slate-300">{result.message}</p>
+              <p className="text-xs font-bold text-slate-600 dark:text-[#B7C6BE]">{result.message}</p>
 
               {result.referenceMonthDisplay && (
                 <div className="flex items-center gap-2 pt-1">
-                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white dark:!bg-[#0F172A] border-2 border-blue-200 dark:!border-blue-800 text-xs font-black text-[#1C4939] dark:text-blue-300 shadow-sm">
-                    <Calendar className="h-4 w-4 text-[#1C4939] dark:text-blue-400 stroke-[2.5]" />
-                    <span>Mês dos registros importados: <strong className="text-slate-900 dark:text-white underline decoration-blue-400 decoration-2">{result.referenceMonthDisplay}</strong></span>
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white dark:!bg-[#102D25] border-2 border-[#D5CFC0] dark:!border-[#214E3E] text-xs font-black text-[#1C4939] dark:text-[#D4A94F] shadow-sm">
+                    <Calendar className="h-4 w-4 text-[#1C4939] dark:text-[#D4A94F] stroke-[2.5]" />
+                    <span>Mês dos registros importados: <strong className="text-slate-900 dark:text-[#E8E4D9] underline decoration-[#D4A94F] decoration-2">{result.referenceMonthDisplay}</strong></span>
                   </div>
                 </div>
               )}
             </div>
 
             <div className="grid grid-cols-2 gap-3 text-center">
-              <div className="p-4 rounded-2xl bg-white dark:!bg-[#0F172A] border-2 border-slate-200 dark:!border-slate-800 shadow-[0_3px_0_0_#E2E8F0] dark:shadow-none">
+              <div className="p-4 rounded-2xl bg-white dark:!bg-[#16382E] border-2 border-slate-200 dark:!border-[#214E3E] shadow-[0_3px_0_0_#E2E8F0] dark:shadow-none">
                 <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Novos Lançamentos</span>
-                <p className="text-2xl font-black text-[#1C4939] dark:text-blue-400 mt-1">{result.importedCount}</p>
+                <p className="text-2xl font-black text-[#1C4939] dark:text-[#D4A94F] mt-1">{result.importedCount}</p>
               </div>
-              <div className="p-4 rounded-2xl bg-white dark:!bg-[#0F172A] border-2 border-slate-200 dark:!border-slate-800 shadow-[0_3px_0_0_#E2E8F0] dark:shadow-none">
+              <div className="p-4 rounded-2xl bg-white dark:!bg-[#16382E] border-2 border-slate-200 dark:!border-[#214E3E] shadow-[0_3px_0_0_#E2E8F0] dark:shadow-none">
                 <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Duplicados Ignorados</span>
                 <p className="text-2xl font-black text-[#FF9600] dark:text-amber-400 mt-1">{result.skippedCount}</p>
               </div>

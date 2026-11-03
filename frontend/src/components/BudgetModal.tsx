@@ -181,17 +181,17 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
-      <div className="bg-white dark:!bg-[#0F172A] border-2 border-slate-200 dark:!border-slate-800 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col text-slate-800 dark:!text-white max-h-[90dvh] my-auto">
+      <div className="bg-white dark:!bg-[#102D25] border-2 border-slate-200 dark:!border-[#214E3E] rounded-3xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col text-slate-800 dark:!text-white max-h-[90dvh] my-auto">
         
         {/* Cabeçalho */}
-        <div className="p-4 sm:p-6 border-b-2 border-slate-100 dark:!border-slate-800 flex items-center justify-between bg-blue-50/70 dark:!bg-blue-950/40">
+        <div className="p-4 sm:p-6 border-b-2 border-slate-100 dark:!border-[#214E3E] flex items-center justify-between bg-[#E8E4D9]/40 dark:!bg-[#16382E]">
           <div className="flex items-center gap-3 sm:gap-3.5">
             <div className="p-2.5 sm:p-3 rounded-2xl bg-[#1C4939] text-white shadow-[0_3px_0_0_#102D25] shrink-0">
               <Target className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2.5]" />
             </div>
             <div>
-              <h2 className="text-lg sm:text-2xl font-black text-slate-800 dark:!text-white">Meta de Orçamento</h2>
-              <p className="text-xs sm:text-sm font-bold text-slate-400">Estabeleça limites e alertas de monitoramento</p>
+              <h2 className="text-lg sm:text-2xl font-black text-slate-800 dark:!text-[#E8E4D9]">Meta de Orçamento</h2>
+              <p className="text-xs sm:text-sm font-bold text-slate-400 dark:!text-[#B7C6BE]">Estabeleça limites e alertas de monitoramento</p>
             </div>
           </div>
           <button
@@ -216,7 +216,7 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
             <label className="block text-xs font-black uppercase tracking-wider text-slate-500 dark:!text-slate-400 mb-1.5 flex items-center justify-between">
               <span>Categoria de Despesa</span>
               {!isCategorySelected ? (
-                <span className="text-[10px] font-bold text-[#1C4939] dark:text-sky-300 bg-blue-50 dark:!bg-blue-950/60 border border-blue-200 dark:border-blue-800 px-2 py-0.5 rounded-md">
+                <span className="text-[10px] font-bold text-[#1C4939] dark:text-[#D4A94F] bg-[#E8E4D9] dark:!bg-[#16382E] border border-[#C8C1B0] dark:border-[#214E3E] px-2 py-0.5 rounded-md">
                   Opcional p/ alerta geral
                 </span>
               ) : (
@@ -239,8 +239,8 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
               }}
               className={`w-full min-h-[46px] px-4 py-2.5 rounded-2xl flex items-center justify-between cursor-pointer border-2 transition-all select-none active:scale-[0.99] ${
                 isDropdownOpen
-                  ? 'border-[#1C4939] bg-white dark:!bg-[#1E293B] ring-2 ring-[#1C4939]/20 shadow-sm'
-                  : 'bg-slate-50 dark:!bg-[#1E293B] border-slate-200 dark:!border-slate-700 hover:border-slate-300 dark:hover:!border-slate-600'
+                  ? 'border-[#1C4939] bg-white dark:!bg-[#16382E] ring-2 ring-[#1C4939]/20 shadow-sm'
+                  : 'bg-slate-50 dark:!bg-[#16382E] border-slate-200 dark:!border-[#214E3E] hover:border-slate-300 dark:hover:!border-slate-600'
               }`}
             >
               <div className="flex items-center gap-2.5 truncate pr-2">
@@ -254,14 +254,14 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
                       {selectedCategory.name}
                     </span>
                     {selectedBudget && (
-                      <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-blue-100 dark:!bg-blue-900/60 text-[#1C4939] dark:text-sky-300 border border-blue-200 dark:border-blue-700/60 shrink-0">
+                      <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-[#E8E4D9] dark:!bg-[#102D25] text-[#1C4939] dark:text-[#D4A94F] border border-[#C8C1B0] dark:border-[#214E3E] shrink-0">
                         Meta: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(selectedBudget.monthlyLimit)}
                       </span>
                     )}
                   </>
                 ) : (
                   <>
-                    <Globe className="w-4 h-4 text-[#1C4939] shrink-0" />
+                    <Globe className="w-4 h-4 text-[#1C4939] dark:text-[#D4A94F] shrink-0" />
                     <span className="text-xs sm:text-sm font-bold text-slate-600 dark:!text-slate-300 truncate">
                       Nenhuma selecionada (Apenas alerta geral)
                     </span>
@@ -293,7 +293,7 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
 
             {/* Menu Popover Flutuante */}
             {isDropdownOpen && (
-              <div className="absolute left-0 right-0 top-full mt-2 bg-white dark:!bg-[#0F172A] border-2 border-slate-200 dark:!border-slate-800 rounded-2xl shadow-2xl z-50 p-2.5 animate-scaleUp">
+              <div className="absolute left-0 right-0 top-full mt-2 bg-white dark:!bg-[#102D25] border-2 border-slate-200 dark:!border-[#214E3E] rounded-2xl shadow-2xl z-50 p-2.5 animate-scaleUp">
                 {/* Campo de Busca */}
                 <div className="relative mb-2">
                   <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -303,7 +303,7 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="Buscar categoria..."
-                    className="w-full pl-9 pr-8 py-2 bg-slate-50 dark:!bg-[#1E293B] border-2 border-slate-200 dark:!border-slate-700 rounded-xl text-xs sm:text-sm font-bold text-slate-800 dark:!text-white placeholder-slate-400 focus:outline-none focus:border-[#1C4939] transition-all"
+                    className="w-full pl-9 pr-8 py-2 bg-slate-50 dark:!bg-[#16382E] border-2 border-slate-200 dark:!border-[#214E3E] rounded-xl text-xs sm:text-sm font-bold text-slate-800 dark:!text-white placeholder-slate-400 focus:outline-none focus:border-[#1C4939] transition-all"
                   />
                   {searchTerm && (
                     <button
@@ -325,12 +325,12 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
                   }}
                   className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-bold flex items-center justify-between transition-colors ${
                     !categoryId
-                      ? 'bg-blue-50 dark:!bg-blue-950/60 text-[#1C4939] dark:text-sky-300 border-2 border-blue-200 dark:border-blue-800 font-black'
-                      : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:!bg-[#1E293B]'
+                      ? 'bg-[#E8E4D9] dark:!bg-[#16382E] text-[#1C4939] dark:text-[#D4A94F] border-2 border-[#1C4939]/30 dark:border-[#D4A94F]/40 font-black'
+                      : 'text-slate-700 dark:text-slate-300 hover:bg-[#E8E4D9]/50 dark:hover:!bg-[#16382E]'
                   }`}
                 >
                   <div className="flex items-center gap-2.5 truncate">
-                    <div className="p-1 rounded-lg bg-blue-100 dark:bg-blue-900/60 text-[#1C4939] dark:text-sky-300 shrink-0">
+                    <div className="p-1 rounded-lg bg-[#E8E4D9] dark:bg-[#102D25] text-[#1C4939] dark:text-[#D4A94F] shrink-0">
                       <Globe className="w-3.5 h-3.5" />
                     </div>
                     <div className="truncate">
@@ -342,7 +342,7 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
                 </button>
 
                 {/* Divisória com contagem de categorias */}
-                <div className="flex items-center justify-between px-2 pt-2 pb-1 text-[10px] font-black uppercase tracking-wider text-slate-400 border-t border-slate-100 dark:border-slate-800 mt-1">
+                <div className="flex items-center justify-between px-2 pt-2 pb-1 text-[10px] font-black uppercase tracking-wider text-slate-400 border-t border-slate-100 dark:border-[#214E3E] mt-1">
                   <span>Categorias ({filteredCategories.length})</span>
                   {existingBudgets.length > 0 && (
                     <span className="text-emerald-600 dark:text-emerald-400">{existingBudgets.length} com meta</span>
@@ -366,18 +366,18 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
                           }}
                           className={`w-full text-left px-3 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-between transition-colors ${
                             isSelected
-                              ? 'bg-[#E8E4D9] dark:!bg-emerald-950/60 text-[#102D25] dark:text-emerald-300 border-2 border-[#1C4939] font-black'
-                              : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:!bg-[#1E293B]'
+                              ? 'bg-[#E8E4D9] dark:!bg-[#16382E] text-[#102D25] dark:text-[#D4A94F] border-2 border-[#1C4939] dark:border-[#D4A94F]/40 font-black'
+                              : 'text-slate-700 dark:text-slate-300 hover:bg-[#E8E4D9]/50 dark:hover:!bg-[#16382E]'
                           }`}
                         >
                           <div className="flex items-center gap-2.5 truncate">
                             <span
                               className="w-3.5 h-3.5 rounded-full shrink-0 shadow-sm ring-1 ring-slate-200 dark:ring-slate-700"
-                              style={{ backgroundColor: cat.colorHex || '#3B82F6' }}
+                              style={{ backgroundColor: cat.colorHex || '#1C4939' }}
                             />
                             <span className="truncate">{cat.name}</span>
                             {existing && (
-                              <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-blue-100 dark:!bg-blue-900/60 text-[#1C4939] dark:text-sky-300 border border-blue-200 dark:border-blue-800 shrink-0">
+                              <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-[#E8E4D9] dark:!bg-[#102D25] text-[#1C4939] dark:text-[#D4A94F] border border-[#C8C1B0] dark:border-[#214E3E] shrink-0">
                                 {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(existing.monthlyLimit)}
                               </span>
                             )}
@@ -406,18 +406,18 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
               value={monthlyLimit}
               onChangeValue={(val) => setMonthlyLimit(val > 0 ? val.toString() : '')}
               placeholder={isCategorySelected ? "0,00" : "Selecione uma categoria"}
-              className="bg-slate-50 dark:!bg-[#1E293B] border-2 border-slate-200 dark:!border-slate-700 rounded-2xl py-2.5 text-sm font-black text-slate-800 dark:!text-white focus:border-[#1C4939] focus:bg-white dark:focus:!bg-[#1E293B] disabled:opacity-50 disabled:bg-slate-100 dark:disabled:bg-slate-800/50"
+              className="bg-slate-50 dark:!bg-[#16382E] border-2 border-slate-200 dark:!border-[#214E3E] rounded-2xl py-2.5 text-sm font-black text-slate-800 dark:!text-white focus:border-[#1C4939] focus:bg-white dark:focus:!bg-[#16382E] disabled:opacity-50 disabled:bg-slate-100 dark:disabled:bg-slate-800/50"
             />
           </div>
 
           {/* Limite de Alerta Percentual (Global para todas as categorias) */}
-          <div className="p-3.5 bg-blue-50/60 dark:!bg-[#1E293B] border-2 border-blue-100/80 dark:!border-slate-700 rounded-2xl space-y-2">
+          <div className="p-3.5 bg-[#E8E4D9]/40 dark:!bg-[#16382E] border-2 border-[#D5CFC0] dark:!border-[#214E3E] rounded-2xl space-y-2">
             <div className="flex items-center justify-between">
               <label className="text-xs font-black uppercase tracking-wider text-slate-700 dark:!text-slate-200 flex items-center gap-1.5">
-                <Globe className="w-3.5 h-3.5 text-[#1C4939]" />
+                <Globe className="w-3.5 h-3.5 text-[#1C4939] dark:text-[#D4A94F]" />
                 <span>Alerta de Consumo Próximo</span>
               </label>
-              <span className="text-[#1C4939] dark:text-sky-300 font-black text-xs px-2 py-0.5 bg-blue-100 dark:!bg-blue-900/60 rounded-lg">
+              <span className="text-[#1C4939] dark:text-[#D4A94F] font-black text-xs px-2 py-0.5 bg-[#FAF5E8] dark:!bg-[#102D25] border border-[#D4A94F]/30 rounded-lg">
                 {alertThreshold}% (Todas as Categorias)
               </span>
             </div>

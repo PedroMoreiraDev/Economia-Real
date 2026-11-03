@@ -202,14 +202,14 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
         </button>
 
         <div className="flex items-center space-x-3.5 mb-5 sm:mb-6">
-          <div className="p-3 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-[#1C4939] dark:text-sky-400 border-2 border-blue-200 dark:border-blue-800 shrink-0">
+          <div className="p-3 rounded-2xl bg-[#E8E4D9] dark:bg-[#16382E] text-[#1C4939] dark:text-[#E8E4D9] border-2 border-[#D5CFC0] dark:border-[#214E3E] shrink-0">
             <Calendar className="w-6 h-6" />
           </div>
           <div>
-            <h2 className="text-lg sm:text-2xl font-black text-slate-800 dark:text-white">
+            <h2 className="text-lg sm:text-2xl font-black text-slate-800 dark:text-[#E8E4D9]">
               {billToEdit ? 'Editar Assinatura / Conta' : 'Nova Assinatura / Conta Fixa'}
             </h2>
-            <p className="text-xs sm:text-sm font-bold text-slate-400 dark:text-slate-400">
+            <p className="text-xs sm:text-sm font-bold text-slate-400 dark:text-[#B7C6BE]">
               Automatize a previsão de despesas fixas recorrentes
             </p>
           </div>
@@ -223,8 +223,8 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
         )}
 
         {billToEdit && (
-          <div className="mb-4 sm:mb-5 flex items-start space-x-2.5 p-3.5 rounded-2xl bg-blue-50 dark:bg-blue-950/60 border-2 border-blue-200 dark:border-blue-800 text-[#1C4939] dark:text-sky-300 text-xs sm:text-sm font-bold">
-            <Sparkles className="w-4 h-4 shrink-0 mt-0.5" />
+          <div className="mb-4 sm:mb-5 flex items-start space-x-2.5 p-3.5 rounded-2xl bg-[#FAF5E8] dark:bg-[#16382E] border-2 border-[#D4A94F]/40 dark:border-[#D4A94F]/40 text-[#1C4939] dark:text-[#E8E4D9] text-xs sm:text-sm font-bold">
+            <Sparkles className="w-4 h-4 shrink-0 mt-0.5 text-[#D4A94F]" />
             <span>
               Ao atualizar, todos os lançamentos desta despesa no extrato (mês atual e meses futuros) serão atualizados automaticamente com os novos dados.
             </span>
@@ -320,7 +320,7 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
                 onClick={() => setPaymentSourceType('direct')}
                 className={`flex items-center justify-center space-x-1.5 py-2.5 px-3 rounded-2xl border-2 text-xs font-black transition-all ${
                   paymentSourceType === 'direct'
-                    ? 'bg-[#E8E4D9] dark:bg-blue-950/60 border-[#1C4939] dark:border-blue-700 text-[#102D25] dark:text-sky-300 shadow-[0_3px_0_0_#102D25] dark:shadow-none'
+                    ? 'bg-[#E8E4D9] dark:bg-[#16382E] border-[#1C4939] dark:border-[#214E3E] text-[#102D25] dark:text-[#E8E4D9] shadow-[0_3px_0_0_#102D25] dark:shadow-none'
                     : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
                 }`}
               >
@@ -331,7 +331,7 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
                 onClick={() => setPaymentSourceType('card')}
                 className={`flex items-center justify-center space-x-1.5 py-2.5 px-3 rounded-2xl border-2 text-xs font-black transition-all ${
                   paymentSourceType === 'card'
-                    ? 'bg-purple-50 dark:bg-purple-950/60 border-[#D4A94F] dark:border-purple-700 text-[#B8892E] dark:text-purple-300 shadow-[0_3px_0_0_#B8892E] dark:shadow-none'
+                    ? 'bg-[#FAF5E8] dark:bg-[#16382E] border-[#D4A94F] dark:border-[#D4A94F]/60 text-[#B8892E] dark:text-[#D4A94F] shadow-[0_3px_0_0_#B8892E] dark:shadow-none'
                     : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
                 }`}
               >
@@ -359,13 +359,13 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
           {!billToEdit && (
             <div className={`p-3.5 rounded-2xl transition-all space-y-3 ${
               autoLaunch
-                ? 'bg-blue-50/80 dark:!bg-[#0F172A] border-2 border-blue-200/90 dark:!border-blue-800'
-                : 'bg-slate-50 dark:!bg-[#0F172A] border-2 border-slate-200 dark:!border-slate-800'
+                ? 'bg-[#E8E4D9]/60 dark:!bg-[#16382E] border-2 border-[#D5CFC0] dark:!border-[#214E3E]'
+                : 'bg-slate-50 dark:!bg-[#16382E] border-2 border-slate-200 dark:!border-[#214E3E]'
             }`}>
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5">
                   <div className={`p-2 rounded-xl shrink-0 transition-colors ${
-                    autoLaunch ? 'bg-blue-100 dark:!bg-[#1E293B] text-[#1C4939] dark:!text-sky-300' : 'bg-slate-200 dark:!bg-slate-800 text-slate-500 dark:!text-slate-400'
+                    autoLaunch ? 'bg-[#E8E4D9] dark:!bg-[#102D25] text-[#1C4939] dark:!text-[#D4A94F]' : 'bg-slate-200 dark:!bg-slate-800 text-slate-500 dark:!text-slate-400'
                   }`}>
                     <Repeat className="h-4 w-4 stroke-[2.5]" />
                   </div>

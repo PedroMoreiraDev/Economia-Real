@@ -515,7 +515,7 @@ export const StatementTable: React.FC<StatementTableProps> = ({
                           </span>
                         )}
                         {tx.type === 'TRANSFER' && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800 text-[10px] font-black">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#E8E4D9] dark:bg-[#16382E] text-[#1C4939] dark:text-[#E8E4D9] border border-[#C8C1B0] dark:border-[#214E3E] text-[10px] font-black">
                             <ArrowLeftRight className="h-3 w-3 stroke-[3]" /> Transf.
                           </span>
                         )}
@@ -621,7 +621,7 @@ export const StatementTable: React.FC<StatementTableProps> = ({
                         <button
                           type="button"
                           onClick={() => onEditTransaction(tx)}
-                          className="p-2 min-h-[36px] min-w-[36px] rounded-xl text-slate-500 hover:text-[#1C4939] dark:text-slate-300 dark:hover:text-sky-300 bg-slate-100 hover:bg-blue-50 dark:bg-slate-800 dark:hover:bg-slate-700 transition-colors flex items-center justify-center"
+                          className="p-2 min-h-[36px] min-w-[36px] rounded-xl text-slate-500 hover:text-[#1C4939] dark:text-slate-300 dark:hover:text-[#D4A94F] bg-slate-100 hover:bg-[#E8E4D9] dark:bg-slate-800 dark:hover:bg-[#16382E] transition-colors flex items-center justify-center"
                           title="Editar movimentação"
                         >
                           <Pencil className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -792,7 +792,7 @@ export const StatementTable: React.FC<StatementTableProps> = ({
                             </span>
                           )}
                           {tx.type === 'TRANSFER' && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200 text-[10px] font-black">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#E8E4D9] dark:bg-[#16382E] text-[#1C4939] dark:text-[#E8E4D9] border border-[#C8C1B0] dark:border-[#214E3E] text-[10px] font-black">
                               <ArrowLeftRight className="h-3 w-3 stroke-[3]" /> Transf.
                             </span>
                           )}

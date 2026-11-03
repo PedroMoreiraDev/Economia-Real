@@ -501,6 +501,23 @@ html:not(.dark) .text-slate-500 {
   background-color: #16382E !important;
 }
 
+.dark .border-sky-700,
+.dark .border-sky-800,
+.dark .border-blue-700,
+.dark .border-blue-800,
+.dark .border-purple-700,
+.dark .border-purple-800 {
+  border-color: #214E3E !important;
+}
+
+.dark [class*="bg-\[\#0F172A\]"] {
+  background-color: #102D25 !important;
+}
+
+.dark [class*="bg-\[\#1E293B\]"] {
+  background-color: #16382E !important;
+}
+
 .dark .text-blue-600,
 .dark .text-blue-700,
 .dark .text-blue-800,

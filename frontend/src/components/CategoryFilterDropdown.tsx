@@ -204,7 +204,7 @@ export const CategoryFilterDropdown: React.FC<CategoryFilterDropdownProps> = ({
               width: `${coords.width}px`,
               zIndex: 9999,
             }}
-            className="card-duo bg-white/98 dark:!bg-[#0F172A] backdrop-blur-md border-2 border-slate-200/90 dark:!border-slate-800 shadow-2xl p-2 rounded-2xl animate-scaleUp text-slate-800 dark:!text-white"
+            className="card-duo bg-white/98 dark:!bg-[#102D25] backdrop-blur-md border-2 border-slate-200/90 dark:!border-[#214E3E] shadow-2xl p-2 rounded-2xl animate-scaleUp text-slate-800 dark:!text-white"
           >
             {/* Campo de Busca Rápida */}
             <div className="relative mb-2">
@@ -215,7 +215,7 @@ export const CategoryFilterDropdown: React.FC<CategoryFilterDropdownProps> = ({
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Buscar categoria..."
                 autoFocus
-                className="w-full bg-slate-50 dark:!bg-[#1E293B] border border-slate-200 dark:!border-slate-700 rounded-xl pl-8 pr-2.5 py-1.5 text-xs font-semibold text-slate-800 dark:!text-white placeholder-slate-400 focus:outline-none focus:border-[#1C4939] focus:bg-white dark:focus:!bg-[#1E293B] transition-all"
+                className="w-full bg-slate-50 dark:!bg-[#16382E] border border-slate-200 dark:!border-[#214E3E] rounded-xl pl-8 pr-2.5 py-1.5 text-xs font-semibold text-slate-800 dark:!text-white placeholder-slate-400 focus:outline-none focus:border-[#1C4939] focus:bg-white dark:focus:!bg-[#16382E] transition-all"
               />
             </div>
 
@@ -230,8 +230,8 @@ export const CategoryFilterDropdown: React.FC<CategoryFilterDropdownProps> = ({
                 }}
                 className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold transition-all text-left ${
                   isAll
-                    ? 'bg-blue-50 dark:!bg-[#1E293B] text-[#1C4939] dark:!text-sky-400 font-black'
-                    : 'hover:bg-slate-100 dark:hover:!bg-[#1E293B] text-slate-700 dark:!text-slate-200'
+                    ? 'bg-[#E8E4D9] dark:!bg-[#16382E] text-[#1C4939] dark:!text-[#D4A94F] font-black border border-[#1C4939]/20 dark:border-[#D4A94F]/30'
+                    : 'hover:bg-[#E8E4D9]/50 dark:hover:!bg-[#16382E] text-slate-700 dark:!text-[#E8E4D9]'
                 }`}
               >
                 <div className="flex items-center gap-2">

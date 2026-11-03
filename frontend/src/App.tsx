@@ -965,10 +965,10 @@ const MainDashboard: React.FC = () => {
                           return (
                             <div
                               key={tx.id}
-                              className="p-3 rounded-2xl bg-slate-50 dark:!bg-[#0F172A] border-2 border-slate-100 dark:!border-slate-800 hover:border-emerald-200 dark:hover:border-emerald-700 transition-all flex items-center justify-between group"
+                              className="p-3 rounded-2xl bg-slate-50 dark:!bg-[#16382E] border-2 border-slate-100 dark:!border-[#214E3E] hover:border-emerald-200 dark:hover:border-emerald-600 transition-all flex items-center justify-between group"
                             >
                               <div className="space-y-0.5 min-w-0 pr-2">
-                                <p className="font-black text-xs text-slate-800 dark:!text-white truncate">{tx.description}</p>
+                                <p className="font-black text-xs text-slate-800 dark:!text-[#E8E4D9] truncate">{tx.description}</p>
                                 <div className="flex items-center gap-1.5">
                                   <span className="text-[10px] font-bold text-slate-400 font-mono">
                                     {tx.accrualDate}
@@ -1289,32 +1289,32 @@ const MainDashboard: React.FC = () => {
 
           {/* Pilares de Valor do Produto (Área Logada) */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
-            <div className="card-duo p-6 space-y-3 dark:!bg-[#0F172A] dark:!border-slate-800">
-              <div className="h-12 w-12 rounded-2xl bg-emerald-50 dark:!bg-[#1E293B] border-2 border-emerald-200 dark:!border-emerald-800 flex items-center justify-center text-emerald-600 dark:!text-emerald-400 shadow-sm">
+            <div className="card-duo p-6 space-y-3 dark:!bg-[#102D25] dark:!border-[#214E3E]">
+              <div className="h-12 w-12 rounded-2xl bg-emerald-50 dark:!bg-[#16382E] border-2 border-emerald-200 dark:!border-emerald-600/40 flex items-center justify-center text-emerald-600 dark:!text-emerald-400 shadow-sm">
                 <ShieldCheck className="h-6 w-6 stroke-[2.5]" />
               </div>
-              <h3 className="text-base font-black text-slate-900 dark:!text-white">Precisão ao Centavo</h3>
-              <p className="text-xs font-bold text-slate-500 dark:!text-slate-400 leading-relaxed">
+              <h3 className="text-base font-black text-slate-900 dark:!text-[#E8E4D9]">Precisão ao Centavo</h3>
+              <p className="text-xs font-bold text-slate-500 dark:!text-[#B7C6BE] leading-relaxed">
                 Controle faturas de cartão, parcelas futuras e saldos bancários com exatidão matemática. Saiba exatamente onde cada real está, sem surpresas no fim do mês.
               </p>
             </div>
 
-            <div className="card-duo p-6 space-y-3 dark:!bg-[#0F172A] dark:!border-slate-800">
-              <div className="h-12 w-12 rounded-2xl bg-[#E8E4D9] dark:!bg-[#1E293B] border-2 border-[#BAE6FD] dark:!border-sky-800 flex items-center justify-center text-[#1C4939] dark:!text-sky-400 shadow-sm">
+            <div className="card-duo p-6 space-y-3 dark:!bg-[#102D25] dark:!border-[#214E3E]">
+              <div className="h-12 w-12 rounded-2xl bg-[#E8E4D9] dark:!bg-[#16382E] border-2 border-[#D5CFC0] dark:!border-[#214E3E] flex items-center justify-center text-[#1C4939] dark:!text-[#E8E4D9] shadow-sm">
                 <Layers className="h-6 w-6 stroke-[2.5]" />
               </div>
-              <h3 className="text-base font-black text-slate-900 dark:!text-white">Visão Real dos Seus Gastos</h3>
-              <p className="text-xs font-bold text-slate-500 dark:!text-slate-400 leading-relaxed">
+              <h3 className="text-base font-black text-slate-900 dark:!text-[#E8E4D9]">Visão Real dos Seus Gastos</h3>
+              <p className="text-xs font-bold text-slate-500 dark:!text-[#B7C6BE] leading-relaxed">
                 Pagamentos de faturas e transferências não distorcem seu orçamento. Você enxerga seu consumo real de despesas sem duplicidades nem confusão contábil.
               </p>
             </div>
 
-            <div className="card-duo p-6 space-y-3 dark:!bg-[#0F172A] dark:!border-slate-800">
-              <div className="h-12 w-12 rounded-2xl bg-[#FAF5E8] dark:!bg-[#1E293B] border-2 border-[#E9D5FF] dark:!border-purple-800 flex items-center justify-center text-[#D4A94F] dark:!text-purple-400 shadow-sm">
+            <div className="card-duo p-6 space-y-3 dark:!bg-[#102D25] dark:!border-[#214E3E]">
+              <div className="h-12 w-12 rounded-2xl bg-[#FAF5E8] dark:!bg-[#16382E] border-2 border-[#D4A94F]/40 dark:!border-[#D4A94F]/50 flex items-center justify-center text-[#D4A94F] dark:!text-[#D4A94F] shadow-sm">
                 <Sparkles className="h-6 w-6 stroke-[2.5]" />
               </div>
-              <h3 className="text-base font-black text-slate-900 dark:!text-white">Lançamento Ágil com I.A</h3>
-              <p className="text-xs font-bold text-slate-500 dark:!text-slate-400 leading-relaxed">
+              <h3 className="text-base font-black text-slate-900 dark:!text-[#E8E4D9]">Lançamento Ágil com I.A</h3>
+              <p className="text-xs font-bold text-slate-500 dark:!text-[#B7C6BE] leading-relaxed">
                 Fale por voz ou digite livremente — como <em>"ifood 49,19"</em> ou <em>"uber 25"</em> — e a inteligência artificial categoriza, data e organiza tudo em segundos.
               </p>
             </div>
@@ -1671,7 +1671,7 @@ const MainDashboard: React.FC = () => {
                   </span>
                 </div>
                 <div className="space-y-1.5 text-xs font-bold text-slate-700 dark:!text-slate-200">
-                  <label className="flex items-center gap-2 cursor-pointer p-2 rounded-xl bg-white/60 dark:!bg-[#0F172A] hover:bg-white dark:hover:!bg-[#1E293B] border border-amber-200/70 dark:!border-slate-700 transition-colors">
+                  <label className="flex items-center gap-2 cursor-pointer p-2 rounded-xl bg-white/60 dark:!bg-[#16382E] hover:bg-white dark:hover:!bg-[#1C4939] border border-amber-200/70 dark:!border-[#214E3E] transition-colors">
                     <input
                       type="radio"
                       name="deleteScope"
@@ -1681,7 +1681,7 @@ const MainDashboard: React.FC = () => {
                     />
                     <span>Excluir apenas o lançamento deste mês</span>
                   </label>
-                  <label className="flex items-center gap-2 cursor-pointer p-2 rounded-xl bg-white/60 dark:!bg-[#0F172A] hover:bg-white dark:hover:!bg-[#1E293B] border border-amber-200/70 dark:!border-slate-700 transition-colors">
+                  <label className="flex items-center gap-2 cursor-pointer p-2 rounded-xl bg-white/60 dark:!bg-[#16382E] hover:bg-white dark:hover:!bg-[#1C4939] border border-amber-200/70 dark:!border-[#214E3E] transition-colors">
                     <input
                       type="radio"
                       name="deleteScope"

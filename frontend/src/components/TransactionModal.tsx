@@ -182,7 +182,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
       <div 
-        className="w-full max-w-lg rounded-3xl bg-white dark:!bg-[#0F172A] border-2 border-slate-200 dark:!border-slate-800 shadow-2xl p-5 sm:p-8 relative max-h-[92vh] overflow-y-auto"
+        className="w-full max-w-lg rounded-3xl bg-white dark:!bg-[#102D25] border-2 border-slate-200 dark:!border-[#214E3E] shadow-2xl p-5 sm:p-8 relative max-h-[92vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -265,7 +265,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         </div>
 
         {error && (
-          <div className="mb-5 p-3.5 rounded-2xl bg-rose-50 dark:!bg-[#0F172A] border-2 border-[#FF4B4B] flex items-center gap-2 text-xs sm:text-sm font-bold text-[#EA2B2B] dark:!text-rose-400">
+          <div className="mb-5 p-3.5 rounded-2xl bg-rose-50 dark:!bg-[#16382E] border-2 border-[#FF4B4B] dark:!border-rose-600/40 flex items-center gap-2 text-xs sm:text-sm font-bold text-[#EA2B2B] dark:!text-rose-400">
             <AlertCircle className="h-4 w-4 shrink-0" />
             <span>{error}</span>
           </div>
@@ -321,15 +321,15 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           {(type === 'INCOME' || type === 'EXPENSE') && !transactionToEdit && (
             <div className={`p-3.5 rounded-2xl transition-all space-y-3 ${
               type === 'INCOME'
-                ? 'bg-emerald-50/80 dark:!bg-[#0F172A] border-2 border-emerald-200/90 dark:!border-emerald-800'
-                : 'bg-rose-50/80 dark:!bg-[#0F172A] border-2 border-rose-200/90 dark:!border-rose-800'
+                ? 'bg-emerald-50/80 dark:!bg-[#16382E] border-2 border-emerald-200/90 dark:!border-emerald-600/40'
+                : 'bg-rose-50/80 dark:!bg-[#16382E] border-2 border-rose-200/90 dark:!border-rose-600/40'
             }`}>
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5">
                   <div className={`p-2 rounded-xl shrink-0 ${
                     type === 'INCOME'
-                      ? 'bg-emerald-100 dark:!bg-[#1E293B] text-emerald-700 dark:!text-emerald-400'
-                      : 'bg-rose-100 dark:!bg-[#1E293B] text-rose-700 dark:!text-rose-400'
+                      ? 'bg-emerald-100 dark:!bg-[#102D25] text-emerald-700 dark:!text-emerald-400'
+                      : 'bg-rose-100 dark:!bg-[#102D25] text-rose-700 dark:!text-rose-400'
                   }`}>
                     <Repeat className="h-4 w-4 stroke-[2.5]" />
                   </div>
@@ -383,7 +383,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
             transactionToEdit.notes.includes('RECURRING_EXPENSE:') ||
             transactionToEdit.notes.includes('RECURRING_BILL:')
           ) && (
-            <div className="p-3.5 bg-amber-50/90 dark:!bg-[#0F172A] border-2 border-amber-300 dark:!border-amber-800 rounded-2xl space-y-2">
+            <div className="p-3.5 bg-amber-50/90 dark:!bg-[#16382E] border-2 border-amber-300 dark:!border-[#D4A94F]/40 rounded-2xl space-y-2">
               <div className="flex items-center gap-2 text-amber-800 dark:!text-amber-400">
                 <Repeat className="h-4 w-4 shrink-0 stroke-[2.5]" />
                 <span className="text-xs font-black uppercase tracking-wider">

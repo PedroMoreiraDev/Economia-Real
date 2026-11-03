@@ -80,24 +80,24 @@ export const RecurringMonthsPicker: React.FC<RecurringMonthsPickerProps> = ({
   const themeStyles = {
     income: {
       activeChip: 'bg-emerald-600 text-white border-emerald-600 shadow-[0_2px_0_0_#047857]',
-      stepperBtn: 'hover:bg-emerald-100 dark:hover:!bg-[#1E293B] text-emerald-800 dark:!text-emerald-400 border-emerald-300 dark:!border-emerald-800',
+      stepperBtn: 'hover:bg-emerald-100 dark:hover:!bg-[#16382E] text-emerald-800 dark:!text-emerald-400 border-emerald-300 dark:!border-emerald-700/60',
       inputFocus: 'focus:border-emerald-500 focus:ring-emerald-200',
-      badge: 'text-emerald-800 dark:!text-emerald-300 bg-emerald-100/80 dark:!bg-[#0F172A] border-emerald-300 dark:!border-emerald-800',
+      badge: 'text-emerald-800 dark:!text-emerald-300 bg-emerald-100/80 dark:!bg-[#16382E] border-emerald-300 dark:!border-emerald-700/60',
       accentText: 'text-emerald-900 dark:!text-emerald-200',
     },
     expense: {
       activeChip: 'bg-rose-600 text-white border-rose-600 shadow-[0_2px_0_0_#BE123C]',
-      stepperBtn: 'hover:bg-rose-100 dark:hover:!bg-[#1E293B] text-rose-800 dark:!text-rose-400 border-rose-300 dark:!border-rose-800',
+      stepperBtn: 'hover:bg-rose-100 dark:hover:!bg-[#16382E] text-rose-800 dark:!text-rose-400 border-rose-300 dark:!border-rose-700/60',
       inputFocus: 'focus:border-rose-500 focus:ring-rose-200',
-      badge: 'text-rose-800 dark:!text-rose-300 bg-rose-100/80 dark:!bg-[#0F172A] border-rose-300 dark:!border-rose-800',
+      badge: 'text-rose-800 dark:!text-rose-300 bg-rose-100/80 dark:!bg-[#16382E] border-rose-300 dark:!border-rose-700/60',
       accentText: 'text-rose-900 dark:!text-rose-200',
     },
     bill: {
       activeChip: 'bg-[#1C4939] text-white border-[#1C4939] shadow-[0_2px_0_0_#102D25]',
-      stepperBtn: 'hover:bg-blue-100 dark:hover:!bg-[#1E293B] text-[#1C4939] dark:!text-sky-300 border-blue-300 dark:!border-blue-800',
-      inputFocus: 'focus:border-[#1C4939] focus:ring-blue-200',
-      badge: 'text-blue-800 dark:!text-sky-300 bg-blue-100/80 dark:!bg-[#0F172A] border-blue-300 dark:!border-blue-800',
-      accentText: 'text-blue-900 dark:!text-sky-200',
+      stepperBtn: 'hover:bg-[#E8E4D9] dark:hover:!bg-[#1C4939] text-[#1C4939] dark:!text-[#E8E4D9] border-[#C8C1B0] dark:!border-[#214E3E]',
+      inputFocus: 'focus:border-[#1C4939] focus:ring-emerald-200',
+      badge: 'text-[#1C4939] dark:!text-[#D4A94F] bg-[#FAF5E8] dark:!bg-[#16382E] border-[#D4A94F]/40 dark:!border-[#D4A94F]/40',
+      accentText: 'text-[#102D25] dark:!text-[#E8E4D9]',
     },
   }[theme];
 
@@ -114,7 +114,7 @@ export const RecurringMonthsPicker: React.FC<RecurringMonthsPickerProps> = ({
 
       {/* Controle Central: Stepper Interativo com Input Livre */}
       <div className="flex items-center gap-3">
-        <div className="flex items-center bg-white dark:!bg-[#0F172A] border-2 border-slate-200 dark:!border-slate-800 rounded-2xl shadow-inner p-1">
+        <div className="flex items-center bg-white dark:!bg-[#16382E] border-2 border-slate-200 dark:!border-[#214E3E] rounded-2xl shadow-inner p-1">
           <button
             type="button"
             onClick={() => handleClamp(months - 1)}

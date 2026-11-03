@@ -247,10 +247,10 @@ export const InlineDatePicker: React.FC<InlineDatePickerProps> = ({
               width: '260px',
               zIndex: 9999,
             }}
-            className="card-duo bg-white/98 dark:!bg-[#0F172A] backdrop-blur-md border-2 border-slate-200/90 dark:!border-slate-800 shadow-2xl p-3 rounded-2xl animate-scaleUp text-slate-800 dark:!text-white select-none"
+            className="card-duo bg-white/98 dark:!bg-[#102D25] backdrop-blur-md border-2 border-slate-200/90 dark:!border-[#214E3E] shadow-2xl p-3 rounded-2xl animate-scaleUp text-slate-800 dark:!text-white select-none"
           >
             {/* Cabeçalho do Mês e Ano */}
-            <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100 dark:!border-slate-800">
+            <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100 dark:!border-[#214E3E]">
               <button
                 type="button"
                 onClick={handlePrevMonth}

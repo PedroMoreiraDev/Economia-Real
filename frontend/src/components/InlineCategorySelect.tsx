@@ -174,7 +174,7 @@ export const InlineCategorySelect: React.FC<InlineCategorySelectProps> = ({
               width: '240px',
               zIndex: 9999,
             }}
-            className="card-duo bg-white/98 dark:!bg-[#0F172A] backdrop-blur-md border-2 border-slate-200/90 dark:!border-slate-800 shadow-2xl p-2 rounded-2xl animate-scaleUp text-slate-800 dark:!text-white"
+            className="card-duo bg-white/98 dark:!bg-[#102D25] backdrop-blur-md border-2 border-slate-200/90 dark:!border-[#214E3E] shadow-2xl p-2 rounded-2xl animate-scaleUp text-slate-800 dark:!text-white"
           >
             {/* Campo de Busca Rápida de Categorias */}
             <div className="relative mb-2">
@@ -185,7 +185,7 @@ export const InlineCategorySelect: React.FC<InlineCategorySelectProps> = ({
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Buscar categoria..."
                 autoFocus
-                className="w-full bg-slate-50 dark:!bg-[#1E293B] border border-slate-200 dark:!border-slate-700 rounded-xl pl-8 pr-2.5 py-1.5 text-xs font-semibold text-slate-800 dark:!text-white placeholder-slate-400 focus:outline-none focus:border-[#1C4939] focus:bg-white dark:focus:!bg-[#1E293B] transition-all"
+                className="w-full bg-slate-50 dark:!bg-[#16382E] border border-slate-200 dark:!border-[#214E3E] rounded-xl pl-8 pr-2.5 py-1.5 text-xs font-semibold text-slate-800 dark:!text-white placeholder-slate-400 focus:outline-none focus:border-[#1C4939] focus:bg-white dark:focus:!bg-[#16382E] transition-all"
               />
             </div>
 
@@ -208,8 +208,8 @@ export const InlineCategorySelect: React.FC<InlineCategorySelectProps> = ({
                       }}
                       className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold transition-all text-left group ${
                         isCurrent
-                          ? 'bg-blue-50 text-[#1C4939] font-black'
-                          : 'hover:bg-slate-100 text-slate-700'
+                          ? 'bg-[#E8E4D9] dark:bg-[#16382E] text-[#1C4939] dark:text-[#D4A94F] font-black border border-[#1C4939]/20 dark:border-[#D4A94F]/30'
+                          : 'hover:bg-[#E8E4D9]/50 dark:hover:bg-[#16382E] text-slate-700 dark:text-[#E8E4D9]'
                       }`}
                     >
                       <div className="flex items-center gap-2 min-w-0 pr-1">
@@ -236,7 +236,7 @@ export const InlineCategorySelect: React.FC<InlineCategorySelectProps> = ({
                   setIsOpen(false);
                   onOpenCreateCategory();
                 }}
-                className="w-full flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-black text-[#1C4939] bg-blue-50/80 hover:bg-blue-100/80 border border-blue-200 transition-all text-left"
+                className="w-full flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-black text-[#1C4939] dark:text-[#E8E4D9] bg-[#E8E4D9] dark:bg-[#16382E] hover:bg-[#D5CFC0] dark:hover:bg-[#1C4939] border border-[#C8C1B0] dark:border-[#214E3E] transition-all text-left"
               >
                 <Plus className="w-3.5 h-3.5 stroke-[3]" />
                 <span>Criar Nova Categoria...</span>
