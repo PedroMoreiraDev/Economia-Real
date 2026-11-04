@@ -185,4 +185,98 @@ class UpdateRecurringBillUseCaseTest {
 
         verifyNoInteractions(transactionRepository);
     }
+
+    @Test
+    @DisplayName("Deve atualizar a despesa fixa e estender a projeção para novos meses quando replicateMonths for informado")
+    void shouldUpdateBillAndExtendProjection() {
+        var userId = UUID.randomUUID();
+        var billId = UUID.randomUUID();
+        var createTxUseCase = mock(com.finance.ai.application.financial.CreateTransactionUseCase.class);
+        var createCardUseCase = mock(com.finance.ai.application.financial.card.CreateCreditCardPurchaseUseCase.class);
+
+        var customUseCase = new UpdateRecurringBillUseCase(
+                recurringBillRepository,
+                categoryRepository,
+                accountRepository,
+                creditCardRepository,
+                transactionRepository,
+                createTxUseCase,
+                createCardUseCase
+        );
+
+        var bill = new RecurringBill(
+                billId,
+                userId,
+                null,
+                null,
+                null,
+                "Netflix",
+                new BigDecimal("55.90"),
+                RecurringFrequency.MONTHLY,
+                10,
+                true,
+                Instant.now(),
+                Instant.now()
+        );
+
+        when(recurringBillRepository.findByIdAndUserId(billId, userId)).thenReturn(Optional.of(bill));
+        when(recurringBillRepository.save(any(RecurringBill.class))).thenAnswer(i -> i.getArgument(0));
+
+        // Simula apenas 1 transação já existente no mês de novembro
+        var txNov = new Transaction(
+                UUID.randomUUID(),
+                userId,
+                TransactionType.EXPENSE,
+                new BigDecimal("55.90"),
+                LocalDate.of(2026, 11, 10),
+                LocalDate.of(2026, 11, 10),
+                "Netflix",
+                null,
+                null,
+                null,
+                TransactionStatus.COMPLETED,
+                TransactionOrigin.MANUAL,
+                "RECURRING_BILL:" + billId,
+                Instant.now(),
+                Instant.now()
+        );
+        when(transactionRepository.findAllByUserIdAndNotesStartingWith(eq(userId), eq("RECURRING_BILL:" + billId)))
+                .thenReturn(List.of(txNov));
+
+        // Usuário atualiza valor para 59.90 e pede projeção de 3 meses a partir de 2026-11-01
+        var cmd = new UpdateRecurringBillCommand(
+                "Netflix Premium",
+                new BigDecimal("59.90"),
+                RecurringFrequency.MONTHLY,
+                10,
+                null,
+                null,
+                null,
+                true,
+                3,
+                LocalDate.of(2026, 11, 1)
+        );
+
+        var res = customUseCase.execute(userId, billId, cmd);
+
+        assertThat(res.description()).isEqualTo("Netflix Premium");
+        assertThat(res.amount()).isEqualByComparingTo(new BigDecimal("59.90"));
+
+        // O mês existente (novembro) deve ter sido atualizado no repositório
+        verify(transactionRepository).save(any(Transaction.class));
+
+        // Os 2 novos meses (dezembro e janeiro) devem ter sido criados via CreateTransactionUseCase
+        verify(createTxUseCase, times(2)).execute(
+                eq(userId),
+                eq(TransactionType.EXPENSE),
+                eq(new BigDecimal("59.90")),
+                any(LocalDate.class),
+                any(LocalDate.class),
+                eq("Netflix Premium"),
+                isNull(),
+                isNull(),
+                isNull(),
+                contains("RECURRING_BILL:" + billId)
+        );
+    }
 }

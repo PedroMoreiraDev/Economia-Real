@@ -78,6 +78,7 @@ export interface UpdateTransactionPayload {
   categoryId?: string;
   notes?: string;
   updateFutureRecurring?: boolean;
+  replicateMonths?: number;
 }
 
 export interface FinancialSummary {

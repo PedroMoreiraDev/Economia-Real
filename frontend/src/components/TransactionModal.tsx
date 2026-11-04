@@ -72,6 +72,13 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       ));
       setIsRecurring(isRec);
       setUpdateFutureRecurring(true);
+      if (transactionToEdit.recurringRemaining) {
+        setReplicateMonths(transactionToEdit.recurringRemaining);
+      } else if (transactionToEdit.recurringTotal) {
+        setReplicateMonths(transactionToEdit.recurringTotal);
+      } else {
+        setReplicateMonths(12);
+      }
     } else {
       const startType = initialType || 'INCOME';
       setType(startType);
@@ -154,6 +161,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         const updatePayload: UpdateTransactionPayload = {
           ...payload,
           updateFutureRecurring: isRec ? updateFutureRecurring : undefined,
+          replicateMonths: (isRec && updateFutureRecurring) ? replicateMonths : undefined,
         };
         await updateTransactionApi(token, transactionToEdit.id, updatePayload);
       } else {
@@ -395,20 +403,32 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               <p className="text-xs font-bold text-slate-600 dark:!text-slate-300">
                 Este lançamento pertence a uma {transactionToEdit.notes.includes('RECURRING_INCOME:') ? 'receita' : 'despesa'} recorrente projetada nos meses futuros.
               </p>
-              <label className="flex items-start gap-2.5 cursor-pointer pt-1 bg-white/70 dark:!bg-[#1E293B] p-2.5 rounded-xl border border-amber-200/80 dark:!border-amber-900/60">
+              <label className="flex items-start gap-2.5 cursor-pointer pt-1 bg-white/70 dark:!bg-[#102D25] p-2.5 rounded-xl border border-amber-200/80 dark:!border-[#214E3E]">
                 <input
                   type="checkbox"
                   checked={updateFutureRecurring}
                   onChange={(e) => setUpdateFutureRecurring(e.target.checked)}
                   className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 accent-emerald-600"
                 />
-                <span className="text-xs font-bold text-slate-800 dark:!text-slate-200 leading-tight">
+                <span className="text-xs font-bold text-slate-800 dark:!text-[#E8E4D9] leading-tight">
                   Atualizar <strong>esta e todas as {transactionToEdit.notes.includes('RECURRING_INCOME:') ? 'receitas' : 'despesas'} futuras</strong> deste grupo
-                  <span className="block text-[11px] font-medium text-slate-500 dark:!text-slate-400 mt-0.5">
+                  <span className="block text-[11px] font-medium text-slate-500 dark:!text-[#B7C6BE] mt-0.5">
                     O histórico dos meses passados será mantido intacto.
                   </span>
                 </span>
               </label>
+
+              {updateFutureRecurring && (
+                <div className="pt-2 border-t border-amber-200/80 dark:!border-[#214E3E] animate-fade-in">
+                  <RecurringMonthsPicker
+                    months={replicateMonths}
+                    onChangeMonths={setReplicateMonths}
+                    startDateStr={accrualDate}
+                    theme={type === 'INCOME' ? 'income' : 'expense'}
+                    label={`Quantidade de meses a manter/projetar esta ${transactionToEdit.notes.includes('RECURRING_INCOME:') ? 'receita' : 'despesa'}`}
+                  />
+                </div>
+              )}
             </div>
           )}
 

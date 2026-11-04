@@ -181,7 +181,7 @@ class TransactionControllerTest {
         when(updateTransactionUseCase.execute(
                 eq(userId), eq(transactionId), eq(TransactionType.EXPENSE), eq(new BigDecimal("250.00")),
                 eq(LocalDate.of(2026, 10, 6)), isNull(), eq("Mercado Atualizado"),
-                isNull(), isNull(), isNull(), eq("Nota atualizada"), eq(false)
+                isNull(), isNull(), isNull(), eq("Nota atualizada"), eq(false), isNull()
         )).thenReturn(updated);
 
         var requestBody = new TransactionController.UpdateTransactionRequest(
@@ -194,6 +194,7 @@ class TransactionControllerTest {
                 null,
                 null,
                 "Nota atualizada",
+                null,
                 null
         );
 
@@ -208,7 +209,7 @@ class TransactionControllerTest {
         verify(updateTransactionUseCase).execute(
                 eq(userId), eq(transactionId), eq(TransactionType.EXPENSE), eq(new BigDecimal("250.00")),
                 eq(LocalDate.of(2026, 10, 6)), isNull(), eq("Mercado Atualizado"),
-                isNull(), isNull(), isNull(), eq("Nota atualizada"), eq(false)
+                isNull(), isNull(), isNull(), eq("Nota atualizada"), eq(false), isNull()
         );
     }
 

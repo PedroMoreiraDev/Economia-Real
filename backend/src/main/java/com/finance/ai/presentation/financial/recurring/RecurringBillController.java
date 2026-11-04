@@ -103,7 +103,9 @@ public class RecurringBillController {
                 request.categoryId(),
                 request.accountId(),
                 request.creditCardId(),
-                request.active()
+                request.active(),
+                request.replicateMonths(),
+                request.startDate()
         );
 
         var updated = updateRecurringBillUseCase.execute(user.userId(), id, cmd);

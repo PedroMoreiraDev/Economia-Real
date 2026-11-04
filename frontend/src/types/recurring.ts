@@ -40,6 +40,8 @@ export interface UpdateRecurringBillPayload {
   accountId?: string | null;
   creditCardId?: string | null;
   active: boolean;
+  replicateMonths?: number;
+  startDate?: string;
 }
 
 export interface PayRecurringBillPayload {

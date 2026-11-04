@@ -47,6 +47,16 @@ public class UpdateTransactionUseCase {
                                LocalDate accrualDate, LocalDate settlementDate,
                                String description, UUID accountId, UUID destinationAccountId,
                                UUID categoryId, String notes, Boolean updateFutureRecurring) {
+        return execute(userId, transactionId, type, amount, accrualDate, settlementDate,
+                description, accountId, destinationAccountId, categoryId, notes, updateFutureRecurring, null);
+    }
+
+    @Transactional
+    public Transaction execute(UUID userId, UUID transactionId, TransactionType type, BigDecimal amount,
+                               LocalDate accrualDate, LocalDate settlementDate,
+                               String description, UUID accountId, UUID destinationAccountId,
+                               UUID categoryId, String notes, Boolean updateFutureRecurring,
+                               Integer replicateMonths) {
 
         var existing = transactionRepository.findByIdAndUserId(transactionId, userId)
                 .orElseThrow(() -> new IllegalArgumentException("Transação não encontrada ou não pertence ao usuário."));
@@ -90,14 +100,81 @@ public class UpdateTransactionUseCase {
 
         var saved = transactionRepository.save(updated);
 
-        // Se for uma entrada recorrente e o usuário optou por atualizar os meses futuros
+        // Se for uma movimentação recorrente e o usuário optou por atualizar os meses futuros
         if (Boolean.TRUE.equals(updateFutureRecurring) && existingPrefix != null) {
             String prefix = existingPrefix;
-            if (prefix != null) {
-                var linked = transactionRepository.findAllByUserIdAndNotesStartingWith(userId, prefix);
-                int newDay = accrualDate.getDayOfMonth();
-                Integer newSettlementDay = settlementDate != null ? settlementDate.getDayOfMonth() : null;
+            var linked = transactionRepository.findAllByUserIdAndNotesStartingWith(userId, prefix);
+            int newDay = accrualDate.getDayOfMonth();
+            Integer newSettlementDay = settlementDate != null ? settlementDate.getDayOfMonth() : null;
 
+            if (replicateMonths != null && replicateMonths > 0) {
+                int monthsToProject = Math.min(replicateMonths, 60);
+                java.util.Map<java.time.YearMonth, Transaction> existingByYearMonth = new java.util.HashMap<>();
+                for (Transaction linkedTx : linked) {
+                    existingByYearMonth.put(java.time.YearMonth.from(linkedTx.getAccrualDate()), linkedTx);
+                }
+
+                java.util.Set<java.time.YearMonth> targetYearMonths = new java.util.HashSet<>();
+
+                for (int i = 0; i < monthsToProject; i++) {
+                    LocalDate monthDate = accrualDate.plusMonths(i);
+                    java.time.YearMonth ym = java.time.YearMonth.from(monthDate);
+                    targetYearMonths.add(ym);
+
+                    int maxDays = monthDate.lengthOfMonth();
+                    int targetDay = Math.min(newDay, maxDays);
+                    LocalDate futureAccrual = monthDate.withDayOfMonth(targetDay);
+
+                    LocalDate futureSettlement = null;
+                    if (settlementDate != null) {
+                        int maxSettlementDays = monthDate.lengthOfMonth();
+                        int sDay = newSettlementDay != null ? newSettlementDay : targetDay;
+                        futureSettlement = monthDate.withDayOfMonth(Math.min(sDay, maxSettlementDays));
+                    }
+
+                    String counter = monthsToProject > 1 ? " (" + (i + 1) + "/" + monthsToProject + ")" : "";
+                    String typeLabel = prefix.startsWith("RECURRING_EXPENSE:") ? "Despesa recorrente: " : (prefix.startsWith("RECURRING_BILL:") ? "Lançamento do custo fixo: " : "Entrada recorrente: ");
+                    String futureNotes = prefix + counter + " | " + typeLabel + description.trim();
+
+                    Transaction linkedTx = existingByYearMonth.get(ym);
+                    if (linkedTx != null) {
+                        var updatedFuture = linkedTx.withUpdates(
+                                type,
+                                amount,
+                                futureAccrual,
+                                futureSettlement,
+                                description.trim(),
+                                accountId,
+                                destinationAccountId,
+                                categoryId,
+                                futureNotes
+                        );
+                        transactionRepository.save(updatedFuture);
+                    } else {
+                        var newTx = Transaction.create(
+                                userId,
+                                type,
+                                amount,
+                                futureAccrual,
+                                futureSettlement,
+                                description.trim(),
+                                accountId,
+                                destinationAccountId,
+                                categoryId,
+                                futureNotes
+                        );
+                        transactionRepository.save(newTx);
+                    }
+                }
+
+                // Remove transações futuras vinculadas que ultrapassem o novo limite projetado
+                for (Transaction linkedTx : linked) {
+                    java.time.YearMonth ym = java.time.YearMonth.from(linkedTx.getAccrualDate());
+                    if (linkedTx.getAccrualDate().isAfter(accrualDate) && !targetYearMonths.contains(ym)) {
+                        transactionRepository.deleteByIdAndUserId(linkedTx.getId(), userId);
+                    }
+                }
+            } else {
                 for (Transaction linkedTx : linked) {
                     // Sincroniza apenas as transações futuras (ou da mesma data se outro id)
                     if (!linkedTx.getId().equals(existing.getId()) && (linkedTx.getAccrualDate().isAfter(existing.getAccrualDate()) || linkedTx.getAccrualDate().isEqual(existing.getAccrualDate()))) {

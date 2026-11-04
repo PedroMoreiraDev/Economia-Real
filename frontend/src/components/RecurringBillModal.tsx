@@ -76,7 +76,9 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
         setPaymentSourceType('direct');
         setCreditCardId('');
       }
-      setAutoLaunch(false);
+      setAutoLaunch(true);
+      setLaunchMonth(defaultMonth || getCurrentMonthStr());
+      setReplicateMonths(12);
     } else {
       setDescription('');
       setAmount('');
@@ -137,6 +139,14 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
       }
 
       if (billToEdit) {
+        let formattedDate: string | undefined = undefined;
+        if (autoLaunch) {
+          const [launchY, launchM] = launchMonth.split('-');
+          const maxDays = new Date(parseInt(launchY, 10), parseInt(launchM, 10), 0).getDate();
+          const validDay = Math.min(numDay, maxDays);
+          formattedDate = `${launchMonth}-${String(validDay).padStart(2, '0')}`;
+        }
+
         const payload: UpdateRecurringBillPayload = {
           description: description.trim(),
           amount: numAmount,
@@ -146,6 +156,8 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
           accountId: targetAccountId,
           creditCardId: targetCardId,
           active,
+          replicateMonths: autoLaunch ? (replicateMonths > 1 ? replicateMonths : 1) : 0,
+          startDate: formattedDate,
         };
         await updateRecurringBillApi(token, billToEdit.id, payload);
       } else {
@@ -356,7 +368,6 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
             )}
           </div>
 
-          {!billToEdit && (
             <div className={`p-3.5 rounded-2xl transition-all space-y-3 ${
               autoLaunch
                 ? 'bg-[#E8E4D9]/60 dark:!bg-[#16382E] border-2 border-[#D5CFC0] dark:!border-[#214E3E]'
@@ -374,7 +385,9 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
                       Custo Fixo Recorrente
                     </span>
                     <span className="text-[11px] font-bold text-slate-500 dark:!text-slate-400 block">
-                      Repetir automaticamente nos meses seguintes (assinatura, mensalidade, conta fixa)
+                      {billToEdit
+                        ? 'Projetar e sincronizar automaticamente lançamentos deste custo nos meses seguintes'
+                        : 'Repetir automaticamente nos meses seguintes (assinatura, mensalidade, conta fixa)'}
                     </span>
                   </div>
                 </div>
@@ -399,7 +412,7 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
                 <div className="space-y-3 pt-3 border-t border-blue-200/70 dark:!border-slate-800 animate-fade-in">
                   <div>
                     <label className="block text-xs font-black uppercase tracking-wider text-slate-500 dark:!text-slate-400 mb-1">
-                      Mês de Início da Repetição
+                      {billToEdit ? 'Mês de Início da Projeção' : 'Mês de Início da Repetição'}
                     </label>
                     <input
                       type="month"
@@ -421,15 +434,14 @@ export const RecurringBillModal: React.FC<RecurringBillModalProps> = ({
                 </div>
               )}
             </div>
-          )}
 
           {billToEdit && (
-            <div className="p-3.5 rounded-2xl bg-slate-50 border-2 border-slate-200 flex items-center justify-between gap-3">
+            <div className="p-3.5 rounded-2xl bg-slate-50 dark:!bg-[#16382E] border-2 border-slate-200 dark:!border-[#214E3E] flex items-center justify-between gap-3">
               <div>
-                <span className="text-xs sm:text-sm font-black text-slate-800 block">
+                <span className="text-xs sm:text-sm font-black text-slate-800 dark:!text-[#E8E4D9] block">
                   Status da Assinatura
                 </span>
-                <span className="text-[11px] font-bold text-slate-500 block">
+                <span className="text-[11px] font-bold text-slate-500 dark:!text-[#B7C6BE] block">
                   {active ? 'Assinatura ativa e computada nas previsões' : 'Assinatura pausada / inativa'}
                 </span>
               </div>

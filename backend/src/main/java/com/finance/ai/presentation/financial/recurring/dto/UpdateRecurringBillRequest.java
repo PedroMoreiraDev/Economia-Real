@@ -27,5 +27,7 @@ public record UpdateRecurringBillRequest(
         UUID categoryId,
         UUID accountId,
         UUID creditCardId,
-        boolean active
+        boolean active,
+        Integer replicateMonths,
+        java.time.LocalDate startDate
 ) {}

@@ -148,7 +148,8 @@ public class TransactionController {
                 request.destinationAccountId(),
                 request.categoryId(),
                 request.notes(),
-                request.updateFutureRecurring() != null && request.updateFutureRecurring()
+                request.updateFutureRecurring() != null && request.updateFutureRecurring(),
+                request.replicateMonths()
         );
 
         return ResponseEntity.ok(toResponse(updated));
@@ -242,7 +243,10 @@ public class TransactionController {
             UUID destinationAccountId,
             UUID categoryId,
             @Size(max = 1000, message = "As observações não podem exceder 1000 caracteres.") String notes,
-            Boolean updateFutureRecurring
+            Boolean updateFutureRecurring,
+            @Min(value = 1, message = "O período de replicação deve ser no mínimo 1 mês.")
+            @Max(value = 60, message = "O período de replicação não pode exceder 60 meses.")
+            Integer replicateMonths
     ) {}
 
     public record TransactionResponse(
