@@ -17,6 +17,8 @@ import {
   X,
   Repeat,
   Activity,
+  PiggyBank,
+  ArrowLeftRight,
 } from 'lucide-react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AuthModal } from './components/AuthModal';
@@ -263,6 +265,7 @@ const MainDashboard: React.FC = () => {
   });
   const [isEditingLimit, setIsEditingLimit] = useState<boolean>(false);
   const [tempLimitInput, setTempLimitInput] = useState<string>('');
+  const [tempSavingsInput, setTempSavingsInput] = useState<string>('');
 
   // Seleção múltipla para exclusão em massa de transações
   const [selectedTxIds, setSelectedTxIds] = useState<Set<string>>(new Set());
@@ -798,8 +801,39 @@ const MainDashboard: React.FC = () => {
   };
 
   const handleStartEditLimit = () => {
-    setTempLimitInput(effectiveGlobalLimit > 0 ? effectiveGlobalLimit.toString() : '');
+    const limit = effectiveGlobalLimit > 0 ? effectiveGlobalLimit : 0;
+    setTempLimitInput(limit > 0 ? limit.toString() : '');
+    if (summary.totalIncome > 0 && limit > 0) {
+      const savings = Math.max(0, summary.totalIncome - limit);
+      setTempSavingsInput(savings > 0 ? savings.toFixed(2) : '0');
+    } else {
+      setTempSavingsInput('');
+    }
     setIsEditingLimit(true);
+  };
+
+  const handleLimitChange = (val: number) => {
+    setTempLimitInput(val > 0 ? val.toString() : '');
+    if (summary.totalIncome > 0) {
+      const savings = Math.max(0, summary.totalIncome - val);
+      setTempSavingsInput(savings > 0 ? savings.toFixed(2) : '0');
+    }
+  };
+
+  const handleSavingsChange = (val: number) => {
+    setTempSavingsInput(val > 0 ? val.toString() : '');
+    if (summary.totalIncome > 0) {
+      const limit = Math.max(0, summary.totalIncome - val);
+      setTempLimitInput(limit > 0 ? limit.toFixed(2) : '0');
+    }
+  };
+
+  const applySavingsPercentage = (pct: number) => {
+    if (summary.totalIncome <= 0) return;
+    const savings = Math.round(summary.totalIncome * (pct / 100));
+    const limit = Math.max(0, summary.totalIncome - savings);
+    setTempSavingsInput(savings > 0 ? savings.toFixed(2) : '0');
+    setTempLimitInput(limit > 0 ? limit.toFixed(2) : '0');
   };
 
   const handleOpenNewIncome = () => {
@@ -1018,26 +1052,26 @@ const MainDashboard: React.FC = () => {
 
                   {/* Bloco 2: Meta Máxima de Gastos (Teto Mensal & IA) */}
                   <div id="tour-spending-limit-card" className="card-duo p-6 space-y-4">
-                    <div className="flex items-center justify-between border-b-2 border-slate-100 pb-3">
+                    <div className="flex items-center justify-between border-b-2 border-slate-100 dark:border-[#214E3E] pb-3">
                       <div className="flex items-center gap-2">
-                        <Target className="h-5 w-5 text-[#1C4939] stroke-[2.5]" />
+                        <Target className="h-5 w-5 text-[#1C4939] dark:text-[#D4A94F] stroke-[2.5]" />
                         <div>
-                          <h2 className="text-base font-black text-slate-800">
-                            Teto Máximo de Gastos
+                          <h2 className="text-base font-black text-slate-800 dark:text-[#E8E4D9]">
+                            Teto de Gastos & Economia
                           </h2>
                           <span className="text-xs font-bold flex items-center gap-1.5">
                             {spendingResolution.isInherited ? (
-                              <span className="text-[#1C4939] flex items-center gap-1">
-                                <span className="inline-block w-2 h-2 rounded-full bg-[#1C4939] animate-pulse" />
+                              <span className="text-[#1C4939] dark:text-[#D4A94F] flex items-center gap-1">
+                                <span className="inline-block w-2 h-2 rounded-full bg-[#1C4939] dark:bg-[#D4A94F] animate-pulse" />
                                 Herdado de {spendingResolution.inheritedFromMonth?.split('-').reverse().join('/')}
                               </span>
                             ) : spendingResolution.limit > 0 ? (
-                              <span className="text-emerald-600 flex items-center gap-1">
+                              <span className="text-emerald-600 dark:text-[#78C6A3] flex items-center gap-1">
                                 <CheckCircle2 className="w-3.5 h-3.5 stroke-[2.5]" />
                                 Definido neste mês
                               </span>
                             ) : (
-                              <span className="text-slate-400">
+                              <span className="text-slate-400 dark:text-[#9AB3A8]">
                                 Meta global para este mês
                               </span>
                             )}
@@ -1070,18 +1104,93 @@ const MainDashboard: React.FC = () => {
                     </div>
 
                     {isEditingLimit ? (
-                      <div className="space-y-3 bg-slate-50 p-3.5 rounded-2xl border-2 border-slate-200/80">
-                        <label className="text-[11px] font-black text-slate-600 uppercase tracking-wider block">
-                          Definir Teto Mensal (R$)
-                        </label>
-                        <CurrencyInput
-                          value={tempLimitInput}
-                          onChangeValue={(val) => setTempLimitInput(val > 0 ? val.toString() : '')}
-                          placeholder="Ex: 3.500,00 (ou 0 para remover)"
-                          className="bg-white border-2 border-slate-200 rounded-xl text-base font-black text-slate-800 focus:outline-none focus:border-[#1C4939] py-2"
-                          autoFocus
-                        />
-                        <div className="flex items-center justify-between pt-1">
+                      <div className="space-y-3.5 bg-slate-50 dark:!bg-[#16382E] p-4 rounded-2xl border-2 border-slate-200/80 dark:!border-[#214E3E]">
+                        <div className="flex items-center justify-between pb-1 border-b border-slate-200/60 dark:border-[#214E3E]">
+                          <span className="text-xs font-bold text-[#1C4939] dark:text-[#D4A94F] flex items-center gap-1.5">
+                            <ArrowLeftRight className="w-3.5 h-3.5" />
+                            Planejamento Sincronizado
+                          </span>
+                          {summary.totalIncome > 0 ? (
+                            <span className="text-[11px] font-semibold text-slate-500 dark:text-[#9AB3A8]">
+                              Renda do mês: <strong className="text-slate-800 dark:text-[#E8E4D9] font-numeric">{formatValue(summary.totalIncome)}</strong>
+                            </span>
+                          ) : (
+                            <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">
+                              Nenhuma receita cadastrada neste mês
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Grid dos 2 campos conectados */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {/* Campo 1: Teto de Gastos */}
+                          <div className="space-y-1">
+                            <label className="text-[11px] font-black text-slate-600 dark:text-[#9AB3A8] uppercase tracking-wider flex items-center justify-between">
+                              <span>Teto de Gastos (R$)</span>
+                              <Target className="w-3.5 h-3.5 text-[#1C4939] dark:text-[#D4A94F]" />
+                            </label>
+                            <CurrencyInput
+                              value={tempLimitInput}
+                              onChangeValue={handleLimitChange}
+                              placeholder="Ex: 3.500,00"
+                              className="bg-white dark:!bg-[#102D25] border-2 border-slate-200 dark:!border-[#214E3E] rounded-xl text-base font-black text-slate-800 dark:!text-[#E8E4D9] focus:outline-none focus:border-[#1C4939] dark:focus:border-[#D4A94F] py-2 w-full"
+                              autoFocus
+                            />
+                            <span className="text-[10px] text-slate-400 dark:text-[#9AB3A8] block">
+                              Quanto você quer gastar no máximo
+                            </span>
+                          </div>
+
+                          {/* Campo 2: Meta de Economia */}
+                          <div className="space-y-1">
+                            <label className="text-[11px] font-black text-slate-600 dark:text-[#9AB3A8] uppercase tracking-wider flex items-center justify-between">
+                              <span>Quero Economizar (R$)</span>
+                              <PiggyBank className="w-3.5 h-3.5 text-emerald-600 dark:text-[#78C6A3]" />
+                            </label>
+                            <CurrencyInput
+                              value={tempSavingsInput}
+                              onChangeValue={handleSavingsChange}
+                              placeholder={summary.totalIncome > 0 ? "Ex: 1.500,00" : "Cadastre receitas primeiro"}
+                              disabled={summary.totalIncome <= 0}
+                              className={`border-2 rounded-xl text-base font-black focus:outline-none py-2 w-full ${
+                                summary.totalIncome > 0
+                                  ? 'bg-white dark:!bg-[#102D25] border-slate-200 dark:!border-[#214E3E] text-slate-800 dark:!text-[#E8E4D9] focus:border-emerald-600 dark:focus:border-[#78C6A3]'
+                                  : 'bg-slate-100 dark:!bg-[#0A1D17] border-dashed border-slate-200 dark:!border-[#214E3E] text-slate-400 cursor-not-allowed'
+                              }`}
+                            />
+                            <span className="text-[10px] text-slate-400 dark:text-[#9AB3A8] block">
+                              {summary.totalIncome > 0
+                                ? 'Quanto quer poupar da sua renda'
+                                : 'Requer receita cadastrada para calcular'}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Atalhos rápidos de % de economia */}
+                        {summary.totalIncome > 0 && (
+                          <div className="space-y-1.5 pt-1">
+                            <span className="text-[10px] font-bold uppercase text-slate-400 dark:text-[#9AB3A8] tracking-wider block">
+                              Atalhos rápidos para poupar da renda:
+                            </span>
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              {[10, 20, 30, 50].map((pct) => {
+                                const savingsVal = Math.round(summary.totalIncome * (pct / 100));
+                                return (
+                                  <button
+                                    key={pct}
+                                    type="button"
+                                    onClick={() => applySavingsPercentage(pct)}
+                                    className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-white dark:bg-[#102D25] hover:bg-[#E6EFEA] dark:hover:bg-[#1C4939] border border-slate-200 dark:border-[#214E3E] text-slate-700 dark:text-[#E8E4D9] transition-colors"
+                                  >
+                                    Guardar {pct}% ({formatValue(savingsVal)})
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="flex items-center justify-between pt-2 border-t border-slate-200/60 dark:border-[#214E3E]">
                           {effectiveGlobalLimit > 0 ? (
                             <button
                               type="button"
@@ -1107,7 +1216,7 @@ const MainDashboard: React.FC = () => {
                               onClick={handleSaveGlobalLimit}
                               className="btn-duo btn-duo-green text-xs px-4 py-1.5"
                             >
-                              Salvar Teto
+                              Salvar Planejamento
                             </button>
                           </div>
                         </div>
@@ -1116,14 +1225,19 @@ const MainDashboard: React.FC = () => {
                       <div className="space-y-4">
                         <div className="flex items-baseline justify-between">
                           <div>
-                            <span className="text-[11px] font-bold text-slate-400 block uppercase">Limite Definido</span>
-                            <span className="text-2xl font-black text-slate-900 font-numeric">
+                            <span className="text-[11px] font-bold text-slate-400 dark:text-[#9AB3A8] block uppercase">Teto de Gastos</span>
+                            <span className="text-2xl font-black text-slate-900 dark:text-[#E8E4D9] font-numeric">
                               {formatValue(effectiveGlobalLimit)}
                             </span>
+                            {summary.totalIncome > 0 && (
+                              <span className="text-[11px] font-semibold text-emerald-600 dark:text-[#78C6A3] block pt-0.5">
+                                Meta de Economia: {formatValue(Math.max(0, summary.totalIncome - effectiveGlobalLimit))} ({Math.max(0, Math.round(((summary.totalIncome - effectiveGlobalLimit) / summary.totalIncome) * 100))}% da renda)
+                              </span>
+                            )}
                           </div>
                           <div className="text-right">
-                            <span className="text-[11px] font-bold text-slate-400 block uppercase">Gasto Atual</span>
-                            <span className={`text-base font-black font-numeric ${summary.totalExpense > effectiveGlobalLimit ? 'text-[#EA2B2B]' : 'text-slate-800'
+                            <span className="text-[11px] font-bold text-slate-400 dark:text-[#9AB3A8] block uppercase">Gasto Atual</span>
+                            <span className={`text-base font-black font-numeric ${summary.totalExpense > effectiveGlobalLimit ? 'text-[#EA2B2B]' : 'text-slate-800 dark:text-[#E8E4D9]'
                               }`}>
                               {formatValue(summary.totalExpense)}
                             </span>
