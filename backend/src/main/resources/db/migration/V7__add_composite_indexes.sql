@@ -7,9 +7,9 @@ ON transactions(user_id, accrual_date DESC);
 CREATE INDEX IF NOT EXISTS idx_transactions_user_category 
 ON transactions(user_id, category_id);
 
--- Otimiza conciliação de faturas de cartão de crédito: WHERE credit_card_id = :cardId AND accrual_date BETWEEN :start AND :end
+-- Otimiza conciliação de faturas de cartão de crédito: WHERE invoice_id = :invoiceId AND accrual_date BETWEEN :start AND :end
 CREATE INDEX IF NOT EXISTS idx_transactions_card_accrual 
-ON transactions(credit_card_id, accrual_date DESC);
+ON transactions(invoice_id, accrual_date DESC);
 
 -- Otimiza busca de metas por usuário e período de referência
 CREATE INDEX IF NOT EXISTS idx_budgets_user_month_ref 
