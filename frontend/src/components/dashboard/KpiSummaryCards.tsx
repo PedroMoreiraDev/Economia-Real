@@ -140,8 +140,8 @@ export const KpiSummaryCards: React.FC<KpiSummaryCardsProps> = ({
             <KpiTooltip
               text={
                 effectiveGlobalLimit > 0
-                  ? "Quanto você ainda pode gastar da sua meta mensal antes de atingir o teto estipulado."
-                  : "Saldo positivo economizado no período caso não haja teto de gastos configurado."
+                  ? "Quanto você ainda pode gastar antes de atingir o limite estipulado no mês (Cálculo: Meta de Gastos − Despesas)."
+                  : "Saldo financeiro economizado no período quando não há meta cadastrada (Cálculo: Entradas − Despesas)."
               }
               align="left"
             />
@@ -182,10 +182,13 @@ export const KpiSummaryCards: React.FC<KpiSummaryCardsProps> = ({
                   style={{ width: `${Math.min(100, Math.round((summary.totalExpense / effectiveGlobalLimit) * 100))}%` }}
                 />
               </div>
-              <p className="text-[10px] sm:text-[11px] font-semibold text-[#526B61] dark:text-[#9AB3A8] truncate">
-                {effectiveGlobalLimit - summary.totalExpense >= 0
-                  ? `Sobra da meta de ${formatValue(effectiveGlobalLimit)}`
-                  : `Ultrapassou em ${formatValue(Math.abs(effectiveGlobalLimit - summary.totalExpense))}`}
+              <p className="text-[10px] sm:text-[11px] font-semibold text-[#526B61] dark:text-[#9AB3A8] truncate flex items-center justify-between">
+                <span>
+                  {effectiveGlobalLimit - summary.totalExpense >= 0
+                    ? `Sobra da meta de ${formatValue(effectiveGlobalLimit)}`
+                    : `Ultrapassou em ${formatValue(Math.abs(effectiveGlobalLimit - summary.totalExpense))}`}
+                </span>
+                <span className="opacity-75 text-[9px] font-normal hidden sm:inline">(Meta − Gastos)</span>
               </p>
             </div>
           </>
@@ -211,7 +214,7 @@ export const KpiSummaryCards: React.FC<KpiSummaryCardsProps> = ({
               Resultado do Mês
             </span>
             <KpiTooltip
-              text="Diferença líquida do mês (Entradas menos Despesas). Não representa o saldo bancário acumulado."
+              text="Fluxo financeiro líquido do mês (Cálculo: Entradas − Despesas). Não representa o saldo bancário acumulado."
               align="right"
             />
           </div>
