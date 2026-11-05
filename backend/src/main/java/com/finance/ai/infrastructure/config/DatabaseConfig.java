@@ -44,13 +44,14 @@ public class DatabaseConfig {
                         path = path.substring(1);
                     }
 
-                    // Se a connectionString contiver usuário e senha embutidos (ex: user:pass@host/db)
+                    // Se a connectionString contiver usuário e senha embutidos (ex: user:pass@host/db), eles têm prioridade
                     if (uri.getUserInfo() != null) {
                         String[] parts = uri.getUserInfo().split(":", 2);
-                        if (parts.length > 0 && !parts[0].isEmpty() && (getUsername() == null || getUsername().isEmpty())) {
+                        if (parts.length > 0 && !parts[0].isEmpty()) {
                             setUsername(parts[0]);
+                            log.info("Usuário do banco de dados extraído da URL: {}", parts[0]);
                         }
-                        if (parts.length > 1 && !parts[1].isEmpty() && (getPassword() == null || getPassword().isEmpty())) {
+                        if (parts.length > 1 && !parts[1].isEmpty()) {
                             setPassword(parts[1]);
                         }
                     }
