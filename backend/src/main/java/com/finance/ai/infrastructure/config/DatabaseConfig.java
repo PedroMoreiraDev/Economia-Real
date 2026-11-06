@@ -1,5 +1,6 @@
 package com.finance.ai.infrastructure.config;
 
+import com.zaxxer.hikari.HikariDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
@@ -8,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
+import javax.sql.DataSource;
 import java.net.URI;
 
 /**
@@ -24,63 +26,80 @@ public class DatabaseConfig {
     @Primary
     @ConfigurationProperties("spring.datasource")
     public DataSourceProperties dataSourceProperties() {
-        return new ResilientDataSourceProperties();
+        return new DataSourceProperties();
     }
 
-    public static class ResilientDataSourceProperties extends DataSourceProperties {
+    @Bean
+    @Primary
+    public DataSource dataSource(DataSourceProperties properties) {
+        String rawUrl = properties.getUrl();
+        String username = properties.getUsername();
+        String password = properties.getPassword();
 
-        @Override
-        public void setUrl(String url) {
-            if (url != null && (url.startsWith("postgres://") || url.startsWith("postgresql://"))) {
-                try {
-                    // Substitui o esquema para http temporariamente para que o java.net.URI faça o parse correto
-                    String cleanUriStr = url.replaceFirst("^postgres(ql)?://", "http://");
-                    URI uri = URI.create(cleanUriStr);
+        if (rawUrl != null && (rawUrl.startsWith("postgres://") || rawUrl.startsWith("postgresql://") || rawUrl.startsWith("jdbc:postgresql://"))) {
+            try {
+                String parseTarget = rawUrl;
+                if (parseTarget.startsWith("jdbc:")) {
+                    parseTarget = parseTarget.substring(5);
+                }
+                String cleanUriStr = parseTarget.replaceFirst("^postgres(ql)?://", "http://");
+                URI uri = URI.create(cleanUriStr);
 
-                    String host = uri.getHost();
-                    int port = uri.getPort() > 0 ? uri.getPort() : 5432;
-                    String path = uri.getPath();
-                    if (path != null && path.startsWith("/")) {
-                        path = path.substring(1);
+                // Se a URL contiver usuário e senha embutidos (ex: user:pass@host/db), eles têm prioridade máxima
+                if (uri.getUserInfo() != null) {
+                    String[] parts = uri.getUserInfo().split(":", 2);
+                    if (parts.length > 0 && !parts[0].isEmpty()) {
+                        username = parts[0];
+                        log.info("Usuário do banco de dados extraído diretamente da URL: {}", username);
                     }
-
-                    // Se a connectionString contiver usuário e senha embutidos (ex: user:pass@host/db), eles têm prioridade
-                    if (uri.getUserInfo() != null) {
-                        String[] parts = uri.getUserInfo().split(":", 2);
-                        if (parts.length > 0 && !parts[0].isEmpty()) {
-                            setUsername(parts[0]);
-                            log.info("Usuário do banco de dados extraído da URL: {}", parts[0]);
-                        }
-                        if (parts.length > 1 && !parts[1].isEmpty()) {
-                            setPassword(parts[1]);
-                        }
-                    }
-
-                    String query = uri.getQuery();
-                    StringBuilder jdbcUrl = new StringBuilder("jdbc:postgresql://")
-                            .append(host)
-                            .append(":")
-                            .append(port)
-                            .append("/")
-                            .append(path);
-
-                    if (query != null && !query.isEmpty()) {
-                        jdbcUrl.append("?").append(query);
-                    }
-
-                    String finalUrl = jdbcUrl.toString();
-                    log.info("URL de banco de dados normalizada com sucesso para formato JDBC: jdbc:postgresql://{}:{}/{}", host, port, path);
-                    super.setUrl(finalUrl);
-                    return;
-                } catch (Exception ex) {
-                    log.warn("Falha ao analisar URI de conexão complexa. Aplicando prefixo jdbc: padrão. Erro: {}", ex.getMessage());
-                    if (!url.startsWith("jdbc:")) {
-                        super.setUrl("jdbc:" + url);
-                        return;
+                    if (parts.length > 1 && !parts[1].isEmpty()) {
+                        password = parts[1];
                     }
                 }
+
+                String host = uri.getHost();
+                int port = uri.getPort() > 0 ? uri.getPort() : 5432;
+                String path = uri.getPath() != null && uri.getPath().startsWith("/") ? uri.getPath().substring(1) : uri.getPath();
+                String query = uri.getQuery();
+
+                StringBuilder jdbcUrl = new StringBuilder("jdbc:postgresql://")
+                        .append(host)
+                        .append(":")
+                        .append(port)
+                        .append("/")
+                        .append(path);
+
+                if (query != null && !query.isEmpty()) {
+                    jdbcUrl.append("?").append(query);
+                }
+
+                rawUrl = jdbcUrl.toString();
+                log.info("URL de banco de dados normalizada com sucesso para formato JDBC: jdbc:postgresql://{}:{}/{}", host, port, path);
+            } catch (Exception ex) {
+                log.warn("Falha ao analisar URI de conexão complexa. Erro: {}", ex.getMessage());
+                if (!rawUrl.startsWith("jdbc:")) {
+                    rawUrl = "jdbc:" + rawUrl;
+                }
             }
-            super.setUrl(url);
         }
+
+        HikariDataSource ds = properties.initializeDataSourceBuilder()
+                .type(HikariDataSource.class)
+                .build();
+
+        ds.setJdbcUrl(rawUrl);
+        if (username != null && !username.isEmpty()) {
+            ds.setUsername(username);
+        }
+        if (password != null && !password.isEmpty()) {
+            ds.setPassword(password);
+        }
+        if (properties.getDriverClassName() != null && !properties.getDriverClassName().isBlank()) {
+            ds.setDriverClassName(properties.getDriverClassName());
+        } else if (rawUrl != null && rawUrl.contains("postgresql")) {
+            ds.setDriverClassName("org.postgresql.Driver");
+        }
+
+        return ds;
     }
 }

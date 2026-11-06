@@ -22,8 +22,8 @@ spring:
 
   datasource:
     url: ${SPRING_DATASOURCE_URL:${DATABASE_URL:jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:finance_db}}}
-    username: ${SPRING_DATASOURCE_USERNAME:${POSTGRES_USER:finance_user}}
-    password: ${SPRING_DATASOURCE_PASSWORD:${POSTGRES_PASSWORD:finance_password}}
+    username: ${SPRING_DATASOURCE_USERNAME:${POSTGRES_USER:}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${POSTGRES_PASSWORD:}}
     driver-class-name: org.postgresql.Driver
     hikari:
       connection-timeout: 30000
