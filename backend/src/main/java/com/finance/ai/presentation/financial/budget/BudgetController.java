@@ -3,15 +3,21 @@ package com.finance.ai.presentation.financial.budget;
 import com.finance.ai.application.financial.budget.BatchCreateBudgetsUseCase;
 import com.finance.ai.application.financial.budget.CreateOrUpdateBudgetUseCase;
 import com.finance.ai.application.financial.budget.DeleteBudgetUseCase;
+import com.finance.ai.application.financial.budget.GetSpendingLimitsTimelineUseCase;
 import com.finance.ai.application.financial.budget.ListBudgetsUseCase;
+import com.finance.ai.application.financial.budget.RemoveSpendingLimitUseCase;
+import com.finance.ai.application.financial.budget.SaveSpendingLimitUseCase;
 import com.finance.ai.application.financial.budget.SuggestBudgetsWithAiUseCase;
+import com.finance.ai.application.financial.budget.SyncSpendingLimitsTimelineUseCase;
 import com.finance.ai.application.financial.budget.UpdateGlobalAlertThresholdUseCase;
 import com.finance.ai.application.financial.budget.dto.AiBudgetSuggestionResult;
 import com.finance.ai.application.financial.budget.dto.BudgetProgressDto;
 import com.finance.ai.domain.financial.budget.Budget;
 import com.finance.ai.infrastructure.security.AuthenticatedUser;
 import com.finance.ai.presentation.financial.budget.dto.CreateBudgetRequest;
+import com.finance.ai.presentation.financial.budget.dto.SaveSpendingLimitRequest;
 import com.finance.ai.presentation.financial.budget.dto.SuggestBudgetsRequest;
+import com.finance.ai.presentation.financial.budget.dto.SyncSpendingLimitsRequest;
 import com.finance.ai.presentation.financial.budget.dto.UpdateAlertThresholdRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -23,8 +29,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -39,19 +47,31 @@ public class BudgetController {
     private final SuggestBudgetsWithAiUseCase suggestBudgetsWithAiUseCase;
     private final BatchCreateBudgetsUseCase batchCreateBudgetsUseCase;
     private final UpdateGlobalAlertThresholdUseCase updateGlobalAlertThresholdUseCase;
+    private final GetSpendingLimitsTimelineUseCase getSpendingLimitsTimelineUseCase;
+    private final SaveSpendingLimitUseCase saveSpendingLimitUseCase;
+    private final RemoveSpendingLimitUseCase removeSpendingLimitUseCase;
+    private final SyncSpendingLimitsTimelineUseCase syncSpendingLimitsTimelineUseCase;
 
     public BudgetController(CreateOrUpdateBudgetUseCase createOrUpdateBudgetUseCase,
                             ListBudgetsUseCase listBudgetsUseCase,
                             DeleteBudgetUseCase deleteBudgetUseCase,
                             SuggestBudgetsWithAiUseCase suggestBudgetsWithAiUseCase,
                             BatchCreateBudgetsUseCase batchCreateBudgetsUseCase,
-                            UpdateGlobalAlertThresholdUseCase updateGlobalAlertThresholdUseCase) {
+                            UpdateGlobalAlertThresholdUseCase updateGlobalAlertThresholdUseCase,
+                            GetSpendingLimitsTimelineUseCase getSpendingLimitsTimelineUseCase,
+                            SaveSpendingLimitUseCase saveSpendingLimitUseCase,
+                            RemoveSpendingLimitUseCase removeSpendingLimitUseCase,
+                            SyncSpendingLimitsTimelineUseCase syncSpendingLimitsTimelineUseCase) {
         this.createOrUpdateBudgetUseCase = createOrUpdateBudgetUseCase;
         this.listBudgetsUseCase = listBudgetsUseCase;
         this.deleteBudgetUseCase = deleteBudgetUseCase;
         this.suggestBudgetsWithAiUseCase = suggestBudgetsWithAiUseCase;
         this.batchCreateBudgetsUseCase = batchCreateBudgetsUseCase;
         this.updateGlobalAlertThresholdUseCase = updateGlobalAlertThresholdUseCase;
+        this.getSpendingLimitsTimelineUseCase = getSpendingLimitsTimelineUseCase;
+        this.saveSpendingLimitUseCase = saveSpendingLimitUseCase;
+        this.removeSpendingLimitUseCase = removeSpendingLimitUseCase;
+        this.syncSpendingLimitsTimelineUseCase = syncSpendingLimitsTimelineUseCase;
     }
 
     @GetMapping
@@ -141,5 +161,43 @@ public class BudgetController {
                 request.alertThresholdPercentage()
         );
         return ResponseEntity.ok(updated);
+    }
+
+    @GetMapping("/spending-limits")
+    @Operation(summary = "Obtém a timeline completa de tetos de gastos globais do usuário")
+    public ResponseEntity<Map<String, BigDecimal>> getSpendingLimits(
+            @AuthenticationPrincipal AuthenticatedUser user) {
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        return ResponseEntity.ok(getSpendingLimitsTimelineUseCase.execute(user.userId()));
+    }
+
+    @PostMapping("/spending-limits")
+    @Operation(summary = "Salva ou atualiza o teto global de gastos para um determinado mês")
+    public ResponseEntity<Map<String, BigDecimal>> saveSpendingLimit(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @Valid @RequestBody SaveSpendingLimitRequest request) {
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        var updated = saveSpendingLimitUseCase.execute(user.userId(), request.month(), request.amount());
+        return ResponseEntity.ok(updated);
+    }
+
+    @DeleteMapping("/spending-limits/{month}")
+    @Operation(summary = "Remove o teto global de gastos de um determinado mês (interrompendo a herança contábil)")
+    public ResponseEntity<Map<String, BigDecimal>> removeSpendingLimit(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @PathVariable String month) {
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        var updated = removeSpendingLimitUseCase.execute(user.userId(), month);
+        return ResponseEntity.ok(updated);
+    }
+
+    @PostMapping("/spending-limits/sync")
+    @Operation(summary = "Sincroniza a timeline local do dispositivo com a nuvem no banco de dados")
+    public ResponseEntity<Map<String, BigDecimal>> syncSpendingLimits(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @RequestBody SyncSpendingLimitsRequest request) {
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        var merged = syncSpendingLimitsTimelineUseCase.execute(user.userId(), request.timeline());
+        return ResponseEntity.ok(merged);
     }
 }

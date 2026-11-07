@@ -112,3 +112,18 @@ export function removeSpendingLimitForMonth(
   }
   return timeline;
 }
+
+/**
+ * Atualiza o cache local com a timeline remota vinda do banco de dados (nuvem).
+ */
+export function cacheSpendingLimitsTimeline(
+  userId: string,
+  timeline: Record<string, number>
+): void {
+  if (!userId || !timeline) return;
+  try {
+    localStorage.setItem(`${STORAGE_PREFIX}${userId}`, JSON.stringify(timeline));
+  } catch (err) {
+    console.error('Erro ao atualizar cache de limites:', err);
+  }
+}

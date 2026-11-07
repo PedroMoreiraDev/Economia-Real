@@ -81,13 +81,21 @@ import {
 import {
   fetchCreditCardsApi
 } from './services/cardApi';
-import { fetchBudgetsApi, deleteBudgetApi } from './services/budgetApi';
+import {
+  fetchBudgetsApi,
+  deleteBudgetApi,
+  fetchSpendingLimitsTimelineApi,
+  saveSpendingLimitApi,
+  removeSpendingLimitApi,
+  syncSpendingLimitsTimelineApi,
+} from './services/budgetApi';
 import { fetchAnalyticsOverviewApi } from './services/analyticsApi';
 import {
   resolveTimelineLimit,
   getSpendingLimitsTimeline,
   saveSpendingLimitForMonth,
   removeSpendingLimitForMonth,
+  cacheSpendingLimitsTimeline,
   SpendingLimitResolution,
 } from './utils/spendingLimitTimeline';
 
@@ -293,16 +301,35 @@ const MainDashboard: React.FC = () => {
     }
 
     if (user?.id) {
-      const timeline = getSpendingLimitsTimeline(user.id);
-      setSpendingTimeline(timeline);
-      const res = resolveTimelineLimit(timeline, selectedMonth);
-      setSpendingResolution(res);
+      // 1. Carrega imediatamente do cache local para renderização instantânea (sem flicker)
+      const localTimeline = getSpendingLimitsTimeline(user.id);
+      setSpendingTimeline(localTimeline);
+      setSpendingResolution(resolveTimelineLimit(localTimeline, selectedMonth));
+
+      // 2. Se autenticado, sincroniza com o banco de dados na nuvem (bidirecional)
+      if (token) {
+        (async () => {
+          try {
+            let remoteTimeline: Record<string, number>;
+            if (localTimeline && Object.keys(localTimeline).length > 0) {
+              remoteTimeline = await syncSpendingLimitsTimelineApi(token, localTimeline);
+            } else {
+              remoteTimeline = await fetchSpendingLimitsTimelineApi(token);
+            }
+            cacheSpendingLimitsTimeline(user.id, remoteTimeline);
+            setSpendingTimeline(remoteTimeline);
+            setSpendingResolution(resolveTimelineLimit(remoteTimeline, selectedMonth));
+          } catch (err) {
+            console.warn('Falha ao sincronizar tetos de gastos na nuvem:', err);
+          }
+        })();
+      }
     } else {
       setSpendingTimeline({});
       setSpendingResolution({ limit: 0, isInherited: false, isExplicitZero: false });
       setSelectedTxIds(new Set());
     }
-  }, [user?.id, selectedMonth]);
+  }, [user?.id, token, selectedMonth]);
 
   // Dados financeiros
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -762,27 +789,51 @@ const MainDashboard: React.FC = () => {
       ? spendingResolution.limit
       : totalBudgetFromCategories;
 
-  const handleSaveGlobalLimit = () => {
+  const handleSaveGlobalLimit = async () => {
     const parsed = parseFloat(tempLimitInput);
     if (!isNaN(parsed) && parsed > 0) {
       if (user?.id) {
-        const updated = saveSpendingLimitForMonth(user.id, selectedMonth, parsed);
-        setSpendingTimeline(updated);
-        const res = resolveTimelineLimit(updated, selectedMonth);
-        setSpendingResolution(res);
+        // Atualiza cache local imediatamente para feedback visual instantâneo
+        const localUpdated = saveSpendingLimitForMonth(user.id, selectedMonth, parsed);
+        setSpendingTimeline(localUpdated);
+        setSpendingResolution(resolveTimelineLimit(localUpdated, selectedMonth));
+
+        // Persiste no banco de dados na nuvem para sincronização multi-dispositivo (celular <-> web)
+        if (token) {
+          try {
+            const remoteUpdated = await saveSpendingLimitApi(token, selectedMonth, parsed);
+            cacheSpendingLimitsTimeline(user.id, remoteUpdated);
+            setSpendingTimeline(remoteUpdated);
+            setSpendingResolution(resolveTimelineLimit(remoteUpdated, selectedMonth));
+          } catch (err) {
+            console.error('Erro ao salvar teto na nuvem:', err);
+          }
+        }
       }
       setIsEditingLimit(false);
     } else {
-      handleRemoveGlobalLimit();
+      await handleRemoveGlobalLimit();
     }
   };
 
   const handleRemoveGlobalLimit = async () => {
     if (user?.id) {
-      const updated = removeSpendingLimitForMonth(user.id, selectedMonth);
-      setSpendingTimeline(updated);
-      const res = resolveTimelineLimit(updated, selectedMonth);
-      setSpendingResolution(res);
+      // Atualiza localmente
+      const localUpdated = removeSpendingLimitForMonth(user.id, selectedMonth);
+      setSpendingTimeline(localUpdated);
+      setSpendingResolution(resolveTimelineLimit(localUpdated, selectedMonth));
+
+      // Persiste remoção na nuvem
+      if (token) {
+        try {
+          const remoteUpdated = await removeSpendingLimitApi(token, selectedMonth);
+          cacheSpendingLimitsTimeline(user.id, remoteUpdated);
+          setSpendingTimeline(remoteUpdated);
+          setSpendingResolution(resolveTimelineLimit(remoteUpdated, selectedMonth));
+        } catch (err) {
+          console.error('Erro ao remover teto na nuvem:', err);
+        }
+      }
     }
 
     // Se houver metas cadastradas especificamente para o mês selecionado no backend, remove-as
@@ -1628,12 +1679,22 @@ const MainDashboard: React.FC = () => {
         onClose={() => setAiBudgetModalOpen(false)}
         initialGlobalLimit={effectiveGlobalLimit > 0 ? effectiveGlobalLimit : 3000}
         existingBudgets={budgets}
-        onApplied={(appliedGlobalLimit) => {
+        onApplied={async (appliedGlobalLimit) => {
           if (user?.id && appliedGlobalLimit && appliedGlobalLimit > 0) {
-            const updated = saveSpendingLimitForMonth(user.id, selectedMonth, appliedGlobalLimit);
-            setSpendingTimeline(updated);
-            const res = resolveTimelineLimit(updated, selectedMonth);
-            setSpendingResolution(res);
+            const localUpdated = saveSpendingLimitForMonth(user.id, selectedMonth, appliedGlobalLimit);
+            setSpendingTimeline(localUpdated);
+            setSpendingResolution(resolveTimelineLimit(localUpdated, selectedMonth));
+
+            if (token) {
+              try {
+                const remoteUpdated = await saveSpendingLimitApi(token, selectedMonth, appliedGlobalLimit);
+                cacheSpendingLimitsTimeline(user.id, remoteUpdated);
+                setSpendingTimeline(remoteUpdated);
+                setSpendingResolution(resolveTimelineLimit(remoteUpdated, selectedMonth));
+              } catch (err) {
+                console.error('Erro ao persistir teto na nuvem:', err);
+              }
+            }
           }
           loadFinancialData();
         }}

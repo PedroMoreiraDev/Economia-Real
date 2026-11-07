@@ -68,6 +68,18 @@ class BudgetControllerTest {
     private com.finance.ai.application.financial.budget.UpdateGlobalAlertThresholdUseCase updateGlobalAlertThresholdUseCase;
 
     @MockBean
+    private com.finance.ai.application.financial.budget.GetSpendingLimitsTimelineUseCase getSpendingLimitsTimelineUseCase;
+
+    @MockBean
+    private com.finance.ai.application.financial.budget.SaveSpendingLimitUseCase saveSpendingLimitUseCase;
+
+    @MockBean
+    private com.finance.ai.application.financial.budget.RemoveSpendingLimitUseCase removeSpendingLimitUseCase;
+
+    @MockBean
+    private com.finance.ai.application.financial.budget.SyncSpendingLimitsTimelineUseCase syncSpendingLimitsTimelineUseCase;
+
+    @MockBean
     private UserRepository userRepository;
 
     @MockBean
@@ -159,5 +171,38 @@ class BudgetControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].alertThresholdPercentage").value(85));
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/budgets/spending-limits - Deve obter a timeline de tetos do usuário")
+    void deveObterTimelineDeTetosComSucesso() throws Exception {
+        mockAuthentication();
+        when(getSpendingLimitsTimelineUseCase.execute(eq(userId)))
+                .thenReturn(java.util.Map.of("2026-11", new BigDecimal("3100.00")));
+
+        mockMvc.perform(get("/api/v1/budgets/spending-limits")
+                        .header("Authorization", "Bearer " + validToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.['2026-11']").value(3100.00));
+    }
+
+    @Test
+    @DisplayName("POST /api/v1/budgets/spending-limits - Deve salvar teto global com sucesso")
+    void deveSalvarTetoGlobalComSucesso() throws Exception {
+        mockAuthentication();
+        when(saveSpendingLimitUseCase.execute(eq(userId), eq("2026-11"), any(BigDecimal.class)))
+                .thenReturn(java.util.Map.of("2026-11", new BigDecimal("3100.00")));
+
+        var request = new com.finance.ai.presentation.financial.budget.dto.SaveSpendingLimitRequest(
+                "2026-11",
+                new BigDecimal("3100.00")
+        );
+
+        mockMvc.perform(post("/api/v1/budgets/spending-limits")
+                        .header("Authorization", "Bearer " + validToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.['2026-11']").value(3100.00));
     }
 }

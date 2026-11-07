@@ -190,5 +190,101 @@ export function setStoredGlobalAlertThreshold(userId: string | undefined, percen
   }
 }
 
+/**
+ * Busca a timeline canônica de tetos de gastos globais persistida no banco de dados.
+ */
+export async function fetchSpendingLimitsTimelineApi(token: string): Promise<Record<string, number>> {
+  const res = await fetch(`${API_BASE_URL}/budgets/spending-limits`, {
+    headers: {
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error('Falha ao carregar timeline de tetos de gastos.');
+  }
+
+  return res.json();
+}
+
+/**
+ * Salva ou atualiza o teto global de gastos para um determinado mês no banco de dados.
+ */
+export async function saveSpendingLimitApi(
+  token: string,
+  month: string,
+  amount: number
+): Promise<Record<string, number>> {
+  const res = await fetch(`${API_BASE_URL}/budgets/spending-limits`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ month, amount }),
+  });
+
+  if (!res.ok) {
+    let errMessage = 'Erro ao salvar teto de gastos.';
+    try {
+      const data = await res.json();
+      if (data.message) errMessage = data.message;
+    } catch {
+      // Ignora erro
+    }
+    throw new Error(errMessage);
+  }
+
+  return res.json();
+}
+
+/**
+ * Remove o teto global de gastos de um determinado mês no banco de dados (marca como 0 para interromper herança).
+ */
+export async function removeSpendingLimitApi(
+  token: string,
+  month: string
+): Promise<Record<string, number>> {
+  const res = await fetch(`${API_BASE_URL}/budgets/spending-limits/${month}`, {
+    method: 'DELETE',
+    headers: {
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error('Falha ao remover teto de gastos.');
+  }
+
+  return res.json();
+}
+
+/**
+ * Sincroniza a timeline local do dispositivo (ex: salva no celular) com o banco de dados.
+ */
+export async function syncSpendingLimitsTimelineApi(
+  token: string,
+  timeline: Record<string, number>
+): Promise<Record<string, number>> {
+  const res = await fetch(`${API_BASE_URL}/budgets/spending-limits/sync`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ timeline }),
+  });
+
+  if (!res.ok) {
+    throw new Error('Falha ao sincronizar tetos de gastos com o servidor.');
+  }
+
+  return res.json();
+}
+
 
 
