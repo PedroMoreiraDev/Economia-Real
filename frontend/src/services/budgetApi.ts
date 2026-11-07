@@ -286,5 +286,49 @@ export async function syncSpendingLimitsTimelineApi(
   return res.json();
 }
 
+/**
+ * Obtém as categorias com travas manuais fixadas na distribuição de IA para o mês no banco de dados.
+ */
+export async function fetchBudgetLocksApi(token: string, month?: string): Promise<Record<string, number>> {
+  const url = month ? `${API_BASE_URL}/budgets/locks?month=${month}` : `${API_BASE_URL}/budgets/locks`;
+  const res = await fetch(url, {
+    headers: {
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error('Falha ao obter travas de categorias.');
+  }
+
+  return res.json();
+}
+
+/**
+ * Salva as categorias com travas manuais fixadas na distribuição de IA para o mês no banco de dados.
+ */
+export async function saveBudgetLocksApi(
+  token: string,
+  month: string,
+  locks: Record<string, number>
+): Promise<Record<string, number>> {
+  const res = await fetch(`${API_BASE_URL}/budgets/locks`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ month, locks }),
+  });
+
+  if (!res.ok) {
+    throw new Error('Falha ao salvar travas de categorias na nuvem.');
+  }
+
+  return res.json();
+}
+
 
 

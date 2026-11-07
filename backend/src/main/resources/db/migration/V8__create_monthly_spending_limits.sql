@@ -14,3 +14,4 @@ CREATE TABLE monthly_spending_limits (
 );
 
 CREATE INDEX idx_monthly_spending_limits_user ON monthly_spending_limits(user_id);
+

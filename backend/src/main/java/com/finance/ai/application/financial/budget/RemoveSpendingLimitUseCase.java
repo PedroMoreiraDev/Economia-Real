@@ -45,3 +45,4 @@ public class RemoveSpendingLimitUseCase {
         return LocalDate.parse(monthStr).withDayOfMonth(1);
     }
 }
+

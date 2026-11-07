@@ -42,3 +42,4 @@ public class PostgreSqlMonthlySpendingLimitRepository implements MonthlySpending
         repository.deleteByUserIdAndMonthReference(userId, monthReference);
     }
 }
+

@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Sparkles, X, Check, AlertCircle, Lock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { getAiBudgetSuggestionsApi, saveBatchBudgetsApi, getStoredGlobalAlertThreshold } from '../services/budgetApi';
+import {
+  getAiBudgetSuggestionsApi,
+  saveBatchBudgetsApi,
+  getStoredGlobalAlertThreshold,
+  fetchBudgetLocksApi,
+  saveBudgetLocksApi,
+} from '../services/budgetApi';
 import { AiBudgetSuggestionResponse, CategoryBudgetSuggestion, CreateBudgetPayload, BudgetProgressDto } from '../types/budget';
 import { CurrencyInput } from './CurrencyInput';
 
@@ -345,13 +351,23 @@ function loadManualLocks(userId?: string, month?: string): Map<string, number> {
   }
 }
 
-function saveManualLocks(userId: string | undefined, month: string | undefined, map: Map<string, number>) {
+function saveManualLocks(
+  userId: string | undefined,
+  month: string | undefined,
+  map: Map<string, number>,
+  token?: string | null
+) {
   try {
     const obj: Record<string, number> = {};
     map.forEach((val, catId) => {
       obj[catId] = val;
     });
     localStorage.setItem(getManualLocksStorageKey(userId, month), JSON.stringify(obj));
+    if (token) {
+      saveBudgetLocksApi(token, month || '', obj).catch((err) =>
+        console.warn('Erro ao sincronizar travas com a nuvem:', err)
+      );
+    }
   } catch {
     // ignora
   }
@@ -380,11 +396,38 @@ export const AiBudgetSuggestionModal: React.FC<AiBudgetSuggestionModalProps> = (
       const startLimit = initialGlobalLimit > 0 ? initialGlobalLimit : 3000;
       setGlobalLimitInput(startLimit.toString());
 
-      // Carrega APENAS as categorias que o usuário ativou o toggle manualmente e personalizou
-      const manualLocksMap = loadManualLocks(user?.id, monthReference);
-      const manualLockedIds = new Set(manualLocksMap.keys());
+      // 1. Carrega do cache local
+      const localLocksMap = loadManualLocks(user?.id, monthReference);
 
-      fetchSuggestions(startLimit, manualLockedIds, manualLocksMap);
+      // 2. Sincroniza com a nuvem
+      if (token) {
+        fetchBudgetLocksApi(token, monthReference)
+          .then((remoteLocks) => {
+            const remoteKeys = Object.keys(remoteLocks || {});
+            const effectiveMap = new Map<string, number>();
+
+            if (remoteKeys.length > 0) {
+              remoteKeys.forEach((catId) => {
+                effectiveMap.set(catId, remoteLocks[catId]);
+              });
+              saveManualLocks(user?.id, monthReference, effectiveMap); // atualiza cache local
+            } else if (localLocksMap.size > 0) {
+              // Migração do local para nuvem
+              saveManualLocks(user?.id, monthReference, localLocksMap, token);
+              localLocksMap.forEach((v, k) => effectiveMap.set(k, v));
+            }
+
+            const manualLockedIds = new Set(effectiveMap.keys());
+            fetchSuggestions(startLimit, manualLockedIds, effectiveMap);
+          })
+          .catch(() => {
+            const manualLockedIds = new Set(localLocksMap.keys());
+            fetchSuggestions(startLimit, manualLockedIds, localLocksMap);
+          });
+      } else {
+        const manualLockedIds = new Set(localLocksMap.keys());
+        fetchSuggestions(startLimit, manualLockedIds, localLocksMap);
+      }
     } else {
       setAiData(null);
       setEditableSuggestions([]);
@@ -392,7 +435,7 @@ export const AiBudgetSuggestionModal: React.FC<AiBudgetSuggestionModalProps> = (
       setCategoryInputs({});
       setError(null);
     }
-  }, [isOpen, initialGlobalLimit, user?.id, monthReference]);
+  }, [isOpen, initialGlobalLimit, user?.id, monthReference, token]);
 
   const fetchSuggestions = async (
     limitVal: number,
@@ -466,7 +509,7 @@ export const AiBudgetSuggestionModal: React.FC<AiBudgetSuggestionModalProps> = (
       }
     });
 
-    saveManualLocks(user?.id, monthReference, currentCustomLimits);
+    saveManualLocks(user?.id, monthReference, currentCustomLimits, token);
     fetchSuggestions(parsed, customizedCategoryIds, currentCustomLimits);
   };
 
@@ -486,7 +529,7 @@ export const AiBudgetSuggestionModal: React.FC<AiBudgetSuggestionModalProps> = (
 
     const manualMap = loadManualLocks(user?.id, monthReference);
     manualMap.set(categoryId, curr);
-    saveManualLocks(user?.id, monthReference, manualMap);
+    saveManualLocks(user?.id, monthReference, manualMap, token);
   };
 
   const handleResetCustomization = (categoryId: string) => {
@@ -496,7 +539,7 @@ export const AiBudgetSuggestionModal: React.FC<AiBudgetSuggestionModalProps> = (
 
     const manualMap = loadManualLocks(user?.id, monthReference);
     manualMap.delete(categoryId);
-    saveManualLocks(user?.id, monthReference, manualMap);
+    saveManualLocks(user?.id, monthReference, manualMap, token);
 
     const targetTotal = parseFloat(globalLimitInput) || 0;
     if (targetTotal > 0) {
@@ -527,7 +570,7 @@ export const AiBudgetSuggestionModal: React.FC<AiBudgetSuggestionModalProps> = (
     if (!isNaN(parsed) && parsed >= 0 && targetTotal > 0) {
       const manualMap = loadManualLocks(user?.id, monthReference);
       manualMap.set(categoryId, parsed);
-      saveManualLocks(user?.id, monthReference, manualMap);
+      saveManualLocks(user?.id, monthReference, manualMap, token);
 
       const rebalanced = rebalanceCategoryBudgetsWithLocks(
         editableSuggestions,
@@ -572,7 +615,7 @@ export const AiBudgetSuggestionModal: React.FC<AiBudgetSuggestionModalProps> = (
     if (targetTotal > 0) {
       const manualMap = loadManualLocks(user?.id, monthReference);
       manualMap.set(categoryId, parsed);
-      saveManualLocks(user?.id, monthReference, manualMap);
+      saveManualLocks(user?.id, monthReference, manualMap, token);
 
       const rebalanced = rebalanceCategoryBudgetsWithLocks(
         editableSuggestions,
@@ -634,7 +677,7 @@ export const AiBudgetSuggestionModal: React.FC<AiBudgetSuggestionModalProps> = (
           finalCustomLimits.set(item.categoryId, item.suggestedLimit || 0);
         }
       });
-      saveManualLocks(user?.id, monthReference, finalCustomLimits);
+      saveManualLocks(user?.id, monthReference, finalCustomLimits, token);
 
       onApplied(!isNaN(parsedGlobalLimit) && parsedGlobalLimit > 0 ? parsedGlobalLimit : undefined);
       onClose();
@@ -752,7 +795,7 @@ export const AiBudgetSuggestionModal: React.FC<AiBudgetSuggestionModalProps> = (
                       type="button"
                       onClick={() => {
                         setCustomizedCategoryIds(new Set());
-                        saveManualLocks(user?.id, monthReference, new Map());
+                        saveManualLocks(user?.id, monthReference, new Map(), token);
                         if (targetTotal > 0) {
                           const rebalanced = resetCategoryToAutomatic(editableSuggestions, targetTotal, new Set());
                           setEditableSuggestions(rebalanced);

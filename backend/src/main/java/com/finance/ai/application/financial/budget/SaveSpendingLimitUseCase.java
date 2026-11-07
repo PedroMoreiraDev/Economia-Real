@@ -49,3 +49,4 @@ public class SaveSpendingLimitUseCase {
         return LocalDate.parse(monthStr).withDayOfMonth(1);
     }
 }
+

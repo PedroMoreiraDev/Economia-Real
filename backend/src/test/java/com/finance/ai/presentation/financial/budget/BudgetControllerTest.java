@@ -80,6 +80,12 @@ class BudgetControllerTest {
     private com.finance.ai.application.financial.budget.SyncSpendingLimitsTimelineUseCase syncSpendingLimitsTimelineUseCase;
 
     @MockBean
+    private com.finance.ai.application.financial.budget.GetBudgetCategoryLocksUseCase getBudgetCategoryLocksUseCase;
+
+    @MockBean
+    private com.finance.ai.application.financial.budget.SaveBudgetCategoryLocksUseCase saveBudgetCategoryLocksUseCase;
+
+    @MockBean
     private UserRepository userRepository;
 
     @MockBean

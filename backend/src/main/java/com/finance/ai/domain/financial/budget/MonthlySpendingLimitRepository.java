@@ -11,3 +11,4 @@ public interface MonthlySpendingLimitRepository {
     MonthlySpendingLimit save(MonthlySpendingLimit limit);
     void deleteByUserIdAndMonthReference(UUID userId, LocalDate monthReference);
 }
+

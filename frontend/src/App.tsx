@@ -82,6 +82,10 @@ import {
   fetchCreditCardsApi
 } from './services/cardApi';
 import {
+  getUserPreferencesApi,
+  updateUserPreferencesApi,
+} from './services/userPreferenceApi';
+import {
   fetchBudgetsApi,
   deleteBudgetApi,
   fetchSpendingLimitsTimelineApi,
@@ -244,8 +248,34 @@ const MainDashboard: React.FC = () => {
   // Exibe o tutorial automaticamente ao entrar na área logada (se o usuário não tiver desabilitado)
   useEffect(() => {
     if (isAuthenticated && user?.id) {
-      const isTourDisabled = localStorage.getItem(`economia_real_tutorial_disabled_${user.id}`) === 'true';
-      if (!isTourDisabled) {
+      const isTourDisabledLocal = localStorage.getItem(`economia_real_tutorial_disabled_${user.id}`) === 'true';
+
+      if (token) {
+        getUserPreferencesApi(token)
+          .then((pref) => {
+            if (pref.onboardingCompleted) {
+              localStorage.setItem(`economia_real_tutorial_disabled_${user.id}`, 'true');
+              setIsTourOpen(false);
+            } else if (isTourDisabledLocal) {
+              // Migração do local para nuvem: se o usuário já desabilitou no dispositivo, envia pro servidor
+              updateUserPreferencesApi(token, { onboardingCompleted: true }).catch(() => {});
+              setIsTourOpen(false);
+            } else {
+              const timer = setTimeout(() => {
+                setIsTourOpen(true);
+              }, 600);
+              return () => clearTimeout(timer);
+            }
+          })
+          .catch(() => {
+            if (!isTourDisabledLocal) {
+              const timer = setTimeout(() => {
+                setIsTourOpen(true);
+              }, 600);
+              return () => clearTimeout(timer);
+            }
+          });
+      } else if (!isTourDisabledLocal) {
         const timer = setTimeout(() => {
           setIsTourOpen(true);
         }, 600);
@@ -254,7 +284,7 @@ const MainDashboard: React.FC = () => {
     } else {
       setIsTourOpen(false);
     }
-  }, [isAuthenticated, user?.id]);
+  }, [isAuthenticated, user?.id, token]);
 
   // Pré-aquecimento silencioso do backend em segundo plano para acordar a instância no Render
   // antes mesmo do usuário interagir, eliminando qualquer espera de inicialização do servidor

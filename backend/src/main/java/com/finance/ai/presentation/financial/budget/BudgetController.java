@@ -3,9 +3,11 @@ package com.finance.ai.presentation.financial.budget;
 import com.finance.ai.application.financial.budget.BatchCreateBudgetsUseCase;
 import com.finance.ai.application.financial.budget.CreateOrUpdateBudgetUseCase;
 import com.finance.ai.application.financial.budget.DeleteBudgetUseCase;
+import com.finance.ai.application.financial.budget.GetBudgetCategoryLocksUseCase;
 import com.finance.ai.application.financial.budget.GetSpendingLimitsTimelineUseCase;
 import com.finance.ai.application.financial.budget.ListBudgetsUseCase;
 import com.finance.ai.application.financial.budget.RemoveSpendingLimitUseCase;
+import com.finance.ai.application.financial.budget.SaveBudgetCategoryLocksUseCase;
 import com.finance.ai.application.financial.budget.SaveSpendingLimitUseCase;
 import com.finance.ai.application.financial.budget.SuggestBudgetsWithAiUseCase;
 import com.finance.ai.application.financial.budget.SyncSpendingLimitsTimelineUseCase;
@@ -15,6 +17,7 @@ import com.finance.ai.application.financial.budget.dto.BudgetProgressDto;
 import com.finance.ai.domain.financial.budget.Budget;
 import com.finance.ai.infrastructure.security.AuthenticatedUser;
 import com.finance.ai.presentation.financial.budget.dto.CreateBudgetRequest;
+import com.finance.ai.presentation.financial.budget.dto.SaveBudgetLocksRequest;
 import com.finance.ai.presentation.financial.budget.dto.SaveSpendingLimitRequest;
 import com.finance.ai.presentation.financial.budget.dto.SuggestBudgetsRequest;
 import com.finance.ai.presentation.financial.budget.dto.SyncSpendingLimitsRequest;
@@ -51,6 +54,8 @@ public class BudgetController {
     private final SaveSpendingLimitUseCase saveSpendingLimitUseCase;
     private final RemoveSpendingLimitUseCase removeSpendingLimitUseCase;
     private final SyncSpendingLimitsTimelineUseCase syncSpendingLimitsTimelineUseCase;
+    private final GetBudgetCategoryLocksUseCase getBudgetCategoryLocksUseCase;
+    private final SaveBudgetCategoryLocksUseCase saveBudgetCategoryLocksUseCase;
 
     public BudgetController(CreateOrUpdateBudgetUseCase createOrUpdateBudgetUseCase,
                             ListBudgetsUseCase listBudgetsUseCase,
@@ -61,7 +66,9 @@ public class BudgetController {
                             GetSpendingLimitsTimelineUseCase getSpendingLimitsTimelineUseCase,
                             SaveSpendingLimitUseCase saveSpendingLimitUseCase,
                             RemoveSpendingLimitUseCase removeSpendingLimitUseCase,
-                            SyncSpendingLimitsTimelineUseCase syncSpendingLimitsTimelineUseCase) {
+                            SyncSpendingLimitsTimelineUseCase syncSpendingLimitsTimelineUseCase,
+                            GetBudgetCategoryLocksUseCase getBudgetCategoryLocksUseCase,
+                            SaveBudgetCategoryLocksUseCase saveBudgetCategoryLocksUseCase) {
         this.createOrUpdateBudgetUseCase = createOrUpdateBudgetUseCase;
         this.listBudgetsUseCase = listBudgetsUseCase;
         this.deleteBudgetUseCase = deleteBudgetUseCase;
@@ -72,6 +79,8 @@ public class BudgetController {
         this.saveSpendingLimitUseCase = saveSpendingLimitUseCase;
         this.removeSpendingLimitUseCase = removeSpendingLimitUseCase;
         this.syncSpendingLimitsTimelineUseCase = syncSpendingLimitsTimelineUseCase;
+        this.getBudgetCategoryLocksUseCase = getBudgetCategoryLocksUseCase;
+        this.saveBudgetCategoryLocksUseCase = saveBudgetCategoryLocksUseCase;
     }
 
     @GetMapping
@@ -199,5 +208,25 @@ public class BudgetController {
         if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         var merged = syncSpendingLimitsTimelineUseCase.execute(user.userId(), request.timeline());
         return ResponseEntity.ok(merged);
+    }
+
+    @GetMapping("/locks")
+    @Operation(summary = "Obtém as categorias com travas manuais fixadas na distribuição de IA para o mês")
+    public ResponseEntity<Map<UUID, BigDecimal>> getBudgetCategoryLocks(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @RequestParam(value = "month", required = false) String month) {
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        var locks = getBudgetCategoryLocksUseCase.execute(user.userId(), month);
+        return ResponseEntity.ok(locks);
+    }
+
+    @PutMapping("/locks")
+    @Operation(summary = "Salva ou atualiza as travas manuais de categorias na distribuição de IA para o mês")
+    public ResponseEntity<Map<UUID, BigDecimal>> saveBudgetCategoryLocks(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @RequestBody SaveBudgetLocksRequest request) {
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        var locks = saveBudgetCategoryLocksUseCase.execute(user.userId(), request.month(), request.locks());
+        return ResponseEntity.ok(locks);
     }
 }

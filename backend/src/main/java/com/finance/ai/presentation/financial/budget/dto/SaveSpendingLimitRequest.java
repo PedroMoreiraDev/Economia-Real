@@ -14,3 +14,4 @@ public record SaveSpendingLimitRequest(
         @DecimalMin(value = "0.00", message = "O valor do teto não pode ser negativo.")
         BigDecimal amount
 ) {}
+

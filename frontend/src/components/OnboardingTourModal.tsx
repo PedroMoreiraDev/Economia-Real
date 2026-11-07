@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { updateUserPreferencesApi } from '../services/userPreferenceApi';
 import {
   Sparkles,
   UploadCloud,
@@ -48,6 +50,7 @@ export const OnboardingTourModal: React.FC<OnboardingTourModalProps> = ({
   onOpenAiModal,
   onOpenAiBudgetModal,
 }) => {
+  const { token } = useAuth();
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [cornerPosition, setCornerPosition] = useState<CornerPosition>('bottom-right');
   const [isMobile, setIsMobile] = useState<boolean>(() => typeof window !== 'undefined' && window.innerWidth < 1024);
@@ -425,6 +428,11 @@ export const OnboardingTourModal: React.FC<OnboardingTourModalProps> = ({
       } else {
         localStorage.removeItem(`economia_real_tutorial_disabled_${userId}`);
       }
+      if (token) {
+        updateUserPreferencesApi(token, { onboardingCompleted: nextVal }).catch((err) =>
+          console.warn('Erro ao atualizar preferencia de tutorial no servidor:', err)
+        );
+      }
     }
   };
 
@@ -432,6 +440,14 @@ export const OnboardingTourModal: React.FC<OnboardingTourModalProps> = ({
     if (currentStep < steps.length - 1) {
       setCurrentStep((prev) => prev + 1);
     } else {
+      if (userId) {
+        localStorage.setItem(`economia_real_tutorial_disabled_${userId}`, 'true');
+        if (token) {
+          updateUserPreferencesApi(token, { onboardingCompleted: true }).catch((err) =>
+            console.warn('Erro ao salvar conclusao de onboarding na nuvem:', err)
+          );
+        }
+      }
       onClose();
     }
   };

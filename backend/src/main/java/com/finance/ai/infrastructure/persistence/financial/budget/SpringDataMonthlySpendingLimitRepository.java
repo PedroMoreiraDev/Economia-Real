@@ -14,3 +14,4 @@ public interface SpringDataMonthlySpendingLimitRepository extends JpaRepository<
     List<MonthlySpendingLimitJpaEntity> findAllByUserId(UUID userId);
     void deleteByUserIdAndMonthReference(UUID userId, LocalDate monthReference);
 }
+

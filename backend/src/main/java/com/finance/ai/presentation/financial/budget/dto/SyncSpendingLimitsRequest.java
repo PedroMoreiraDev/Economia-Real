@@ -6,3 +6,4 @@ import java.util.Map;
 public record SyncSpendingLimitsRequest(
         Map<String, BigDecimal> timeline
 ) {}
+
