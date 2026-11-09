@@ -52,3 +52,4 @@ public class SaveBudgetCategoryLocksUseCase {
         return LocalDate.parse(monthStr).withDayOfMonth(1);
     }
 }
+

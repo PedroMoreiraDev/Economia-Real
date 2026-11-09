@@ -27,3 +27,4 @@ public class PostgreSqlUserPreferenceRepository implements UserPreferenceReposit
         return repository.save(entity).toDomain();
     }
 }
+

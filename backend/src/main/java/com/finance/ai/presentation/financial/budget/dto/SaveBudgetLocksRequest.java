@@ -8,3 +8,4 @@ public record SaveBudgetLocksRequest(
         String month,
         Map<UUID, BigDecimal> locks
 ) {}
+

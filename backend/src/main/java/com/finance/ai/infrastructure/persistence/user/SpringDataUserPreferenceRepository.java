@@ -8,3 +8,4 @@ import java.util.UUID;
 @Repository
 public interface SpringDataUserPreferenceRepository extends JpaRepository<UserPreferenceJpaEntity, UUID> {
 }
+

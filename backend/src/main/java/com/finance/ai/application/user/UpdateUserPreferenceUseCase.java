@@ -28,3 +28,4 @@ public class UpdateUserPreferenceUseCase {
         return repository.save(preference);
     }
 }
+

@@ -598,14 +598,14 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
 
           {/* Mensagem de Sucesso após Salvar */}
           {successFeedback && (
-            <div className="p-3.5 bg-[#E8E4D9] border-2 border-[#1C4939] rounded-2xl flex items-center justify-between gap-3 text-slate-800 text-xs sm:text-sm font-bold shadow-sm animate-fade-in">
+            <div className="p-3.5 bg-[#E8E4D9] dark:bg-emerald-950/80 border-2 border-[#1C4939] dark:border-emerald-800 rounded-2xl flex items-center justify-between gap-3 text-slate-800 dark:text-[#E8E4D9] text-xs sm:text-sm font-bold shadow-sm animate-fade-in">
               <div className="flex items-center gap-2.5">
-                <div className="p-1.5 rounded-xl bg-[#1C4939] text-white shadow-[0_2px_0_0_#102D25]">
+                <div className="p-1.5 rounded-xl bg-[#1C4939] dark:bg-emerald-800 text-white dark:text-[#78C6A3] shadow-[0_2px_0_0_#102D25] dark:shadow-none">
                   <CheckCircle2 className="w-4 h-4 stroke-[3]" />
                 </div>
                 <div>
-                  <span className="text-slate-800">{successFeedback}</span>
-                  <p className="text-[11px] text-[#102D25] font-extrabold mt-0.5">
+                  <span className="text-slate-800 dark:text-[#E8E4D9]">{successFeedback}</span>
+                  <p className="text-[11px] text-[#102D25] dark:text-[#78C6A3] font-extrabold mt-0.5">
                     Você já pode clicar no microfone abaixo e falar o próximo registro!
                   </p>
                 </div>
@@ -613,7 +613,7 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
               <button
                 type="button"
                 onClick={() => setSuccessFeedback(null)}
-                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-white/80 transition-colors"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-[#E8E4D9] p-1 rounded-lg hover:bg-white/80 dark:hover:bg-emerald-900/60 transition-colors"
                 title="Fechar aviso"
               >
                 <X className="w-4 h-4 stroke-[2.5]" />
@@ -691,7 +691,7 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
                             setInputText(ex);
                             handleProcessText(ex);
                           }}
-                          className="text-xs px-3 py-1.5 rounded-xl bg-slate-100 text-slate-600 font-bold hover:bg-[#E8E4D9] hover:text-[#102D25] border-2 border-slate-200 hover:border-[#D4A94F] transition-all"
+                          className="text-xs px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-[#102D25] text-slate-600 dark:text-slate-300 font-bold hover:bg-[#E8E4D9] dark:hover:bg-[#1C4939] hover:text-[#102D25] dark:hover:text-[#E8E4D9] border-2 border-slate-200 dark:border-[#214E3E] hover:border-[#D4A94F] transition-all"
                         >
                           "{ex}"
                         </button>
@@ -768,8 +768,8 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
                           <span className="text-[#1C4939] font-black">"Ifood 49,19 no débito hoje"</span>
                         </p>
                         {successFeedback && (
-                          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E8E4D9] text-[#102D25] border border-[#1C4939] text-xs font-black">
-                            <span className="w-2 h-2 rounded-full bg-[#1C4939] animate-ping" />
+                          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E8E4D9] dark:bg-emerald-950/80 text-[#102D25] dark:text-[#78C6A3] border border-[#1C4939] dark:border-emerald-800 text-xs font-black">
+                            <span className="w-2 h-2 rounded-full bg-[#1C4939] dark:bg-[#78C6A3] animate-ping" />
                             <span>Pronto para o próximo! Clique no microfone acima</span>
                           </div>
                         )}
@@ -935,7 +935,7 @@ export const AiTransactionModal: React.FC<AiTransactionModalProps> = ({
                       setQuickCatError(null);
                       setShowQuickCategoryModal(true);
                     }}
-                    className="text-xs font-black text-[#1C4939] hover:text-[#102D25] flex items-center gap-1 transition-colors px-2 py-0.5 rounded-lg hover:bg-[#E8E4D9] active:scale-95"
+                    className="text-xs font-black text-[#1C4939] dark:text-[#78C6A3] hover:text-[#102D25] dark:hover:text-[#E8E4D9] flex items-center gap-1 transition-colors px-2 py-0.5 rounded-lg hover:bg-[#E8E4D9] dark:hover:bg-emerald-950/60 active:scale-95"
                   >
                     <Plus className="w-3.5 h-3.5 stroke-[3]" />
                     Nova Categoria

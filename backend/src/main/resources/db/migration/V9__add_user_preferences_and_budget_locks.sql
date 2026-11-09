@@ -22,3 +22,4 @@ CREATE TABLE budget_category_locks (
 );
 
 CREATE INDEX idx_budget_locks_user_month ON budget_category_locks(user_id, month_reference);
+

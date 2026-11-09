@@ -22,3 +22,4 @@ public class GetUserPreferenceUseCase {
                 .orElseGet(() -> UserPreference.createDefault(userId));
     }
 }
+

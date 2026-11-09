@@ -8,3 +8,4 @@ public interface BudgetCategoryLockRepository {
     List<BudgetCategoryLock> findAllByUserIdAndMonthReference(UUID userId, LocalDate monthReference);
     void replaceLocks(UUID userId, LocalDate monthReference, List<BudgetCategoryLock> locks);
 }
+

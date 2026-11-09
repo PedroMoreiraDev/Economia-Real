@@ -7,3 +7,4 @@ public interface UserPreferenceRepository {
     Optional<UserPreference> findByUserId(UUID userId);
     UserPreference save(UserPreference preference);
 }
+

@@ -39,3 +39,4 @@ export async function updateUserPreferencesApi(
 
   return res.json();
 }
+

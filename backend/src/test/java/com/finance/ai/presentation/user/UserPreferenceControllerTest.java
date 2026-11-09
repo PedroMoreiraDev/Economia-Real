@@ -94,3 +94,4 @@ class UserPreferenceControllerTest {
                 .andExpect(jsonPath("$.onboardingCompleted").value(true));
     }
 }
+

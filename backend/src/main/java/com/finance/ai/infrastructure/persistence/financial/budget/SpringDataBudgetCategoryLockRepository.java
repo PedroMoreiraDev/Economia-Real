@@ -12,3 +12,4 @@ public interface SpringDataBudgetCategoryLockRepository extends JpaRepository<Bu
     List<BudgetCategoryLockJpaEntity> findAllByUserIdAndMonthReference(UUID userId, LocalDate monthReference);
     void deleteAllByUserIdAndMonthReference(UUID userId, LocalDate monthReference);
 }
+

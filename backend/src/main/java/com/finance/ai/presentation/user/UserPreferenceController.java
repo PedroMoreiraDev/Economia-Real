@@ -49,3 +49,4 @@ public class UserPreferenceController {
         return ResponseEntity.ok(new UserPreferenceResponse(pref.isOnboardingCompleted()));
     }
 }
+
