@@ -31,8 +31,8 @@ export const ImportModal: React.FC<ImportModalProps> = ({
     if (e.target.files && e.target.files[0]) {
       const selected = e.target.files[0];
       const lower = selected.name.toLowerCase();
-      if (!lower.endsWith('.ofx') && !lower.endsWith('.csv') && !lower.endsWith('.xlsx') && !lower.endsWith('.xls')) {
-        setError('Por favor, selecione apenas arquivos bancários com extensão .ofx, .csv, .xlsx ou .xls.');
+      if (!lower.endsWith('.ofx') && !lower.endsWith('.csv') && !lower.endsWith('.xlsx') && !lower.endsWith('.xls') && !lower.endsWith('.pdf')) {
+        setError('Por favor, selecione apenas arquivos bancários com extensão .ofx, .csv, .xlsx, .xls ou faturas em .pdf.');
         setFile(null);
         return;
       }
@@ -40,8 +40,9 @@ export const ImportModal: React.FC<ImportModalProps> = ({
       setFile(selected);
       setResult(null);
 
-      // Auto-detecção de fatura de cartão de crédito pelo nome do arquivo
-      const isCardFile = lower.includes('fatura')
+      // Auto-detecção de fatura de cartão de crédito pelo nome ou extensão do arquivo
+      const isCardFile = lower.endsWith('.pdf')
+        || lower.includes('fatura')
         || lower.includes('cartao')
         || lower.includes('cartão')
         || lower.includes('card')
@@ -172,12 +173,12 @@ export const ImportModal: React.FC<ImportModalProps> = ({
           <form onSubmit={handleSubmit} className="space-y-4">
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-black uppercase tracking-wider text-slate-500">Arquivo do Extrato (.OFX, .CSV ou Excel)</label>
+              <label className="block text-xs font-black uppercase tracking-wider text-slate-500">Arquivo do Extrato ou Fatura (.OFX, .CSV, Excel ou PDF)</label>
               <div className="border-2 border-dashed border-blue-300 dark:border-blue-700/60 hover:border-[#1C4939] dark:hover:border-blue-500 rounded-3xl p-6 text-center cursor-pointer transition-colors relative bg-blue-50/40 dark:bg-blue-950/20">
                 <input
                   type="file"
                   required
-                  accept=".ofx,.csv,.xlsx,.xls"
+                  accept=".ofx,.csv,.xlsx,.xls,.pdf"
                   onChange={handleFileChange}
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 />
@@ -193,7 +194,7 @@ export const ImportModal: React.FC<ImportModalProps> = ({
                   ) : (
                     <div>
                       <p className="text-xs sm:text-sm font-black text-slate-700 dark:text-slate-200">Arraste ou clique para selecionar</p>
-                      <p className="text-xs font-bold text-slate-400">Formatos aceitos: extrato bancário .ofx ou planilhas .csv, .xlsx, .xls</p>
+                      <p className="text-xs font-bold text-slate-400">Formatos aceitos: extratos (.ofx, .csv, .xlsx, .xls) ou faturas digitais em PDF (.pdf)</p>
                     </div>
                   )}
                 </div>

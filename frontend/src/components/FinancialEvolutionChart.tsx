@@ -13,14 +13,17 @@ import { MonthlyEvolutionItem } from '../types/analytics';
 
 interface FinancialEvolutionChartProps {
   data: MonthlyEvolutionItem[];
+  privacyMode?: boolean;
 }
 
-function formatBRL(val: number | undefined): string {
+function formatBRLGlobal(val: number | undefined, privacyMode?: boolean): string {
+  if (privacyMode) return '••••••';
   if (val === undefined || isNaN(val)) return 'R$ 0,00';
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
 }
 
-function formatCompactBRL(val: number): string {
+function formatCompactBRLGlobal(val: number, privacyMode?: boolean): string {
+  if (privacyMode) return '••••••';
   if (val >= 1000000) {
     return `R$ ${(val / 1000000).toFixed(1)}M`;
   }
@@ -54,7 +57,10 @@ function getSmoothSplinePath(points: { x: number; y: number }[]): string {
   return d;
 }
 
-export const FinancialEvolutionChart: React.FC<FinancialEvolutionChartProps> = ({ data }) => {
+export const FinancialEvolutionChart: React.FC<FinancialEvolutionChartProps> = ({ data, privacyMode }) => {
+  const formatBRL = (val: number | undefined) => formatBRLGlobal(val, privacyMode);
+  const formatCompactBRL = (val: number) => formatCompactBRLGlobal(val, privacyMode);
+
   const [viewMode, setViewMode] = useState<'bars' | 'area'>('bars');
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const [highlightMetric, setHighlightMetric] = useState<'all' | 'income' | 'expense' | 'savings'>('all');

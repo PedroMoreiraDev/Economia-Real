@@ -42,6 +42,13 @@ interface RecurringBillsSectionProps {
   creditCards: CreditCard[];
   selectedMonth?: string;
   onDataChanged?: () => void;
+  privacyMode?: boolean;
+}
+
+function formatBRL(val: number | undefined, privacyMode?: boolean): string {
+  if (privacyMode) return '••••••';
+  if (val === undefined || isNaN(val)) return 'R$ 0,00';
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
 }
 
 export const RecurringBillsSection: React.FC<RecurringBillsSectionProps> = ({
@@ -50,6 +57,7 @@ export const RecurringBillsSection: React.FC<RecurringBillsSectionProps> = ({
   creditCards,
   selectedMonth,
   onDataChanged,
+  privacyMode,
 }) => {
   const { token } = useAuth();
   const [bills, setBills] = useState<RecurringBill[]>([]);
@@ -206,7 +214,7 @@ export const RecurringBillsSection: React.FC<RecurringBillsSectionProps> = ({
             </span>
             <div className="mt-2 flex items-baseline space-x-2">
               <span className="text-2xl sm:text-3xl font-extrabold text-[#102D25] dark:text-[#E8E4D9] font-numeric">
-                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalMonthlyCommitment)}
+                {formatBRL(totalMonthlyCommitment, privacyMode)}
               </span>
             </div>
           </div>
@@ -325,7 +333,7 @@ export const RecurringBillsSection: React.FC<RecurringBillsSectionProps> = ({
 
                     <div className="text-right font-numeric">
                       <span className="text-lg font-extrabold text-[#102D25] dark:text-[#E8E4D9] block">
-                        {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(bill.amount)}
+                        {formatBRL(bill.amount, privacyMode)}
                       </span>
                       <span className="text-[10px] text-[#526B61] dark:text-[#9AB3A8] uppercase tracking-wider font-bold">
                         {bill.frequency === 'MONTHLY'
@@ -433,7 +441,7 @@ export const RecurringBillsSection: React.FC<RecurringBillsSectionProps> = ({
               <div>
                 <h3 className="text-xl font-extrabold text-[#102D25] dark:text-[#E8E4D9]">Lançar Despesa Fixa</h3>
                 <p className="text-xs font-semibold text-[#526B61] dark:text-[#9AB3A8] font-numeric">
-                  {billToLaunch.description} • {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(billToLaunch.amount)}
+                  {billToLaunch.description} • {formatBRL(billToLaunch.amount, privacyMode)}
                 </p>
               </div>
             </div>

@@ -22,11 +22,19 @@ import { useAuth } from '../context/AuthContext';
 interface SavingsGoalsSectionProps {
   accounts: Account[];
   onDataChanged?: () => void;
+  privacyMode?: boolean;
+}
+
+function formatBRL(val: number | undefined, privacyMode?: boolean): string {
+  if (privacyMode) return '••••••';
+  if (val === undefined || isNaN(val)) return 'R$ 0,00';
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
 }
 
 export const SavingsGoalsSection: React.FC<SavingsGoalsSectionProps> = ({
   accounts,
   onDataChanged,
+  privacyMode,
 }) => {
   const { token } = useAuth();
   const [goals, setGoals] = useState<SavingsGoal[]>([]);
@@ -136,7 +144,7 @@ export const SavingsGoalsSection: React.FC<SavingsGoalsSectionProps> = ({
             </div>
             <div className="mt-2">
               <span className="text-2xl sm:text-3xl font-extrabold text-[#1C4939] dark:text-[#78C6A3] font-numeric">
-                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalSaved)}
+                {formatBRL(totalSaved, privacyMode)}
               </span>
             </div>
             <span className="text-xs font-semibold text-[#526B61] dark:text-[#9AB3A8] mt-1 block">
@@ -153,7 +161,7 @@ export const SavingsGoalsSection: React.FC<SavingsGoalsSectionProps> = ({
             </div>
             <div className="mt-2 flex items-baseline gap-2 font-numeric">
               <span className="text-2xl sm:text-3xl font-extrabold text-[#102D25] dark:text-[#E8E4D9]">
-                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalTarget)}
+                {formatBRL(totalTarget, privacyMode)}
               </span>
               <span className="text-xs font-bold text-[#1C4939] dark:text-[#D4A94F]">({overallPercentage.toFixed(0)}%)</span>
             </div>
@@ -260,13 +268,13 @@ export const SavingsGoalsSection: React.FC<SavingsGoalsSectionProps> = ({
                       <div>
                         <span className="text-[10px] uppercase font-bold text-[#526B61] dark:text-[#9AB3A8] block tracking-wider">Acumulado</span>
                         <span className="font-extrabold text-[#1C4939] dark:text-[#78C6A3] text-sm sm:text-base">
-                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(goal.currentAmount)}
+                          {formatBRL(goal.currentAmount, privacyMode)}
                         </span>
                       </div>
                       <div className="text-right">
                         <span className="text-[10px] uppercase font-bold text-[#526B61] dark:text-[#9AB3A8] block tracking-wider">Objetivo</span>
                         <span className="font-extrabold text-[#102D25] dark:text-[#E8E4D9] text-sm sm:text-base">
-                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(goal.targetAmount)}
+                          {formatBRL(goal.targetAmount, privacyMode)}
                         </span>
                       </div>
                     </div>

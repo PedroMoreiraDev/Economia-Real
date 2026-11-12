@@ -31,6 +31,7 @@ public class ImportBankStatementUseCase {
     private final OfxParser ofxParser = new OfxParser();
     private final CsvParser csvParser = new CsvParser();
     private final ExcelParser excelParser = new ExcelParser();
+    private final PdfInvoiceParser pdfParser = new PdfInvoiceParser();
     private final InstallmentDetector installmentDetector = new InstallmentDetector();
 
     public ImportBankStatementUseCase(AccountRepository accountRepository,
@@ -70,17 +71,20 @@ public class ImportBankStatementUseCase {
             fileType = "OFX";
         } else if (cleanName.endsWith(".xlsx") || cleanName.endsWith(".xls")) {
             fileType = "EXCEL";
+        } else if (cleanName.endsWith(".pdf")) {
+            fileType = "PDF";
         } else {
             fileType = "CSV";
         }
 
-        boolean detectedCard = Boolean.TRUE.equals(isCreditCard) || (isCreditCard == null && isCardFileName(cleanName));
+        boolean detectedCard = Boolean.TRUE.equals(isCreditCard) || (isCreditCard == null && isCardFileName(cleanName)) || "PDF".equals(fileType);
 
         List<ParsedTransactionItem> parsedItems;
         try (InputStream is = new ByteArrayInputStream(fileBytes)) {
             parsedItems = switch (fileType) {
                 case "OFX" -> ofxParser.parse(is, detectedCard);
                 case "EXCEL" -> excelParser.parse(is, detectedCard);
+                case "PDF" -> pdfParser.parse(is, detectedCard);
                 default -> csvParser.parse(is, detectedCard);
             };
         }

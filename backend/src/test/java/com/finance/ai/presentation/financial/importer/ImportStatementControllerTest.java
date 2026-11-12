@@ -33,170 +33,208 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = ImportStatementController.class)
-@Import({SecurityConfig.class, JwtAuthenticationFilter.class, GlobalExceptionHandler.class})
+@Import({ SecurityConfig.class, JwtAuthenticationFilter.class, GlobalExceptionHandler.class })
 @DisplayName("Testes de Integração Web: ImportStatementController e Upload Seguro")
 class ImportStatementControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+        @Autowired
+        private MockMvc mockMvc;
 
-    @MockBean
-    private ImportBankStatementUseCase importUseCase;
+        @MockBean
+        private ImportBankStatementUseCase importUseCase;
 
-    @MockBean
-    private ListImportBatchesUseCase listBatchesUseCase;
+        @MockBean
+        private ListImportBatchesUseCase listBatchesUseCase;
 
-    @MockBean
-    private UserRepository userRepository;
+        @MockBean
+        private UserRepository userRepository;
 
-    @MockBean
-    private JwtTokenProvider jwtTokenProvider;
+        @MockBean
+        private JwtTokenProvider jwtTokenProvider;
 
-    @Test
-    @DisplayName("GET /api/v1/imports - deve rejeitar acesso sem token (403)")
-    void shouldDenyUnauthenticatedAccess() throws Exception {
-        mockMvc.perform(get("/api/v1/imports"))
-                .andExpect(status().isForbidden());
-    }
+        @Test
+        @DisplayName("GET /api/v1/imports - deve rejeitar acesso sem token (403)")
+        void shouldDenyUnauthenticatedAccess() throws Exception {
+                mockMvc.perform(get("/api/v1/imports"))
+                                .andExpect(status().isForbidden());
+        }
 
-    @Test
-    @DisplayName("POST /api/v1/imports/upload - deve processar arquivo OFX com sucesso (201)")
-    void shouldUploadOfxFileSuccessfully() throws Exception {
-        UUID userId = UUID.randomUUID();
-        UUID accountId = UUID.randomUUID();
-        String token = "valid.jwt.token";
-        User user = new User(userId, "pedro@teste.com", "Pedro", "$2a$12$hash", Instant.now());
+        @Test
+        @DisplayName("POST /api/v1/imports/upload - deve processar arquivo OFX com sucesso (201)")
+        void shouldUploadOfxFileSuccessfully() throws Exception {
+                UUID userId = UUID.randomUUID();
+                UUID accountId = UUID.randomUUID();
+                String token = "valid.jwt.token";
+                User user = new User(userId, "pedro@teste.com", "Pedro", "$2a$12$hash", Instant.now());
 
-        when(jwtTokenProvider.isTokenValid(token)).thenReturn(true);
-        when(jwtTokenProvider.extractUserId(token)).thenReturn(userId);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+                when(jwtTokenProvider.isTokenValid(token)).thenReturn(true);
+                when(jwtTokenProvider.extractUserId(token)).thenReturn(userId);
+                when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        MockMultipartFile file = new MockMultipartFile(
-                "file",
-                "extrato.ofx",
-                "application/x-ofx",
-                "<OFX>conteudo</OFX>".getBytes()
-        );
+                MockMultipartFile file = new MockMultipartFile(
+                                "file",
+                                "extrato.ofx",
+                                "application/x-ofx",
+                                "<OFX>conteudo</OFX>".getBytes());
 
-        var result = new ImportStatementResult(
-                UUID.randomUUID(),
-                "extrato.ofx",
-                "OFX",
-                5,
-                1,
-                "Importação concluída com sucesso."
-        );
+                var result = new ImportStatementResult(
+                                UUID.randomUUID(),
+                                "extrato.ofx",
+                                "OFX",
+                                5,
+                                1,
+                                "Importação concluída com sucesso.");
 
-        when(importUseCase.execute(eq(userId), eq(accountId), eq("extrato.ofx"), any())).thenReturn(result);
+                when(importUseCase.execute(eq(userId), eq(accountId), eq("extrato.ofx"), any())).thenReturn(result);
 
-        mockMvc.perform(multipart("/api/v1/imports/upload")
-                        .file(file)
-                        .param("accountId", accountId.toString())
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.importedCount").value(5))
-                .andExpect(jsonPath("$.skippedCount").value(1))
-                .andExpect(jsonPath("$.fileType").value("OFX"));
+                mockMvc.perform(multipart("/api/v1/imports/upload")
+                                .file(file)
+                                .param("accountId", accountId.toString())
+                                .header("Authorization", "Bearer " + token))
+                                .andExpect(status().isCreated())
+                                .andExpect(jsonPath("$.importedCount").value(5))
+                                .andExpect(jsonPath("$.skippedCount").value(1))
+                                .andExpect(jsonPath("$.fileType").value("OFX"));
 
-        verify(importUseCase).execute(eq(userId), eq(accountId), eq("extrato.ofx"), any());
-    }
+                verify(importUseCase).execute(eq(userId), eq(accountId), eq("extrato.ofx"), any());
+        }
 
-    @Test
-    @DisplayName("POST /api/v1/imports/upload - deve processar arquivo Excel XLSX com sucesso (201)")
-    void shouldUploadExcelFileSuccessfully() throws Exception {
-        UUID userId = UUID.randomUUID();
-        UUID accountId = UUID.randomUUID();
-        String token = "valid.jwt.token";
-        User user = new User(userId, "pedro@teste.com", "Pedro", "$2a$12$hash", Instant.now());
+        @Test
+        @DisplayName("POST /api/v1/imports/upload - deve processar arquivo Excel XLSX com sucesso (201)")
+        void shouldUploadExcelFileSuccessfully() throws Exception {
+                UUID userId = UUID.randomUUID();
+                UUID accountId = UUID.randomUUID();
+                String token = "valid.jwt.token";
+                User user = new User(userId, "pedro@teste.com", "Pedro", "$2a$12$hash", Instant.now());
 
-        when(jwtTokenProvider.isTokenValid(token)).thenReturn(true);
-        when(jwtTokenProvider.extractUserId(token)).thenReturn(userId);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+                when(jwtTokenProvider.isTokenValid(token)).thenReturn(true);
+                when(jwtTokenProvider.extractUserId(token)).thenReturn(userId);
+                when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        byte[] validXlsxHeader = new byte[] { 0x50, 0x4B, 0x03, 0x04, 0x14, 0x00, 0x06, 0x00 };
-        MockMultipartFile file = new MockMultipartFile(
-                "file",
-                "extrato_bancario.xlsx",
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                validXlsxHeader
-        );
+                byte[] validXlsxHeader = new byte[] { 0x50, 0x4B, 0x03, 0x04, 0x14, 0x00, 0x06, 0x00 };
+                MockMultipartFile file = new MockMultipartFile(
+                                "file",
+                                "extrato_bancario.xlsx",
+                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                validXlsxHeader);
 
-        var result = new ImportStatementResult(
-                UUID.randomUUID(),
-                "extrato_bancario.xlsx",
-                "EXCEL",
-                8,
-                2,
-                "Importação concluída com sucesso."
-        );
+                var result = new ImportStatementResult(
+                                UUID.randomUUID(),
+                                "extrato_bancario.xlsx",
+                                "EXCEL",
+                                8,
+                                2,
+                                "Importação concluída com sucesso.");
 
-        when(importUseCase.execute(eq(userId), eq(accountId), eq("extrato_bancario.xlsx"), any())).thenReturn(result);
+                when(importUseCase.execute(eq(userId), eq(accountId), eq("extrato_bancario.xlsx"), any()))
+                                .thenReturn(result);
 
-        mockMvc.perform(multipart("/api/v1/imports/upload")
-                        .file(file)
-                        .param("accountId", accountId.toString())
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.importedCount").value(8))
-                .andExpect(jsonPath("$.skippedCount").value(2))
-                .andExpect(jsonPath("$.fileType").value("EXCEL"));
+                mockMvc.perform(multipart("/api/v1/imports/upload")
+                                .file(file)
+                                .param("accountId", accountId.toString())
+                                .header("Authorization", "Bearer " + token))
+                                .andExpect(status().isCreated())
+                                .andExpect(jsonPath("$.importedCount").value(8))
+                                .andExpect(jsonPath("$.skippedCount").value(2))
+                                .andExpect(jsonPath("$.fileType").value("EXCEL"));
 
-        verify(importUseCase).execute(eq(userId), eq(accountId), eq("extrato_bancario.xlsx"), any());
-    }
+                verify(importUseCase).execute(eq(userId), eq(accountId), eq("extrato_bancario.xlsx"), any());
+        }
 
-    @Test
-    @DisplayName("POST /api/v1/imports/upload - deve rejeitar extensão inválida (400)")
-    void shouldRejectUnsupportedFileExtension() throws Exception {
-        UUID userId = UUID.randomUUID();
-        UUID accountId = UUID.randomUUID();
-        String token = "valid.jwt.token";
-        User user = new User(userId, "pedro@teste.com", "Pedro", "$2a$12$hash", Instant.now());
+        @Test
+        @DisplayName("POST /api/v1/imports/upload - deve rejeitar extensão inválida (400)")
+        void shouldRejectUnsupportedFileExtension() throws Exception {
+                UUID userId = UUID.randomUUID();
+                UUID accountId = UUID.randomUUID();
+                String token = "valid.jwt.token";
+                User user = new User(userId, "pedro@teste.com", "Pedro", "$2a$12$hash", Instant.now());
 
-        when(jwtTokenProvider.isTokenValid(token)).thenReturn(true);
-        when(jwtTokenProvider.extractUserId(token)).thenReturn(userId);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+                when(jwtTokenProvider.isTokenValid(token)).thenReturn(true);
+                when(jwtTokenProvider.extractUserId(token)).thenReturn(userId);
+                when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        MockMultipartFile file = new MockMultipartFile(
-                "file",
-                "documento.pdf",
-                "application/pdf",
-                "%PDF-1.4".getBytes()
-        );
+                MockMultipartFile file = new MockMultipartFile(
+                                "file",
+                                "documento.txt",
+                                "text/plain",
+                                "texto simples".getBytes());
 
-        mockMvc.perform(multipart("/api/v1/imports/upload")
-                        .file(file)
-                        .param("accountId", accountId.toString())
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Formato não suportado. Envie apenas arquivos .ofx, .csv, .xlsx ou .xls."));
-    }
+                mockMvc.perform(multipart("/api/v1/imports/upload")
+                                .file(file)
+                                .param("accountId", accountId.toString())
+                                .header("Authorization", "Bearer " + token))
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$.message").value(
+                                                "Formato não suportado. Envie apenas arquivos .ofx, .csv, .xlsx, .xls ou faturas .pdf."));
+        }
 
-    @Test
-    @DisplayName("POST /api/v1/imports/upload - deve rejeitar arquivo binário executável disfarçado de planilha (400)")
-    void shouldRejectExecutableFileDisguisedAsStatement() throws Exception {
-        UUID userId = UUID.randomUUID();
-        UUID accountId = UUID.randomUUID();
-        String token = "valid.jwt.token";
-        User user = new User(userId, "pedro@teste.com", "Pedro", "$2a$12$hash", Instant.now());
+        @Test
+        @DisplayName("POST /api/v1/imports/upload - deve aceitar fatura de cartão em PDF com sucesso (201)")
+        void shouldAcceptPdfInvoice() throws Exception {
+                UUID userId = UUID.randomUUID();
+                UUID accountId = UUID.randomUUID();
+                String token = "valid.jwt.token";
+                User user = new User(userId, "pedro@teste.com", "Pedro", "$2a$12$hash", Instant.now());
 
-        when(jwtTokenProvider.isTokenValid(token)).thenReturn(true);
-        when(jwtTokenProvider.extractUserId(token)).thenReturn(userId);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+                when(jwtTokenProvider.isTokenValid(token)).thenReturn(true);
+                when(jwtTokenProvider.extractUserId(token)).thenReturn(userId);
+                when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        // Cabeçalho de executável PE/MZ do Windows disfarçado com extensão .xlsx
-        byte[] fakeExe = new byte[] { 'M', 'Z', (byte) 0x90, 0x00, 0x03, 0x00 };
-        MockMultipartFile file = new MockMultipartFile(
-                "file",
-                "extrato_malicioso.xlsx",
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                fakeExe
-        );
+                ImportStatementResult expectedResult = new ImportStatementResult(
+                                UUID.randomUUID(),
+                                "fatura_nubank.pdf",
+                                "PDF",
+                                5,
+                                0,
+                                "5 lançamentos importados com sucesso.");
 
-        mockMvc.perform(multipart("/api/v1/imports/upload")
-                        .file(file)
-                        .param("accountId", accountId.toString())
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Arquivo inválido: binários executáveis não são permitidos."));
-    }
+                when(importUseCase.execute(eq(userId), eq(accountId), eq("fatura_nubank.pdf"), any(), any()))
+                                .thenReturn(expectedResult);
+                when(importUseCase.execute(eq(userId), eq(accountId), eq("fatura_nubank.pdf"), any()))
+                                .thenReturn(expectedResult);
+
+                MockMultipartFile file = new MockMultipartFile(
+                                "file",
+                                "fatura_nubank.pdf",
+                                "application/pdf",
+                                "%PDF-1.4 fatura content".getBytes());
+
+                mockMvc.perform(multipart("/api/v1/imports/upload")
+                                .file(file)
+                                .param("accountId", accountId.toString())
+                                .param("isCreditCard", "true")
+                                .header("Authorization", "Bearer " + token))
+                                .andExpect(status().isCreated())
+                                .andExpect(jsonPath("$.importedCount").value(5))
+                                .andExpect(jsonPath("$.fileType").value("PDF"));
+        }
+
+        @Test
+        @DisplayName("POST /api/v1/imports/upload - deve rejeitar arquivo binário executável disfarçado de planilha (400)")
+        void shouldRejectExecutableFileDisguisedAsStatement() throws Exception {
+                UUID userId = UUID.randomUUID();
+                UUID accountId = UUID.randomUUID();
+                String token = "valid.jwt.token";
+                User user = new User(userId, "pedro@teste.com", "Pedro", "$2a$12$hash", Instant.now());
+
+                when(jwtTokenProvider.isTokenValid(token)).thenReturn(true);
+                when(jwtTokenProvider.extractUserId(token)).thenReturn(userId);
+                when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+                // Cabeçalho de executável PE/MZ do Windows disfarçado com extensão .xlsx
+                byte[] fakeExe = new byte[] { 'M', 'Z', (byte) 0x90, 0x00, 0x03, 0x00 };
+                MockMultipartFile file = new MockMultipartFile(
+                                "file",
+                                "extrato_malicioso.xlsx",
+                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                fakeExe);
+
+                mockMvc.perform(multipart("/api/v1/imports/upload")
+                                .file(file)
+                                .param("accountId", accountId.toString())
+                                .header("Authorization", "Bearer " + token))
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$.message")
+                                                .value("Arquivo inválido: binários executáveis não são permitidos."));
+        }
 }

@@ -57,8 +57,8 @@ public class ImportStatementController {
         if (originalFilename == null) originalFilename = "extrato.csv";
 
         String lower = originalFilename.toLowerCase();
-        if (!lower.endsWith(".ofx") && !lower.endsWith(".csv") && !lower.endsWith(".xlsx") && !lower.endsWith(".xls")) {
-            throw new IllegalArgumentException("Formato não suportado. Envie apenas arquivos .ofx, .csv, .xlsx ou .xls.");
+        if (!lower.endsWith(".ofx") && !lower.endsWith(".csv") && !lower.endsWith(".xlsx") && !lower.endsWith(".xls") && !lower.endsWith(".pdf")) {
+            throw new IllegalArgumentException("Formato não suportado. Envie apenas arquivos .ofx, .csv, .xlsx, .xls ou faturas .pdf.");
         }
 
         byte[] fileBytes = file.getBytes();
@@ -131,6 +131,11 @@ public class ImportStatementController {
             // XLS legado é OLE2 Compound Document (D0 CF 11 E0)
             if (bytes.length < 4 || !((bytes[0] & 0xFF) == 0xD0 && (bytes[1] & 0xFF) == 0xCF && (bytes[2] & 0xFF) == 0x11 && (bytes[3] & 0xFF) == 0xE0)) {
                 throw new IllegalArgumentException("O arquivo informado não possui a estrutura válida de uma planilha XLS legada.");
+            }
+        } else if (lower.endsWith(".pdf")) {
+            // PDF deve iniciar com magic bytes %PDF (0x25, 0x50, 0x44, 0x46)
+            if (bytes.length < 4 || !(bytes[0] == 0x25 && bytes[1] == 0x50 && bytes[2] == 0x44 && bytes[3] == 0x46)) {
+                throw new IllegalArgumentException("O arquivo informado não possui a estrutura válida de um documento PDF (%PDF).");
             }
         } else if (lower.endsWith(".ofx") || lower.endsWith(".csv")) {
             // Arquivos de texto não devem conter caracteres nulos binários nos primeiros 512 bytes

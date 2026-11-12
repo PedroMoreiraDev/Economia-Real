@@ -33,6 +33,12 @@ import { BudgetModal } from './components/BudgetModal';
 import { AiBudgetSuggestionModal } from './components/AiBudgetSuggestionModal';
 import { RecurringBillsSection } from './components/RecurringBillsSection';
 import { SavingsGoalsSection } from './components/SavingsGoalsSection';
+import { WhatIfSimulatorModal } from './components/WhatIfSimulatorModal';
+import { MonthlyWrappedModal } from './components/MonthlyWrappedModal';
+import { fetchRecurringBillsApi } from './services/recurringApi';
+import { fetchSavingsGoalsApi } from './services/goalApi';
+import { RecurringBill } from './types/recurring';
+import { SavingsGoal } from './types/goal';
 import { LandingPage } from './components/LandingPage';
 import { ConfirmModal } from './components/ConfirmModal';
 import { OnboardingTourModal } from './components/OnboardingTourModal';
@@ -241,6 +247,11 @@ const MainDashboard: React.FC = () => {
   const [telemetryModalOpen, setTelemetryModalOpen] = useState<boolean>(false);
   const [legalModalOpen, setLegalModalOpen] = useState<boolean>(false);
   const [legalModalTab, setLegalModalTab] = useState<LegalTab>('privacy');
+  const [recurringBills, setRecurringBills] = useState<RecurringBill[]>([]);
+  const [savingsGoals, setSavingsGoals] = useState<SavingsGoal[]>([]);
+  const [isWhatIfModalOpen, setIsWhatIfModalOpen] = useState<boolean>(false);
+  const [whatIfPrefill, setWhatIfPrefill] = useState<{ deliveryCut?: number; cancelBills?: number } | undefined>(undefined);
+  const [isMonthlyWrappedOpen, setIsMonthlyWrappedOpen] = useState<boolean>(false);
 
   // Tutorial Guiado / Onboarding Interativo
   const [isTourOpen, setIsTourOpen] = useState<boolean>(false);
@@ -427,6 +438,15 @@ const MainDashboard: React.FC = () => {
         setBudgets(bgs);
         setAnalytics(anls);
       }
+
+      // Carrega despesas fixas e metas em segundo plano para alimentar os motores de inteligência
+      Promise.all([
+        fetchRecurringBillsApi(token, selectedMonth).catch(() => []),
+        fetchSavingsGoalsApi(token).catch(() => []),
+      ]).then(([bills, goals]) => {
+        setRecurringBills(bills);
+        setSavingsGoals(goals);
+      });
 
       // Rastreamento de Crescimento: Retenção em 7 dias e Ativação do Usuário
       if (user?.id) {
@@ -1452,9 +1472,19 @@ const MainDashboard: React.FC = () => {
                 <AnalyticsSection
                   analytics={analytics}
                   budgets={budgets}
+                  transactions={transactions}
+                  savingsGoals={savingsGoals}
+                  recurringBills={recurringBills}
+                  creditCards={creditCards}
                   onOpenBudgetModal={() => setBudgetModalOpen(true)}
                   onOpenAiBudgetModal={() => setAiBudgetModalOpen(true)}
+                  onOpenWhatIfSimulator={(prefill) => {
+                    setWhatIfPrefill(prefill);
+                    setIsWhatIfModalOpen(true);
+                  }}
+                  onOpenMonthlyWrapped={() => setIsMonthlyWrappedOpen(true)}
                   globalLimit={effectiveGlobalLimit}
+                  privacyMode={privacyMode}
                 />
               </div>
             )}
@@ -1468,6 +1498,7 @@ const MainDashboard: React.FC = () => {
                   creditCards={creditCards}
                   selectedMonth={selectedMonth}
                   onDataChanged={loadFinancialData}
+                  privacyMode={privacyMode}
                 />
               </div>
             )}
@@ -1477,6 +1508,7 @@ const MainDashboard: React.FC = () => {
               <SavingsGoalsSection
                 accounts={accounts}
                 onDataChanged={loadFinancialData}
+                privacyMode={privacyMode}
               />
             )}
 
@@ -1957,6 +1989,28 @@ const MainDashboard: React.FC = () => {
         isOpen={legalModalOpen}
         onClose={() => setLegalModalOpen(false)}
         initialTab={legalModalTab}
+      />
+
+      {/* Simulador de "E se...?" */}
+      <WhatIfSimulatorModal
+        isOpen={isWhatIfModalOpen}
+        onClose={() => setIsWhatIfModalOpen(false)}
+        savingsGoals={savingsGoals}
+        initialDeliveryCut={whatIfPrefill?.deliveryCut}
+        initialCancelBills={whatIfPrefill?.cancelBills}
+        privacyMode={privacyMode}
+      />
+
+      {/* Retrospectiva "Seu Mês em Revista" (Wrapped) */}
+      <MonthlyWrappedModal
+        isOpen={isMonthlyWrappedOpen}
+        onClose={() => setIsMonthlyWrappedOpen(false)}
+        selectedMonth={selectedMonth}
+        summary={summary}
+        categoryDistribution={analytics?.categoryDistribution || []}
+        transactions={transactions}
+        savingsGoals={savingsGoals}
+        privacyMode={privacyMode}
       />
 
       {toastMessage && (
