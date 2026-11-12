@@ -1312,7 +1312,7 @@ const MainDashboard: React.FC = () => {
                                   onClick={() => setIsWhatIfModalOpen(true)}
                                   className="text-[10px] font-black text-[#D4A94F] hover:underline flex items-center gap-1"
                                 >
-                                  <span>Simulador Completo</span>
+                                  <span>Simulador Completo (1 a 30 anos)</span>
                                   <ArrowUpRight className="w-3 h-3" />
                                 </button>
                               </div>

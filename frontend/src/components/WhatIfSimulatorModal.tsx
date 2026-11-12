@@ -34,7 +34,7 @@ function formatBRL(val: number | undefined, privacyMode?: boolean): string {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
 }
 
-type HorizonYears = 1 | 3 | 5 | 10;
+type HorizonYears = 1 | 3 | 5 | 10 | 20 | 30;
 
 export const WhatIfSimulatorModal: React.FC<WhatIfSimulatorModalProps> = ({
   isOpen,
@@ -173,8 +173,8 @@ export const WhatIfSimulatorModal: React.FC<WhatIfSimulatorModalProps> = ({
             Em quanto tempo você quer ver o resultado?
           </span>
 
-          <div className="flex items-center gap-1.5">
-            {([1, 3, 5, 10] as HorizonYears[]).map((y) => (
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {([1, 3, 5, 10, 20, 30] as HorizonYears[]).map((y) => (
               <button
                 key={y}
                 type="button"
