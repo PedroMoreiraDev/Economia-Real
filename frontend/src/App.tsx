@@ -250,7 +250,6 @@ const MainDashboard: React.FC = () => {
   const [recurringBills, setRecurringBills] = useState<RecurringBill[]>([]);
   const [savingsGoals, setSavingsGoals] = useState<SavingsGoal[]>([]);
   const [isWhatIfModalOpen, setIsWhatIfModalOpen] = useState<boolean>(false);
-  const [whatIfPrefill, setWhatIfPrefill] = useState<{ deliveryCut?: number; cancelBills?: number } | undefined>(undefined);
   const [isMonthlyWrappedOpen, setIsMonthlyWrappedOpen] = useState<boolean>(false);
 
   // Tutorial Guiado / Onboarding Interativo
@@ -1478,10 +1477,7 @@ const MainDashboard: React.FC = () => {
                   creditCards={creditCards}
                   onOpenBudgetModal={() => setBudgetModalOpen(true)}
                   onOpenAiBudgetModal={() => setAiBudgetModalOpen(true)}
-                  onOpenWhatIfSimulator={(prefill) => {
-                    setWhatIfPrefill(prefill);
-                    setIsWhatIfModalOpen(true);
-                  }}
+                  onOpenWhatIfSimulator={() => setIsWhatIfModalOpen(true)}
                   onOpenMonthlyWrapped={() => setIsMonthlyWrappedOpen(true)}
                   globalLimit={effectiveGlobalLimit}
                   privacyMode={privacyMode}
@@ -1997,14 +1993,15 @@ const MainDashboard: React.FC = () => {
         onClose={() => setIsWhatIfModalOpen(false)}
         savingsGoals={savingsGoals}
         categoryDistribution={analytics?.categoryDistribution || []}
+        totalIncome={summary.totalIncome}
+        totalExpense={summary.totalExpense}
+        initialCapital={summary.totalAccountBalance}
         token={token}
         onGoalCreated={() => {
           if (token) {
             fetchSavingsGoalsApi(token).then(setSavingsGoals).catch(() => {});
           }
         }}
-        initialDeliveryCut={whatIfPrefill?.deliveryCut}
-        initialCancelBills={whatIfPrefill?.cancelBills}
         privacyMode={privacyMode}
       />
 

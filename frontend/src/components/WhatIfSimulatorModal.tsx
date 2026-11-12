@@ -1,15 +1,15 @@
 import React, { useState, useMemo } from 'react';
 import { 
   X, 
-  Sliders, 
   Target, 
   CheckCircle2, 
-  Coffee, 
   Rocket, 
   ShieldCheck, 
   Sparkles,
   TrendingUp,
-  PlusCircle
+  Coins,
+  Crown,
+  Zap
 } from 'lucide-react';
 import { SavingsGoal } from '../types/goal';
 import { CategoryDistributionItem } from '../types/analytics';
@@ -20,8 +20,9 @@ interface WhatIfSimulatorModalProps {
   onClose: () => void;
   savingsGoals?: SavingsGoal[];
   categoryDistribution?: CategoryDistributionItem[];
-  initialDeliveryCut?: number;
-  initialCancelBills?: number;
+  totalIncome?: number;
+  totalExpense?: number;
+  initialCapital?: number;
   token?: string | null;
   onGoalCreated?: () => void;
   privacyMode?: boolean;
@@ -33,104 +34,78 @@ function formatBRL(val: number | undefined, privacyMode?: boolean): string {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
 }
 
-type PresetMode = 'coffee' | 'focus' | 'freedom' | 'custom';
+type HorizonYears = 1 | 3 | 5 | 10;
 
 export const WhatIfSimulatorModal: React.FC<WhatIfSimulatorModalProps> = ({
   isOpen,
   onClose,
   savingsGoals = [],
-  categoryDistribution = [],
-  initialDeliveryCut = 25,
-  initialCancelBills = 35,
+  totalIncome = 0,
+  totalExpense = 0,
+  initialCapital = 0,
   token,
   onGoalCreated,
   privacyMode,
 }) => {
-  // Puxa o gasto real em Alimentação/Delivery do usuário neste mês se existir
-  const realFoodExpense = useMemo(() => {
-    const foodCat = categoryDistribution.find((c) => {
-      const name = c.categoryName.toLowerCase();
-      return name.includes('aliment') || name.includes('restauran') || name.includes('refei') || name.includes('delivery');
-    });
-    return foodCat && foodCat.totalAmount > 0 ? foodCat.totalAmount : 350;
-  }, [categoryDistribution]);
+  // Ponto de partida sugerido para o aporte mensal
+  const defaultMonthlySaving = useMemo(() => {
+    if (totalIncome > 0) {
+      // 20% da renda é a referência de ouro
+      return Math.max(300, Math.round(totalIncome * 0.2));
+    }
+    return 500;
+  }, [totalIncome]);
 
-  const [preset, setPreset] = useState<PresetMode>('coffee');
-  const [deliveryCutPct, setDeliveryCutPct] = useState<number>(initialDeliveryCut);
-  const [cancelBillsAmount, setCancelBillsAmount] = useState<number>(initialCancelBills);
-  const [extraDirectSavings, setExtraDirectSavings] = useState<number>(100);
+  const [monthlyContribution, setMonthlyContribution] = useState<number>(defaultMonthlySaving);
+  const [startingCapital, setStartingCapital] = useState<number>(Math.max(0, initialCapital));
+  const [horizon, setHorizon] = useState<HorizonYears>(5);
+  const [expectedRateAnnual] = useState<number>(10.5); // 10.5% a.a. (~100% CDI / Tesouro Selic)
 
-  // Estado para criar a meta diretamente da simulação
+  // Estado para criar a meta de liberdade diretamente da simulação
   const [isCreatingGoal, setIsCreatingGoal] = useState(false);
-  const [goalTitle, setGoalTitle] = useState('Reserva Criada no Simulador');
+  const [goalTitle, setGoalTitle] = useState('Projeto de Liberdade Financeira');
   const [goalTargetAmount, setGoalTargetAmount] = useState<number>(0);
   const [isSavingGoal, setIsSavingGoal] = useState(false);
   const [goalFeedback, setGoalFeedback] = useState<string | null>(null);
 
-  // Aplica cenários rápidos pré-configurados
-  const applyPreset = (mode: PresetMode) => {
-    setPreset(mode);
-    if (mode === 'coffee') {
-      setDeliveryCutPct(15);
-      setCancelBillsAmount(25);
-      setExtraDirectSavings(60);
-    } else if (mode === 'focus') {
-      setDeliveryCutPct(30);
-      setCancelBillsAmount(60);
-      setExtraDirectSavings(150);
-    } else if (mode === 'freedom') {
-      setDeliveryCutPct(50);
-      setCancelBillsAmount(120);
-      setExtraDirectSavings(300);
-    }
-  };
+  // Cálculos de juros compostos em tempo real
+  const projection = useMemo(() => {
+    const monthlyRate = Math.pow(1 + expectedRateAnnual / 100, 1 / 12) - 1;
+    const months = horizon * 12;
 
-  const results = useMemo(() => {
-    const deliverySavings = (deliveryCutPct / 100) * realFoodExpense;
-    const monthlyTotalSaved = Math.round(deliverySavings + cancelBillsAmount + extraDirectSavings);
-    const annualTotal = monthlyTotalSaved * 12;
+    // Valor futuro do capital inicial
+    const fvStartingCapital = startingCapital * Math.pow(1 + monthlyRate, months);
 
-    // Projeção em 5 anos (60 meses) com CDI conservador de 10% a.a. (~0.797% ao mês)
-    const monthlyRate = 0.007974;
-    const months = 60;
-    const compoundFiveYears = Math.round(
-      monthlyTotalSaved * ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate)
-    );
-    const pureDepositedFiveYears = monthlyTotalSaved * 60;
-    const interestEarnedFiveYears = Math.max(0, compoundFiveYears - pureDepositedFiveYears);
+    // Valor futuro dos aportes mensais: PMT * (((1 + i)^n - 1) / i)
+    const fvContributions =
+      monthlyContribution * ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate);
 
-    // Impacto nas metas ativas
-    const goalsAcceleration = savingsGoals.map((goal) => {
-      const remaining = Math.max(0, goal.targetAmount - goal.currentAmount);
-      const currentMonthlyContribution = 200;
-      const normalMonths = Math.ceil(remaining / currentMonthlyContribution);
+    const totalAccumulated = Math.round(fvStartingCapital + fvContributions);
+    const totalDeposited = Math.round(startingCapital + monthlyContribution * months);
+    const totalInterestEarned = Math.max(0, totalAccumulated - totalDeposited);
 
-      const acceleratedContribution = currentMonthlyContribution + monthlyTotalSaved;
-      const acceleratedMonths = Math.ceil(remaining / acceleratedContribution);
-      const monthsSaved = Math.max(0, normalMonths - acceleratedMonths);
+    // Estimativa de Renda Passiva Mensal gerada por esse patrimônio (sem gastar o principal!)
+    // Rendimento mensal conservador de ~0.75% a 0.8% ao mês
+    const passiveMonthlyIncome = Math.round(totalAccumulated * monthlyRate);
 
-      return {
-        ...goal,
-        normalMonths,
-        acceleratedMonths,
-        monthsSaved,
-      };
-    });
+    // Marcos de vida real destravados com esse patrimônio
+    const monthlyCost = totalExpense > 0 ? totalExpense : 3000;
+    const monthsOfEmergency = (totalAccumulated / monthlyCost).toFixed(1);
 
     return {
-      monthlyTotalSaved,
-      annualTotal,
-      compoundFiveYears,
-      pureDepositedFiveYears,
-      interestEarnedFiveYears,
-      goalsAcceleration,
+      totalAccumulated,
+      totalDeposited,
+      totalInterestEarned,
+      passiveMonthlyIncome,
+      monthsOfEmergency,
+      months,
     };
-  }, [deliveryCutPct, realFoodExpense, cancelBillsAmount, extraDirectSavings, savingsGoals]);
+  }, [monthlyContribution, startingCapital, horizon, expectedRateAnnual, totalExpense]);
 
-  // Atualiza valor padrão do objetivo quando a simulação muda
+  // Atualiza valor padrão do objetivo quando a projeção muda
   useMemo(() => {
-    setGoalTargetAmount(results.annualTotal);
-  }, [results.annualTotal]);
+    setGoalTargetAmount(projection.totalAccumulated);
+  }, [projection.totalAccumulated]);
 
   const handleSaveGoal = async () => {
     if (!token) {
@@ -144,7 +119,7 @@ export const WhatIfSimulatorModal: React.FC<WhatIfSimulatorModalProps> = ({
         title: goalTitle,
         targetAmount: goalTargetAmount,
       });
-      setGoalFeedback('Meta criada com sucesso! Você pode acompanhá-la na aba de Metas.');
+      setGoalFeedback('🎉 Meta de Liberdade Financeira cadastrada com sucesso! Acompanhe o progresso na aba de Metas.');
       setIsCreatingGoal(false);
       if (onGoalCreated) onGoalCreated();
     } catch (err: any) {
@@ -157,26 +132,27 @@ export const WhatIfSimulatorModal: React.FC<WhatIfSimulatorModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
-      <div className="card-duo bg-white dark:!bg-[#102D25] border-2 border-slate-200/90 dark:!border-[#214E3E] max-w-2xl w-full p-6 sm:p-8 rounded-3xl shadow-2xl relative space-y-6 my-auto max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/65 backdrop-blur-sm animate-fade-in overflow-y-auto">
+      <div className="card-duo bg-white dark:!bg-[#102D25] border-2 border-slate-200/90 dark:!border-[#214E3E] max-w-3xl w-full p-6 sm:p-8 rounded-3xl shadow-2xl relative space-y-6 my-auto max-h-[92vh] overflow-y-auto">
         
-        {/* Cabeçalho */}
+        {/* Cabeçalho de Alto Impacto */}
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-[#214E3E] pb-4">
           <div className="flex items-center gap-3">
             <div className="p-3 rounded-2xl bg-[#1C4939] dark:bg-[#16382E] text-[#D4A94F] border border-[#D4A94F]/40 shadow-xs">
-              <Sliders className="w-5 h-5 stroke-[2.5]" />
+              <Rocket className="w-6 h-6 stroke-[2.2]" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-xl font-extrabold text-[#102D25] dark:text-[#E8E4D9]">
-                  Simulador de "E se...?"
+                <h3 className="text-xl sm:text-2xl font-black text-[#102D25] dark:text-[#E8E4D9] tracking-tight">
+                  Simulador de Liberdade Financeira
                 </h3>
-                <span className="hidden sm:inline-flex px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-[#FAF8F4] dark:bg-[#16382E] text-[#1C4939] dark:text-[#78C6A3] border border-[#1C4939]/30">
-                  Base Real
+                <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-[#FAF8F4] dark:bg-[#16382E] text-[#1C4939] dark:text-[#78C6A3] border border-[#1C4939]/30">
+                  <Sparkles className="w-3 h-3 text-[#D4A94F]" />
+                  Efeito Bola de Neve
                 </span>
               </div>
-              <p className="text-xs font-semibold text-[#526B61] dark:text-[#9AB3A8]">
-                Descubra o impacto real de pequenas escolhas no seu patrimônio
+              <p className="text-xs font-semibold text-[#526B61] dark:text-[#9AB3A8] mt-0.5">
+                Veja o potencial multiplicador da sua grana e quanto ela renderá de salário passivo
               </p>
             </div>
           </div>
@@ -190,343 +166,309 @@ export const WhatIfSimulatorModal: React.FC<WhatIfSimulatorModalProps> = ({
           </button>
         </div>
 
-        {/* Barra de Cenários Prontos (Presets em 1 clique) */}
-        <div className="space-y-2">
-          <span className="text-[11px] font-black uppercase tracking-wider text-[#526B61] dark:text-[#9AB3A8] block">
-            Escolha um Cenário Rápido ou Ajuste Livremente:
+        {/* 1. SELETOR DE HORIZONTE DE TEMPO (Onde a mágica acontece) */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-[#FAF8F4] dark:bg-[#16382E]/60 border border-[#1C4939]/15 dark:border-[#214E3E]">
+          <span className="text-xs font-extrabold text-[#102D25] dark:text-[#E8E4D9] flex items-center gap-1.5">
+            <TrendingUp className="w-4 h-4 text-[#D4A94F]" />
+            Em quanto tempo você quer ver o resultado?
           </span>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            <button
-              type="button"
-              onClick={() => applyPreset('coffee')}
-              className={`p-2.5 rounded-xl border text-left text-xs font-bold transition-all flex items-center gap-2 ${
-                preset === 'coffee'
-                  ? 'bg-[#1C4939] text-white border-[#1C4939] shadow-xs'
-                  : 'bg-white/80 dark:bg-[#16382E]/60 text-[#102D25] dark:text-[#E8E4D9] border-slate-200 dark:border-[#214E3E] hover:border-[#1C4939]'
-              }`}
-            >
-              <Coffee className="w-4 h-4 shrink-0 text-[#D4A94F]" />
-              <div>
-                <span className="block font-black">Corte Leve</span>
-                <span className="text-[10px] opacity-80 font-normal">Pequenos hábitos</span>
-              </div>
-            </button>
 
-            <button
-              type="button"
-              onClick={() => applyPreset('focus')}
-              className={`p-2.5 rounded-xl border text-left text-xs font-bold transition-all flex items-center gap-2 ${
-                preset === 'focus'
-                  ? 'bg-[#1C4939] text-white border-[#1C4939] shadow-xs'
-                  : 'bg-white/80 dark:bg-[#16382E]/60 text-[#102D25] dark:text-[#E8E4D9] border-slate-200 dark:border-[#214E3E] hover:border-[#1C4939]'
-              }`}
-            >
-              <Rocket className="w-4 h-4 shrink-0 text-[#D4A94F]" />
-              <div>
-                <span className="block font-black">Foco Total</span>
-                <span className="text-[10px] opacity-80 font-normal">Modo aceleração</span>
-              </div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => applyPreset('freedom')}
-              className={`p-2.5 rounded-xl border text-left text-xs font-bold transition-all flex items-center gap-2 ${
-                preset === 'freedom'
-                  ? 'bg-[#1C4939] text-white border-[#1C4939] shadow-xs'
-                  : 'bg-white/80 dark:bg-[#16382E]/60 text-[#102D25] dark:text-[#E8E4D9] border-slate-200 dark:border-[#214E3E] hover:border-[#1C4939]'
-              }`}
-            >
-              <ShieldCheck className="w-4 h-4 shrink-0 text-[#D4A94F]" />
-              <div>
-                <span className="block font-black">Investidor</span>
-                <span className="text-[10px] opacity-80 font-normal">Independência</span>
-              </div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setPreset('custom')}
-              className={`p-2.5 rounded-xl border text-left text-xs font-bold transition-all flex items-center gap-2 ${
-                preset === 'custom'
-                  ? 'bg-[#1C4939] text-white border-[#1C4939] shadow-xs'
-                  : 'bg-white/80 dark:bg-[#16382E]/60 text-[#102D25] dark:text-[#E8E4D9] border-slate-200 dark:border-[#214E3E] hover:border-[#1C4939]'
-              }`}
-            >
-              <Sliders className="w-4 h-4 shrink-0 text-[#D4A94F]" />
-              <div>
-                <span className="block font-black">Manual</span>
-                <span className="text-[10px] opacity-80 font-normal">Personalizado</span>
-              </div>
-            </button>
+          <div className="flex items-center gap-1.5">
+            {([1, 3, 5, 10] as HorizonYears[]).map((y) => (
+              <button
+                key={y}
+                type="button"
+                onClick={() => setHorizon(y)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all ${
+                  horizon === y
+                    ? 'bg-[#1C4939] text-[#E8E4D9] shadow-xs scale-105 border border-[#1C4939]'
+                    : 'bg-white/80 dark:bg-[#102D25] text-[#526B61] dark:text-[#9AB3A8] border border-slate-200 dark:border-[#214E3E] hover:border-[#1C4939]'
+                }`}
+              >
+                {y} {y === 1 ? 'Ano' : 'Anos'}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Sliders Interativos Conectados à Realidade */}
-        <div className="space-y-4 bg-[#FAF8F4] dark:bg-[#16382E]/60 p-5 rounded-2xl border border-[#1C4939]/15 dark:border-[#214E3E]">
+        {/* 2. GRANDES NÚMEROS DE IMPACTO (O QUE FAZ O OLHO BRILHAR!) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           
-          {/* Slider 1: Alimentação / Delivery Real */}
-          <div className="space-y-2">
-            <div className="flex justify-between text-xs font-bold text-[#102D25] dark:text-[#E8E4D9]">
-              <div>
-                <span>Otimizar Alimentação & Restaurantes:</span>
-                <span className="block text-[10px] text-[#526B61] dark:text-[#9AB3A8] font-normal">
-                  Gasto atual do mês: {formatBRL(realFoodExpense, privacyMode)}
-                </span>
-              </div>
-              <span className="font-black text-[#1C4939] dark:text-[#78C6A3] font-mono tabular-nums text-right">
-                {deliveryCutPct}% (- {formatBRL((deliveryCutPct / 100) * realFoodExpense, privacyMode)}/mês)
+          {/* Card de Patrimônio Total Projetado */}
+          <div className="p-6 rounded-3xl bg-gradient-to-br from-[#102D25] to-[#1C4939] text-[#FAF8F4] border-2 border-[#D4A94F]/50 shadow-xl relative overflow-hidden flex flex-col justify-between">
+            <div className="absolute top-0 right-0 p-4 opacity-15">
+              <Coins className="w-24 h-24 text-[#D4A94F]" />
+            </div>
+
+            <div>
+              <span className="text-[11px] font-black uppercase tracking-wider text-[#D4A94F] flex items-center gap-1.5">
+                <Crown className="w-4 h-4" />
+                Seu Patrimônio em {horizon} {horizon === 1 ? 'Ano' : 'Anos'}:
+              </span>
+              <p className="text-3xl sm:text-4xl font-black text-white mt-1.5 font-mono tabular-nums tracking-tight">
+                {formatBRL(projection.totalAccumulated, privacyMode)}
+              </p>
+            </div>
+
+            <div className="pt-4 mt-4 border-t border-white/10 flex items-center justify-between text-xs">
+              <span className="text-[#9AB3A8]">
+                Com aportes de <strong>{formatBRL(monthlyContribution, privacyMode)}/mês</strong>
+              </span>
+              <span className="font-bold text-[#78C6A3]">
+                Taxa de 10,5% a.a. (CDI)
               </span>
             </div>
-            <input
-              type="range"
-              min={0}
-              max={60}
-              step={5}
-              value={deliveryCutPct}
-              onChange={(e) => {
-                setDeliveryCutPct(Number(e.target.value));
-                setPreset('custom');
-              }}
-              className="w-full accent-[#1C4939] dark:accent-[#D4A94F] cursor-pointer"
-            />
           </div>
 
-          {/* Slider 2: Assinaturas Supérfluas */}
-          <div className="space-y-2">
-            <div className="flex justify-between text-xs font-bold text-[#102D25] dark:text-[#E8E4D9]">
-              <div>
-                <span>Rever Assinaturas & Serviços Recorrentes:</span>
-                <span className="block text-[10px] text-[#526B61] dark:text-[#9AB3A8] font-normal">
-                  Streamings, apps ou mensalidades esquecidas
-                </span>
-              </div>
-              <span className="font-black text-[#1C4939] dark:text-[#78C6A3] font-mono tabular-nums">
-                - {formatBRL(cancelBillsAmount, privacyMode)}/mês
+          {/* Card de Salário Passivo Mensal (Viver de Renda!) */}
+          <div className="p-6 rounded-3xl bg-white dark:bg-[#16382E] border-2 border-[#1C4939]/25 dark:border-[#214E3E] shadow-sm flex flex-col justify-between">
+            <div>
+              <span className="text-[11px] font-black uppercase tracking-wider text-[#1C4939] dark:text-[#78C6A3] flex items-center gap-1.5">
+                <Zap className="w-4 h-4 text-[#D4A94F]" />
+                Renda Passiva Mensal Estimada:
               </span>
+              <p className="text-3xl sm:text-4xl font-black text-[#102D25] dark:text-[#E8E4D9] mt-1.5 font-mono tabular-nums tracking-tight">
+                +{formatBRL(projection.passiveMonthlyIncome, privacyMode)}
+                <span className="text-sm font-bold text-[#526B61] dark:text-[#9AB3A8]"> /mês</span>
+              </p>
+              <p className="text-xs text-[#526B61] dark:text-[#9AB3A8] mt-1">
+                Dinheiro caindo na sua conta todo mês sem você mexer no valor principal!
+              </p>
             </div>
-            <input
-              type="range"
-              min={0}
-              max={200}
-              step={10}
-              value={cancelBillsAmount}
-              onChange={(e) => {
-                setCancelBillsAmount(Number(e.target.value));
-                setPreset('custom');
-              }}
-              className="w-full accent-[#1C4939] dark:accent-[#D4A94F] cursor-pointer"
-            />
-          </div>
 
-          {/* Slider 3: Poupança Direta */}
-          <div className="space-y-2">
-            <div className="flex justify-between text-xs font-bold text-[#102D25] dark:text-[#E8E4D9]">
-              <div>
-                <span>Aporte Mensal Direto para Investir:</span>
-                <span className="block text-[10px] text-[#526B61] dark:text-[#9AB3A8] font-normal">
-                  Valor transferido direto para a reserva
-                </span>
-              </div>
-              <span className="font-black text-[#1C4939] dark:text-[#78C6A3] font-mono tabular-nums">
-                + {formatBRL(extraDirectSavings, privacyMode)}/mês
-              </span>
+            <div className="pt-3 mt-3 border-t border-slate-100 dark:border-[#214E3E] flex items-center gap-2 text-xs font-semibold text-[#1C4939] dark:text-[#78C6A3]">
+              <ShieldCheck className="w-4 h-4 shrink-0 text-[#D4A94F]" />
+              <span>Garante <strong>{projection.monthsOfEmergency} meses</strong> do seu padrão de vida pago</span>
             </div>
-            <input
-              type="range"
-              min={0}
-              max={500}
-              step={25}
-              value={extraDirectSavings}
-              onChange={(e) => {
-                setExtraDirectSavings(Number(e.target.value));
-                setPreset('custom');
-              }}
-              className="w-full accent-[#1C4939] dark:accent-[#D4A94F] cursor-pointer"
-            />
           </div>
 
         </div>
 
-        {/* Resultados em 3 Tempos */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
-          <div className="p-4 rounded-2xl bg-white dark:bg-[#16382E] border border-[#1C4939]/20 dark:border-[#214E3E]">
-            <span className="text-[10px] font-black uppercase text-[#526B61] dark:text-[#9AB3A8] block">
-              Mais Dinheiro no Mês
-            </span>
-            <p className="text-xl font-black text-[#1C4939] dark:text-[#78C6A3] mt-1 font-mono tabular-nums">
-              +{formatBRL(results.monthlyTotalSaved, privacyMode)}
-            </p>
-            <span className="text-[10px] text-[#526B61] dark:text-[#9AB3A8] block mt-0.5">
-              todo mês na sua conta
-            </span>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-white dark:bg-[#16382E] border border-[#1C4939]/20 dark:border-[#214E3E]">
-            <span className="text-[10px] font-black uppercase text-[#526B61] dark:text-[#9AB3A8] block">
-              Acumulado em 1 Ano
-            </span>
-            <p className="text-xl font-black text-[#102D25] dark:text-[#E8E4D9] mt-1 font-mono tabular-nums">
-              {formatBRL(results.annualTotal, privacyMode)}
-            </p>
-            <span className="text-[10px] text-[#526B61] dark:text-[#9AB3A8] block mt-0.5">
-              12 meses de economia
-            </span>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-[#1C4939] text-[#FAF8F4] border border-[#D4A94F]/40 shadow-sm">
-            <span className="text-[10px] font-black uppercase text-[#D4A94F] block">
-              Em 5 Anos com Rendimento
-            </span>
-            <p className="text-xl font-black text-[#FAF8F4] mt-1 font-mono tabular-nums">
-              {formatBRL(results.compoundFiveYears, privacyMode)}
-            </p>
-            <span className="text-[10px] text-[#78C6A3] block mt-0.5">
-              + {formatBRL(results.interestEarnedFiveYears, privacyMode)} só de juros
-            </span>
-          </div>
-        </div>
-
-        {/* Barra Visual dos Juros Compostos (Depósito vs Juros) */}
-        <div className="p-4 rounded-2xl bg-[#FAF8F4] dark:bg-[#16382E]/50 border border-[#1C4939]/15 dark:border-[#214E3E] space-y-2.5">
+        {/* 3. A BOLA DE NEVE DOS JUROS (SEU BOLSO vs LUCRO DOS JUROS) */}
+        <div className="p-5 rounded-2xl bg-[#FAF8F4] dark:bg-[#16382E]/50 border border-[#1C4939]/15 dark:border-[#214E3E] space-y-3">
           <div className="flex items-center justify-between text-xs">
             <span className="font-extrabold text-[#102D25] dark:text-[#E8E4D9] flex items-center gap-1.5">
-              <TrendingUp className="w-4 h-4 text-[#D4A94F]" />
-              Como esse patrimônio é formado em 5 anos:
+              <Sparkles className="w-4 h-4 text-[#D4A94F]" />
+              Composição desse Patrimônio (O Efeito Bola de Neve):
             </span>
-            <span className="text-[10px] text-[#526B61] dark:text-[#9AB3A8]">
-              Taxa de 10% a.a. (100% CDI)
+            <span className="text-[11px] font-bold text-[#526B61] dark:text-[#9AB3A8]">
+              {Math.round((projection.totalInterestEarned / projection.totalAccumulated) * 100)}% gerado só por juros!
             </span>
           </div>
 
-          {/* Barra segmentada */}
-          <div className="w-full h-3 rounded-full overflow-hidden flex bg-slate-200 dark:bg-slate-800">
+          {/* Barra Visual Dividida */}
+          <div className="w-full h-4 rounded-full overflow-hidden flex bg-slate-200 dark:bg-slate-800 shadow-inner">
             <div 
-              style={{ width: `${(results.pureDepositedFiveYears / results.compoundFiveYears) * 100}%` }}
-              className="bg-[#1C4939] h-full"
+              style={{ width: `${(projection.totalDeposited / projection.totalAccumulated) * 100}%` }}
+              className="bg-[#1C4939] h-full transition-all duration-300"
               title="Total depositado do seu bolso"
             />
             <div 
-              style={{ width: `${(results.interestEarnedFiveYears / results.compoundFiveYears) * 100}%` }}
-              className="bg-[#D4A94F] h-full"
-              title="Rendimento gerado pelos juros compostos"
+              style={{ width: `${(projection.totalInterestEarned / projection.totalAccumulated) * 100}%` }}
+              className="bg-[#D4A94F] h-full transition-all duration-300"
+              title="Lucro acumulado gerado pelos juros compostos"
             />
           </div>
 
-          <div className="flex justify-between items-center text-[11px] font-bold">
-            <span className="text-[#1C4939] dark:text-[#78C6A3] flex items-center gap-1">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#1C4939] inline-block" />
-              Do seu bolso: <strong>{formatBRL(results.pureDepositedFiveYears, privacyMode)}</strong>
-            </span>
-            <span className="text-[#9A7220] dark:text-[#D4A94F] flex items-center gap-1">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#D4A94F] inline-block" />
-              Lucro dos juros: <strong>+{formatBRL(results.interestEarnedFiveYears, privacyMode)}</strong>
-            </span>
-          </div>
-        </div>
-
-        {/* O que esse dinheiro realiza na vida real? */}
-        <div className="space-y-2">
-          <p className="text-[11px] font-black uppercase tracking-wider text-[#526B61] dark:text-[#9AB3A8]">
-            O que essa economia realiza para você:
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-            <div className="p-3 rounded-xl bg-white/90 dark:bg-[#16382E]/80 border border-slate-200 dark:border-[#214E3E] flex items-center gap-2.5">
-              <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-400">
-                <ShieldCheck className="w-4 h-4" />
-              </div>
-              <div>
-                <span className="font-extrabold text-[#102D25] dark:text-[#E8E4D9] block">
-                  Reserva de Emergência
-                </span>
-                <span className="text-[10px] text-[#526B61] dark:text-[#9AB3A8]">
-                  Montada em cerca de 6 a 8 meses
-                </span>
-              </div>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs font-bold pt-1">
+            <div className="flex items-center gap-1.5 text-[#1C4939] dark:text-[#78C6A3]">
+              <span className="w-3 h-3 rounded-full bg-[#1C4939] shrink-0 inline-block" />
+              <span>O que saiu do seu bolso: <strong>{formatBRL(projection.totalDeposited, privacyMode)}</strong></span>
             </div>
 
-            <div className="p-3 rounded-xl bg-white/90 dark:bg-[#16382E]/80 border border-slate-200 dark:border-[#214E3E] flex items-center gap-2.5">
-              <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-400">
-                <Sparkles className="w-4 h-4" />
-              </div>
-              <div>
-                <span className="font-extrabold text-[#102D25] dark:text-[#E8E4D9] block">
-                  Viagem ou Conquista
-                </span>
-                <span className="text-[10px] text-[#526B61] dark:text-[#9AB3A8]">
-                  {formatBRL(results.annualTotal, privacyMode)} pagos à vista em 1 ano
-                </span>
-              </div>
+            <div className="flex items-center gap-1.5 text-[#9A7220] dark:text-[#D4A94F]">
+              <span className="w-3 h-3 rounded-full bg-[#D4A94F] shrink-0 inline-block" />
+              <span>Lucro que o dinheiro gerou sozinho: <strong>+{formatBRL(projection.totalInterestEarned, privacyMode)}</strong></span>
             </div>
           </div>
         </div>
 
-        {/* Aceleração nas Metas Ativas do Usuário (se existirem) */}
-        {results.goalsAcceleration.length > 0 && (
-          <div className="space-y-2 pt-1">
-            <p className="text-[11px] font-black uppercase tracking-wider text-[#526B61] dark:text-[#9AB3A8]">
-              Aceleração das Suas Metas de Poupança
-            </p>
-            <div className="space-y-1.5 max-h-32 overflow-y-auto pr-1">
-              {results.goalsAcceleration.map((goal) => (
-                <div
-                  key={goal.id}
-                  className="p-2.5 rounded-xl bg-white/80 dark:bg-[#16382E]/50 border border-slate-200 dark:border-[#214E3E] flex items-center justify-between text-xs"
-                >
-                  <div className="flex items-center gap-2">
-                    <Target className="w-4 h-4 text-[#D4A94F]" />
-                    <span className="font-extrabold text-[#102D25] dark:text-[#E8E4D9]">{goal.title}</span>
+        {/* 4. CONTROLES DE PODER (APORTE MENSAL E PATRIMÔNIO ATUAL) */}
+        <div className="p-5 rounded-2xl bg-white dark:bg-[#102D25] border border-[#1C4939]/20 dark:border-[#214E3E] space-y-5">
+          
+          {/* Controle do Aporte Mensal */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <label className="text-xs font-black uppercase text-[#102D25] dark:text-[#E8E4D9] block">
+                  Quanto você vai aportar por mês?
+                </label>
+                <span className="text-[11px] text-[#526B61] dark:text-[#9AB3A8]">
+                  O motor principal do seu crescimento financeiro
+                </span>
+              </div>
+
+              <div className="text-right">
+                <span className="text-xl sm:text-2xl font-black text-[#1C4939] dark:text-[#78C6A3] font-mono tabular-nums">
+                  {formatBRL(monthlyContribution, privacyMode)}
+                </span>
+                <span className="text-xs font-semibold text-[#526B61] dark:text-[#9AB3A8]"> /mês</span>
+              </div>
+            </div>
+
+            {/* Slider de Aporte */}
+            <input
+              type="range"
+              min={100}
+              max={5000}
+              step={50}
+              value={monthlyContribution}
+              onChange={(e) => setMonthlyContribution(Number(e.target.value))}
+              className="w-full accent-[#1C4939] dark:accent-[#D4A94F] cursor-pointer h-2 bg-slate-200 dark:bg-slate-700 rounded-lg"
+            />
+
+            {/* Atalhos de Alto Impacto baseados na Renda Real ou Valores Fortes */}
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <span className="text-[10px] font-black uppercase tracking-wider text-[#526B61] dark:text-[#9AB3A8]">
+                Atalhos de Aporte:
+              </span>
+
+              {totalIncome > 0 ? (
+                // Se o usuário tiver renda cadastrada, sugere % da renda real
+                [15, 25, 35, 50].map((pct) => {
+                  const val = Math.round(totalIncome * (pct / 100));
+                  return (
+                    <button
+                      key={pct}
+                      type="button"
+                      onClick={() => setMonthlyContribution(val)}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                        monthlyContribution === val
+                          ? 'bg-[#1C4939] text-[#E8E4D9] shadow-xs'
+                          : 'bg-[#FAF8F4] dark:bg-[#16382E] text-[#102D25] dark:text-[#E8E4D9] border border-slate-200 dark:border-[#214E3E] hover:border-[#D4A94F]'
+                      }`}
+                    >
+                      {pct}% da renda ({formatBRL(val, privacyMode)})
+                    </button>
+                  );
+                })
+              ) : (
+                // Se não tiver renda cadastrada, usa valores padrão de impacto
+                [300, 600, 1200, 2500].map((val) => (
+                  <button
+                    key={val}
+                    type="button"
+                    onClick={() => setMonthlyContribution(val)}
+                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                      monthlyContribution === val
+                        ? 'bg-[#1C4939] text-[#E8E4D9] shadow-xs'
+                        : 'bg-[#FAF8F4] dark:bg-[#16382E] text-[#102D25] dark:text-[#E8E4D9] border border-slate-200 dark:border-[#214E3E] hover:border-[#D4A94F]'
+                    }`}
+                  >
+                    {formatBRL(val, privacyMode)}
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Capital Inicial (Se já tiver dinheiro guardado) */}
+          <div className="pt-4 border-t border-slate-100 dark:border-[#214E3E] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <span className="text-xs font-extrabold text-[#102D25] dark:text-[#E8E4D9] block">
+                Já tem algum valor guardado para começar?
+              </span>
+              <span className="text-[11px] text-[#526B61] dark:text-[#9AB3A8]">
+                O dinheiro inicial potencializa ainda mais a velocidade dos juros
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-[#526B61] dark:text-[#9AB3A8]">R$</span>
+              <input
+                type="number"
+                min={0}
+                step={500}
+                value={startingCapital}
+                onChange={(e) => setStartingCapital(Math.max(0, Number(e.target.value)))}
+                className="input-duo text-xs py-1.5 px-3 w-32 font-mono tabular-nums font-bold"
+                placeholder="0,00"
+              />
+            </div>
+          </div>
+
+        </div>
+
+        {/* 5. METAS ATIVAS ACELERADAS */}
+        {savingsGoals.length > 0 && (
+          <div className="space-y-2">
+            <span className="text-[11px] font-black uppercase tracking-wider text-[#526B61] dark:text-[#9AB3A8] block">
+              Impacto Direto nas Suas Metas Ativas:
+            </span>
+            <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
+              {savingsGoals.map((g) => {
+                const remaining = Math.max(0, g.targetAmount - g.currentAmount);
+                const monthsToFinish = Math.ceil(remaining / Math.max(1, monthlyContribution));
+                return (
+                  <div
+                    key={g.id}
+                    className="p-3 rounded-xl bg-[#FAF8F4] dark:bg-[#16382E]/50 border border-slate-200 dark:border-[#214E3E] flex items-center justify-between text-xs"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Target className="w-4 h-4 text-[#D4A94F]" />
+                      <div>
+                        <span className="font-extrabold text-[#102D25] dark:text-[#E8E4D9]">{g.title}</span>
+                        <span className="text-[10px] text-[#526B61] dark:text-[#9AB3A8] block">
+                          Faltam {formatBRL(remaining, privacyMode)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 font-bold text-emerald-600 dark:text-emerald-400 text-xs">
+                      <CheckCircle2 className="w-4 h-4 shrink-0" />
+                      <span>Alcançada em apenas <strong>{monthsToFinish} {monthsToFinish === 1 ? 'mês' : 'meses'}</strong>!</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1.5 font-bold text-emerald-600 dark:text-emerald-400 text-[11px]">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>Concluída {goal.monthsSaved} meses antes!</span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
 
-        {/* Formulário Inline para Criar Meta com a Simulação */}
+        {/* 6. FORMULÁRIO DE COMPROMISSO INLINE (TRANSFORMAR EM META) */}
         {isCreatingGoal ? (
-          <div className="p-4 rounded-2xl bg-[#FAF8F4] dark:bg-[#16382E] border border-[#D4A94F]/50 space-y-3 animate-in fade-in duration-200">
+          <div className="p-5 rounded-2xl bg-[#FAF8F4] dark:bg-[#16382E] border-2 border-[#D4A94F] shadow-sm space-y-3 animate-in fade-in duration-200">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-black text-[#102D25] dark:text-[#E8E4D9] flex items-center gap-1.5">
-                <Target className="w-4 h-4 text-[#D4A94F]" />
-                Criar Meta com a Economia Simulada
+              <span className="text-sm font-black text-[#102D25] dark:text-[#E8E4D9] flex items-center gap-2">
+                <Crown className="w-4 h-4 text-[#D4A94F]" />
+                Registrar Minha Meta de Liberdade Financeira
               </span>
               <button
                 type="button"
                 onClick={() => setIsCreatingGoal(false)}
-                className="text-[11px] text-slate-400 hover:text-slate-600"
+                className="text-xs text-slate-400 hover:text-slate-600 font-bold"
               >
                 Cancelar
               </button>
             </div>
 
+            <p className="text-xs text-[#526B61] dark:text-[#9AB3A8]">
+              Isso vai criar uma meta oficial no seu painel para você acompanhar os aportes e ver sua bola de neve crescer mês a mês.
+            </p>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
               <div>
-                <label className="block text-[10px] font-bold text-[#526B61] dark:text-[#9AB3A8] uppercase mb-1">
+                <label className="block text-[10px] font-black text-[#526B61] dark:text-[#9AB3A8] uppercase mb-1">
                   Nome da Meta:
                 </label>
                 <input
                   type="text"
                   value={goalTitle}
                   onChange={(e) => setGoalTitle(e.target.value)}
-                  className="input-duo text-xs w-full"
-                  placeholder="Ex: Reserva Criada no Simulador"
+                  className="input-duo text-xs w-full font-bold"
+                  placeholder="Ex: Minha Independência em 5 Anos"
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold text-[#526B61] dark:text-[#9AB3A8] uppercase mb-1">
-                  Objetivo em 1 Ano (R$):
+                <label className="block text-[10px] font-black text-[#526B61] dark:text-[#9AB3A8] uppercase mb-1">
+                  Patrimônio Alvo em {horizon} {horizon === 1 ? 'Ano' : 'Anos'} (R$):
                 </label>
                 <input
                   type="number"
                   value={goalTargetAmount}
                   onChange={(e) => setGoalTargetAmount(Number(e.target.value))}
-                  className="input-duo text-xs w-full font-mono tabular-nums"
+                  className="input-duo text-xs w-full font-mono tabular-nums font-bold"
                 />
               </div>
             </div>
@@ -536,37 +478,38 @@ export const WhatIfSimulatorModal: React.FC<WhatIfSimulatorModalProps> = ({
                 type="button"
                 disabled={isSavingGoal}
                 onClick={handleSaveGoal}
-                className="btn-duo btn-duo-yellow px-4 py-2 text-xs font-black flex items-center gap-1.5"
+                className="btn-duo btn-duo-yellow px-5 py-2.5 text-xs font-black flex items-center gap-1.5 shadow-sm"
               >
-                {isSavingGoal ? 'Salvando...' : 'Confirmar e Salvar Meta'}
+                {isSavingGoal ? 'Salvando Meta...' : 'Confirmar e Iniciar Minha Jornada'}
               </button>
             </div>
           </div>
         ) : null}
 
         {goalFeedback && (
-          <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 text-xs font-bold text-emerald-800 dark:text-emerald-300">
-            {goalFeedback}
+          <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/70 border border-emerald-300 text-xs font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>{goalFeedback}</span>
           </div>
         )}
 
-        {/* Rodapé com Botão Acionável */}
+        {/* 7. RODAPÉ COM CHAMADA PARA AÇÃO INSPIRADORA */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-[#214E3E]">
           <button
             type="button"
             onClick={() => setIsCreatingGoal(!isCreatingGoal)}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black bg-[#FAF8F4] dark:bg-[#16382E] text-[#1C4939] dark:text-[#78C6A3] border border-[#1C4939]/30 hover:border-[#D4A94F] shadow-xs transition-all"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl text-xs sm:text-sm font-black bg-[#D4A94F] hover:bg-[#C3963B] text-[#102D25] shadow-md transition-all active:scale-95"
           >
-            <PlusCircle className="w-4 h-4 text-[#D4A94F]" />
-            <span>Transformar essa Economia em Meta Real</span>
+            <Rocket className="w-4 h-4 stroke-[2.5]" />
+            <span>Transformar essa Simulação em Meta Real</span>
           </button>
 
           <button
             type="button"
             onClick={onClose}
-            className="w-full sm:w-auto btn-duo btn-duo-green px-6 py-2.5 text-xs font-black"
+            className="w-full sm:w-auto btn-duo btn-duo-green px-6 py-2.5 text-xs sm:text-sm font-black"
           >
-            Fechar Simulador
+            Fechar
           </button>
         </div>
 
