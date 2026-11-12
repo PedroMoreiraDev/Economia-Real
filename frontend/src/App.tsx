@@ -1996,6 +1996,13 @@ const MainDashboard: React.FC = () => {
         isOpen={isWhatIfModalOpen}
         onClose={() => setIsWhatIfModalOpen(false)}
         savingsGoals={savingsGoals}
+        categoryDistribution={analytics?.categoryDistribution || []}
+        token={token}
+        onGoalCreated={() => {
+          if (token) {
+            fetchSavingsGoalsApi(token).then(setSavingsGoals).catch(() => {});
+          }
+        }}
         initialDeliveryCut={whatIfPrefill?.deliveryCut}
         initialCancelBills={whatIfPrefill?.cancelBills}
         privacyMode={privacyMode}
