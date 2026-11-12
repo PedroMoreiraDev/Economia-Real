@@ -1290,6 +1290,55 @@ const MainDashboard: React.FC = () => {
                           </div>
                         )}
 
+                        {/* MINI-PROJEÇÃO DO POTENCIAL DA ECONOMIA INTEGRADA AO TETO */}
+                        {(() => {
+                          const n = parseFloat(tempSavingsInput.replace(/\./g, '').replace(',', '.'));
+                          const savingsVal = isNaN(n) ? 0 : Math.max(0, n);
+                          if (savingsVal <= 0) return null;
+
+                          const monthlyRate = Math.pow(1 + 0.105, 1 / 12) - 1; // 10.5% a.a. (~100% CDI)
+                          const fiveYears = Math.round(savingsVal * ((Math.pow(1 + monthlyRate, 60) - 1) / monthlyRate));
+                          const passiveMonthly = Math.round(fiveYears * monthlyRate);
+
+                          return (
+                            <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[#102D25] to-[#1C4939] text-[#FAF8F4] border border-[#D4A94F]/40 shadow-sm space-y-2 animate-in fade-in duration-200">
+                              <div className="flex items-center justify-between">
+                                <span className="text-[10px] font-black uppercase tracking-wider text-[#D4A94F] flex items-center gap-1.5">
+                                  <Sparkles className="w-3.5 h-3.5" />
+                                  Potencial dessa Economia (Juros Compostos):
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => setIsWhatIfModalOpen(true)}
+                                  className="text-[10px] font-black text-[#D4A94F] hover:underline flex items-center gap-1"
+                                >
+                                  <span>Simulador Completo</span>
+                                  <ArrowUpRight className="w-3 h-3" />
+                                </button>
+                              </div>
+
+                              <div className="grid grid-cols-2 gap-2 text-xs">
+                                <div className="p-2 rounded-xl bg-white/10 border border-white/10">
+                                  <span className="text-[10px] text-[#9AB3A8] block">Em 5 Anos (10,5% a.a.):</span>
+                                  <strong className="text-sm font-black text-white font-mono tabular-nums block">
+                                    {formatValue(fiveYears)}
+                                  </strong>
+                                </div>
+                                <div className="p-2 rounded-xl bg-white/10 border border-white/10">
+                                  <span className="text-[10px] text-[#9AB3A8] block">Renda Passiva Estimada:</span>
+                                  <strong className="text-sm font-black text-[#78C6A3] font-mono tabular-nums block">
+                                    +{formatValue(passiveMonthly)}/mês
+                                  </strong>
+                                </div>
+                              </div>
+
+                              <p className="text-[10px] text-[#9AB3A8] font-medium leading-tight">
+                                💡 Essa economia mensal de <strong>{formatValue(savingsVal)}</strong> gera um salário passivo sem você mexer no valor principal!
+                              </p>
+                            </div>
+                          );
+                        })()}
+
                         <div className="flex items-center justify-between pt-2 border-t border-slate-200/60 dark:border-[#214E3E]">
                           {effectiveGlobalLimit > 0 ? (
                             <button
@@ -1330,9 +1379,20 @@ const MainDashboard: React.FC = () => {
                               {formatValue(effectiveGlobalLimit)}
                             </span>
                             {summary.totalIncome > 0 && (
-                              <span className="text-[11px] font-semibold text-emerald-600 dark:text-[#78C6A3] block pt-0.5">
-                                Meta de Economia: {formatValue(Math.max(0, summary.totalIncome - effectiveGlobalLimit))} ({Math.max(0, Math.round(((summary.totalIncome - effectiveGlobalLimit) / summary.totalIncome) * 100))}% da renda)
-                              </span>
+                              <div className="flex flex-wrap items-center gap-2 pt-0.5">
+                                <span className="text-[11px] font-semibold text-emerald-600 dark:text-[#78C6A3]">
+                                  Meta de Economia: {formatValue(Math.max(0, summary.totalIncome - effectiveGlobalLimit))} ({Math.max(0, Math.round(((summary.totalIncome - effectiveGlobalLimit) / summary.totalIncome) * 100))}% da renda)
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => setIsWhatIfModalOpen(true)}
+                                  className="text-[10px] font-black text-[#1C4939] dark:text-[#D4A94F] hover:underline flex items-center gap-1"
+                                  title="Ver potencial dessa economia acumulada em 1, 3, 5 e 10 anos"
+                                >
+                                  <Sparkles className="w-3 h-3 text-[#D4A94F]" />
+                                  <span>Simular Futuro</span>
+                                </button>
+                              </div>
                             )}
                           </div>
                           <div className="text-right">
