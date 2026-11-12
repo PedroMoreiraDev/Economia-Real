@@ -42,7 +42,7 @@ import { SavingsGoal } from './types/goal';
 import { LandingPage } from './components/LandingPage';
 import { ConfirmModal } from './components/ConfirmModal';
 import { OnboardingTourModal } from './components/OnboardingTourModal';
-import { CurrencyInput } from './components/CurrencyInput';
+import { CurrencyInput, parseRawToCents } from './components/CurrencyInput';
 import { TelemetryModal } from './components/TelemetryModal';
 import { LegalModal, LegalTab } from './components/LegalModal';
 import { useTheme } from './context/ThemeContext';
@@ -839,7 +839,7 @@ const MainDashboard: React.FC = () => {
       : totalBudgetFromCategories;
 
   const handleSaveGlobalLimit = async () => {
-    const parsed = parseFloat(tempLimitInput);
+    const parsed = parseRawToCents(tempLimitInput) / 100;
     if (!isNaN(parsed) && parsed > 0) {
       if (user?.id) {
         // Atualiza cache local imediatamente para feedback visual instantâneo
@@ -1292,8 +1292,7 @@ const MainDashboard: React.FC = () => {
 
                         {/* MINI-PROJEÇÃO DO POTENCIAL DA ECONOMIA INTEGRADA AO TETO */}
                         {(() => {
-                          const n = parseFloat(tempSavingsInput.replace(/\./g, '').replace(',', '.'));
-                          const savingsVal = isNaN(n) ? 0 : Math.max(0, n);
+                          const savingsVal = parseRawToCents(tempSavingsInput) / 100;
                           if (savingsVal <= 0) return null;
 
                           const monthlyRate = Math.pow(1 + 0.105, 1 / 12) - 1; // 10.5% a.a. (~100% CDI)
