@@ -1531,9 +1531,7 @@ const MainDashboard: React.FC = () => {
                   analytics={analytics}
                   budgets={budgets}
                   transactions={transactions}
-                  savingsGoals={savingsGoals}
                   recurringBills={recurringBills}
-                  creditCards={creditCards}
                   onOpenBudgetModal={() => setBudgetModalOpen(true)}
                   onOpenAiBudgetModal={() => setAiBudgetModalOpen(true)}
                   onOpenWhatIfSimulator={() => setIsWhatIfModalOpen(true)}

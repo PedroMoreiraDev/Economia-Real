@@ -14,23 +14,17 @@ import {
 import { AnalyticsOverview } from '../types/analytics';
 import { BudgetProgressDto } from '../types/budget';
 import { Transaction } from '../types/financial';
-import { SavingsGoal } from '../types/goal';
 import { RecurringBill } from '../types/recurring';
-import { CreditCard } from '../types/card';
 import { FinancialEvolutionChart } from './FinancialEvolutionChart';
 import { CategoryDonutChart } from './CategoryDonutChart';
 import { FiftyThirtyTwentyWidget } from './FiftyThirtyTwentyWidget';
-import { FinancialHealthRadar } from './FinancialHealthRadar';
-import { CashFlowForecastChart } from './CashFlowForecastChart';
 import { SavingsLeakageSection } from './SavingsLeakageSection';
 
 interface AnalyticsSectionProps {
   analytics: AnalyticsOverview | null;
   budgets: BudgetProgressDto[];
   transactions?: Transaction[];
-  savingsGoals?: SavingsGoal[];
   recurringBills?: RecurringBill[];
-  creditCards?: CreditCard[];
   onOpenBudgetModal: () => void;
   onOpenAiBudgetModal?: () => void;
   onOpenWhatIfSimulator?: (prefill?: { deliveryCut?: number; cancelBills?: number }) => void;
@@ -49,9 +43,7 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({
   analytics,
   budgets,
   transactions = [],
-  savingsGoals = [],
   recurringBills = [],
-  creditCards = [],
   onOpenBudgetModal,
   onOpenAiBudgetModal,
   onOpenWhatIfSimulator,
@@ -65,15 +57,8 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({
 
   const { monthlyEvolution, categoryDistribution, burnRate } = analytics;
 
-  // Total de receitas e despesas do mês corrente
+  // Total de receitas do mês corrente
   const totalIncome = monthlyEvolution.length > 0 ? (monthlyEvolution[monthlyEvolution.length - 1].income || 0) : 0;
-  const totalExpense = monthlyEvolution.length > 0 ? (monthlyEvolution[monthlyEvolution.length - 1].expense || 0) : 0;
-  const currentBalance = totalIncome - totalExpense;
-
-  // Gastos em cartão no mês
-  const cardExpense = transactions
-    .filter((t) => t.type === 'EXPENSE' && (t.notes?.includes('CARD') || t.notes?.includes('CARTÃO') || t.notes?.includes('PARCELA')))
-    .reduce((sum, t) => sum + t.amount, 0);
 
   return (
     <div className="space-y-6">
@@ -404,26 +389,7 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({
         privacyMode={privacyMode}
       />
 
-      {/* 6. RADAR DE SAÚDE FINANCEIRA */}
-      <FinancialHealthRadar
-        totalIncome={totalIncome}
-        totalExpense={totalExpense}
-        budgets={budgets}
-        savingsGoals={savingsGoals}
-        recurringBills={recurringBills}
-        creditCardExpense={cardExpense}
-      />
-
-      {/* 7. PREVISÃO DE SALDO DIÁRIO (30 DIAS) */}
-      <CashFlowForecastChart
-        currentBalance={currentBalance}
-        recurringBills={recurringBills}
-        creditCards={creditCards}
-        estimatedMonthlyIncome={totalIncome}
-        privacyMode={privacyMode}
-      />
-
-      {/* 8. DETETIVE DE ECONOMIA / RASTREADOR DE VAZAMENTOS */}
+      {/* 6. DETETIVE DE ECONOMIA / RASTREADOR DE VAZAMENTOS */}
       <SavingsLeakageSection
         transactions={transactions}
         recurringBills={recurringBills}
