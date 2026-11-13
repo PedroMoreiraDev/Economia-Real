@@ -122,8 +122,7 @@ export const CategoryDonutChart: React.FC<CategoryDonutChartProps> = ({
           t.description.toLowerCase().includes(focusCategory.categoryName.toLowerCase());
         return matchesCategory && t.type === 'EXPENSE';
       })
-      .sort((a, b) => b.amount - a.amount)
-      .slice(0, 5); // top 5 gastos
+      .sort((a, b) => b.amount - a.amount);
   }, [transactions, selectedCategoryName, activeCategory, distribution]);
 
   if (!distribution || distribution.length === 0 || totalExpense === 0) {
@@ -331,20 +330,20 @@ export const CategoryDonutChart: React.FC<CategoryDonutChartProps> = ({
                 </div>
               </div>
 
-              {/* Lista dos Maiores Gastos da Categoria */}
+              {/* Lista Completa de Lançamentos da Categoria */}
               <div className="space-y-2.5">
                 <div className="flex items-center justify-between">
                   <p className="text-[11px] font-black uppercase tracking-wider text-[#526B61] dark:text-[#9AB3A8] flex items-center gap-1.5">
                     <Receipt className="w-3.5 h-3.5 text-[#1C4939] dark:text-[#78C6A3]" />
-                    Maiores Lançamentos Desta Categoria
+                    Lançamentos Desta Categoria
                   </p>
-                  <span className="text-[10px] text-[#526B61] dark:text-[#9AB3A8]">
-                    Top {drilldownTransactions.length} gastos
+                  <span className="text-[10px] font-bold text-[#1C4939] dark:text-[#78C6A3] bg-[#FAF8F4] dark:bg-[#16382E] px-2 py-0.5 rounded-full border border-[#1C4939]/15">
+                    {drilldownTransactions.length} {drilldownTransactions.length === 1 ? 'lançamento' : 'lançamentos'}
                   </span>
                 </div>
 
                 {drilldownTransactions.length > 0 ? (
-                  <div className="space-y-2">
+                  <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1">
                     {drilldownTransactions.map((tx) => (
                       <div
                         key={tx.id}
