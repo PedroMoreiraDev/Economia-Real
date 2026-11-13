@@ -21,7 +21,8 @@ import {
   Eye,
   ArrowLeftRight,
   ChevronUp,
-  ChevronDown
+  ChevronDown,
+  Sliders
 } from 'lucide-react';
 
 export type TourTabType = 'overview' | 'analytics' | 'recurring' | 'goals';
@@ -237,11 +238,11 @@ export const OnboardingTourModal: React.FC<OnboardingTourModalProps> = ({
       id: 5,
       badge: 'Passo 5 • Orçamento com I.A',
       badgeColor: badgeStyle,
-      title: 'Defina seu Teto e Metas com I.A',
-      targetName: 'Card "Teto Máximo de Gastos"',
+      title: 'Teto de Gastos & Potencial de Liberdade',
+      targetName: 'Card "Teto de Gastos & Economia"',
       shortText:
-        'Estipule o máximo que deseja gastar no mês e clique em "Distribuir Tetos com I.A". A inteligência artificial divide as metas ideais para cada categoria sem complicar.',
-      tip: 'A barra de progresso avisa se você está no ritmo seguro ou prestes a estourar a meta.',
+        'Estipule quanto quer gastar e poupar no mês. O card calcula em tempo real quanto essa economia rende em até 30 anos com juros compostos a 10,5% a.a. e a renda passiva mensal gerada!',
+      tip: 'Acesse o "Simulador de E se...?" completo ou use a I.A para distribuir os tetos ideais por categoria.',
       targetId: 'tour-spending-limit-card',
       requiredTab: 'overview' as TourTabType,
       actionBtn: onOpenAiBudgetModal
@@ -258,17 +259,17 @@ export const OnboardingTourModal: React.FC<OnboardingTourModalProps> = ({
         <div className="bg-[#EFECE3] dark:bg-[#0D241D] border border-[#D5CFC0] dark:border-[#285E4B] p-3.5 rounded-2xl space-y-2">
           <div className="flex items-center justify-between text-[11px] font-extrabold text-[#102D25] dark:text-[#E8E4D9]">
             <span className="flex items-center gap-1.5">
-              <Target className="w-3.5 h-3.5 text-[#D4A94F]" /> Teto Mensal Definido
+              <Target className="w-3.5 h-3.5 text-[#D4A94F]" /> Teto & Meta Definidos
             </span>
-            <span className="text-[#102D25] dark:text-[#D4A94F] font-numeric">R$ 3.500,00</span>
+            <span className="text-[#102D25] dark:text-[#D4A94F] font-numeric">R$ 5.000,00</span>
           </div>
-          <div className="space-y-1.5">
-            <div className="w-full h-2.5 bg-[#D5CFC0] dark:bg-[#16382E] rounded-full overflow-hidden">
-              <div className="h-full bg-[#1C4939] dark:bg-[#D4A94F] rounded-full" style={{ width: '48%' }} />
-            </div>
-            <div className="flex items-center justify-between text-[10px] font-bold text-[#526B61] dark:text-[#9AB3A8]">
-              <span className="text-[#1C4939] dark:text-[#D4A94F] font-extrabold">Restam R$ 1.820,00</span>
-              <span>48% utilizado</span>
+          <div className="p-2.5 rounded-xl bg-[#102D25] text-[#FAF8F4] border border-[#D4A94F]/40 space-y-1">
+            <span className="text-[10px] text-[#D4A94F] font-black uppercase tracking-wider block">
+              Potencial em 5 Anos (10,5% a.a.):
+            </span>
+            <div className="flex items-center justify-between">
+              <strong className="text-xs font-black text-white font-numeric">R$ 77.854,00</strong>
+              <span className="text-[10px] font-bold text-[#78C6A3]">+R$ 650/mês passivo</span>
             </div>
           </div>
         </div>
@@ -319,11 +320,11 @@ export const OnboardingTourModal: React.FC<OnboardingTourModalProps> = ({
       id: 7,
       badge: 'Passo 7 • Visão do Futuro',
       badgeColor: badgeStyle,
-      title: 'Acompanhe Metas & Perspectiva Anual',
+      title: 'Evolução & Gráficos Interativos',
       targetName: 'Aba "Gráficos & Orçamento"',
       shortText:
-        'Acesse a aba "Gráficos & Orçamento" para analisar o raio-X dos seus gastos por categoria, ver a evolução financeira dos últimos meses e acompanhar suas Metas de Economia!',
-      tip: 'Compare seus resultados mês a mês e celebre sua independência financeira!',
+        'Acesse a aba "Gráficos & Orçamento" para analisar seu histórico mensal e a Distribuição de Gastos. O gráfico de categorias é 100% interativo: clique em qualquer fatia para inspecionar todas as compras daquela categoria!',
+      tip: 'Compare a evolução de despesas e receitas mês a mês para blindar sua rentabilidade.',
       targetId: 'tour-analytics-tab-content',
       requiredTab: 'analytics' as TourTabType,
       actionBtn: null,
@@ -331,10 +332,10 @@ export const OnboardingTourModal: React.FC<OnboardingTourModalProps> = ({
         <div className="bg-[#102D25] dark:bg-[#0D241D] text-[#E8E4D9] p-3.5 rounded-2xl space-y-2 border border-[#285E4B]">
           <div className="flex items-center justify-between text-[11px] font-bold">
             <span className="flex items-center gap-1.5 text-[#D4A94F]">
-              <TrendingUp className="w-3.5 h-3.5" /> Evolução Financeira
+              <TrendingUp className="w-3.5 h-3.5" /> Gráficos com Drilldown
             </span>
             <span className="bg-[#1C4939] text-[#D4A94F] border border-[#D4A94F]/30 px-2 py-0.5 rounded-full text-[10px]">
-              Visão Anual
+              Interativo
             </span>
           </div>
           <div className="flex items-end justify-between gap-1.5 h-12 pt-1 px-1">
@@ -344,8 +345,40 @@ export const OnboardingTourModal: React.FC<OnboardingTourModalProps> = ({
             <div className="flex-1 bg-[#D4A94F] rounded-t-md h-12" />
           </div>
           <p className="text-[10px] font-extrabold text-center text-[#D4A94F]">
-            Evolução crescente e economia em alta!
+            Clique em qualquer fatia para ver os lançamentos!
           </p>
+        </div>
+      ),
+    },
+    {
+      id: 8,
+      badge: 'Passo 8 • Auditoria Inteligente',
+      badgeColor: badgeStyle,
+      title: 'Detetive de Economia & Sobra Real',
+      targetName: 'Card "Detetive de Economia Real"',
+      shortText:
+        'O Detetive identifica na hora vazamentos como delivery excessivo, assinaturas esquecidas e micro-gastos. Abra o novo Simulador de Sobra para testar cortes e ver exatamente quanto a mais sobra livre no seu bolso no mês e no ano!',
+      tip: 'Descubra quanto de fato sobrará na sua conta ao cortar despesas reais sem chute ou achismo.',
+      targetId: 'tour-savings-leakage',
+      requiredTab: 'analytics' as TourTabType,
+      actionBtn: null,
+      preview: (
+        <div className="bg-[#102D25] dark:bg-[#0D241D] text-[#E8E4D9] p-3.5 rounded-2xl space-y-2.5 border border-[#D4A94F]/40">
+          <div className="flex items-center justify-between text-[11px] font-bold">
+            <span className="flex items-center gap-1.5 text-[#D4A94F]">
+              <Sliders className="w-3.5 h-3.5" /> Sobra Real no Bolso
+            </span>
+            <span className="bg-[#1C4939] text-[#78C6A3] border border-[#78C6A3]/30 px-2 py-0.5 rounded-full text-[10px] font-extrabold">
+              Cortes Reais
+            </span>
+          </div>
+          <div className="p-2.5 rounded-xl bg-[#16382E] border border-[#285E4B] flex items-center justify-between">
+            <div>
+              <p className="text-[11px] font-extrabold text-[#E8E4D9]">Redução de Delivery (-40%)</p>
+              <p className="text-[10px] text-[#78C6A3] font-semibold">+ R$ 360,00 livres todo mês</p>
+            </div>
+            <span className="text-xs font-black text-[#D4A94F] font-numeric">+ R$ 4.320/ano</span>
+          </div>
         </div>
       ),
     },

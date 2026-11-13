@@ -128,7 +128,7 @@ export const SavingsLeakageSection: React.FC<SavingsLeakageSectionProps> = ({
   }, [transactions, recurringBills, onOpenWhatIfSimulator, onOpenExpenseReductionModal, privacyMode]);
 
   return (
-    <div className="card-duo-green p-6 sm:p-8 space-y-6">
+    <div id="tour-savings-leakage" className="card-duo-green p-6 sm:p-8 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1C4939]/20 dark:border-[#214E3E] pb-4">
         <div className="flex items-center gap-3">
           <div className="p-3 rounded-2xl bg-[#1C4939] dark:bg-[#102D25] text-[#D4A94F] border border-[#D4A94F]/40 shadow-xs">
