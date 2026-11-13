@@ -2,11 +2,13 @@ import React, { useMemo } from 'react';
 import { Search, Sparkles, ArrowRight } from 'lucide-react';
 import { Transaction } from '../types/financial';
 import { RecurringBill } from '../types/recurring';
+import { ReductionFocusMode } from './RealExpenseReductionModal';
 
 interface SavingsLeakageSectionProps {
   transactions: Transaction[];
   recurringBills: RecurringBill[];
-  onOpenWhatIfSimulator: (prefillData?: { deliveryCut?: number; cancelBills?: number }) => void;
+  onOpenWhatIfSimulator?: (prefillData?: { deliveryCut?: number; cancelBills?: number }) => void;
+  onOpenExpenseReductionModal?: (mode: ReductionFocusMode) => void;
   privacyMode?: boolean;
 }
 
@@ -20,6 +22,7 @@ export const SavingsLeakageSection: React.FC<SavingsLeakageSectionProps> = ({
   transactions,
   recurringBills,
   onOpenWhatIfSimulator,
+  onOpenExpenseReductionModal,
   privacyMode,
 }) => {
   const leakages = useMemo(() => {
@@ -34,6 +37,15 @@ export const SavingsLeakageSection: React.FC<SavingsLeakageSectionProps> = ({
       actionLabel: string;
       onAction: () => void;
     }> = [];
+
+    // Helper para acionar o modal específico de redução de despesas
+    const triggerSimulation = (mode: ReductionFocusMode, prefillData?: { deliveryCut?: number; cancelBills?: number }) => {
+      if (onOpenExpenseReductionModal) {
+        onOpenExpenseReductionModal(mode);
+      } else if (onOpenWhatIfSimulator) {
+        onOpenWhatIfSimulator(prefillData);
+      }
+    };
 
     // 1. Detecção de Múltiplas Assinaturas de Streaming / Lazer
     const streamingKeywords = ['netflix', 'spotify', 'prime', 'disney', 'max', 'hbo', 'globoplay', 'youtube', 'deezer', 'apple'];
@@ -53,7 +65,7 @@ export const SavingsLeakageSection: React.FC<SavingsLeakageSectionProps> = ({
         annualPotential: monthlySum * 12,
         description: `Você possui ${streamingsFound.map((s) => s.description).join(', ')}. Alternar entre os serviços quando não estiver assistindo pode economizar até 50% deste valor.`,
         actionLabel: 'Simular Corte de Assinaturas',
-        onAction: () => onOpenWhatIfSimulator({ cancelBills: Math.round(monthlySum * 0.5) }),
+        onAction: () => triggerSimulation('SUBSCRIPTIONS', { cancelBills: Math.round(monthlySum * 0.5) }),
       });
     }
 
@@ -76,7 +88,7 @@ export const SavingsLeakageSection: React.FC<SavingsLeakageSectionProps> = ({
         annualPotential: potentialMonthlySavings * 12,
         description: `Você gastou ${formatBRL(totalDelivery, privacyMode)} em delivery. Reduzir 1 a 2 pedidos por semana economizaria ${formatBRL(potentialMonthlySavings * 12, privacyMode)} em 1 ano!`,
         actionLabel: 'Simular Redução de Delivery',
-        onAction: () => onOpenWhatIfSimulator({ deliveryCut: 35 }),
+        onAction: () => triggerSimulation('DELIVERY', { deliveryCut: 35 }),
       });
     }
 
@@ -93,7 +105,7 @@ export const SavingsLeakageSection: React.FC<SavingsLeakageSectionProps> = ({
         annualPotential: totalSmall * 0.4 * 12,
         description: `Pequenas compras diárias somaram ${formatBRL(totalSmall, privacyMode)} no mês. Ter um teto semanal para micro-gastos estanca até 40% dessa sangria invisível.`,
         actionLabel: 'Simular Economia Geral',
-        onAction: () => onOpenWhatIfSimulator(),
+        onAction: () => triggerSimulation('SMALL_EXPENSES'),
       });
     }
 
@@ -107,13 +119,13 @@ export const SavingsLeakageSection: React.FC<SavingsLeakageSectionProps> = ({
         monthlyAmount: 0,
         annualPotential: 0,
         description: 'Sua disciplina financeira está excelente! Não encontramos cobranças duplicadas ou gastos compulsivos fora da curva este mês.',
-        actionLabel: 'Simular Aceleração de Metas',
-        onAction: () => onOpenWhatIfSimulator(),
+        actionLabel: 'Simular Sobra do Mês',
+        onAction: () => triggerSimulation('ALL_EXPENSES'),
       });
     }
 
     return list;
-  }, [transactions, recurringBills, onOpenWhatIfSimulator, privacyMode]);
+  }, [transactions, recurringBills, onOpenWhatIfSimulator, onOpenExpenseReductionModal, privacyMode]);
 
   return (
     <div className="card-duo-green p-6 sm:p-8 space-y-6">

@@ -19,12 +19,15 @@ import { FinancialEvolutionChart } from './FinancialEvolutionChart';
 import { CategoryDonutChart } from './CategoryDonutChart';
 import { FiftyThirtyTwentyWidget } from './FiftyThirtyTwentyWidget';
 import { SavingsLeakageSection } from './SavingsLeakageSection';
+import { RealExpenseReductionModal, ReductionFocusMode } from './RealExpenseReductionModal';
 
 interface AnalyticsSectionProps {
   analytics: AnalyticsOverview | null;
   budgets: BudgetProgressDto[];
   transactions?: Transaction[];
   recurringBills?: RecurringBill[];
+  totalIncome?: number;
+  totalExpense?: number;
   onOpenBudgetModal: () => void;
   onOpenAiBudgetModal?: () => void;
   onOpenWhatIfSimulator?: (prefill?: { deliveryCut?: number; cancelBills?: number }) => void;
@@ -44,6 +47,8 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({
   budgets,
   transactions = [],
   recurringBills = [],
+  totalIncome: propTotalIncome,
+  totalExpense: propTotalExpense,
   onOpenBudgetModal,
   onOpenAiBudgetModal,
   onOpenWhatIfSimulator,
@@ -57,8 +62,23 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({
 
   const { monthlyEvolution, categoryDistribution, burnRate } = analytics;
 
-  // Total de receitas do mês corrente
-  const totalIncome = monthlyEvolution.length > 0 ? (monthlyEvolution[monthlyEvolution.length - 1].income || 0) : 0;
+  // Total de receitas e despesas do mês corrente
+  const totalIncome = propTotalIncome !== undefined && propTotalIncome > 0
+    ? propTotalIncome
+    : (monthlyEvolution.length > 0 ? (monthlyEvolution[monthlyEvolution.length - 1].income || 0) : 0);
+
+  const totalExpense = propTotalExpense !== undefined && propTotalExpense > 0
+    ? propTotalExpense
+    : (monthlyEvolution.length > 0 ? (monthlyEvolution[monthlyEvolution.length - 1].expense || 0) : 0);
+
+  // Estado para o simulador de redução de gastos reais
+  const [expenseModalConfig, setExpenseModalConfig] = React.useState<{
+    isOpen: boolean;
+    mode: ReductionFocusMode;
+  }>({
+    isOpen: false,
+    mode: 'DELIVERY',
+  });
 
   return (
     <div className="space-y-6">
@@ -394,6 +414,20 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({
         transactions={transactions}
         recurringBills={recurringBills}
         onOpenWhatIfSimulator={(prefill) => onOpenWhatIfSimulator && onOpenWhatIfSimulator(prefill)}
+        onOpenExpenseReductionModal={(mode) => setExpenseModalConfig({ isOpen: true, mode })}
+        privacyMode={privacyMode}
+      />
+
+      {/* MODAL ESPECÍFICO DE REDUÇÃO DE GASTOS REAIS */}
+      <RealExpenseReductionModal
+        isOpen={expenseModalConfig.isOpen}
+        onClose={() => setExpenseModalConfig((prev) => ({ ...prev, isOpen: false }))}
+        initialMode={expenseModalConfig.mode}
+        totalIncome={totalIncome}
+        totalExpense={totalExpense}
+        transactions={transactions}
+        recurringBills={recurringBills}
+        categoryDistribution={categoryDistribution}
         privacyMode={privacyMode}
       />
 

@@ -1532,6 +1532,8 @@ const MainDashboard: React.FC = () => {
                   budgets={budgets}
                   transactions={transactions}
                   recurringBills={recurringBills}
+                  totalIncome={summary.totalIncome}
+                  totalExpense={summary.totalExpense}
                   onOpenBudgetModal={() => setBudgetModalOpen(true)}
                   onOpenAiBudgetModal={() => setAiBudgetModalOpen(true)}
                   onOpenWhatIfSimulator={() => setIsWhatIfModalOpen(true)}
