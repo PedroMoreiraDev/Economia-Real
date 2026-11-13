@@ -8,7 +8,8 @@ import {
   PieChart, 
   ArrowRight, 
   CheckCircle2, 
-  Sliders
+  Sliders,
+  AlertCircle
 } from 'lucide-react';
 import { Transaction } from '../types/financial';
 import { RecurringBill } from '../types/recurring';
@@ -34,6 +35,13 @@ function formatBRL(val: number | undefined, privacyMode?: boolean): string {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
 }
 
+function normalizeText(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
 export const RealExpenseReductionModal: React.FC<RealExpenseReductionModalProps> = ({
   isOpen,
   onClose,
@@ -47,30 +55,40 @@ export const RealExpenseReductionModal: React.FC<RealExpenseReductionModalProps>
 }) => {
   const [activeMode, setActiveMode] = useState<ReductionFocusMode>(initialMode);
 
-  // 1. Extração de Gastos Reais com Delivery
+  // 1. Extração de Gastos Reais com Delivery & Restaurantes (estritamente baseados nas transações)
   const deliveryData = useMemo(() => {
-    const deliveryKeywords = ['delivery', 'ifood', 'rappi', 'zé delivery', 'ze delivery', 'ai que fome', 'habib', 'mcdonald', 'burger king', 'pizz'];
+    const deliveryKeywords = [
+      'delivery', 'ifood', 'rappi', 'ze delivery', 'ai que fome', 
+      'habib', 'mcdonald', 'burger king', 'pizz', 'sushi', 'lanche', 'restaurante'
+    ];
+
     const list = transactions.filter((t) => {
-      const desc = (t.description || '').toLowerCase();
-      return t.type === 'EXPENSE' && deliveryKeywords.some((kw) => desc.includes(kw));
+      if (t.type !== 'EXPENSE') return false;
+      const desc = normalizeText(t.description || '');
+      return deliveryKeywords.some((kw) => desc.includes(kw));
     });
+
     const total = list.reduce((acc, t) => acc + t.amount, 0);
     return {
       transactions: list,
-      totalAmount: total > 0 ? total : 380, // fallback realista se não houver registros
+      totalAmount: total, // Valor real exato das despesas cadastradas
       count: list.length,
     };
   }, [transactions]);
 
-  // 2. Extração de Gastos Reais com Assinaturas
+  // 2. Extração de Assinaturas Reais (estritamente cadastradas em recorrentes ou transações)
   const subscriptionData = useMemo(() => {
-    const streamingKeywords = ['netflix', 'spotify', 'prime', 'disney', 'max', 'hbo', 'globoplay', 'youtube', 'deezer', 'apple', 'star+'];
+    const streamingKeywords = [
+      'netflix', 'spotify', 'prime', 'amazon prime', 'disney', 'max', 'hbo', 
+      'globoplay', 'youtube', 'deezer', 'apple', 'star+', 'paramount', 'crunchyroll'
+    ];
+
     const detectedFromRecurring = recurringBills.filter((bill) => {
-      const desc = bill.description.toLowerCase();
-      return streamingKeywords.some((kw) => desc.includes(kw)) || bill.categoryName?.toLowerCase().includes('assinat') || bill.categoryName?.toLowerCase().includes('serviço');
+      const desc = normalizeText(bill.description || '');
+      const cat = normalizeText(bill.categoryName || '');
+      return streamingKeywords.some((kw) => desc.includes(kw)) || cat.includes('assinat') || cat.includes('servico') || cat.includes('streaming');
     });
 
-    // Se tiver recorrentes cadastradas, usa elas; caso contrário, busca nas transações
     let items = detectedFromRecurring.map((b) => ({
       id: b.id,
       name: b.description,
@@ -79,10 +97,11 @@ export const RealExpenseReductionModal: React.FC<RealExpenseReductionModalProps>
     }));
 
     if (items.length === 0) {
-      // Buscar em transações
+      // Buscar em transações do mês
       const txSubs = transactions.filter((t) => {
-        const desc = (t.description || '').toLowerCase();
-        return t.type === 'EXPENSE' && streamingKeywords.some((kw) => desc.includes(kw));
+        if (t.type !== 'EXPENSE') return false;
+        const desc = normalizeText(t.description || '');
+        return streamingKeywords.some((kw) => desc.includes(kw));
       });
       items = txSubs.map((t) => ({
         id: t.id,
@@ -92,28 +111,18 @@ export const RealExpenseReductionModal: React.FC<RealExpenseReductionModalProps>
       }));
     }
 
-    if (items.length === 0) {
-      // Itens simulados caso o usuário ainda não tenha registrado assinaturas
-      items = [
-        { id: 'sub-1', name: 'Netflix Padrão', amount: 44.90, checked: true },
-        { id: 'sub-2', name: 'Spotify Premium', amount: 34.90, checked: true },
-        { id: 'sub-3', name: 'Amazon Prime', amount: 19.90, checked: true },
-        { id: 'sub-4', name: 'Disney+ / Max', amount: 43.90, checked: true },
-      ];
-    }
-
     const total = items.reduce((acc, item) => acc + item.amount, 0);
     return { items, totalAmount: total };
   }, [recurringBills, transactions]);
 
-  // 3. Extração de Gastos Pequenos ("Efeito Formiguinha" <= R$ 35)
+  // 3. Extração de Gastos Formiguinha Reais (compras <= R$ 35)
   const smallExpensesData = useMemo(() => {
     const list = transactions.filter((t) => t.type === 'EXPENSE' && t.amount <= 35 && t.amount > 0);
     const total = list.reduce((acc, t) => acc + t.amount, 0);
     return {
       transactions: list,
-      totalAmount: total > 0 ? total : 280,
-      count: list.length > 0 ? list.length : 12,
+      totalAmount: total, // Valor real exato
+      count: list.length,
     };
   }, [transactions]);
 
@@ -177,7 +186,7 @@ export const RealExpenseReductionModal: React.FC<RealExpenseReductionModalProps>
   const monthlyExtraInPocket = calculatedCutAmount;
   const annualSavingsInPocket = monthlyExtraInPocket * 12;
 
-  // % de aumento na sobra
+  // % de aumento na sobra mensal
   const leftoverIncreasePct = useMemo(() => {
     if (baselineLeftover <= 0) {
       return newLeftover > 0 ? 100 : 0;
@@ -188,13 +197,13 @@ export const RealExpenseReductionModal: React.FC<RealExpenseReductionModalProps>
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto">
       <div 
-        className="w-full max-w-3xl max-h-[92vh] flex flex-col rounded-3xl bg-[#FAF8F4] dark:bg-[#102D25] text-[#102D25] dark:text-[#E8E4D9] border-2 border-[#1C4939]/30 dark:border-[#214E3E] shadow-2xl overflow-hidden my-auto"
+        className="w-full max-w-3xl max-h-[92vh] flex flex-col rounded-3xl bg-[#FAF8F4] dark:bg-[#102D25] text-[#102D25] dark:text-[#E8E4D9] border border-[#D5CFC0] dark:border-[#214E3E] shadow-2xl overflow-hidden my-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* CABEÇALHO */}
-        <div className="flex items-center justify-between p-5 sm:p-6 border-b border-[#1C4939]/20 dark:border-[#214E3E] bg-[#E8E4D9]/60 dark:bg-[#16382E]">
+        {/* CABEÇALHO COM IDENTIDADE VISUAL INSTITUCIONAL */}
+        <div className="flex items-center justify-between p-5 sm:p-6 border-b border-[#D5CFC0] dark:border-[#214E3E] bg-[#E8E4D9]/80 dark:bg-[#16382E]">
           <div className="flex items-center gap-3">
             <div className="p-3 rounded-2xl bg-[#1C4939] text-[#D4A94F] shadow-sm">
               <Sliders className="w-5 h-5 stroke-[2.5]" />
@@ -204,8 +213,8 @@ export const RealExpenseReductionModal: React.FC<RealExpenseReductionModalProps>
                 <h2 className="text-lg sm:text-xl font-black text-[#102D25] dark:text-[#E8E4D9]">
                   Simulador de Sobra Real no Bolso
                 </h2>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-[#1C4939] text-[#D4A94F]">
-                  Valores Reais
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-[#1C4939] text-[#D4A94F] border border-[#D4A94F]/30">
+                  Despesas Reais
                 </span>
               </div>
               <p className="text-xs font-semibold text-[#526B61] dark:text-[#9AB3A8]">
@@ -225,22 +234,22 @@ export const RealExpenseReductionModal: React.FC<RealExpenseReductionModalProps>
         {/* CONTEÚDO PRINCIPAL (SCROLLÁVEL) */}
         <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-6">
           
-          {/* RAIO-X DO MÊS ATUAL (PONTO DE PARTIDA) */}
-          <div className="grid grid-cols-3 gap-2 sm:gap-3 p-4 rounded-2xl bg-white dark:bg-[#16382E]/90 border border-[#1C4939]/20 dark:border-[#214E3E]">
+          {/* RAIO-X DO MÊS ATUAL (PONTO DE PARTIDA REAL) */}
+          <div className="grid grid-cols-3 gap-2 sm:gap-3 p-4 rounded-2xl bg-[#F7F5F0] dark:bg-[#16382E] border border-[#D5CFC0] dark:border-[#214E3E]">
             <div className="text-center sm:text-left">
               <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[#526B61] dark:text-[#9AB3A8] block">
                 Renda do Mês
               </span>
-              <strong className="text-sm sm:text-lg font-black text-emerald-700 dark:text-emerald-400 font-mono">
+              <strong className="text-sm sm:text-lg font-black text-[#1C4939] dark:text-[#78C6A3] font-numeric tabular-nums block mt-0.5">
                 {formatBRL(totalIncome, privacyMode)}
               </strong>
             </div>
 
-            <div className="text-center sm:text-left border-x border-[#1C4939]/10 dark:border-[#214E3E] px-2 sm:px-4">
+            <div className="text-center sm:text-left border-x border-[#D5CFC0] dark:border-[#214E3E] px-2 sm:px-4">
               <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[#526B61] dark:text-[#9AB3A8] block">
                 Despesas Atuais
               </span>
-              <strong className="text-sm sm:text-lg font-black text-rose-700 dark:text-rose-400 font-mono">
+              <strong className="text-sm sm:text-lg font-black text-[#B93838] dark:text-rose-400 font-numeric tabular-nums block mt-0.5">
                 {formatBRL(totalExpense, privacyMode)}
               </strong>
             </div>
@@ -249,10 +258,10 @@ export const RealExpenseReductionModal: React.FC<RealExpenseReductionModalProps>
               <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[#526B61] dark:text-[#9AB3A8] block">
                 Sobra Atual (Saldo)
               </span>
-              <strong className={`text-sm sm:text-lg font-black font-mono ${
+              <strong className={`text-sm sm:text-lg font-black font-numeric tabular-nums block mt-0.5 ${
                 baselineLeftover >= 0 
                   ? 'text-[#1C4939] dark:text-[#78C6A3]' 
-                  : 'text-rose-600 dark:text-rose-400'
+                  : 'text-[#B93838] dark:text-rose-400'
               }`}>
                 {formatBRL(baselineLeftover, privacyMode)}
               </strong>
@@ -262,7 +271,7 @@ export const RealExpenseReductionModal: React.FC<RealExpenseReductionModalProps>
           {/* SELETOR DE FOCO DE REDUÇÃO (TABS) */}
           <div className="space-y-2">
             <label className="text-xs font-extrabold uppercase tracking-wider text-[#526B61] dark:text-[#9AB3A8] block">
-              Escolha qual despesa simular redução:
+              Escolha qual despesa real simular redução:
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <button
@@ -271,17 +280,17 @@ export const RealExpenseReductionModal: React.FC<RealExpenseReductionModalProps>
                 className={`p-3 rounded-2xl border text-left flex flex-col justify-between transition-all ${
                   activeMode === 'DELIVERY'
                     ? 'bg-[#1C4939] text-[#FAF8F4] border-[#1C4939] shadow-sm'
-                    : 'bg-white dark:bg-[#16382E] text-[#102D25] dark:text-[#E8E4D9] border-[#1C4939]/20 dark:border-[#214E3E] hover:border-[#1C4939]/50'
+                    : 'bg-[#F7F5F0] dark:bg-[#16382E] text-[#102D25] dark:text-[#E8E4D9] border-[#D5CFC0] dark:border-[#214E3E] hover:border-[#1C4939]/50'
                 }`}
               >
                 <div className="flex items-center justify-between mb-1">
                   <UtensilsCrossed className={`w-4 h-4 ${activeMode === 'DELIVERY' ? 'text-[#D4A94F]' : 'text-[#526B61] dark:text-[#9AB3A8]'}`} />
                   <span className={`text-[10px] font-black ${activeMode === 'DELIVERY' ? 'text-[#D4A94F]' : 'text-[#526B61] dark:text-[#9AB3A8]'}`}>
-                    {deliveryData.count > 0 ? `${deliveryData.count} pedidos` : 'Estimativa'}
+                    {deliveryData.count > 0 ? `${deliveryData.count} pedidos` : '0 pedidos'}
                   </span>
                 </div>
                 <span className="text-xs font-extrabold">Delivery</span>
-                <span className={`text-[11px] font-mono font-bold mt-0.5 ${activeMode === 'DELIVERY' ? 'text-white/80' : 'text-[#526B61] dark:text-[#9AB3A8]'}`}>
+                <span className={`text-[11px] font-numeric tabular-nums font-bold mt-0.5 ${activeMode === 'DELIVERY' ? 'text-white/80' : 'text-[#526B61] dark:text-[#9AB3A8]'}`}>
                   {formatBRL(deliveryData.totalAmount, privacyMode)}
                 </span>
               </button>
@@ -292,17 +301,17 @@ export const RealExpenseReductionModal: React.FC<RealExpenseReductionModalProps>
                 className={`p-3 rounded-2xl border text-left flex flex-col justify-between transition-all ${
                   activeMode === 'SUBSCRIPTIONS'
                     ? 'bg-[#1C4939] text-[#FAF8F4] border-[#1C4939] shadow-sm'
-                    : 'bg-white dark:bg-[#16382E] text-[#102D25] dark:text-[#E8E4D9] border-[#1C4939]/20 dark:border-[#214E3E] hover:border-[#1C4939]/50'
+                    : 'bg-[#F7F5F0] dark:bg-[#16382E] text-[#102D25] dark:text-[#E8E4D9] border-[#D5CFC0] dark:border-[#214E3E] hover:border-[#1C4939]/50'
                 }`}
               >
                 <div className="flex items-center justify-between mb-1">
                   <Tv className={`w-4 h-4 ${activeMode === 'SUBSCRIPTIONS' ? 'text-[#D4A94F]' : 'text-[#526B61] dark:text-[#9AB3A8]'}`} />
                   <span className={`text-[10px] font-black ${activeMode === 'SUBSCRIPTIONS' ? 'text-[#D4A94F]' : 'text-[#526B61] dark:text-[#9AB3A8]'}`}>
-                    {subscriptionData.items.length} itens
+                    {subscriptionData.items.length} serviço(s)
                   </span>
                 </div>
                 <span className="text-xs font-extrabold">Assinaturas</span>
-                <span className={`text-[11px] font-mono font-bold mt-0.5 ${activeMode === 'SUBSCRIPTIONS' ? 'text-white/80' : 'text-[#526B61] dark:text-[#9AB3A8]'}`}>
+                <span className={`text-[11px] font-numeric tabular-nums font-bold mt-0.5 ${activeMode === 'SUBSCRIPTIONS' ? 'text-white/80' : 'text-[#526B61] dark:text-[#9AB3A8]'}`}>
                   {formatBRL(subscriptionData.totalAmount, privacyMode)}
                 </span>
               </button>
@@ -313,17 +322,17 @@ export const RealExpenseReductionModal: React.FC<RealExpenseReductionModalProps>
                 className={`p-3 rounded-2xl border text-left flex flex-col justify-between transition-all ${
                   activeMode === 'SMALL_EXPENSES'
                     ? 'bg-[#1C4939] text-[#FAF8F4] border-[#1C4939] shadow-sm'
-                    : 'bg-white dark:bg-[#16382E] text-[#102D25] dark:text-[#E8E4D9] border-[#1C4939]/20 dark:border-[#214E3E] hover:border-[#1C4939]/50'
+                    : 'bg-[#F7F5F0] dark:bg-[#16382E] text-[#102D25] dark:text-[#E8E4D9] border-[#D5CFC0] dark:border-[#214E3E] hover:border-[#1C4939]/50'
                 }`}
               >
                 <div className="flex items-center justify-between mb-1">
                   <Coins className={`w-4 h-4 ${activeMode === 'SMALL_EXPENSES' ? 'text-[#D4A94F]' : 'text-[#526B61] dark:text-[#9AB3A8]'}`} />
                   <span className={`text-[10px] font-black ${activeMode === 'SMALL_EXPENSES' ? 'text-[#D4A94F]' : 'text-[#526B61] dark:text-[#9AB3A8]'}`}>
-                    &lt; R$ 35
+                    {smallExpensesData.count} gastos &le; R$ 35
                   </span>
                 </div>
                 <span className="text-xs font-extrabold">Formiguinha</span>
-                <span className={`text-[11px] font-mono font-bold mt-0.5 ${activeMode === 'SMALL_EXPENSES' ? 'text-white/80' : 'text-[#526B61] dark:text-[#9AB3A8]'}`}>
+                <span className={`text-[11px] font-numeric tabular-nums font-bold mt-0.5 ${activeMode === 'SMALL_EXPENSES' ? 'text-white/80' : 'text-[#526B61] dark:text-[#9AB3A8]'}`}>
                   {formatBRL(smallExpensesData.totalAmount, privacyMode)}
                 </span>
               </button>
@@ -334,7 +343,7 @@ export const RealExpenseReductionModal: React.FC<RealExpenseReductionModalProps>
                 className={`p-3 rounded-2xl border text-left flex flex-col justify-between transition-all ${
                   activeMode === 'ALL_EXPENSES'
                     ? 'bg-[#1C4939] text-[#FAF8F4] border-[#1C4939] shadow-sm'
-                    : 'bg-white dark:bg-[#16382E] text-[#102D25] dark:text-[#E8E4D9] border-[#1C4939]/20 dark:border-[#214E3E] hover:border-[#1C4939]/50'
+                    : 'bg-[#F7F5F0] dark:bg-[#16382E] text-[#102D25] dark:text-[#E8E4D9] border-[#D5CFC0] dark:border-[#214E3E] hover:border-[#1C4939]/50'
                 }`}
               >
                 <div className="flex items-center justify-between mb-1">
@@ -344,7 +353,7 @@ export const RealExpenseReductionModal: React.FC<RealExpenseReductionModalProps>
                   </span>
                 </div>
                 <span className="text-xs font-extrabold">Geral do Mês</span>
-                <span className={`text-[11px] font-mono font-bold mt-0.5 ${activeMode === 'ALL_EXPENSES' ? 'text-white/80' : 'text-[#526B61] dark:text-[#9AB3A8]'}`}>
+                <span className={`text-[11px] font-numeric tabular-nums font-bold mt-0.5 ${activeMode === 'ALL_EXPENSES' ? 'text-white/80' : 'text-[#526B61] dark:text-[#9AB3A8]'}`}>
                   {formatBRL(totalExpense, privacyMode)}
                 </span>
               </button>
@@ -352,7 +361,7 @@ export const RealExpenseReductionModal: React.FC<RealExpenseReductionModalProps>
           </div>
 
           {/* CONTROLE INTERATIVO ESPECÍFICO */}
-          <div className="p-5 rounded-2xl bg-white dark:bg-[#16382E] border border-[#1C4939]/20 dark:border-[#214E3E] space-y-4">
+          <div className="p-5 rounded-2xl bg-[#F7F5F0] dark:bg-[#16382E] border border-[#D5CFC0] dark:border-[#214E3E] space-y-4">
             
             {/* MODO 1: DELIVERY */}
             {activeMode === 'DELIVERY' && (
@@ -363,54 +372,65 @@ export const RealExpenseReductionModal: React.FC<RealExpenseReductionModalProps>
                       Simular Redução de Delivery & Restaurante
                     </h4>
                     <p className="text-xs text-[#526B61] dark:text-[#9AB3A8]">
-                      Gasto registrado no mês: <strong>{formatBRL(deliveryData.totalAmount, privacyMode)}</strong>
+                      Gasto registrado no mês: <strong className="font-numeric tabular-nums">{formatBRL(deliveryData.totalAmount, privacyMode)}</strong> ({deliveryData.count} pedidos)
                     </p>
                   </div>
                   <div className="text-right">
                     <span className="text-xs font-bold text-[#526B61] dark:text-[#9AB3A8] block">Corte Simulado:</span>
-                    <strong className="text-base font-black text-emerald-700 dark:text-emerald-400 font-mono">
+                    <strong className="text-base font-black text-[#1C4939] dark:text-[#78C6A3] font-numeric tabular-nums">
                       -{formatBRL(calculatedCutAmount, privacyMode)} ({deliveryCutPct}%)
                     </strong>
                   </div>
                 </div>
 
-                {/* Slider */}
-                <div className="space-y-1">
-                  <input
-                    type="range"
-                    min={0}
-                    max={100}
-                    step={5}
-                    value={deliveryCutPct}
-                    onChange={(e) => setDeliveryCutPct(Number(e.target.value))}
-                    className="w-full h-2.5 bg-[#FAF8F4] dark:bg-[#102D25] rounded-lg appearance-none cursor-pointer accent-[#1C4939] dark:accent-[#78C6A3]"
-                  />
-                  <div className="flex justify-between text-[10px] font-bold text-[#526B61] dark:text-[#9AB3A8]">
-                    <span>0% (Manter)</span>
-                    <span>25% (-1 ped/sem)</span>
-                    <span>50% (Pela metade)</span>
-                    <span>75%</span>
-                    <span>100% (Zerar)</span>
+                {deliveryData.totalAmount === 0 ? (
+                  <div className="p-4 rounded-xl bg-[#FAF8F4] dark:bg-[#102D25] border border-[#D5CFC0] dark:border-[#214E3E] flex items-center gap-3">
+                    <AlertCircle className="w-5 h-5 text-[#526B61] dark:text-[#9AB3A8] shrink-0" />
+                    <p className="text-xs text-[#526B61] dark:text-[#9AB3A8]">
+                      Você não possui lançamentos com palavras-chave de delivery ou restaurantes cadastrados este mês. Simule cortes na aba <strong>Formiguinha</strong> ou <strong>Geral do Mês</strong>!
+                    </p>
                   </div>
-                </div>
+                ) : (
+                  <>
+                    {/* Slider */}
+                    <div className="space-y-1">
+                      <input
+                        type="range"
+                        min={0}
+                        max={100}
+                        step={5}
+                        value={deliveryCutPct}
+                        onChange={(e) => setDeliveryCutPct(Number(e.target.value))}
+                        className="w-full h-2.5 bg-[#E8E4D9] dark:bg-[#102D25] rounded-lg appearance-none cursor-pointer accent-[#1C4939] dark:accent-[#78C6A3]"
+                      />
+                      <div className="flex justify-between text-[10px] font-bold text-[#526B61] dark:text-[#9AB3A8]">
+                        <span>0% (Manter)</span>
+                        <span>25% (-1 ped/sem)</span>
+                        <span>50% (Pela metade)</span>
+                        <span>75%</span>
+                        <span>100% (Zerar)</span>
+                      </div>
+                    </div>
 
-                {/* Atalhos Rápidos */}
-                <div className="flex flex-wrap gap-2 pt-1">
-                  {[25, 40, 50, 75].map((pct) => (
-                    <button
-                      key={pct}
-                      type="button"
-                      onClick={() => setDeliveryCutPct(pct)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-                        deliveryCutPct === pct
-                          ? 'bg-[#1C4939] text-[#D4A94F] border-[#1C4939]'
-                          : 'bg-[#FAF8F4] dark:bg-[#102D25] text-[#102D25] dark:text-[#E8E4D9] border-[#1C4939]/20 hover:border-[#1C4939]'
-                      }`}
-                    >
-                      Reduzir {pct}% (-{formatBRL((deliveryData.totalAmount * pct) / 100, privacyMode)})
-                    </button>
-                  ))}
-                </div>
+                    {/* Atalhos Rápidos */}
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {[25, 40, 50, 75].map((pct) => (
+                        <button
+                          key={pct}
+                          type="button"
+                          onClick={() => setDeliveryCutPct(pct)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+                            deliveryCutPct === pct
+                              ? 'bg-[#1C4939] text-[#D4A94F] border-[#1C4939]'
+                              : 'bg-[#FAF8F4] dark:bg-[#102D25] text-[#102D25] dark:text-[#E8E4D9] border-[#D5CFC0] dark:border-[#214E3E] hover:border-[#1C4939]'
+                          }`}
+                        >
+                          Reduzir {pct}% (-{formatBRL((deliveryData.totalAmount * pct) / 100, privacyMode)})
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
             )}
 
@@ -423,55 +443,64 @@ export const RealExpenseReductionModal: React.FC<RealExpenseReductionModalProps>
                       Simular Cancelamento de Assinaturas & Streaming
                     </h4>
                     <p className="text-xs text-[#526B61] dark:text-[#9AB3A8]">
-                      Desmarque os serviços que você toparia pausar ou alternar:
+                      Total de assinaturas encontradas: <strong className="font-numeric tabular-nums">{formatBRL(subscriptionData.totalAmount, privacyMode)}</strong>
                     </p>
                   </div>
                   <div className="text-right">
                     <span className="text-xs font-bold text-[#526B61] dark:text-[#9AB3A8] block">Economia Simulada:</span>
-                    <strong className="text-base font-black text-emerald-700 dark:text-emerald-400 font-mono">
+                    <strong className="text-base font-black text-[#1C4939] dark:text-[#78C6A3] font-numeric tabular-nums">
                       +{formatBRL(calculatedCutAmount, privacyMode)}/mês
                     </strong>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-                  {subscriptionData.items.map((sub) => {
-                    const isKept = activeSubs[sub.id] !== false;
-                    return (
-                      <div
-                        key={sub.id}
-                        onClick={() => setActiveSubs((prev) => ({ ...prev, [sub.id]: !isKept }))}
-                        className={`p-3 rounded-xl border cursor-pointer flex items-center justify-between transition-all ${
-                          isKept
-                            ? 'bg-[#FAF8F4] dark:bg-[#102D25] border-[#1C4939]/20 dark:border-[#214E3E]'
-                            : 'bg-rose-50 dark:bg-rose-950/40 border-rose-300 dark:border-rose-900/60'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <input
-                            type="checkbox"
-                            checked={isKept}
-                            onChange={() => {}}
-                            className="rounded border-[#1C4939] text-[#1C4939] focus:ring-[#1C4939]"
-                          />
-                          <span className={`text-xs font-bold ${!isKept ? 'line-through text-rose-700 dark:text-rose-400' : 'text-[#102D25] dark:text-[#E8E4D9]'}`}>
-                            {sub.name}
-                          </span>
-                        </div>
-                        <div className="text-right">
-                          <span className="text-xs font-mono font-bold block">
-                            {formatBRL(sub.amount, privacyMode)}
-                          </span>
-                          {!isKept && (
-                            <span className="text-[10px] font-black text-emerald-700 dark:text-emerald-400">
-                              + Economizado
+                {subscriptionData.items.length === 0 ? (
+                  <div className="p-4 rounded-xl bg-[#FAF8F4] dark:bg-[#102D25] border border-[#D5CFC0] dark:border-[#214E3E] flex items-center gap-3">
+                    <AlertCircle className="w-5 h-5 text-[#526B61] dark:text-[#9AB3A8] shrink-0" />
+                    <p className="text-xs text-[#526B61] dark:text-[#9AB3A8]">
+                      Nenhuma assinatura ou despesa recorrente de streaming foi detectada este mês. Cadastre suas assinaturas na aba <strong>Despesas Recorrentes</strong> para auditar cada uma, ou simule na aba <strong>Geral do Mês</strong>!
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                    {subscriptionData.items.map((sub) => {
+                      const isKept = activeSubs[sub.id] !== false;
+                      return (
+                        <div
+                          key={sub.id}
+                          onClick={() => setActiveSubs((prev) => ({ ...prev, [sub.id]: !isKept }))}
+                          className={`p-3 rounded-xl border cursor-pointer flex items-center justify-between transition-all ${
+                            isKept
+                              ? 'bg-[#FAF8F4] dark:bg-[#102D25] border-[#D5CFC0] dark:border-[#214E3E]'
+                              : 'bg-rose-50 dark:bg-rose-950/40 border-rose-300 dark:border-rose-900/60'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <input
+                              type="checkbox"
+                              checked={isKept}
+                              onChange={() => {}}
+                              className="rounded border-[#1C4939] text-[#1C4939] focus:ring-[#1C4939]"
+                            />
+                            <span className={`text-xs font-bold ${!isKept ? 'line-through text-[#B93838] dark:text-rose-400' : 'text-[#102D25] dark:text-[#E8E4D9]'}`}>
+                              {sub.name}
                             </span>
-                          )}
+                          </div>
+                          <div className="text-right">
+                            <span className="text-xs font-numeric tabular-nums font-bold block">
+                              {formatBRL(sub.amount, privacyMode)}
+                            </span>
+                            {!isKept && (
+                              <span className="text-[10px] font-black text-[#1C4939] dark:text-[#78C6A3]">
+                                + Economizado
+                              </span>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
 
@@ -481,55 +510,66 @@ export const RealExpenseReductionModal: React.FC<RealExpenseReductionModalProps>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                   <div>
                     <h4 className="text-sm font-extrabold text-[#102D25] dark:text-[#E8E4D9]">
-                      Estancar o Efeito Formiguinha (Compras &lt; R$ 35)
+                      Estancar o Efeito Formiguinha (Compras &le; R$ 35)
                     </h4>
                     <p className="text-xs text-[#526B61] dark:text-[#9AB3A8]">
-                      Você teve <strong>{smallExpensesData.count}</strong> pequenos gastos somando <strong>{formatBRL(smallExpensesData.totalAmount, privacyMode)}</strong> este mês
+                      Você teve <strong>{smallExpensesData.count}</strong> pequenos gastos somando <strong className="font-numeric tabular-nums">{formatBRL(smallExpensesData.totalAmount, privacyMode)}</strong> este mês
                     </p>
                   </div>
                   <div className="text-right">
                     <span className="text-xs font-bold text-[#526B61] dark:text-[#9AB3A8] block">Corte Simulado:</span>
-                    <strong className="text-base font-black text-emerald-700 dark:text-emerald-400 font-mono">
+                    <strong className="text-base font-black text-[#1C4939] dark:text-[#78C6A3] font-numeric tabular-nums">
                       -{formatBRL(calculatedCutAmount, privacyMode)} ({smallCutPct}%)
                     </strong>
                   </div>
                 </div>
 
-                <div className="space-y-1">
-                  <input
-                    type="range"
-                    min={0}
-                    max={100}
-                    step={5}
-                    value={smallCutPct}
-                    onChange={(e) => setSmallCutPct(Number(e.target.value))}
-                    className="w-full h-2.5 bg-[#FAF8F4] dark:bg-[#102D25] rounded-lg appearance-none cursor-pointer accent-[#1C4939] dark:accent-[#78C6A3]"
-                  />
-                  <div className="flex justify-between text-[10px] font-bold text-[#526B61] dark:text-[#9AB3A8]">
-                    <span>0% (Sem teto)</span>
-                    <span>25%</span>
-                    <span>50% (Meta disciplinada)</span>
-                    <span>75%</span>
-                    <span>100%</span>
+                {smallExpensesData.totalAmount === 0 ? (
+                  <div className="p-4 rounded-xl bg-[#FAF8F4] dark:bg-[#102D25] border border-[#D5CFC0] dark:border-[#214E3E] flex items-center gap-3">
+                    <AlertCircle className="w-5 h-5 text-[#526B61] dark:text-[#9AB3A8] shrink-0" />
+                    <p className="text-xs text-[#526B61] dark:text-[#9AB3A8]">
+                      Nenhum gasto menor que R$ 35 foi registrado este mês. Seus pequenos gastos estão sob total controle!
+                    </p>
                   </div>
-                </div>
+                ) : (
+                  <>
+                    <div className="space-y-1">
+                      <input
+                        type="range"
+                        min={0}
+                        max={100}
+                        step={5}
+                        value={smallCutPct}
+                        onChange={(e) => setSmallCutPct(Number(e.target.value))}
+                        className="w-full h-2.5 bg-[#E8E4D9] dark:bg-[#102D25] rounded-lg appearance-none cursor-pointer accent-[#1C4939] dark:accent-[#78C6A3]"
+                      />
+                      <div className="flex justify-between text-[10px] font-bold text-[#526B61] dark:text-[#9AB3A8]">
+                        <span>0% (Sem teto)</span>
+                        <span>25%</span>
+                        <span>50% (Meta disciplinada)</span>
+                        <span>75%</span>
+                        <span>100%</span>
+                      </div>
+                    </div>
 
-                <div className="flex flex-wrap gap-2 pt-1">
-                  {[20, 35, 50, 70].map((pct) => (
-                    <button
-                      key={pct}
-                      type="button"
-                      onClick={() => setSmallCutPct(pct)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-                        smallCutPct === pct
-                          ? 'bg-[#1C4939] text-[#D4A94F] border-[#1C4939]'
-                          : 'bg-[#FAF8F4] dark:bg-[#102D25] text-[#102D25] dark:text-[#E8E4D9] border-[#1C4939]/20 hover:border-[#1C4939]'
-                      }`}
-                    >
-                      Segurar {pct}% (-{formatBRL((smallExpensesData.totalAmount * pct) / 100, privacyMode)})
-                    </button>
-                  ))}
-                </div>
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {[20, 35, 50, 70].map((pct) => (
+                        <button
+                          key={pct}
+                          type="button"
+                          onClick={() => setSmallCutPct(pct)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+                            smallCutPct === pct
+                              ? 'bg-[#1C4939] text-[#D4A94F] border-[#1C4939]'
+                              : 'bg-[#FAF8F4] dark:bg-[#102D25] text-[#102D25] dark:text-[#E8E4D9] border-[#D5CFC0] dark:border-[#214E3E] hover:border-[#1C4939]'
+                          }`}
+                        >
+                          Segurar {pct}% (-{formatBRL((smallExpensesData.totalAmount * pct) / 100, privacyMode)})
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
             )}
 
@@ -542,12 +582,12 @@ export const RealExpenseReductionModal: React.FC<RealExpenseReductionModalProps>
                       Simular Otimização Geral de Despesas
                     </h4>
                     <p className="text-xs text-[#526B61] dark:text-[#9AB3A8]">
-                      Total de despesas do mês: <strong>{formatBRL(totalExpense, privacyMode)}</strong>
+                      Total de despesas do mês: <strong className="font-numeric tabular-nums">{formatBRL(totalExpense, privacyMode)}</strong>
                     </p>
                   </div>
                   <div className="text-right">
                     <span className="text-xs font-bold text-[#526B61] dark:text-[#9AB3A8] block">Corte Global:</span>
-                    <strong className="text-base font-black text-emerald-700 dark:text-emerald-400 font-mono">
+                    <strong className="text-base font-black text-[#1C4939] dark:text-[#78C6A3] font-numeric tabular-nums">
                       -{formatBRL(calculatedCutAmount, privacyMode)} ({generalCutPct}%)
                     </strong>
                   </div>
@@ -561,7 +601,7 @@ export const RealExpenseReductionModal: React.FC<RealExpenseReductionModalProps>
                     step={1}
                     value={generalCutPct}
                     onChange={(e) => setGeneralCutPct(Number(e.target.value))}
-                    className="w-full h-2.5 bg-[#FAF8F4] dark:bg-[#102D25] rounded-lg appearance-none cursor-pointer accent-[#1C4939] dark:accent-[#78C6A3]"
+                    className="w-full h-2.5 bg-[#E8E4D9] dark:bg-[#102D25] rounded-lg appearance-none cursor-pointer accent-[#1C4939] dark:accent-[#78C6A3]"
                   />
                   <div className="flex justify-between text-[10px] font-bold text-[#526B61] dark:text-[#9AB3A8]">
                     <span>0% (Sem cortes)</span>
@@ -581,7 +621,7 @@ export const RealExpenseReductionModal: React.FC<RealExpenseReductionModalProps>
                       className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
                         generalCutPct === pct
                           ? 'bg-[#1C4939] text-[#D4A94F] border-[#1C4939]'
-                          : 'bg-[#FAF8F4] dark:bg-[#102D25] text-[#102D25] dark:text-[#E8E4D9] border-[#1C4939]/20 hover:border-[#1C4939]'
+                          : 'bg-[#FAF8F4] dark:bg-[#102D25] text-[#102D25] dark:text-[#E8E4D9] border-[#D5CFC0] dark:border-[#214E3E] hover:border-[#1C4939]'
                       }`}
                     >
                       Otimizar {pct}% (-{formatBRL((totalExpense * pct) / 100, privacyMode)})
@@ -590,17 +630,17 @@ export const RealExpenseReductionModal: React.FC<RealExpenseReductionModalProps>
                 </div>
 
                 {categoryDistribution.length > 0 && (
-                  <div className="pt-3 border-t border-[#1C4939]/10 dark:border-[#214E3E] space-y-2">
+                  <div className="pt-3 border-t border-[#D5CFC0] dark:border-[#214E3E] space-y-2">
                     <span className="text-[11px] font-bold uppercase tracking-wider text-[#526B61] dark:text-[#9AB3A8] block">
                       Suas Maiores Categorias de Despesa:
                     </span>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                       {categoryDistribution.slice(0, 6).map((cat) => (
-                        <div key={cat.categoryId} className="p-2 rounded-xl bg-[#FAF8F4] dark:bg-[#102D25] border border-[#1C4939]/10 dark:border-[#214E3E]">
+                        <div key={cat.categoryId} className="p-2 rounded-xl bg-[#FAF8F4] dark:bg-[#102D25] border border-[#D5CFC0] dark:border-[#214E3E]">
                           <span className="text-xs font-bold text-[#102D25] dark:text-[#E8E4D9] truncate block">
                             {cat.categoryName}
                           </span>
-                          <span className="text-[11px] font-mono text-[#526B61] dark:text-[#9AB3A8] font-bold block">
+                          <span className="text-[11px] font-numeric tabular-nums text-[#526B61] dark:text-[#9AB3A8] font-bold block">
                             {formatBRL(cat.totalAmount, privacyMode)} ({cat.percentage.toFixed(0)}%)
                           </span>
                         </div>
@@ -632,7 +672,7 @@ export const RealExpenseReductionModal: React.FC<RealExpenseReductionModalProps>
                 <span className="text-[10px] uppercase font-bold text-[#9AB3A8] block">
                   Despesas Reduzem Para:
                 </span>
-                <strong className="text-base sm:text-lg font-black text-white font-mono block mt-1">
+                <strong className="text-base sm:text-lg font-black text-white font-numeric tabular-nums block mt-1">
                   {formatBRL(newTotalExpense, privacyMode)}
                 </strong>
                 <span className="text-[10px] font-bold text-rose-300 block mt-0.5">
@@ -645,7 +685,7 @@ export const RealExpenseReductionModal: React.FC<RealExpenseReductionModalProps>
                 <span className="text-[10px] uppercase font-black text-[#D4A94F] block">
                   NOVA SOBRA NO SEU BOLSO:
                 </span>
-                <strong className="text-lg sm:text-xl font-black text-[#FAF8F4] font-mono block mt-0.5">
+                <strong className="text-lg sm:text-xl font-black text-[#FAF8F4] font-numeric tabular-nums block mt-0.5">
                   {formatBRL(newLeftover, privacyMode)}
                 </strong>
                 <span className="text-[10px] font-bold text-[#78C6A3] block mt-0.5">
@@ -658,7 +698,7 @@ export const RealExpenseReductionModal: React.FC<RealExpenseReductionModalProps>
                 <span className="text-[10px] uppercase font-bold text-[#9AB3A8] block">
                   Em 1 Ano (12 Meses):
                 </span>
-                <strong className="text-base sm:text-lg font-black text-[#78C6A3] font-mono block mt-1">
+                <strong className="text-base sm:text-lg font-black text-[#78C6A3] font-numeric tabular-nums block mt-1">
                   +{formatBRL(annualSavingsInPocket, privacyMode)}
                 </strong>
                 <span className="text-[10px] font-semibold text-white/80 block mt-0.5">
@@ -687,11 +727,11 @@ export const RealExpenseReductionModal: React.FC<RealExpenseReductionModalProps>
                     <div className="w-full h-3 rounded-full bg-white/20 flex overflow-hidden">
                       <div 
                         style={{ width: `${Math.min(100, Math.max(0, (totalExpense / totalIncome) * 100))}%` }} 
-                        className="bg-rose-500/80 h-full transition-all"
+                        className="bg-[#B93838] h-full transition-all"
                       />
                       <div 
                         style={{ width: `${Math.min(100, Math.max(0, (baselineLeftover / totalIncome) * 100))}%` }} 
-                        className="bg-emerald-500/80 h-full transition-all"
+                        className="bg-[#1C4939] dark:bg-[#78C6A3] h-full transition-all"
                       />
                     </div>
                   </div>
@@ -707,11 +747,11 @@ export const RealExpenseReductionModal: React.FC<RealExpenseReductionModalProps>
                     <div className="w-full h-3.5 rounded-full bg-white/20 flex overflow-hidden border border-[#D4A94F]/40">
                       <div 
                         style={{ width: `${Math.min(100, Math.max(0, (newTotalExpense / totalIncome) * 100))}%` }} 
-                        className="bg-rose-400/80 h-full transition-all"
+                        className="bg-[#B93838]/85 h-full transition-all"
                       />
                       <div 
                         style={{ width: `${Math.min(100, Math.max(0, (newLeftover / totalIncome) * 100))}%` }} 
-                        className="bg-emerald-400 h-full transition-all"
+                        className="bg-[#78C6A3] h-full transition-all"
                       />
                     </div>
                   </div>
@@ -720,7 +760,7 @@ export const RealExpenseReductionModal: React.FC<RealExpenseReductionModalProps>
                 {/* Mensagem de Diagnóstico Real */}
                 <p className="text-xs font-semibold text-[#E8E4D9] pt-2">
                   {baselineLeftover < 0 && newLeftover >= 0 ? (
-                    <span className="text-emerald-300 font-bold">
+                    <span className="text-[#78C6A3] font-bold">
                       🎉 Incrível! Esse corte sozinho tira você do vermelho (de {formatBRL(baselineLeftover, privacyMode)}) e coloca sua conta no positivo com {formatBRL(newLeftover, privacyMode)} livres todo mês!
                     </span>
                   ) : baselineLeftover < 0 ? (
@@ -740,9 +780,9 @@ export const RealExpenseReductionModal: React.FC<RealExpenseReductionModalProps>
         </div>
 
         {/* RODAPÉ DO MODAL */}
-        <div className="p-4 sm:p-5 border-t border-[#1C4939]/20 dark:border-[#214E3E] bg-[#E8E4D9]/40 dark:bg-[#16382E] flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="p-4 sm:p-5 border-t border-[#D5CFC0] dark:border-[#214E3E] bg-[#E8E4D9]/80 dark:bg-[#16382E] flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-xs text-[#526B61] dark:text-[#9AB3A8]">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-[#1C4939] dark:text-[#78C6A3] shrink-0" />
             <span>Simulação em tempo real sobre seus lançamentos reais</span>
           </div>
 
@@ -760,4 +800,3 @@ export const RealExpenseReductionModal: React.FC<RealExpenseReductionModalProps>
     </div>
   );
 };
-
