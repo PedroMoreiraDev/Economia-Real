@@ -123,12 +123,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 100% Gratuito
               </span>
               <span className="flex items-center gap-1.5 text-[#102D25] dark:text-[#E8E4D9] bg-[#F7EFE0] dark:bg-[#16382E] px-3 py-1 rounded-full border border-[#D4A94F]/45">
-                <CheckCircle2 className="h-4 w-4 text-[#9A7220] dark:text-[#D4A94F] stroke-[2.5]" />
-                Sem pedir cartão de crédito
+                <Lock className="h-4 w-4 text-[#9A7220] dark:text-[#D4A94F] stroke-[2.5]" />
+                Criptografia AES-256 no Banco
               </span>
               <span className="flex items-center gap-1.5 text-[#102D25] dark:text-[#E8E4D9] bg-[#FAF8F4] dark:bg-[#16382E] px-3 py-1 rounded-full border border-[#D5CFC0] dark:border-[#285C49]">
                 <CheckCircle2 className="h-4 w-4 text-[#1C4939] dark:text-[#D4A94F] stroke-[2.5]" />
                 Sem conectar senha bancária
+              </span>
+              <span className="flex items-center gap-1.5 text-[#1C4939] dark:text-[#78C6A3] bg-[#E6EFEA] dark:bg-[#16382E] px-3 py-1 rounded-full border border-[#1C4939]/25 dark:border-[#2B6B54]">
+                <ShieldCheck className="h-4 w-4 text-[#1C4939] dark:text-[#D4A94F] stroke-[2.5]" />
+                Privacidade Blindada: Nem Nós Vemos Seus Gastos
               </span>
             </div>
           </div>
@@ -302,7 +306,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <div className="pt-4 border-t border-[#214E3E] relative z-10">
                 <button
                   onClick={onOpenRegister}
-                  className="w-full btn-duo btn-duo-purple text-xs sm:text-sm py-3 flex items-center justify-center gap-2"
+                  className="w-full btn-duo btn-duo-yellow text-xs sm:text-sm py-3 flex items-center justify-center gap-2"
                 >
                   <Sparkles className="h-4 w-4 text-[#102D25]" />
                   <span>Experimentar Gratuitamente Agora</span>
@@ -852,7 +856,76 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </section>
 
       {/* =========================================================================
-          6. PERGUNTAS FREQUENTES (FAQ)
+          6. SEÇÃO DE PRIVACIDADE BLINDADA & CRIPTOGRAFIA EM REPOUSO (ZERO-ESPIONAGEM)
+          ========================================================================= */}
+      <section className="rounded-3xl p-6 sm:p-10 bg-gradient-to-br from-[#102D25] via-[#143B30] to-[#1C4939] border-2 border-[#D4A94F]/40 shadow-2xl text-[#E8E4D9] relative overflow-hidden space-y-8">
+        
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#D4A94F]/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#1C4939]/30 rounded-full blur-2xl pointer-events-none" />
+
+        <div className="max-w-3xl mx-auto text-center space-y-3 relative z-10">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#0A1D17]/80 border border-[#D4A94F]/50 text-[#D4A94F] text-xs font-black uppercase tracking-widest shadow-xs">
+            <Lock className="h-3.5 w-3.5" />
+            Privacidade Blindada & Governança LGPD
+          </div>
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+            Seus Gastos São 100% Seus.<br />
+            <span className="text-[#D4A94F]">Nem Nós Temos Acesso aos Seus Dados.</span>
+          </h2>
+          <p className="text-xs sm:text-base font-medium text-[#E8E4D9]/85 leading-relaxed max-w-2xl mx-auto">
+            Acreditamos que a sua vida financeira é sagrada e confidencial. Por isso, implementamos Criptografia em Nível de Campo (AES-256-GCM) diretamente no banco de dados: seus lançamentos e anotações são convertidos em dados cifrados antes de tocar o disco.
+          </p>
+        </div>
+
+        {/* Grade de 4 Pilares Inegociáveis de Privacidade */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 relative z-10">
+          
+          <div className="p-5 rounded-2xl bg-[#0E2820]/90 border border-[#D4A94F]/30 space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-[#1C4939] text-[#D4A94F] flex items-center justify-center border border-[#D4A94F]/30 shadow-xs">
+              <Lock className="w-5 h-5 stroke-[2.3]" />
+            </div>
+            <h3 className="text-sm font-black text-white">Criptografia AES-256 no Banco</h3>
+            <p className="text-xs text-[#B8C7C0] leading-relaxed">
+              No banco de dados, compras como "Farmácia", "Aluguel" ou nomes de lojas viram códigos cifrados indecifráveis. Nem os administradores conseguem ler seu extrato.
+            </p>
+          </div>
+
+          <div className="p-5 rounded-2xl bg-[#0E2820]/90 border border-[#D4A94F]/30 space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-[#1C4939] text-[#D4A94F] flex items-center justify-center border border-[#D4A94F]/30 shadow-xs">
+              <ShieldCheck className="w-5 h-5 stroke-[2.3]" />
+            </div>
+            <h3 className="text-sm font-black text-white">Zero Venda de Dados</h3>
+            <p className="text-xs text-[#B8C7C0] leading-relaxed">
+              Diferente de grandes instituições, seu histórico de compras nunca é vendido ou compartilhado com bancos, birôs de crédito ou anunciantes.
+            </p>
+          </div>
+
+          <div className="p-5 rounded-2xl bg-[#0E2820]/90 border border-[#D4A94F]/30 space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-[#1C4939] text-[#D4A94F] flex items-center justify-center border border-[#D4A94F]/30 shadow-xs">
+              <Sparkles className="w-5 h-5 stroke-[2.3]" />
+            </div>
+            <h3 className="text-sm font-black text-white">I.A Segura e Confidencial</h3>
+            <p className="text-xs text-[#B8C7C0] leading-relaxed">
+              O processamento de voz e faturas é seguro e transitório. Seus dados não são utilizados para treinar modelos públicos de inteligência artificial.
+            </p>
+          </div>
+
+          <div className="p-5 rounded-2xl bg-[#0E2820]/90 border border-[#D4A94F]/30 space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-[#1C4939] text-[#D4A94F] flex items-center justify-center border border-[#D4A94F]/30 shadow-xs">
+              <FileText className="w-5 h-5 stroke-[2.3]" />
+            </div>
+            <h3 className="text-sm font-black text-white">Direito ao Esquecimento</h3>
+            <p className="text-xs text-[#B8C7C0] leading-relaxed">
+              Conformidade total com a LGPD. Se você decidir encerrar sua conta, todas as transações, extratos e chaves são eliminados em definitivo dos servidores.
+            </p>
+          </div>
+
+        </div>
+
+      </section>
+
+      {/* =========================================================================
+          7. PERGUNTAS FREQUENTES (FAQ)
           ========================================================================= */}
       <section className="space-y-8 max-w-3xl mx-auto">
         <div className="text-center space-y-3">
@@ -869,6 +942,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
         <div className="space-y-3">
           {[
+            {
+              question: 'Os administradores ou donos do aplicativo conseguem ver o que eu gastei ou comprei?',
+              answer: 'Não! De forma alguma. Nós implementamos Criptografia em Nível de Campo (AES-256-GCM) diretamente no banco de dados. Isso significa que as descrições dos seus gastos, os nomes dos estabelecimentos e as suas anotações pessoais são gravadas de forma cifrada no disco. Nem mesmo quem gerencia os servidores ou o banco de dados tem a capacidade técnica de ler a sua privacidade financeira. Seus dados pertencem única e exclusivamente a você.'
+            },
             {
               question: 'Eu preciso conectar a senha da minha conta bancária?',
               answer: 'Não! De forma alguma. Sua segurança é nossa prioridade máxima. Você nunca insere senhas de banco no Economia Real. O lançamento é feito via comando de voz em tempo real ou você mesmo exporta o extrato/fatura (OFX ou CSV) do seu aplicativo de preferência e arrasta para cá.'
@@ -941,7 +1018,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               }}
               onMouseEnter={warmUpBackend}
               onTouchStart={warmUpBackend}
-              className="btn-duo btn-duo-purple w-full sm:w-auto text-base sm:text-lg px-8 py-4 flex items-center justify-center gap-3"
+              className="btn-duo btn-duo-yellow w-full sm:w-auto text-base sm:text-lg px-8 py-4 flex items-center justify-center gap-3"
             >
               <Zap className="h-5 w-5 stroke-[2.5]" />
               <span>Criar Minha Conta Grátis</span>

@@ -2,7 +2,9 @@ package com.finance.ai.infrastructure.persistence.financial.recurring;
 
 import com.finance.ai.domain.financial.recurring.RecurringBill;
 import com.finance.ai.domain.financial.recurring.RecurringFrequency;
+import com.finance.ai.infrastructure.security.encryption.EncryptedStringConverter;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -32,7 +34,8 @@ public class RecurringBillJpaEntity {
     @Column(name = "credit_card_id")
     private UUID creditCardId;
 
-    @Column(name = "description", nullable = false)
+    @Convert(converter = EncryptedStringConverter.class)
+    @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;
 
     @Column(name = "amount", nullable = false, precision = 15, scale = 2)

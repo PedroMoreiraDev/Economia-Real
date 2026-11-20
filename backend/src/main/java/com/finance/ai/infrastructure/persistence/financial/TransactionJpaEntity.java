@@ -3,6 +3,7 @@ package com.finance.ai.infrastructure.persistence.financial;
 import com.finance.ai.domain.financial.TransactionOrigin;
 import com.finance.ai.domain.financial.TransactionStatus;
 import com.finance.ai.domain.financial.TransactionType;
+import com.finance.ai.infrastructure.security.encryption.EncryptedStringConverter;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -34,7 +35,8 @@ public class TransactionJpaEntity {
     @Column(name = "settlement_date")
     private LocalDate settlementDate;
 
-    @Column(name = "description", nullable = false, length = 255)
+    @Convert(converter = EncryptedStringConverter.class)
+    @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;
 
     @Column(name = "account_id")
@@ -54,6 +56,7 @@ public class TransactionJpaEntity {
     @Column(name = "origin", nullable = false, length = 20)
     private TransactionOrigin origin;
 
+    @Convert(converter = EncryptedStringConverter.class)
     @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;
 
