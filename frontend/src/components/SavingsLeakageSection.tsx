@@ -104,7 +104,7 @@ export const SavingsLeakageSection: React.FC<SavingsLeakageSectionProps> = ({
         monthlyAmount: totalSmall,
         annualPotential: totalSmall * 0.4 * 12,
         description: `Pequenas compras diárias somaram ${formatBRL(totalSmall, privacyMode)} no mês. Ter um teto semanal para micro-gastos estanca até 40% dessa sangria invisível.`,
-        actionLabel: 'Simular Economia Geral',
+        actionLabel: 'Simular Redução de Gastos Formiga',
         onAction: () => triggerSimulation('SMALL_EXPENSES'),
       });
     }
@@ -119,7 +119,7 @@ export const SavingsLeakageSection: React.FC<SavingsLeakageSectionProps> = ({
         monthlyAmount: 0,
         annualPotential: 0,
         description: 'Sua disciplina financeira está excelente! Não encontramos cobranças duplicadas ou gastos compulsivos fora da curva este mês.',
-        actionLabel: 'Simular Sobra do Mês',
+        actionLabel: 'Simular Otimização de Despesas',
         onAction: () => triggerSimulation('ALL_EXPENSES'),
       });
     }
