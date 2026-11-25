@@ -35,7 +35,7 @@ public class RecurringBillJpaEntity {
     private UUID creditCardId;
 
     @Convert(converter = EncryptedStringConverter.class)
-    @Column(name = "description", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "description", nullable = false)
     private String description;
 
     @Column(name = "amount", nullable = false, precision = 15, scale = 2)

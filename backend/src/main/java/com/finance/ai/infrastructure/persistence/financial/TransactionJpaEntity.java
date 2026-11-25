@@ -36,7 +36,7 @@ public class TransactionJpaEntity {
     private LocalDate settlementDate;
 
     @Convert(converter = EncryptedStringConverter.class)
-    @Column(name = "description", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "description", nullable = false)
     private String description;
 
     @Column(name = "account_id")
@@ -57,7 +57,7 @@ public class TransactionJpaEntity {
     private TransactionOrigin origin;
 
     @Convert(converter = EncryptedStringConverter.class)
-    @Column(name = "notes", columnDefinition = "TEXT")
+    @Column(name = "notes")
     private String notes;
 
     @Column(name = "created_at", nullable = false, updatable = false)
