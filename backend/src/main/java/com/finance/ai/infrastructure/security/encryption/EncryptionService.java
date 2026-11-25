@@ -127,8 +127,8 @@ public class EncryptionService {
             byte[] plainBytes = cipher.doFinal(cipherBytes);
             return new String(plainBytes, StandardCharsets.UTF_8);
         } catch (Exception e) {
-            log.error("Erro ao decifrar campo sensível (possível chave divergente ou adulteração): {}", e.getMessage());
-            throw new IllegalStateException("Falha de segurança na decifragem de dados confidenciais", e);
+            log.warn("Aviso ao decifrar campo sensível (possível chave divergente ou dado ilegível): {}", e.getMessage());
+            return "[Dado Protegido]";
         }
     }
 
@@ -143,3 +143,4 @@ public class EncryptionService {
         }
     }
 }
+

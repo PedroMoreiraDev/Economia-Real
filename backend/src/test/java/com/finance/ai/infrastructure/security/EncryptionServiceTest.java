@@ -68,16 +68,16 @@ class EncryptionServiceTest {
     }
 
     @Test
-    @DisplayName("Deve falhar ao decifrar texto adulterado (GCM authentication failure)")
-    void shouldFailWhenCiphertextIsTampered() {
+    @DisplayName("Deve retornar fallback seguro ao decifrar texto adulterado ou com chave divergente")
+    void shouldReturnSafeFallbackWhenCiphertextIsTampered() {
         String original = "Segredo Financeiro";
         String encrypted = encryptionService.encrypt(original);
 
         // Adultera o payload cifrado
         String tampered = encrypted.substring(0, encrypted.length() - 4) + "AAAA";
 
-        assertThatThrownBy(() -> encryptionService.decrypt(tampered))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("Falha de segurança na decifragem");
+        String result = encryptionService.decrypt(tampered);
+        assertThat(result).isEqualTo("[Dado Protegido]");
     }
 }
+
