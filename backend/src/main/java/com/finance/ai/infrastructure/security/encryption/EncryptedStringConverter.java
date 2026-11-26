@@ -27,3 +27,4 @@ public class EncryptedStringConverter implements AttributeConverter<String, Stri
         return EncryptionService.getInstance().decrypt(dbData);
     }
 }
+

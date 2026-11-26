@@ -3,3 +3,4 @@
 
 ALTER TABLE transactions ALTER COLUMN description TYPE TEXT;
 ALTER TABLE recurring_bills ALTER COLUMN description TYPE TEXT;
+

@@ -35,8 +35,13 @@ public class EncryptionService {
     private final SecretKey secretKey;
     private final SecureRandom secureRandom;
 
+    public EncryptionService() {
+        this(new EncryptionProperties());
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
     public EncryptionService(EncryptionProperties properties) {
-        this.secretKey = deriveKey(properties.getMasterKey());
+        this.secretKey = deriveKey(properties != null ? properties.getMasterKey() : null);
         this.secureRandom = new SecureRandom();
         setGlobalInstance(this);
     }

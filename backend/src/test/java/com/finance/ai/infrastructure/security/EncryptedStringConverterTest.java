@@ -43,3 +43,4 @@ class EncryptedStringConverterTest {
         assertThat(converter.convertToEntityAttribute(null)).isNull();
     }
 }
+

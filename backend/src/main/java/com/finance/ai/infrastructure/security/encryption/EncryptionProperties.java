@@ -21,3 +21,4 @@ public class EncryptionProperties {
         this.masterKey = masterKey;
     }
 }
+
